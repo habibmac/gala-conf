@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="flex h-[100dvh] overflow-hidden">
     <NuxtLayout>
-      <RouterView />
+      <NuxtPage />
     </NuxtLayout>
   </div>
 </template>

@@ -5,6 +5,8 @@ interface AuthState {
     accessToken: string | null;
     refreshToken: string | null;
     userInfo: object | null;
+    roles: string[];
+    packages: string[];
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -13,6 +15,8 @@ export const useAuthStore = defineStore('auth', {
         accessToken: null,
         refreshToken: null,
         userInfo: null,
+        roles: [],
+        packages: []
     }),
     actions: {
         setAuth(accessToken: string, refreshToken: string) {
@@ -53,6 +57,13 @@ export const useAuthStore = defineStore('auth', {
             } catch (error) {
                 console.error('Failed to fetch user info', error)
             }
+        },
+
+        hasAccess(roles?: string[], packages?: string[]) {
+            if (!roles && !packages) return true;
+            if (roles && roles.some(role => this.roles.includes(role))) return true;
+            if (packages && packages.some(pkg => this.packages.includes(pkg))) return true;
+            return false;
         },
 
         async logout() {
