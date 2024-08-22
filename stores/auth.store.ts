@@ -14,6 +14,9 @@ export const useAuthStore = defineStore("auth", () => {
     const nuxtApp = useNuxtApp();
 
     const isAuthenticated = computed(() => !!accessToken.value);
+    
+    // Logout state
+    const loggingOut = ref(false);
 
     const exchangeCodeForTokens = async (code: string) => {
         try {
@@ -92,14 +95,16 @@ export const useAuthStore = defineStore("auth", () => {
     };
 
     const logout = async () => {
+        loggingOut.value = true;
         try {
-            await nuxtApp.$oauthApi.post("/destroy", {
+            await nuxtApp.$oauthApi.post("/destroy/", {
                 token: accessToken.value,
             });
         } catch (error) {
             console.error("Error during logout", error);
         } finally {
             clearAuth();
+            loggingOut.value = false;
         }
     };
 
@@ -109,6 +114,7 @@ export const useAuthStore = defineStore("auth", () => {
         userInfo,
         packages,
         isAuthenticated,
+        loggingOut,
         exchangeCodeForTokens,
         setAuth,
         clearAuth,

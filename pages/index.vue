@@ -1,21 +1,65 @@
 <script setup lang="ts">
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from "@/stores";
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const authStore = useAuthStore();
 
-// If logged in, redirect to /my-events
-if (authStore.isAuthenticated) {
-  console.log('User is authenticated');
-  router.push('/my-events');
+const statuses = ref([
+  'Booting up...',
+  'Loading components...',
+  'Painting the walls...',
+]);
 
-} else {
-  // If not logged in, redirect to /auth/login
-  router.push('/auth/login');
-}
+const statusIndex = ref(0);
+const currentStatus = computed(() => statuses.value[statusIndex.value]);
+
+let interval: NodeJS.Timeout | null = null;
+let timeout: NodeJS.Timeout | null = null;
+
+const updateStatus = () => {
+  statusIndex.value = (statusIndex.value + 1) % statuses.value.length;
+};
+
+const startCycling = () => {
+  let intervalTime = 600;
+  interval = setInterval(updateStatus, intervalTime);
+  timeout = setTimeout(() => {
+    if (authStore.isAuthenticated) {
+      router.push('/my-events');
+    } else {
+      router.push('/auth/login');
+    }
+  }, intervalTime * statuses.value.length);
+};
+
+onMounted(() => {
+  startCycling();
+});
+
+onUnmounted(() => {
+  if (interval) clearInterval(interval);
+  if (timeout) clearTimeout(timeout);
+});
+
+// Watch for authentication state changes
+watch(() => authStore.isAuthenticated, (isAuthenticated) => {
+  if (isAuthenticated) {
+    if (interval) clearInterval(interval);
+    if (timeout) clearTimeout(timeout);
+    router.push('/my-events');
+  }
+}, { immediate: true });
 </script>
+
 <template>
-  <div>
-    Redirecting...
+  <div class="max-w-9xl mx-auto w-full px-4 py-8 flex sm:px-6 lg:px-8 min-h-screen">
+    <div class="m-auto max-w-2xl">
+      <div class="px-4 text-center">
+        <SpinnerRing />
+        <h1>{{ currentStatus }}</h1>
+      </div>
+    </div>
   </div>
 </template>

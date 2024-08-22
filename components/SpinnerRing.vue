@@ -7,7 +7,7 @@ const props = withDefaults(
 		class?: string;
 	}>(),
 	{
-		size: '50',
+		size: '42',
 		class: '',
 	},
 );

@@ -6,6 +6,11 @@ export default defineNuxtRouteMiddleware((to) => {
         return;
     }
 
+    // Handle the /auth/logout route
+    if (to.path === '/auth/logout') {
+        return;
+    }
+
     // Protect routes that require authentication
     if (!authStore.isAuthenticated && !['/', '/auth/login'].includes(to.path)) {
         return navigateTo('/auth/login')
