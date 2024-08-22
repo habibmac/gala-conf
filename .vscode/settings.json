@@ -23,4 +23,10 @@
     },
     "peacock.color": "#79c9c8",
     "typescript.tsdk": "node_modules/typescript/lib",
+    "files.exclude": {
+        "**/.nuxt": true,
+        "**/node_modules": true,
+        "**/.output": true,
+        "**/dist": true,
+    }
 }
