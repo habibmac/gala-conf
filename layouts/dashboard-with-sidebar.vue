@@ -32,7 +32,6 @@ const setSidebarExpanded = (value: boolean) => {
         </div>
       </div>
       <div class="relative h-full">
-        >
         <slot />
       </div>
     </main>

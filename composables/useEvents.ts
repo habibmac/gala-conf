@@ -41,7 +41,7 @@ export const useEvents = ({
     };
 
     const { isLoading, isError, error, data, isPlaceholderData } = useQuery({
-        queryKey: ['events', page, perPage, evtStatus],
+        queryKey: ['my-events', page, perPage, evtStatus],
         queryFn: ({ signal }) => getData(evtStatus, page, perPage, signal),
         placeholderData: keepPreviousData,
         staleTime: 1000 * 60 * 5, // 5 minutes
