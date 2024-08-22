@@ -1,10 +1,8 @@
-import path from 'path'
-import fs from 'fs'
-
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
-  modules: ['@pinia/nuxt', "@nuxtjs/tailwindcss", "shadcn-nuxt"],
+  modules: ['@pinia/nuxt', "@nuxtjs/tailwindcss", "shadcn-nuxt", "@nuxt/eslint", '@vueuse/nuxt',
+],
   app: {
     head: {
       bodyAttrs: {
