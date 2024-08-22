@@ -1,6 +1,6 @@
 import { computed } from 'vue';
 import { menuGroups } from '@/config/menuGroups';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from "@/stores";
 
 interface MenuItem {
     name: string;

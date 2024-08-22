@@ -1,39 +1,34 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "nuxt/app";
-import axios from "axios";
 
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores";
 import SpinnerRing from "@/components/SpinnerRing.vue";
 
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 
-const code = route.query.code as string;
+// Exchange the code for tokens
+const exchangeCodeForTokens = async (code: string) => {
+  try {
+    await authStore.exchangeCodeForTokens(code);
+    // Redirect to the main page after successful authentication
+    router.replace('/my-events');
+  } catch (error) {
+    console.error("Failed to exchange code for tokens", error);
+    // Redirect to login page if there's an error
+    router.replace('/auth/login');
+  }
+};
 
+// Check for the code in the URL and exchange it for tokens
 onMounted(async () => {
-  const config = useRuntimeConfig();
+  const code = route.query.code as string;
   if (code) {
-    try {
-      const response = await axios.post(`${config.public.oauthUrl}/token`, {
-        grant_type: "authorization_code",
-        client_id: config.public.oauthClientId,
-        client_secret: config.public.oauthClientSecret,
-        code: code,
-        redirect_uri: config.public.oauthRedirectUri,
-      });
-      authStore.setAuth(
-        response.data.access_token,
-        response.data.refresh_token
-      );
-      await authStore.fetchUserInfo();
-      router.push("/events");
-    } catch (error) {
-      console.error("Authentication failed", error);
-      router.push("/");
-    }
+    exchangeCodeForTokens(code);
   } else {
-    router.push("/");
+    // If there's no code, redirect to login
+    router.replace('/auth/login');
   }
 });
 </script>
