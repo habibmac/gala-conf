@@ -23,13 +23,13 @@ const updateStatus = () => {
 };
 
 const startCycling = () => {
-  let intervalTime = 600;
+  let intervalTime = 400;
   interval = setInterval(updateStatus, intervalTime);
   timeout = setTimeout(() => {
     if (authStore.isAuthenticated) {
-      router.push('/my-events');
+      router.replace('/my-events');
     } else {
-      router.push('/auth/login');
+      router.replace('/auth/login');
     }
   }, intervalTime * statuses.value.length);
 };
@@ -48,7 +48,7 @@ watch(() => authStore.isAuthenticated, (isAuthenticated) => {
   if (isAuthenticated) {
     if (interval) clearInterval(interval);
     if (timeout) clearTimeout(timeout);
-    router.push('/my-events');
+    router.replace('/my-events');
   }
 }, { immediate: true });
 </script>

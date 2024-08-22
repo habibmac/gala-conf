@@ -40,7 +40,7 @@ onMounted(async () => {
   clearInterval(interval);
   clearInterval(dotsInterval);
 
-  router.push("/auth/login?loggedout=true");
+  router.replace("/auth/login?loggedout=true");
 });
 </script>
 
@@ -52,7 +52,7 @@ onMounted(async () => {
       <div class="px-4 text-center">
         <SpinnerRing />
         <h1>Logging out...</h1>
-        <p class="py-4 text-center">
+        <p class="py-4 text-center text-muted-foreground text-sm">
           You will be redirected in
           <span class="font-medium dark:text-slate-300">{{ seconds }}</span>
           seconds.
