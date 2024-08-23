@@ -54,7 +54,7 @@ const logout = () => {
         </div>
 
         <!-- Header: Right side -->
-        <div class="flex h-16 items-center space-x-1">
+        <div class="flex h-16 items-center space-x-3">
           <div>
             <button
               class="icon-btn"
@@ -89,7 +89,7 @@ const logout = () => {
 						</Teleport> -->
           </div>
           <!-- <Notifications align="right" /> -->
-          <!-- <ThemeToggle /> -->
+          <ThemeToggle />
           <!-- Divider -->
           <hr class="h-6 w-px border-none bg-slate-200 dark:bg-slate-700" />
           <div class="flex h-full shrink-0 items-center">

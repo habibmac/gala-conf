@@ -25,3 +25,9 @@ export interface RegRequestParams {
     order: string;
     [key: string]: string; // This allows for additional string keys
 }
+
+export interface EvtRequestParams {
+    evtStatus?: Ref<string>;
+    page?: Ref<number>;
+    perPage?: Ref<number>;
+}

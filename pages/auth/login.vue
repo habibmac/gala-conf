@@ -70,7 +70,7 @@ const login = () => {
         <Button @click="login">Login</Button>
 
         <p class="px-8 text-center text-sm text-muted-foreground">
-          By clicking continue, you agree to our
+          By signing in, you agree to our
           <a
             href="https://galanesia.com/terms"
             class="underline underline-offset-4 hover:text-primary"

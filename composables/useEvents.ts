@@ -1,18 +1,12 @@
 import { computed, ref, type Ref } from 'vue';
 import { useQuery, keepPreviousData } from '@tanstack/vue-query';
-
-interface GetDataParams {
-    evtStatus?: Ref<string>;
-    page?: Ref<number>;
-    perPage?: Ref<number>;
-}
+import {type EvtRequestParams} from '~/types';
 
 export const useEvents = ({
     evtStatus = ref('all'),
     page = ref(1),
     perPage = ref(10),
-}: GetDataParams = {}) => {
-
+}: EvtRequestParams = {}) => {
     const { $galantisApi } = useNuxtApp();
     const getData = async (
         evtStatus: Ref<string>,
@@ -26,6 +20,7 @@ export const useEvents = ({
                     page: page.value,
                     per_page: perPage.value,
                     evt_status: evtStatus.value,
+                    nocache: 1
                 },
                 signal,
             })
@@ -40,7 +35,7 @@ export const useEvents = ({
             });
     };
 
-    const { isLoading, isError, error, data, isPlaceholderData } = useQuery({
+    const { isLoading, isError, error, data, isPlaceholderData, refetch } = useQuery({
         queryKey: ['my-events', page, perPage, evtStatus],
         queryFn: ({ signal }) => getData(evtStatus, page, perPage, signal),
         placeholderData: keepPreviousData,
@@ -92,5 +87,6 @@ export const useEvents = ({
         setPage,
         setPerPage,
         setEvtStatus,
+        refetch
     };
 };
