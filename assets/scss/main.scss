@@ -1,0 +1,24 @@
+html {
+    color-scheme: light dark;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
+html.light {
+    color-scheme: light;
+}
+
+/* Custom styles */
+.number {
+    font-feature-settings: 'ss02', 'ss03', 'ss04';
+}
+
+.tabular {
+    font-variant-numeric: 'tnum';
+}
+
+.scroll-area {
+    scrollbar-width: thin;
+}
