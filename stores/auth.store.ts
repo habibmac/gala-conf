@@ -14,6 +14,9 @@ export const useAuthStore = defineStore("auth", () => {
     const nuxtApp = useNuxtApp();
 
     const isAuthenticated = computed(() => !!accessToken.value);
+
+    const selectedEvent = ref<Event | null>(null); // Handle dropdown event selection
+    const eventId = ref<string | null>(null); // Handle route event id
     
     // Logout state
     const loggingOut = ref(false);
@@ -108,6 +111,10 @@ export const useAuthStore = defineStore("auth", () => {
         }
     };
 
+    const setSelectedEvent = (event: Event) => {
+        selectedEvent.value = event;
+    };
+
     return {
         accessToken,
         refreshToken,
@@ -122,6 +129,7 @@ export const useAuthStore = defineStore("auth", () => {
         setUser,
         fetchUserInfo,
         hasAccess,
+        setSelectedEvent,
         logout,
     };
 });

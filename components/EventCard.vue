@@ -76,17 +76,17 @@ defineProps({
 			]"
 		>
 			<div
-				class="number font-medium"
+				class="number"
 				:class="[
 					isPast
-						? 'text-xl text-slate-600 dark:text-slate-400'
+						? 'text-xl text-slate-600 dark:text-slate-300'
 						: 'text-3xl text-green-500 ',
 				]"
 			>
 				{{ event.regs }}
 			</div>
 			<div
-				class="font-medium text-slate-500 dark:text-slate-400"
+				class="text-slate-500 dark:text-slate-400"
 				:class="[isPast ? 'text-xs' : 'text-sm']"
 			>
 				Regs

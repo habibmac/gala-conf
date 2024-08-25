@@ -3,6 +3,7 @@ import { useQuery, keepPreviousData } from '@tanstack/vue-query';
 import {type EvtRequestParams} from '~/types';
 
 export const useEvents = ({
+    search = ref(''),
     evtStatus = ref('all'),
     page = ref(1),
     perPage = ref(10),
@@ -17,6 +18,7 @@ export const useEvents = ({
         return $galantisApi
             .get('/events', {
                 params: {
+                    search: search.value,
                     page: page.value,
                     per_page: perPage.value,
                     evt_status: evtStatus.value,
@@ -35,8 +37,8 @@ export const useEvents = ({
             });
     };
 
-    const { isLoading, isError, error, data, isPlaceholderData, refetch } = useQuery({
-        queryKey: ['my-events', page, perPage, evtStatus],
+    const { isLoading, isError, error, data, isPlaceholderData, refetch, isRefetching } = useQuery({
+        queryKey: ['my-events', page, perPage, evtStatus, search],
         queryFn: ({ signal }) => getData(evtStatus, page, perPage, signal),
         placeholderData: keepPreviousData,
         staleTime: 1000 * 60 * 5, // 5 minutes
@@ -82,11 +84,12 @@ export const useEvents = ({
         page,
         perPage,
         maxPage,
+        isRefetching,
         prevPage,
         nextPage,
         setPage,
         setPerPage,
         setEvtStatus,
-        refetch
+        refetch,
     };
 };
