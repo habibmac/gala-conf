@@ -15,7 +15,7 @@ const setSidebarExpanded = (value: boolean) => {
   <div
     class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden bg-slate-200 dark:bg-slate-900"
   >
-    <NavBar />
+    <NavBar :show-events="true" />
 
     <main class="grow">
       <div class="translate-y-[-200px] opacity-50 lg:translate-y-[-550px]">
