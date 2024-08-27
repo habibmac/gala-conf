@@ -8,6 +8,7 @@ import {
 import EventCover from "./EventCover.vue";
 import SpinnerDots from "@/components/SpinnerDots.vue";
 import { ref, watch } from "vue";
+import { Icon } from "@iconify/vue";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { cn } from "~/lib/utils";
@@ -25,7 +26,8 @@ const { events, page, maxPage, prevPage, nextPage, refetch, isRefetching } = use
 
 // User action to select an event
 const handleselectEvent = (newEventId: string) => {
-  navigateTo(newEventId);
+  selectedEventId.value = newEventId;
+  router.push(`/event/${newEventId}`);
 };
 
 const isSelected = (eventId: string) => {
@@ -138,17 +140,18 @@ watch(search, (newValue) => {
             >
               <div class="sticky z-10 top-0 pointer-events-none">
                 <div
-                  class="p-3 bg-white dark:bg-slate-800 relative pointer-events-auto border-b dark:border-b-slate-700"
+                  class="p-3 bg-white dark:bg-slate-800 relative pointer-events-auto"
                 >
+                  <div  class="absolute top-1/2 -translate-y-1/2 left-6 pointer-events-none">
+                    <SpinnerDots v-if="isRefetching" class="h-7 w-7 text-slate-400 dark:text-slate-500" />
+                  <Icon v-else class="h-5 w-5 text-slate-400 dark:text-slate-500" icon="heroicons-outline:search" />
+                  </div>
                   <Input
                     type="search"
-                    class="h-10 px-4 border-b border-slate-200 dark:border-slate-700"
-                    placeholder="Search events"
+                    class="h-10 px-4 pl-12 border-b border-slate-200 dark:border-slate-700"
+                    placeholder="Search events..."
                     v-model="search"
                   />
-                <div v-if="isRefetching" class="absolute top-1/2 -translate-y-1/2 right-14 pointer-events-none">
-                  <SpinnerDots class="h-7 w-7 text-slate-400 dark:text-slate-500" />
-                </div>
                 </div>
                 <div
                   class="h-8 bg-gradient-to-b from-white dark:from-slate-800"

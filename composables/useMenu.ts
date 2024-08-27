@@ -1,24 +1,26 @@
-import { computed } from 'vue';
-import { menuGroups } from '@/config/menuGroups';
+// useMenu.ts
+import { ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from "@/stores";
-
-interface MenuItem {
-    name: string;
-    to: string;
-    roles?: string[];
-    group?: string;
-    icon?: string;
-}
-
-interface MenuGroup {
-    id: string;
-    label: string;
-    menus: MenuItem[];
-}
+import { useEvent } from '@/composables/useEvent';
+import { menuGroups } from '@/config/menuGroups';
+import type { MenuGroup, MenuItem } from '~/types/menu';
 
 export const useMenu = () => {
-    const authStore = useAuthStore();
     const router = useRouter();
+    const route = useRoute();
+    const authStore = useAuthStore();
+    const { event } = useEvent();
+
+    const allMenuItems = ref<MenuItem[]>([]);
+    const isLoading = ref(false);
+
+    const loadMenuItems = () => {
+        isLoading.value = true;
+        const routes = router.getRoutes();
+        allMenuItems.value = processRoutes(routes);
+        isLoading.value = false;
+    };
 
     const processRoutes = (routes: any[]): MenuItem[] => {
         let items: MenuItem[] = [];
@@ -27,15 +29,26 @@ export const useMenu = () => {
             if (meta.showInMenu) {
                 const routeRoles = meta.roles as string[] | undefined;
                 const routePackages = meta.packages as string[] | undefined;
+                const routeCapabilities = meta.capabilities as string[] | undefined;
+                const routePermissions = meta.permissions as string[] | undefined;
+
                 const hasAccess = authStore.hasAccess(routeRoles, routePackages);
-                if (hasAccess) {
-                    const groupName = meta.group || '';
+                const hasCapabilitiesAndPermissions = authStore.canAccessRoute(
+                    routeCapabilities || [],
+                    routePermissions || []
+                );
+
+                if (hasAccess && hasCapabilitiesAndPermissions) {
                     items.push({
                         name: meta.title as string,
-                        to: route.path,
-                        roles: meta.roles as string[] | undefined,
-                        group: groupName as string,
+                        to: route.path as string,
+                        roles: routeRoles,
+                        packages: routePackages,
+                        capabilities: routeCapabilities,
+                        permissions: routePermissions,
+                        group: meta.group as string || '',
                         icon: meta.icon as string | undefined,
+                        order: meta.order as number | undefined,
                     });
                 }
             }
@@ -52,22 +65,32 @@ export const useMenu = () => {
             menus: [],
         }));
 
-        const routes = router.getRoutes();
-        const allItems = processRoutes(routes);
-
-        allItems.forEach((item) => {
+        allMenuItems.value.forEach((item) => {
             const groupIndex = groupedItems.findIndex(
                 (group) => group.id === item.group
             );
             if (groupIndex !== -1) {
                 groupedItems[groupIndex].menus.push(item);
-            } else {
-                console.warn(`No matching group for menu item: ${item.name}`);
             }
+        });
+
+        groupedItems.forEach((group) => {
+            group.menus.sort((a, b) => (a.order || 0) - (b.order || 0));
         });
 
         return groupedItems.filter((group) => group.menus.length > 0);
     });
 
-    return { menuItems };
+    // Watch for changes in authentication state or selected event
+    watch([
+        () => authStore.selectedEvent,
+    ], () => {
+        loadMenuItems();
+    }, { immediate: true });
+
+    return {
+        menuItems,
+        isLoading,
+        loadMenuItems
+    };
 };

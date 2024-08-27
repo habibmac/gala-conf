@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { UserProfile } from "@/types";
+import type { UserProfile, Event } from "@/types";
 
 const accessTokenField = "gala_at";
 const refreshTokenField = "gala_rt";
@@ -14,10 +14,12 @@ export const useAuthStore = defineStore("auth", () => {
     const nuxtApp = useNuxtApp();
 
     const isAuthenticated = computed(() => !!accessToken.value);
+    const userCapabilities = ref<string[]>([]);
 
     const selectedEvent = ref<Event | null>(null); // Handle dropdown event selection
     const eventId = ref<string | null>(null); // Handle route event id
-    
+    const eventCapabilities = ref<string[]>([]);
+
     // Logout state
     const loggingOut = ref(false);
 
@@ -32,7 +34,6 @@ export const useAuthStore = defineStore("auth", () => {
             });
 
             setAuth(response.data.access_token, response.data.refresh_token);
-            await fetchUserInfo();
         } catch (error) {
             console.error('Error exchanging code for tokens', error);
             throw error;
@@ -71,24 +72,40 @@ export const useAuthStore = defineStore("auth", () => {
         }
     };
 
-    const setUser = (user: UserProfile | null) => {
+    const setUser = (user: UserProfile) => {
         userInfo.value = user;
+        userCapabilities.value = Object.keys(user?.capabilities || []);
     };
 
-    const fetchUserInfo = async () => {
-        try {
-            const response = await nuxtApp.$galantisApi.post(
-                "/me",
-                {},
-                {
-                    baseURL: config.public.oauthUrl,
-                }
-            );
-            setUser(response.data);
-        } catch (error) {
-            console.error("Failed to fetch user info", error);
-        }
-    };
+    const setSelectedEvent = async (event: Event) => {
+        selectedEvent.value = event
+        eventId.value = event.id
+        eventCapabilities.value = event.capabilities || []
+    }
+
+    const hasCapability = (capability: string) => {
+        return userCapabilities.value.includes(capability)
+    }
+
+    const hasEventPermission = (permission: string) => {
+        return eventCapabilities.value.includes(permission)
+    }
+
+    const canAccessRoute = (requiredCapabilities: string[], requiredPermissions: string[]) => {
+        // If no capabilities or permissions are required, let the user through
+        if (!requiredCapabilities.length && !requiredPermissions.length) return true
+
+        // Check if the user has all the required capabilities
+        const hasCapabilities = requiredCapabilities.every(cap => hasCapability(cap))
+
+        // If no permissions are required, return the capabilities check only
+        if (!requiredPermissions.length) 
+            return hasCapabilities
+
+        const hasPermissions = requiredPermissions.every(perm => hasEventPermission(perm))
+
+        return hasCapabilities && hasPermissions
+    }
 
     const hasAccess = (roles?: string[], pkgs?: string[]) => {
         if (!roles && !pkgs) return true;
@@ -111,10 +128,6 @@ export const useAuthStore = defineStore("auth", () => {
         }
     };
 
-    const setSelectedEvent = (event: Event) => {
-        selectedEvent.value = event;
-    };
-
     return {
         accessToken,
         refreshToken,
@@ -127,8 +140,13 @@ export const useAuthStore = defineStore("auth", () => {
         clearAuth,
         refreshTokens,
         setUser,
-        fetchUserInfo,
         hasAccess,
+        userCapabilities,
+        eventCapabilities,
+        hasCapability,
+        hasEventPermission,
+        canAccessRoute,
+        selectedEvent,
         setSelectedEvent,
         logout,
     };

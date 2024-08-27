@@ -33,7 +33,7 @@ const login = () => {
     <div
       class="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex"
     >
-      <div class="absolute inset-0 bg-zinc-900">
+      <div class="absolute inset-0 bg-gray-950">
         <img
           src="https://images.unsplash.com/photo-1502691876148-a84978e59af8?q=80&w=4000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt=""
@@ -49,9 +49,8 @@ const login = () => {
       <div class="relative z-20 mt-auto">
         <blockquote class="space-y-2">
           <p class="text-lg">
-            &ldquo;This library has saved me countless hours of work and helped
-            me deliver stunning designs to my clients faster than ever
-            before.&rdquo;
+            &ldquo;
+            .&rdquo;
           </p>
           <footer class="text-sm">Sofia Davis</footer>
         </blockquote>

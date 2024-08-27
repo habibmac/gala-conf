@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent } from 'vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps<{
-	name: string;
+  name: string;
+  width?: string | number;
+  height?: string | number;
 }>();
-const loadIcon = (name: string) =>
-	defineAsyncComponent(() => import(`@/components/icons/${name}Icon.vue`));
-
-const IconComponent = computed(() => loadIcon(props.name));
 </script>
 
 <template>
-	<component :is="IconComponent" />
+  <Icon :icon="name" :width="width" :height="height" />
 </template>

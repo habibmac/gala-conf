@@ -16,6 +16,7 @@ export interface Event {
     title: string;
     logo: string;
     package: string;
+    capabilities?: string[];
 }
 
 export interface RegRequestParams {
