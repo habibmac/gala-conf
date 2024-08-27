@@ -68,7 +68,7 @@ const translationClass = computed(() => {
         <div class="px-4 py-4 sm:px-6 sm:py-6">
           <div class="flex mb-6">
             <div
-              class="relative flex w-full max-w-sm p-1 bg-slate-50/50 dark:bg-slate-700/40 rounded-md"
+              class="relative flex w-full max-w-sm p-1 bg-slate-50/50 dark:bg-slate-700/40 rounded-md mx-auto sm:mx-0"
             >
               <span
                 class="absolute inset-0 m-1 pointer-events-none"

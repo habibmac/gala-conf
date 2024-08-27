@@ -66,7 +66,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-w-fit relative z-50">
+  <div class="min-w-fit relative z-30">
     <!-- Sidebar backdrop (mobile only) -->
     <div
       class="fixed inset-0 z-20 bg-slate-900 bg-opacity-30 transition-opacity duration-200 lg:z-auto lg:hidden"

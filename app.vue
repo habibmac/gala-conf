@@ -10,7 +10,8 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="flex h-[100dvh] overflow-hidden">
+  <div class="flex relative h-[100dvh]">
+    <NuxtLoadingIndicator color="#34d399" />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>

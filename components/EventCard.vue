@@ -19,7 +19,7 @@ defineProps({
 <template>
 	<NuxtLink
 		:to="`/event/${event.id}`"
-		class="relative mx-auto flex flex-col max-w-xs overflow-hidden rounded-lg border border-white bg-white transition hover:shadow-lg hover:ring-2 hover:ring-blue-600 w-full sm:flex-row dark:border-slate-700 dark:bg-slate-800 dark:hover:ring-blue-600"
+		class="relative mx-auto flex flex-col max-w-xs sm:max-w-none overflow-hidden rounded-lg border border-white bg-white transition hover:shadow-lg hover:ring-2 hover:ring-blue-600 w-full sm:flex-row dark:border-slate-700 dark:bg-slate-800 dark:hover:ring-blue-600"
 	>
 		<!-- Image -->
 		<EventCover

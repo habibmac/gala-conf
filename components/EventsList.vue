@@ -20,7 +20,7 @@ const evtStatus = computed(() =>
   props.status === "past" ? "inactive" : "active"
 );
 
-const { events, isLoading, isError, pagination, maxPage, refetch } = useEvents({
+const { events, isLoading, isError, pagination, refetch, isRefetching } = useEvents({
   evtStatus,
   page: currentPage,
 });
@@ -32,18 +32,6 @@ watch(
   },
   { immediate: true }
 );
-
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    updatePage(currentPage.value - 1);
-  }
-};
-
-const nextPage = () => {
-  if (currentPage.value < maxPage.value) {
-    updatePage(currentPage.value + 1);
-  }
-};
 
 const updatePage = (page: number) => {
   router.push({
@@ -64,8 +52,8 @@ watch(
 </script>
 
 <template>
-  <div v-if="isLoading" class="grid h-full grid-cols-1 gap-6">
-    <Skeleton class="h-32" />
+  <div v-if="isLoading || isRefetching" class="grid h-full grid-cols-1 gap-6">
+    <Skeleton class="h-80 w-full sm:h-32 max-w-xs sm:max-w-none mx-auto" />
   </div>
   <template v-else-if="isError">
     <div class="flex h-32 items-center justify-center">

@@ -7,7 +7,7 @@ defineProps(["sidebarOpen", "showEvents"]);
 
 <template>
   <header
-    class="sticky top-0 z-40 h-16 border-b border-slate-200 bg-white/60 bg-opacity-80 backdrop-blur-sm backdrop-filter dark:border-slate-800 dark:bg-[#182235] dark:bg-opacity-75"
+    class="sticky top-0 z-20 h-16 border-b border-slate-200 bg-white/60 bg-opacity-80 backdrop-blur-sm backdrop-filter dark:border-slate-800 dark:bg-[#182235] dark:bg-opacity-75"
   >
     <div class="h-full px-4 lg:px-8">
       <div class="-mb-px flex h-full items-center justify-between">
