@@ -20,6 +20,7 @@
     "axios": "^1.7.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
     "nuxt": "^3.12.4",
     "pinia": "^2.2.2",
     "radix-vue": "^1.9.4",

@@ -80,12 +80,12 @@ watch(
       </div>
 
       <!-- Pagination -->
-     <Pagination
-  v-if="pagination && pagination.total_pages > 1"
-  :total-pages="pagination.total_pages"
-  :current-page="currentPage"
-  @update:page="updatePage"
-/>
+      <Pagination
+        v-if="pagination && pagination.total_pages > 1"
+        :total-pages="pagination.total_pages"
+        :current-page="currentPage"
+        @update:page="updatePage"
+      />
     </div>
     <EmptyState
       v-else
