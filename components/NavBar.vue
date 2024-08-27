@@ -1,38 +1,30 @@
 <script setup lang="ts">
-import { Button } from './ui/button';
-import { Icon } from '@iconify/vue'
+import { Button } from "./ui/button";
+import { Icon } from "@iconify/vue";
 
 defineProps(["sidebarOpen", "showEvents"]);
-
-const router = useRouter();
-const authStore = useAuthStore();
-
-const searchModalOpen = ref(false);
-
-const logout = () => {
-  authStore.logout();
-  router.push("/");
-};
 </script>
 
 <template>
   <header
-    class="sticky top-0 z-50 h-16 border-b border-slate-200 bg-white/60 bg-opacity-80 backdrop-blur-sm backdrop-filter dark:border-slate-800 dark:bg-[#182235] dark:bg-opacity-75"
+    class="sticky top-0 z-40 h-16 border-b border-slate-200 bg-white/60 bg-opacity-80 backdrop-blur-sm backdrop-filter dark:border-slate-800 dark:bg-[#182235] dark:bg-opacity-75"
   >
-    <div class="h-full px-4 sm:px-6 lg:px-8">
+    <div class="h-full px-4 lg:px-8">
       <div class="-mb-px flex h-full items-center justify-between">
         <!-- Header: Left side -->
         <div class="flex items-center">
           <!-- Hamburger button -->
           <Button
             v-if="showEvents"
-            variant="outline"
-            class="pr-3 lg:hidden"
+            class="lg:hidden mr-3"
+            variant="ghost"
             @click.stop="$emit('toggle-sidebar')"
             aria-controls="sidebar"
             :aria-expanded="sidebarOpen"
+            size="icon"
           >
-            <Icon icon="heroicons-outline:menu-alt-1" class="h-6 w-6" />
+            <span class="sr-only">Open sidebar</span>
+            <Icon icon="material-symbols-light:menu" class="h-8 w-8 fill-current" />
           </Button>
           <NuxtLink
             v-else
@@ -49,7 +41,6 @@ const logout = () => {
         <!-- Header: Right side -->
         <div class="flex h-16 items-center space-x-3">
           <div>
-            
             <!-- <Teleport to="body">
 							<SearchModal
 								id="search-modal"

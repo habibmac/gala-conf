@@ -19,11 +19,11 @@ defineProps({
 <template>
 	<NuxtLink
 		:to="`/event/${event.id}`"
-		class="relative mx-auto flex flex-col overflow-hidden rounded-lg border border-white bg-white transition hover:shadow-lg hover:ring-2 hover:ring-blue-600 sm:w-full sm:flex-row dark:border-slate-700 dark:bg-slate-800 dark:hover:ring-blue-600"
+		class="relative mx-auto flex flex-col max-w-xs overflow-hidden rounded-lg border border-white bg-white transition hover:shadow-lg hover:ring-2 hover:ring-blue-600 w-full sm:flex-row dark:border-slate-700 dark:bg-slate-800 dark:hover:ring-blue-600"
 	>
 		<!-- Image -->
 		<EventCover
-			class="relative mx-auto inline-block w-full shrink-0 p-3 sm:block"
+			class="relative mx-auto inline-block w-full max-w-40 shrink-0 p-3 sm:block"
 			:class="[
 				isPast ? 'sm:h-32 sm:w-32' : 'sm:h-40 sm:w-40',
 			]"
@@ -35,7 +35,7 @@ defineProps({
 		<div class="flex grow flex-col p-5 text-center sm:text-left">
 			<div class="grow">
 				<div
-					class="mb-2 text-xs font-semibold uppercase text-slate-500"
+					class="text-xs font-semibold uppercase text-slate-500"
 				>
 					{{ event.start }} - {{ event.end }}
 				</div>

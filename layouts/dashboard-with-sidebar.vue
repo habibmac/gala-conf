@@ -1,21 +1,23 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { useSiteStore } from "@/stores";
 
-const isSidebarExpanded = ref(false);
+const siteStore = useSiteStore();
 
-const setSidebarExpanded = (value: boolean) => {
-  isSidebarExpanded.value = value;
-};
+onBeforeMount(() => {
+  // Initialize the sidebar state
+  siteStore.initSidebarExpanded();
+});
 </script>
 <template>
   <Sidebar
-    :sidebar-open="isSidebarExpanded"
-    @close-sidebar="setSidebarExpanded(false)"
+    :sidebar-open="siteStore.isSidebarExpanded"
+    @close-sidebar="siteStore.setSidebarExpanded(false)"
   />
   <div
     class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden bg-slate-200 dark:bg-slate-900"
   >
-    <NavBar :show-events="true" />
+    <NavBar :show-events="true" :sidebar-open="siteStore.isSidebarExpanded" 
+    @toggle-sidebar="siteStore.toggleSidebarExpanded()" />
 
     <main class="grow">
       <div class="translate-y-[-200px] opacity-50 lg:translate-y-[-550px]">

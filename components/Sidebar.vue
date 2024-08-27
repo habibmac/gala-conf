@@ -1,22 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from "vue";
-import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 import { useLocalStorage } from "#imports";
-import MenuIcon from "~/components/MenuIcon.vue";
-import { Button } from "@/components/ui/button";
+import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 import { Icon } from "@iconify/vue";
-import Logo from "~/components/Logo.vue";
-import { useMenu } from "@/composables/useMenu"; // Make sure this path is correct
-import type { RouteLocationRaw } from "vue-router";
-import type { MenuItem } from "~/types/menu";
 
-const props = defineProps<{
-  sidebarOpen: boolean;
-}>();
+import { useMenu } from "@/composables/useMenu";
+import MenuIcon from "@/components/MenuIcon.vue";
+import { Button } from "@/components/ui/button";
+import Logo from "@/components/Logo.vue";
 
-const emit = defineEmits<{
-  (e: "close-sidebar"): void;
-}>();
+const props = defineProps(["sidebarOpen"]);
+const emit = defineEmits(["close-sidebar"]);
 
 const { menuItems } = useMenu();
 const { isLoading: isFetchingEvent } = useEvent();
@@ -29,24 +23,11 @@ const lgAndSmaller = breakpoints.smallerOrEqual("lg");
 
 const sidebarExpanded = useLocalStorage("sidebar-expanded", false);
 
-onMounted(() => {
-  document.addEventListener("click", clickHandler);
-  document.addEventListener("keydown", keyHandler);
-  updateBodyClass();
-});
-
-onUnmounted(() => {
-  document.removeEventListener("click", clickHandler);
-  document.removeEventListener("keydown", keyHandler);
-});
-
 const clickHandler = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
   if (!sidebar.value || !trigger.value) return;
   if (
     !props.sidebarOpen ||
-    sidebar.value.contains(target) ||
-    trigger.value.contains(target) ||
     !lgAndSmaller.value
   )
     return;
@@ -73,30 +54,22 @@ watch(sidebarExpanded, () => {
   updateBodyClass();
 });
 
-const toggleSidebar = () => {
-  sidebarExpanded.value = !sidebarExpanded.value;
-};
+onMounted(() => {
+	document.addEventListener('click', clickHandler);
+	document.addEventListener('keydown', keyHandler);
+});
 
-const generateLinkTo = (linkItem: MenuItem): RouteLocationRaw => {
-  if (linkItem.to.includes(":eventId")) {
-    const authStore = useAuthStore();
-    const eventId = authStore.selectedEvent?.id;
-
-    if (!eventId) {
-      return { path: "/my-events" };
-    }
-
-    return { path: linkItem.to.replace(":eventId()", eventId) };
-  }
-  return { path: linkItem.to };
-};
+onUnmounted(() => {
+	document.removeEventListener('click', clickHandler);
+	document.removeEventListener('keydown', keyHandler);
+});
 </script>
 
 <template>
-  <div class="min-w-fit">
+  <div class="min-w-fit relative z-50">
     <!-- Sidebar backdrop (mobile only) -->
     <div
-      class="fixed inset-0 z-40 bg-slate-900 bg-opacity-30 transition-opacity duration-200 lg:z-auto lg:hidden"
+      class="fixed inset-0 z-20 bg-slate-900 bg-opacity-30 transition-opacity duration-200 lg:z-auto lg:hidden"
       :class="sidebarOpen ? 'opacity-100' : 'pointer-events-none opacity-0'"
       aria-hidden="true"
     ></div>
@@ -105,7 +78,7 @@ const generateLinkTo = (linkItem: MenuItem): RouteLocationRaw => {
     <div
       id="sidebar"
       ref="sidebar"
-      class="no-scrollbar sidebar-expanded:overflow-hidden lg:sidebar-expanded:!w-64 z-60 absolute left-0 top-0 flex h-[100dvh] w-64 shrink-0 flex-col overflow-y-scroll bg-gradient-to-t from-blue-700 to-blue-700 transition-all duration-200 ease-in-out lg:static lg:left-auto lg:top-auto lg:w-20 lg:translate-x-0 lg:overflow-y-auto 2xl:!w-64"
+      class="no-scrollbar lg:sidebar-expanded:!w-64 z-30 absolute left-0 top-0 flex h-[100dvh] w-64 shrink-0 flex-col overflow-y-scroll bg-gradient-to-t from-blue-700 to-blue-700 transition-all duration-200 ease-in-out lg:static lg:left-auto lg:top-auto lg:w-20 lg:translate-x-0 lg:overflow-y-auto 2xl:!w-64"
       :class="sidebarOpen ? 'translate-x-0' : '-translate-x-64'"
     >
       <!-- Sidebar header -->
@@ -115,6 +88,7 @@ const generateLinkTo = (linkItem: MenuItem): RouteLocationRaw => {
         <!-- Close button -->
         <Button
           ref="trigger"
+          variant="ghost"
           size="icon"
           class="text-slate-300 hover:text-slate-100 lg:hidden"
           @click.stop="$emit('close-sidebar')"
@@ -122,15 +96,7 @@ const generateLinkTo = (linkItem: MenuItem): RouteLocationRaw => {
           :aria-expanded="sidebarOpen"
         >
           <span class="sr-only">Close sidebar</span>
-          <svg
-            class="h-6 w-6 fill-current"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M10.7 18.7l1.4-1.4L7.8 13H20v-2H7.8l4.3-4.3-1.4-1.4L4 12z"
-            />
-          </svg>
+          <Icon icon="material-symbols-light:close-rounded" class="h-7 w-7" />
         </Button>
         <!-- Logo -->
         <NuxtLink to="/my-events" class="mx-auto">
@@ -160,7 +126,7 @@ const generateLinkTo = (linkItem: MenuItem): RouteLocationRaw => {
           <ul class="mt-2">
             <NuxtLink
               v-for="(linkItem, index) in group.menus"
-              :to="generateLinkTo(linkItem)"
+              :to="linkItem.generatedLink?.path"
               custom
               v-slot="{ href, navigate, isExactActive }"
               :key="index"
@@ -196,7 +162,7 @@ const generateLinkTo = (linkItem: MenuItem): RouteLocationRaw => {
       <!-- Expand / collapse button -->
       <div class="mt-auto hidden justify-end lg:inline-flex p-4">
         <Button
-          @click="toggleSidebar"
+          @click="sidebarExpanded = !sidebarExpanded"
           variant="ghost"
           size="icon"
           class="text-slate-200"
@@ -204,8 +170,7 @@ const generateLinkTo = (linkItem: MenuItem): RouteLocationRaw => {
           <span class="sr-only">Expand / collapse sidebar</span>
           <Icon
             icon="radix-icons:pin-right"
-            class="h-6 w-6"
-            :class="sidebarExpanded ? 'transform rotate-180' : ''"
+            class="h-6 w-6 sidebar-expanded:rotate-180"
           />
         </Button>
       </div>

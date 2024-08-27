@@ -120,7 +120,7 @@ watch(search, (newValue) => {
         leave-to-class="opacity-0"
       >
         <ListboxOptions
-          class="absolute left-0 mt-0 sm:mt-1 flex h-screen max-h-[calc(100dvh-64px)] w-auto flex-col border bg-white text-sm shadow-lg ring-black/5 focus:outline-none sm:left-auto sm:h-auto sm:min-h-min sm:w-96 sm:rounded-lg dark:border-slate-700 dark:bg-slate-800"
+          class="absolute left-0 mt-0 sm:mt-1 w-full flex h-[calc(100dvh-64px)] md:max-h-[calc(100dvh-64px)] md:w-auto flex-col border bg-white text-sm shadow-lg ring-black/5 focus:outline-none sm:left-auto sm:h-auto sm:min-h-min sm:w-96 sm:rounded-lg dark:border-slate-700 dark:bg-slate-800"
         >
           <template v-if="isLoading">
             <li class="flex w-full justify-center py-10">
@@ -136,7 +136,7 @@ watch(search, (newValue) => {
 
           <template v-else-if="events">
             <div
-              class="no-scrollbar relative grid grow auto-rows-min grid-cols-1 overflow-y-auto overscroll-y-contain gap-0.5 pb-10 sm:pb-4 max-h-96 scroll-area"
+              class="no-scrollbar relative grid grow auto-rows-min grid-cols-1 overflow-y-auto overscroll-y-contain gap-0.5 pb-10 sm:pb-4 md:max-h-96 scroll-area"
             >
               <div class="sticky z-10 top-0 pointer-events-none">
                 <div

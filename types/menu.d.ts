@@ -8,6 +8,7 @@ export interface MenuItem {
     group: string;
     icon?: string;
     order?: number;
+    generatedLink?: { path: string }
 }
 
 export interface MenuGroup {

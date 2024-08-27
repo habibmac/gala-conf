@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { useLocalStorage } from "#imports";
+
 onMounted(() => {
-  if (localStorage.getItem("sidebar-expanded") === "true") {
+  if (useLocalStorage("sidebar-expanded", false)) {
     document.body.classList.add("sidebar-expanded");
   } else {
     document.body.classList.remove("sidebar-expanded");
