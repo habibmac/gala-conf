@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { UserProfile, Event } from "@/types";
+import type { AuthResponse, UserProfile, Event } from "@/types";
 
 const accessTokenField = "gala_at";
 const refreshTokenField = "gala_rt";
@@ -25,15 +25,13 @@ export const useAuthStore = defineStore("auth", () => {
 
     const exchangeCodeForTokens = async (code: string) => {
         try {
-            const response = await nuxtApp.$oauthApi.post('/token', {
-                grant_type: 'authorization_code',
-                client_id: config.public.oauthClientId,
-                client_secret: config.public.oauthClientSecret,
-                code: code,
-                redirect_uri: config.public.oauthRedirectUri,
-            });
+            const response: AuthResponse = await $fetch('/api/exchange-token', {
+                method: 'POST',
+                body: { code },
+            })
+            // Set the tokens in the store
+            setAuth(response.access_token, response.refresh_token);
 
-            setAuth(response.data.access_token, response.data.refresh_token);
         } catch (error) {
             console.error('Error exchanging code for tokens', error);
             throw error;
@@ -57,15 +55,12 @@ export const useAuthStore = defineStore("auth", () => {
 
     const refreshTokens = async () => {
         try {
-            const response = await nuxtApp.$oauthApi.post("/token", {
-                grant_type: "refresh_token",
-                refresh_token: refreshToken.value,
-                client_id: config.public.oauthClientId,
-                client_secret: config.public.oauthClientSecret,
+            const response: AuthResponse = await $fetch('/api/refresh-token', {
+                method: 'POST',
+                body: { refresh_token: refreshToken.value },
             });
-
-            setAuth(response.data.access_token, response.data.refresh_token);
-            return response.data.access_token;
+            setAuth(response.access_token, response.refresh_token);
+            return response.access_token;
         } catch (error) {
             clearAuth();
             throw error;
@@ -99,7 +94,7 @@ export const useAuthStore = defineStore("auth", () => {
         const hasCapabilities = requiredCapabilities.every(cap => hasCapability(cap))
 
         // If no permissions are required, return the capabilities check only
-        if (!requiredPermissions.length) 
+        if (!requiredPermissions.length)
             return hasCapabilities
 
         const hasPermissions = requiredPermissions.every(perm => hasEventPermission(perm))

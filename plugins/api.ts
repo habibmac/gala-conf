@@ -12,7 +12,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     })
 
     const galantisApi = axios.create({
-        baseURL: config.public.apiUrl,
+        baseURL: `${config.public.apiUrl}/wp-json/galantis/v1`,
     })
 
     let isRefreshing = false
@@ -62,18 +62,9 @@ export default defineNuxtPlugin((nuxtApp) => {
                 isRefreshing = true
 
                 try {
-                    const { data } = await oauthApi.post("/token", {
-                        grant_type: "refresh_token",
-                        refresh_token: authStore.refreshToken,
-                        client_id: config.public.oauthClientId,
-                        client_secret: config.public.oauthClientSecret,
-                    })
-                    authStore.setAuth(data.access_token, data.refresh_token)
-                    galantisApi.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`
-                    processQueue(null, data.access_token)
-
+                    await authStore.refreshTokens();
+                    processQueue(null, authStore.accessToken)
                     return galantisApi(originalRequest)
-
                 } catch (refreshError) {
                     processQueue(refreshError, null)
                     authStore.clearAuth()
