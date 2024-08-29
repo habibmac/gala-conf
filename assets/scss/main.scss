@@ -50,3 +50,14 @@ html.dark {
 .scroll-area {
     scrollbar-width: thin;
 }
+
+.list-option {
+    @apply relative flex cursor-default select-none items-center space-x-2 px-3 py-1 hover:bg-slate-100 dark:hover:bg-slate-900/50;
+}
+
+.dropdown-item {
+    @apply cursor-default text-sm flex items-center space-x-1 px-3 py-1.5 m-1 rounded dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors;
+    &.selected {
+        @apply bg-emerald-100 hover:bg-emerald-100 dark:bg-slate-800/50;
+    }
+}

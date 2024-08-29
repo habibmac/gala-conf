@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Button } from "./ui/button";
 import { Icon } from "@iconify/vue";
 
 defineProps(["sidebarOpen", "showEvents"]);
@@ -7,17 +6,16 @@ defineProps(["sidebarOpen", "showEvents"]);
 
 <template>
   <header
-    class="sticky top-0 z-20 h-16 border-b border-slate-200 bg-white/60 bg-opacity-80 backdrop-blur-sm backdrop-filter dark:border-slate-800 dark:bg-[#182235] dark:bg-opacity-75"
+    class="sticky top-0 z-20 h-16 border-b border-slate-200 bg-white/60 bg-opacity-80 backdrop-blur-sm backdrop-filter dark:border-slate-800 dark:bg-slate-950 dark:bg-opacity-80"
   >
     <div class="h-full px-4 lg:px-8">
       <div class="-mb-px flex h-full items-center justify-between">
         <!-- Header: Left side -->
         <div class="flex items-center">
           <!-- Hamburger button -->
-          <Button
+          <button
             v-if="showEvents"
-            class="lg:hidden mr-3"
-            variant="ghost"
+            class="icon-btn lg:!hidden mr-3"
             @click.stop="$emit('toggle-sidebar')"
             aria-controls="sidebar"
             :aria-expanded="sidebarOpen"
@@ -25,7 +23,7 @@ defineProps(["sidebarOpen", "showEvents"]);
           >
             <span class="sr-only">Open sidebar</span>
             <Icon icon="material-symbols-light:menu" class="h-8 w-8 fill-current" />
-          </Button>
+          </button>
           <NuxtLink
             v-else
             to="/my-events"

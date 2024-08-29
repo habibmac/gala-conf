@@ -1,73 +1,131 @@
 <script setup lang="ts">
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Button } from "~/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+import { ref, onMounted, onUnmounted } from "vue";
 
-const { user } = useUserProfile()
-const router = useRouter();
+const { user } = useUserProfile();
+const config = useRuntimeConfig();
 
-const getUserInitials = () => {
-  if (!user) return "";
+const backendUrl = `${config.public.apiUrl}/backend`;
 
-  return user.value?.display_name
-    .split(" ")
-    .map((name) => name[0])
-    .join("");
+const dropdownOpen = ref(false);
+const trigger = ref<HTMLElement | null>(null);
+const dropdown = ref<HTMLElement | null>(null);
+
+// Close on click outside
+const clickHandler = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (
+    !dropdownOpen.value ||
+    (dropdown.value && dropdown.value.contains(target)) ||
+    (trigger.value && trigger.value.contains(target))
+  )
+    return;
+  dropdownOpen.value = false;
 };
 
-const loggingOut = () => {
-  router.push('/auth/logout');
+// Close if the ESC key is pressed
+const keyHandler = (event: KeyboardEvent) => {
+  if (!dropdownOpen.value || event.key !== "Escape") return;
+  dropdownOpen.value = false;
 };
+
+onMounted(() => {
+  document.addEventListener("click", clickHandler);
+  document.addEventListener("keydown", keyHandler);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("click", clickHandler);
+  document.removeEventListener("keydown", keyHandler);
+});
 </script>
-
 <template>
-  <DropdownMenu>
-    <DropdownMenuTrigger as-child>
-      <Button variant="ghost" class="relative h-8 w-8 rounded-full">
-        <Avatar class="h-8 w-8" v-if="user">
-          <AvatarImage :src="user.avatar" alt="@radix-vue" />
-          <AvatarFallback>{{ getUserInitials() }}</AvatarFallback>
-        </Avatar>
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent class="w-56" align="end" v-if="user">
-      <DropdownMenuLabel class="font-normal flex">
-        <div class="flex flex-col space-y-1">
-          <p class="text-sm font-medium leading-none">
-            {{ user.display_name }}
-          </p>
-          <p class="text-xs leading-none text-muted-foreground">
-            {{ user.user_roles.join(", ") }}
-          </p>
-        </div>
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <template v-if="user.user_roles.includes('administrator')">
-        <DropdownMenuGroup>
-          <DropdownMenuItem as-child>
-            <NuxtLink to="/" class="text-red-500"> 🚨 Backend </NuxtLink>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-      </template>
+  <div class="relative inline-flex ml-2">
+    <button
+      ref="trigger"
+      class="group icon-btn round"
+      aria-haspopup="true"
+      @click.prevent="dropdownOpen = !dropdownOpen"
+      :aria-expanded="dropdownOpen"
+    >
+      <img
+        v-if="user"
+        class="h-8 w-8 rounded-full pointer-events-none"
+        :src="user.avatar"
+        width="32"
+        height="32"
+        alt="User"
+      />
+      <div
+        v-else
+        class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-700"
+      ></div>
+    </button>
+    <Transition
+      enter-active-class="transition ease-out duration-200 transform"
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition ease-out duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-show="dropdownOpen"
+        class="absolute right-0 top-full z-10 min-w-64 origin-top-right overflow-hidden rounded-md mt-1 border border-slate-200 bg-white py-1.5 shadow-lg dark:border-slate-800 dark:bg-slate-950"
+      >
+        <ul
+          ref="dropdown"
+          class="text-left"
+          @focusin="dropdownOpen = true"
+          @focusout="dropdownOpen = false"
+        >
+          <template v-if="user">
+            <li
+              class="mb-1 border-b border-slate-200 px-3 pb-2 pt-0.5 dark:border-slate-900"
+            >
+              <div class="font-medium text-sm text-slate-800 dark:text-slate-100">
+                {{ user.display_name }}
+              </div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">
+                {{ user.user_email }}
+              </div>
+            </li>
+            <template v-if="user.user_roles.includes('administrator')">
+              <NuxtLink :to="backendUrl" custom v-slot="{ href, navigate }">
+                <li>
+                  <a :href="href" class="dropdown-item" @click="navigate"
+                    >🚨 Backend</a
+                  >
+                </li>
+              </NuxtLink>
+              <hr class="h-1 dark:border-slate-900" />
+            </template>
 
-      <DropdownMenuGroup>
-        <DropdownMenuItem as-child>
-          <NuxtLink to="/my-events" class="block"> Events </NuxtLink>
-        </DropdownMenuItem>
-        <DropdownMenuItem> Settings </DropdownMenuItem>
-        <DropdownMenuItem>New Team</DropdownMenuItem>
-      </DropdownMenuGroup>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem @click="loggingOut()"> Log out </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
+            <NuxtLink to="/my-events" custom v-slot="{ href, navigate }">
+              <li>
+                <a :href="href" class="dropdown-item" @click="navigate"
+                  >My Events</a
+                >
+              </li>
+            </NuxtLink>
+            <NuxtLink to="/my-events" custom v-slot="{ href, navigate }">
+              <li>
+                <a :href="href" class="dropdown-item" @click="navigate"
+                  >Settings</a
+                >
+              </li>
+            </NuxtLink>
+            <hr class="h-1 dark:border-slate-900" />
+            <NuxtLink to="/auth/logout" custom v-slot="{ href, navigate }">
+              <li>
+                <a :href="href" class="dropdown-item" @click="navigate"
+                  >Logout</a
+                >
+              </li>
+            </NuxtLink>
+          </template>
+        </ul>
+      </div>
+    </Transition>
+  </div>
 </template>
+

@@ -57,7 +57,7 @@ const selectedStatusClass = computed(() => {
 </script>
 
 <template>
-  <div class="">
+  <ClientOnly>
     <Listbox v-model="selectedStatus">
       <div class="relative h-full w-full max-w-full">
         <ListboxButton
@@ -111,10 +111,5 @@ const selectedStatusClass = computed(() => {
         </ListboxOptions>
       </Transition>
     </Listbox>
-  </div>
+  </ClientOnly>
 </template>
-<style>
-.list-option {
-  @apply relative flex cursor-default select-none items-center space-x-2 px-3 py-1 hover:bg-slate-100 dark:hover:bg-slate-900/50;
-}
-</style>
