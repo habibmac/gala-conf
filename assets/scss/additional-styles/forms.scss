@@ -1,0 +1,146 @@
+/* Forms */
+input[type='search']::-webkit-search-decoration,
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-results-button,
+input[type='search']::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+}
+
+.form-input,
+.form-textarea,
+.form-multiselect,
+.form-select,
+.form-checkbox,
+.form-radio {
+    @apply border bg-white focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-offset-0 dark:bg-slate-900/30 dark:focus:border-blue-600 dark:disabled:border-slate-700 dark:disabled:bg-slate-700/30 dark:disabled:hover:border-slate-700;
+}
+
+.form-input,
+.form-textarea,
+.form-multiselect,
+.form-select,
+.form-checkbox {
+    @apply rounded-lg;
+}
+
+.form-input,
+.form-textarea,
+.form-multiselect,
+.form-select {
+    @apply border-slate-200 px-3 py-2.5 text-sm leading-5 text-slate-800 shadow-sm hover:border-blue-300 focus:border-blue-300 dark:border-slate-700 dark:text-slate-100 dark:hover:border-blue-600;
+}
+
+.form-input,
+.form-textarea {
+    @apply placeholder-slate-400 dark:placeholder-slate-500;
+}
+
+.form-input.with-icon {
+    @apply pl-10;
+}
+
+.form-input-lg {
+    @apply px-4 py-3 text-base leading-6;
+}
+
+.form-select {
+    @apply pr-10;
+}
+
+.form-checkbox,
+.form-radio {
+    @apply border border-slate-300 text-blue-500 checked:bg-blue-500 focus:border-blue-300 dark:border-slate-700 dark:checked:border-transparent dark:focus:border-blue-500/50 dark:checked:bg-blue-600;
+}
+
+/* Switch element */
+.form-switch {
+    @apply relative select-none;
+    width: 44px;
+
+    &.form-switch-sm {
+        scale: 0.6;
+    }
+
+    label>span:first-child {
+        @apply absolute block rounded-full;
+        width: 20px;
+        height: 20px;
+        top: 2px;
+        left: 2px;
+        right: 50%;
+        transition: all 0.15s ease-out;
+    }
+
+    label {
+        @apply block h-6 cursor-pointer overflow-hidden rounded-full;
+    }
+    
+
+    input[type='checkbox']:checked+label {
+        @apply bg-blue-500;
+
+        >span:first-child {
+            left: 22px;
+        }
+    }
+
+    input[type='checkbox']:disabled+label {
+        @apply cursor-not-allowed border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-700/20;
+
+        >span:first-child {
+            @apply bg-slate-400 dark:bg-slate-600;
+        }
+    }
+}
+
+// Buttons
+.btn,
+.btn-lg,
+.btn-sm,
+.btn-xs {
+    @apply inline-flex select-none items-center justify-center rounded-md leading-5 shadow-sm transition duration-150 ease-in-out focus:ring-4;
+
+    &.btn-primary {
+        @apply bg-gradient-to-r from-blue-600 to-emerald-400 px-8 text-white shadow-lg transition duration-150 ease-in-out hover:from-emerald-500 hover:to-emerald-500 disabled:cursor-not-allowed disabled:bg-emerald-400 dark:from-blue-700 dark:to-emerald-500 dark:hover:from-emerald-500 dark:hover:to-emerald-500;
+    }
+
+    &.btn-cta {
+        @apply rounded-full bg-gradient-to-r from-blue-600 to-blue-500 py-3 text-base font-semibold text-white shadow-lg transition duration-150 ease-in-out hover:from-blue-600 hover:to-blue-600 disabled:cursor-not-allowed disabled:from-blue-600 disabled:to-blue-500 dark:from-blue-600 dark:to-blue-500 dark:hover:from-blue-800 dark:hover:to-blue-700 dark:disabled:bg-blue-600;
+    }
+
+    &.round {
+        @apply rounded-full;
+    }
+
+    &.with-icon {
+        @apply flex-row gap-1;
+    }
+}
+
+.btn {
+    @apply px-3 py-2;
+
+    .round {
+        @apply px-5;
+    }
+}
+
+.btn-lg {
+    @apply px-4 py-3;
+}
+
+.btn-sm {
+    @apply px-2 py-1;
+}
+
+.btn-xs {
+    @apply px-2 py-0.5;
+}
+
+.icon-btn {
+    @apply flex h-9 w-9 items-center justify-center rounded-md hover:bg-slate-200 dark:hover:bg-slate-600/50 focus-within:bg-slate-300 dark:focus-within:bg-slate-600/50;
+
+    &.round {
+        @apply rounded-full;
+    }
+}

@@ -1,3 +1,9 @@
+@import 'additional-styles/forms.scss';
+@import 'additional-styles/vue-datepicker.scss';
+@import 'additional-styles/toast.scss';
+@import 'additional-styles/utility-patterns.scss';
+@import 'additional-styles/statuses.scss';
+
 html {
     color-scheme: light dark;
 }
@@ -8,6 +14,28 @@ html.dark {
 
 html.light {
     color-scheme: light;
+}
+
+::-webkit-scrollbar {
+    width: .5rem;
+    height: .5rem
+}
+
+::-webkit-scrollbar-track {
+    background-color: hsl(var(--muted)) !important
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: calc(var(--radius) - 4px);
+    background-color: hsl(var(--muted-foreground) / .3) !important
+}
+
+html {
+    scrollbar-color: hsl(215.4 16.3% 46.9% / .3)
+}
+
+html.dark {
+    scrollbar-color: hsl(215.4 16.3% 56.9% / .3)
 }
 
 /* Custom styles */
@@ -21,16 +49,4 @@ html.light {
 
 .scroll-area {
     scrollbar-width: thin;
-}
-
-/* Chrome, Safari and Opera */
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-
-.no-scrollbar {
-    -ms-overflow-style: none;
-    /* IE and Edge */
-    scrollbar-width: none;
-    /* Firefox */
 }

@@ -2,7 +2,6 @@
 import { formatThousands } from "@/utils";
 import { useQuery } from "@tanstack/vue-query";
 import { Icon } from "@iconify/vue";
-import SpinnerDots from "@/components/SpinnerDots.vue";
 
 definePageMeta({
   title: "Dashboard",
@@ -19,6 +18,8 @@ definePageMeta({
 
 const { event, isLoading, isError } = useEvent();
 
+const eventId = computed(() => event.value?.id)
+
 // Use queryClient to fetch data
 const getEventSummary = async (evtId: number) => {
   const { $galantisApi } = useNuxtApp();
@@ -27,9 +28,9 @@ const getEventSummary = async (evtId: number) => {
 };
 
 const { data, refetch, isRefetching } = useQuery({
-  queryKey: ["event-summary", event.value?.id],
-  queryFn: () => getEventSummary(event.value?.id),
-  enabled: !!event.value,
+  queryKey: ["eventSummary", eventId],
+  queryFn: () => getEventSummary(eventId.value),
+  enabled: !!eventId,
 });
 
 const summaryData = computed(() => data?.value);
