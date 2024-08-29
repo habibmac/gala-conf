@@ -2,6 +2,7 @@
 import { formatThousands } from "@/utils";
 import { useQuery } from "@tanstack/vue-query";
 import { Icon } from "@iconify/vue";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const { event, isLoading, isError } = useEvent();
 
@@ -34,10 +35,10 @@ watch(
 </script>
 
 <template>
-  <div v-if="isLoading" class="grid gap-4 grid-cols-12">
+  <div v-if="isLoading || isRefetching" class="grid gap-4 grid-cols-12">
     <Skeleton
       v-for="i in 4"
-      class="h-[125px] rounded-xl col-span-3 dark:bg-slate-900"
+      class="h-28 rounded-xl col-span-3 bg-white dark:bg-slate-900"
     />
   </div>
   <div v-else-if="isError" class="py-16">

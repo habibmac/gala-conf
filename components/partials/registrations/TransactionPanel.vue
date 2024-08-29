@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, toRef, watchEffect } from "vue";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { Icon } from "@iconify/vue";
 
 import { formatDate, formatCurrency, getCountryFlagWithName } from "@/utils";
 import SpinnerRing from "@/components/SpinnerRing.vue";
@@ -73,7 +74,7 @@ const queryClient = useQueryClient();
 // Watch for changes in route or events data to update the selected event
 watchEffect(() => {
   if (props.regId) {
-    data.value = null;
+    // Reset data
     refetch();
   }
 });
@@ -99,39 +100,35 @@ onUnmounted(async () => {
 });
 </script>
 <template>
-  <div ref="panelContent" class="absolute inset-0 z-30 sm:block sm:left-auto">
-    <Transition
-      enter-active-class="transition duration-100 ease-in-out"
-      enter-from-class="translate-x-full opacity-0"
-      enter-to-class="translate-x-0 opacity-100"
-      leave-active-class="transition duration-200 ease-in-out"
-      leave-from-class="translate-x-0 opacity-100"
-      leave-to-class="translate-x-full opacity-0"
+  <Transition
+		enter-active-class="transition duration-100 ease-in-out"
+		enter-from-class="translate-x-[20%] opacity-0"
+		enter-to-class="translate-x-0 opacity-100"
+		leave-active-class="transition duration-200"
+		leave-from-class="translate-x-0 "
+		leave-to-class="translate-x-[20%] opacity-0"
+  >
+    <div
+      ref="panelContent"
+      class="absolute inset-0 z-30 sm:block sm:left-auto"
+      v-show="transactionPanelOpen"
     >
       <div
-        v-if="transactionPanelOpen"
-        class="no-scrollbar sticky top-16 h-[calc(100dvh-64px)] shadow-xl w-full shrink-0 overflow-y-auto overflow-x-hidden border-l border-slate-200 bg-slate-100 sm:w-[390px] dark:border-slate-700/50 dark:bg-gradient-to-b dark:from-slate-800 dark:to-slate-900"
-      >
+				class="no-scrollbar sticky top-16 h-[calc(100dvh-64px)] w-full shrink-0 overflow-y-auto overflow-x-hidden border-l border-slate-200 bg-slate-50 sm:w-[390px] dark:border-slate-700 dark:bg-gradient-to-b dark:from-slate-800 dark:to-slate-900"      >
         <button
           ref="closeBtn"
           @click.stop="$emit('close-transactionpanel')"
           class="group absolute right-0 top-0 mr-6 mt-6 p-2"
         >
-          <svg
-            class="pointer-events-none h-4 w-4 fill-slate-400 group-hover:fill-slate-600"
-            viewBox="0 0 16 16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="m7.95 6.536 4.242-4.243a1 1 0 1 1 1.415 1.414L9.364 7.95l4.243 4.242a1 1 0 1 1-1.415 1.415L7.95 9.364l-4.243 4.243a1 1 0 0 1-1.414-1.415L6.536 7.95 2.293 3.707a1 1 0 0 1 1.414-1.414L7.95 6.536Z"
-            />
-          </svg>
+          <Icon icon="iconamoon:close-thin" class="w-6 h-6 text-slate-800 dark:text-slate-100" />
         </button>
 
         <div class="px-4 py-8 lg:px-8">
           <div v-if="isRefetching" class="grid gap-4">
             <div>
-              <Skeleton class="h-8 w-40 mx-auto p-4 bg-white dark:bg-slate-700/60" />
+              <Skeleton
+                class="h-8 w-40 mx-auto p-4 bg-white dark:bg-slate-700/60"
+              />
             </div>
             <Skeleton class="h-96 p-4 bg-white dark:bg-slate-700/60" />
             <Skeleton class="h-20 p-4 bg-white dark:bg-slate-700/60" />
@@ -430,6 +427,6 @@ onUnmounted(async () => {
           </div>
         </div>
       </div>
-    </Transition>
-  </div>
+    </div>
+  </Transition>
 </template>

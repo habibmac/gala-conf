@@ -210,22 +210,36 @@ const columns = computed(() => {
           switch (config.key) {
             case "date":
               const date = fromUnixTime(Number(cellProps.getValue()));
-              return h("div", { class: "text-right text-slate-900 text-xs" }, [
-                h("div", { class: "" }, format(date, "d MMM yyyy")),
-                h(
-                  "div",
-                  {
-                    class: "text-xs text-slate-400 dark:text-slate-400",
-                  },
-                  format(date, "hh:mm")
-                ),
-              ]);
+              return h(
+                "div",
+                {
+                  class:
+                    "text-right text-slate-900 dark:text-slate-300 text-xs",
+                },
+                [
+                  h("div", { class: "" }, format(date, "d MMM yyyy")),
+                  h(
+                    "div",
+                    {
+                      class: "text-xs text-slate-400 dark:text-slate-600",
+                    },
+                    format(date, "hh:mm")
+                  ),
+                ]
+              );
             case "code":
               const stt_id = cellProps.row.original.stt_id;
+              // Add new query parameters to the existing query
+              const newParams = {
+                ...route.query,
+                details: cellProps.row.original.id,
+              };
               return h(
                 "a",
                 {
-                  href: `/dashboard/${eventId.value}/${endpoint}/${cellProps.row.original.id}`,
+                  href: `/dashboard/${eventId.value}/${endpoint}?${new URLSearchParams(
+                    newParams
+                  ).toString()}`,
                   class:
                     "number text-center group inline-block whitespace-nowrap",
                   onClick: (e: Event) => {
@@ -520,198 +534,191 @@ watch(
       <h1 class="h2 mb-5">Registrations</h1>
     </header>
     <RegCards />
+  </div>
 
-    </div>
-
-    <section>
-      <!-- Search and filter -->
-      <div
-        class="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-8"
-      >
-        <!-- Left: Avatars -->
-        <div
-          class="justify-start gap-2 space-y-2 sm:grid sm:grid-flow-col sm:space-y-0"
-        >
-          <TableSearchForm
-            v-model="filters.search"
-            placeholder="Search Registrant..."
-          />
-          <DropdownTicketFilter
-            v-model="filters.ticket_name"
-            :evtId="eventId"
-          />
-          <DropdownStatusFilter v-model="filters.status" />
-          <TableResetBtn
-            @click.prevent="handleResetFilters"
-            v-if="isAnyFilterActive"
-          />
-        </div>
-        <!-- Right: Actions -->
-        <div class="flex shrink-0 space-x-2 justify-self-end">
-          <div class="min-w-64 grow">
-            <!-- Datepicker -->
-            <Datepicker
-              :date-range="dateRange"
-              @update:date-range="handleSetDateRange"
-            />
-          </div>
-          <DropdownTableColumns
-            v-model="columnConfigs"
-          />
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div
-        class="flex justify-between items-center min-h-12 w-full gap-2 bg-slate-50 px-4 py-3 sm:flex-row sm:px-6 sm:py-3 dark:bg-slate-950"
-        :class="[
-          isAnyFilterActive
-            ? 'flex-col items-start'
-            : 'flex-row items-center justify-between',
-        ]"
-      >
-        <h3 class="shrink-0">
-          <span
-            v-if="isAnyFilterActive"
-            class="font-semibold text-slate-950 dark:text-slate-300"
-            >Filtered Registrations
-          </span>
-          <span v-else class="font-semibold text-slate-950 dark:text-slate-200"
-            >All Registrations</span
-          >
-        </h3>
-        <div class="number shrink-0 text-slate-500 text-sm" v-if="!isLoading">
-          <template v-if="totalData"
-            >Found
-            <span class="font-semibold text-slate-900 dark:text-slate-300">{{
-              formatThousands(totalData)
-            }}</span>
-            results.</template
-          >
-
-          <div v-else>No data found.</div>
-        </div>
-      </div>
-    </section>
-
-    <section
-      class="relative"
-      :class="{ 'overflow-x-auto scroll-area': !isLoading }"
-      :style="{ width: `${Math.max(100, totalVisibleWidth)}%` }"
+  <section>
+    <!-- Search and filter -->
+    <div
+      class="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-8"
     >
-      <template v-if="isLoading">
-        <div
-          class="absolute z-10 h-full w-full bg-slate-500/10 dark:bg-slate-950/20 ring-0"
-        ></div>
-      </template>
-      <table
-        class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90"
+      <!-- Left: Avatars -->
+      <div
+        class="justify-start gap-2 space-y-2 sm:grid sm:grid-flow-col sm:space-y-0"
       >
-        <thead
-          class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
+        <TableSearchForm
+          v-model="filters.search"
+          placeholder="Search Registrant..."
+        />
+        <DropdownTicketFilter v-model="filters.ticket_name" :evtId="eventId" />
+        <DropdownStatusFilter v-model="filters.status" />
+        <TableResetBtn
+          @click.prevent="handleResetFilters"
+          v-if="isAnyFilterActive"
+        />
+      </div>
+      <!-- Right: Actions -->
+      <div class="flex shrink-0 space-x-2 justify-self-end">
+        <div class="min-w-64 grow">
+          <!-- Datepicker -->
+          <Datepicker
+            :date-range="dateRange"
+            @update:date-range="handleSetDateRange"
+          />
+        </div>
+        <DropdownTableColumns v-model="columnConfigs" />
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div
+      class="flex justify-between items-center min-h-12 w-full gap-2 bg-slate-50 px-4 py-3 sm:flex-row sm:px-6 sm:py-3 dark:bg-slate-950"
+      :class="[
+        isAnyFilterActive
+          ? 'flex-col items-start'
+          : 'flex-row items-center justify-between',
+      ]"
+    >
+      <h3 class="shrink-0">
+        <span
+          v-if="isAnyFilterActive"
+          class="font-semibold text-slate-950 dark:text-slate-300"
+          >Filtered Registrations
+        </span>
+        <span v-else class="font-semibold text-slate-950 dark:text-slate-200"
+          >All Registrations</span
         >
-          <tr
-            v-for="headerGroup in table.getHeaderGroups()"
-            :key="headerGroup.id"
+      </h3>
+      <div class="number shrink-0 text-slate-500 text-sm" v-if="!isLoading">
+        <template v-if="totalData"
+          >Found
+          <span class="font-semibold text-slate-900 dark:text-slate-300">{{
+            formatThousands(totalData)
+          }}</span>
+          results.</template
+        >
+
+        <div v-else>No data found.</div>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="relative"
+    :class="{ 'overflow-x-auto scroll-area': !isLoading }"
+    :style="{ width: `${Math.max(100, totalVisibleWidth)}%` }"
+  >
+    <template v-if="isLoading">
+      <div
+        class="absolute z-10 h-full w-full bg-slate-500/10 dark:bg-slate-950/20 ring-0"
+      ></div>
+    </template>
+    <table
+      class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90"
+    >
+      <thead
+        class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
+      >
+        <tr
+          v-for="headerGroup in table.getHeaderGroups()"
+          :key="headerGroup.id"
+        >
+          <th
+            v-for="header in headerGroup.headers"
+            :key="header.id"
+            :colSpan="header.colSpan"
+            :style="{
+              minWidth: `${header.column.columnDef.size ?? 20}px`,
+            }"
+            class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-200/20 dark:hover:bg-slate-900/50 first:pl-5 last:pr-5 text-xs"
+            :class="{
+              'bg-blue-200/20 text-blue-600 dark:bg-slate-800/50':
+                header.column.getIsSorted(),
+              'cursor-pointer select-none': header.column.getCanSort(),
+            }"
+            @click="
+              header.column.getCanSort()
+                ? header.column.getToggleSortingHandler()?.($event)
+                : null
+            "
           >
-            <th
-              v-for="header in headerGroup.headers"
-              :key="header.id"
-              :colSpan="header.colSpan"
-              :style="{
-                minWidth: `${header.column.columnDef.size ?? 20}px`,
-              }"
-              class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-200/20 dark:hover:bg-slate-900/50 first:pl-5 last:pr-5 text-xs"
-              :class="{
-                'bg-blue-200/20 text-blue-600 dark:bg-slate-900/50':
-                  header.column.getIsSorted(),
-                'cursor-pointer select-none': header.column.getCanSort(),
-              }"
-              @click="
-                header.column.getCanSort()
-                  ? header.column.getToggleSortingHandler()?.($event)
-                  : null
-              "
-            >
-              <template v-if="!header.isPlaceholder">
-                <div class="relative">
-                  <FlexRender
-                    :render="header.column.columnDef.header"
-                    :props="header.getContext()"
-                  />
-                  <span
-                    class="absolute right-0 text-blue-500 dark:text-slate-300"
-                  >
-                    <span>
-                      {{
-                        { asc: "↑", desc: "↓" }[
-                          header.column.getIsSorted() as string
-                        ]
-                      }}
-                    </span>
-                  </span>
-                </div>
-              </template>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="divide-y divide-slate-200 text-sm 2xl:text-sm dark:divide-slate-800 border-b"
-        >
-          <template v-if="!table.getRowModel().rows.length">
-            <tr class="">
-              <td colspan="10" class="py-5 text-center">
-                <div
-                  v-if="isLoading"
-                  class="mx-auto inline-flex select-none justify-center py-20"
+            <template v-if="!header.isPlaceholder">
+              <div class="relative">
+                <FlexRender
+                  :render="header.column.columnDef.header"
+                  :props="header.getContext()"
+                />
+                <span
+                  class="absolute right-0 text-blue-500 dark:text-slate-300"
                 >
-                  <SpinnerRing
-                    class="h-10 w-10 text-blue-500 dark:text-blue-400"
-                  />
-                </div>
-                <NoData v-else @reset-filters="handleResetFilters" />
-              </td>
-            </tr>
-          </template>
-          <tr
-            v-for="row in table.getRowModel().rows"
-            :key="row.id"
-            class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
-          >
-            <td
-              v-for="cell in row.getVisibleCells()"
-              :key="cell.id"
-              class="number px-2 py-3 text-center first:pl-5 last:pr-5"
-              :class="{
-                'text-slate-600 bg-blue-50/50 dark:bg-slate-900/70 dark:text-slate-300':
-                  cell.column.getIsSorted(),
-              }"
-            >
-              <FlexRender
-                :render="cell.column.columnDef.cell"
-                :props="cell.getContext()"
-              />
+                  <span>
+                    {{
+                      { asc: "↑", desc: "↓" }[
+                        header.column.getIsSorted() as string
+                      ]
+                    }}
+                  </span>
+                </span>
+              </div>
+            </template>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="divide-y divide-slate-200 text-sm 2xl:text-sm dark:divide-slate-800 border-b"
+      >
+        <template v-if="!table.getRowModel().rows.length">
+          <tr class="">
+            <td colspan="10" class="py-5 text-center">
+              <div
+                v-if="isLoading"
+                class="mx-auto inline-flex select-none justify-center py-20"
+              >
+                <SpinnerRing
+                  class="h-10 w-10 text-blue-500 dark:text-blue-400"
+                />
+              </div>
+              <NoData v-else @reset-filters="handleResetFilters" />
             </td>
           </tr>
-        </tbody>
-      </table>
-    </section>
-    <TablePagination
-      v-if="table.getRowModel().rows.length > 0"
-      :currentPage="table.getState().pagination.pageIndex + 1"
-      :pageCount="table.getPageCount()"
-      :pageSizes="pageSizes"
-      :pageSize="table.getState().pagination.pageSize"
-      :totalData="totalData"
-      @update:pageSize="handlePageSizeChange"
-      @update:currentPage="handleNavigation"
-    />
-    <TransactionPanel
-      :transactionPanelOpen="selectedRegId !== ''"
-      @close-transactionpanel="handleCloseDetails"
-      :evt-id="eventId"
-      :reg-id="selectedRegId ? selectedRegId : undefined"
-    />
-  
+        </template>
+        <tr
+          v-for="row in table.getRowModel().rows"
+          :key="row.id"
+          class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
+        >
+          <td
+            v-for="cell in row.getVisibleCells()"
+            :key="cell.id"
+            class="number px-2 py-3 text-center first:pl-5 last:pr-5"
+            :class="{
+              'text-slate-600 bg-blue-50/50 dark:bg-slate-600/20 dark:text-slate-300':
+                cell.column.getIsSorted(),
+            }"
+          >
+            <FlexRender
+              :render="cell.column.columnDef.cell"
+              :props="cell.getContext()"
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+  <TablePagination
+    v-if="table.getRowModel().rows.length > 0"
+    :currentPage="table.getState().pagination.pageIndex + 1"
+    :pageCount="table.getPageCount()"
+    :pageSizes="pageSizes"
+    :pageSize="table.getState().pagination.pageSize"
+    :totalData="totalData"
+    @update:pageSize="handlePageSizeChange"
+    @update:currentPage="handleNavigation"
+  />
+  <TransactionPanel
+    :transactionPanelOpen="selectedRegId !== ''"
+    @close-transactionpanel="handleCloseDetails"
+    :evt-id="eventId"
+    :reg-id="selectedRegId ? selectedRegId : undefined"
+  />
 </template>

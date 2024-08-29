@@ -27,7 +27,7 @@ input[type='search']::-webkit-search-results-decoration {
 .form-textarea,
 .form-multiselect,
 .form-select {
-    @apply border-slate-200 px-3 py-2.5 text-sm leading-5 text-slate-800 shadow-sm focus:border-blue-600 dark:border-slate-700 dark:text-slate-100 dark:hover:border-blue-600;
+    @apply border-slate-200 px-3 py-2.5 text-sm leading-5 text-slate-800 shadow-sm focus:border-blue-600 dark:border-slate-800 dark:text-slate-100 dark:hover:border-blue-600;
 }
 
 .form-input,

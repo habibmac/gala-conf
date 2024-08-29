@@ -52,7 +52,7 @@ const translationClass = computed(() => {
     <header class="mx-auto w-full max-w-4xl">
       <div class="px-4 py-10 sm:px-6 sm:pt-12">
         <div class="flex justify-between">
-          <h1 class="text-2xl font-semibold tracking-tight">My Events</h1>
+          <h1 class="text-2xl font-semibold tracking-tight h2">My Events</h1>
           <div class="flex items-center space-x-2">
             <Button as-child>
               <NuxtLink to="/new-event"> Create New </NuxtLink>
