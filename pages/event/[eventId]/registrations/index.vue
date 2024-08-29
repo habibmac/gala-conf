@@ -2,7 +2,6 @@
 import { ref, computed, h, watch, toRefs } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { fromUnixTime, format } from "date-fns";
-
 import {
   FlexRender,
   getCoreRowModel,
@@ -14,6 +13,7 @@ import {
 
 import { useRegs } from "@/composables/useRegs";
 import { formatThousands, getStatusInfo } from "@/utils";
+import type { Reg, Filter, ColumnConfig } from "@/types";
 
 import RegCards from "@/components/partials/registrations/RegCards.vue";
 import DropdownTicketFilter from "@/components/DropdownTicketFilter.vue";
@@ -25,7 +25,7 @@ import TableStatusTooltip from "@/components/TableStatusTooltip.vue";
 import TransactionPanel from "@/components/partials/registrations/TransactionPanel.vue";
 import TableResetBtn from "@/components/TableResetBtn.vue";
 import SpinnerRing from "@/components/SpinnerRing.vue";
-import BadgeFilter from "@/components/BadgeFilter.vue";
+import NoData from "@/components/partials/registrations/NoData.vue";
 import Datepicker from "@/components/Datepicker.vue";
 
 definePageMeta({
@@ -36,36 +36,6 @@ definePageMeta({
   group: "reports",
   layout: "dashboard-with-sidebar",
 });
-
-interface Filter {
-  search: string;
-  ticket_name: string;
-  status: string;
-  date_start: string; // Allow undefined
-  date_end: string; // Allow undefined
-}
-
-interface Reg {
-  id: string;
-  code: string;
-  date: string;
-  fullname: string;
-  ticket_name: string;
-  ticket_price: string;
-  total: string;
-  paid: string;
-  status: string;
-  stt_id: string;
-  [key: string]: any;
-}
-
-interface ColumnConfig {
-  key: string;
-  header: string;
-  isVisible: boolean;
-  isHideable: boolean;
-  width: number; // Width in percentage
-}
 
 const props = defineProps<{
   search?: string;
@@ -107,16 +77,6 @@ const selectedRegId = ref<string>(detail.value || "");
 // Pagination configs
 const INITIAL_PAGE_SIZE = 10;
 const pageSizes: (number | string)[] = [10, 20, 30, 40, 50];
-
-const columnVisibility = ref({
-  date: true,
-  code: true,
-  fullname: true,
-  ticket_name: true,
-  ticket_price: true,
-  paid: true,
-  status: true,
-} as Record<string, boolean>);
 
 const columnConfigs = ref<ColumnConfig[]>([
   {
@@ -227,16 +187,6 @@ const dateRange = computed({
   },
 });
 
-const dateRangeLabel = computed(() => {
-  if (filters.value.date_start === "" || filters.value.date_end === "") {
-    return "";
-  }
-  return `${format(
-    new Date(filters.value.date_start),
-    "d LLL yyyy"
-  )} - ${format(new Date(filters.value.date_end), "d LLL yyyy")}`;
-});
-
 // Define parseDesc to accept a string and return a boolean
 const parseDesc = (order: string): boolean => order.toLowerCase() === "desc";
 const sorting = ref<SortingState>([
@@ -260,12 +210,12 @@ const columns = computed(() => {
           switch (config.key) {
             case "date":
               const date = fromUnixTime(Number(cellProps.getValue()));
-              return h("div", { class: "text-right text-xs" }, [
+              return h("div", { class: "text-right text-slate-900 text-xs" }, [
                 h("div", { class: "" }, format(date, "d MMM yyyy")),
                 h(
                   "div",
                   {
-                    class: "text-xs text-slate-700 dark:text-slate-400",
+                    class: "text-xs text-slate-400 dark:text-slate-400",
                   },
                   format(date, "hh:mm")
                 ),
@@ -498,13 +448,6 @@ const handleResetFilters = () => {
   ];
 };
 
-function updateColumnVisibility(newVisibility: Record<string, boolean>) {
-  columnConfigs.value = columnConfigs.value.map((config) => ({
-    ...config,
-    isVisible: newVisibility[config.key],
-  }));
-}
-
 const totalVisibleWidth = computed(() => {
   return columnConfigs.value
     .filter((config) => config.isVisible)
@@ -572,7 +515,7 @@ watch(
 </script>
 
 <template>
-  <div class="container mx-auto">
+  <div class="container mx-auto 2xl:mx-0">
     <header class="pt-10">
       <h1 class="h2 mb-5">Registrations</h1>
     </header>
@@ -598,6 +541,10 @@ watch(
             :evtId="eventId"
           />
           <DropdownStatusFilter v-model="filters.status" />
+          <TableResetBtn
+            @click.prevent="handleResetFilters"
+            v-if="isAnyFilterActive"
+          />
         </div>
         <!-- Right: Actions -->
         <div class="flex shrink-0 space-x-2 justify-self-end">
@@ -609,9 +556,7 @@ watch(
             />
           </div>
           <DropdownTableColumns
-            v-model="columnVisibility"
-            :columns="columnConfigs"
-            @update:modelValue="updateColumnVisibility"
+            v-model="columnConfigs"
           />
         </div>
       </div>
@@ -619,7 +564,7 @@ watch(
 
     <section>
       <div
-        class="flex min-h-12 w-full gap-2 bg-slate-50 px-4 py-3 sm:flex-row sm:px-6 sm:py-3 dark:bg-slate-950"
+        class="flex justify-between items-center min-h-12 w-full gap-2 bg-slate-50 px-4 py-3 sm:flex-row sm:px-6 sm:py-3 dark:bg-slate-950"
         :class="[
           isAnyFilterActive
             ? 'flex-col items-start'
@@ -629,43 +574,14 @@ watch(
         <h3 class="shrink-0">
           <span
             v-if="isAnyFilterActive"
-            class="font-semibold text-slate-600 dark:text-slate-300"
-            >Results for:
+            class="font-semibold text-slate-950 dark:text-slate-300"
+            >Filtered Registrations
           </span>
-          <span v-else class="font-semibold text-slate-600 dark:text-slate-200"
+          <span v-else class="font-semibold text-slate-950 dark:text-slate-200"
             >All Registrations</span
           >
         </h3>
-        <div class="flex grow flex-wrap gap-2">
-          <BadgeFilter
-            :filter="filters.search"
-            label="Search"
-            @clear-filter="filters.search = ''"
-          />
-          <BadgeFilter
-            :filter="filters.ticket_name"
-            label="Ticket"
-            @clear-filter="filters.ticket_name = ''"
-          />
-          <BadgeFilter
-            :filter="filters.status"
-            label="Status"
-            @clear-filter="filters.status = ''"
-          />
-          <BadgeFilter
-            :filter="dateRangeLabel"
-            label="Date Range"
-            @clear-filter="
-              filters.date_start = '';
-              filters.date_end = '';
-            "
-          />
-          <TableResetBtn
-            @click.prevent="handleResetFilters"
-            v-if="isAnyFilterActive"
-          />
-        </div>
-        <div class="number shrink-0 text-sm" v-if="!isLoading">
+        <div class="number shrink-0 text-slate-500 text-sm" v-if="!isLoading">
           <template v-if="totalData"
             >Found
             <span class="font-semibold text-slate-900 dark:text-slate-300">{{
@@ -754,52 +670,7 @@ watch(
                     class="h-10 w-10 text-blue-500 dark:text-blue-400"
                   />
                 </div>
-                <div class="m-auto my-16 max-w-2xl" v-else>
-                  <div class="px-4 text-center">
-                    <div
-                      class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-t from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
-                    >
-                      <svg class="h-6 w-5 fill-current" viewBox="0 0 20 24">
-                        <path
-                          class="text-slate-500 dark:text-slate-600"
-                          d="M10 10.562l9-5-8.514-4.73a1 1 0 00-.972 0L1 5.562l9 5z"
-                        />
-                        <path
-                          class="text-slate-300 dark:text-slate-400"
-                          d="M9 12.294l-9-5v10.412a1 1 0 00.514.874L9 23.294v-11z"
-                        />
-                        <path
-                          class="text-slate-400 dark:text-slate-500"
-                          d="M11 12.294v11l8.486-4.714a1 1 0 00.514-.874V7.295l-9 4.999z"
-                        />
-                      </svg>
-                    </div>
-                    <h2
-                      class="mb-2 text-xl font-bold text-slate-500 dark:text-slate-100"
-                    >
-                      No data found.
-                    </h2>
-                    <p class="mb-5 text-sm">
-                      Try another filter or reset all filters.
-                    </p>
-
-                    <button
-                      class="btn bg-blue-500 text-slate-50 hover:bg-blue-600 dark:text-slate-300"
-                      @click="handleResetFilters()"
-                    >
-                      <svg
-                        class="h-6 w-6 shrink-0 fill-current opacity-50"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M17.65 6.35A7.958 7.958 0 0 0 12 4a8 8 0 0 0-8 8a8 8 0 0 0 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18a6 6 0 0 1-6-6a6 6 0 0 1 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"
-                        />
-                      </svg>
-                      <span class="ml-2">Reset Filter</span>
-                    </button>
-                  </div>
-                </div>
+                <NoData v-else @reset-filters="handleResetFilters" />
               </td>
             </tr>
           </template>

@@ -1,14 +1,7 @@
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig()
     const body = await readBody(event)
-    console.table(
-        {
-            'config.public.oauthUrl': config.public.oauthUrl,
-            'config.public.oauthClientId': config.public.oauthClientId,
-            'config.oauthClientSecret': config.oauthClientSecret,
-            'body.refresh_token': body.refresh_token,
-        }
-    )
+    
     try {
         const response = await $fetch(config.public.oauthUrl + '/token', {
             method: 'POST',

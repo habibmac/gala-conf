@@ -41,3 +41,34 @@ interface AuthResponse {
     token_type: string;
     scope: string;
 }
+
+export interface ColumnConfig {
+    key: string;
+    header: string;
+    isVisible: boolean;
+    isHideable: boolean;
+    width: number; // Width in percentage
+}
+
+
+interface Filter {
+    search: string;
+    ticket_name: string;
+    status: string;
+    date_start: string; // Allow undefined
+    date_end: string; // Allow undefined
+}
+
+interface Reg {
+    id: string;
+    code: string;
+    date: string;
+    fullname: string;
+    ticket_name: string;
+    ticket_price: string;
+    total: string;
+    paid: string;
+    status: string;
+    stt_id: string;
+    [key: string]: any;
+}

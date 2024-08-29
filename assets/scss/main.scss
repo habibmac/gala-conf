@@ -56,8 +56,11 @@ html.dark {
 }
 
 .dropdown-item {
-    @apply cursor-default text-sm flex items-center space-x-1 px-3 py-1.5 m-1 rounded dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors;
+    @apply text-sm flex items-center space-x-1 px-3 py-1.5 m-1 rounded dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-default select-none relative;
     &.selected {
-        @apply bg-emerald-100 hover:bg-emerald-100 dark:bg-slate-800/50;
+        @apply bg-slate-100 hover:bg-slate-100 dark:bg-slate-800;
+    }
+    > .check {
+        @apply w-4 h-4;
     }
 }

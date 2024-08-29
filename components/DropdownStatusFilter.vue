@@ -6,7 +6,8 @@ import {
   ListboxOptions,
   ListboxOption,
 } from "@headlessui/vue";
-import { allRegStatuses } from "@/utils/status-map";
+import { Icon } from "@iconify/vue";
+import { allRegStatuses } from "@/utils";
 
 const props = defineProps<{
   modelValue: string;
@@ -59,57 +60,87 @@ const selectedStatusClass = computed(() => {
 <template>
   <ClientOnly>
     <Listbox v-model="selectedStatus">
-      <div class="relative h-full w-full max-w-full">
+      <div class="relative">
         <ListboxButton
-          :class="[
-            selectedStatusClass,
-            'form-select font-medium !text-slate-600 dark:!text-slate-400',
-          ]"
+          class="form-select !w-auto space-x-2"
+          v-slot="{ open }"
         >
-          <div class="line-clamp-1">
-            {{ selectedStatusLabel || "All Status" }}
-          </div>
+          <span v-if="selectedStatus" class="text-xs text-slate-500 border-r pr-2">
+            Status
+            <span
+              :class="`dot ${selectedStatusClass} h-2 w-2 rounded-full`"
+            ></span>
+          </span>
+          <span class="font-medium">
+            {{ selectedStatusLabel }}
+          </span>
+          <Icon
+            icon="heroicons:chevron-down"
+            :class="
+              [
+                open ? 'transform rotate-180' : '',
+                'w-3.5 h-3.w-3.5 text-slate-600 dark:text-slate-400',
+              ]
+            "
+          />
         </ListboxButton>
-      </div>
-      <Transition
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        enter-active-class="transition duration-100 ease-out"
-        leave-active-class="transition duration-100 ease-in"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
-      >
-        <ListboxOptions
-          class="absolute z-40 grid grid-cols-1 mt-1 overflow-auto rounded-md border bg-white p-3 text-sm font-medium shadow-lg ring-black/5 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
+        <Transition
+          enter-active-class="transition ease-out duration-200 transform"
+          enter-from-class="opacity-0 -translate-y-2"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition ease-out duration-200"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
         >
-          <ListboxOption value="" @click="updateValue('')">
-            <li class="list-option">All Status</li>
-          </ListboxOption>
-          <ListboxOption
-            v-for="(status, index) in statuses"
-            :key="index"
-            :value="status.label"
-            as="template"
-            v-slot="{ active, selected }"
+          <ListboxOptions
+            class="absolute left-0 top-full z-20 min-w-24 origin-top-left max-h-[400px] overflow-y-auto rounded-md mt-1 border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950 scroll-area"
+            as="ul" 
           >
-            <li
-              :class="[
-                active
-                  ? 'bg-slate-100 text-slate-700 dark:bg-slate-900/50 dark:text-slate-300'
-                  : '',
-                selected
-                  ? 'bg-emerald-100 hover:bg-emerald-100 dark:bg-slate-900/50'
-                  : '',
-                'list-option',
-              ]"
-              @click="updateValue(status.label)"
+            <ListboxOption
+              :value="null"
+              v-slot="{ active, selected }"
             >
-              <span :class="`dot ${status.color} h-2 w-2 rounded-full`"></span>
-              <span>{{ status.label }}</span>
-            </li>
-          </ListboxOption>
-        </ListboxOptions>
-      </Transition>
+              <li
+                :class="[
+                  selected
+                    ? 'selected'
+                    : '',
+                  'dropdown-item',
+                ]"
+                @click="updateValue('')"
+              >
+                <span class="dot h-2 w-2 rounded-full"></span>
+                <span>All Status</span>
+              </li>
+            </ListboxOption>
+            <ListboxOption
+              v-for="(item, index) in statuses"
+              :key="index"
+              :value="item.label"
+              :disabled="item.label === selectedStatus"
+                          v-slot="{ active, selected }"
+
+              as="template"
+            >
+              <li
+                :class="[
+                  selected
+                    ? 'selected'
+                    : '',
+                
+                  'dropdown-item !space-x-2',
+                ]"
+                @click="updateValue(item.label)"
+              >
+                <span
+                  :class="`dot ${item.color} h-2 w-2 rounded-full`"
+                ></span>
+                <span>{{ item.label }}</span>
+              </li>
+            </ListboxOption>
+          </ListboxOptions>
+        </Transition>
+      </div>
     </Listbox>
   </ClientOnly>
 </template>

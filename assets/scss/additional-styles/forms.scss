@@ -12,7 +12,7 @@ input[type='search']::-webkit-search-results-decoration {
 .form-select,
 .form-checkbox,
 .form-radio {
-    @apply border bg-white focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-offset-0 dark:bg-slate-900/30 dark:focus:border-blue-600 dark:disabled:border-slate-700 dark:disabled:bg-slate-700/30 dark:disabled:hover:border-slate-700;
+    @apply border bg-white focus:outline-none focus:ring-0 focus:ring-offset-0 dark:bg-slate-900/30 dark:focus:border-blue-600 dark:disabled:border-slate-700 dark:disabled:bg-slate-700/30 dark:disabled:hover:border-slate-700;
 }
 
 .form-input,
@@ -27,7 +27,7 @@ input[type='search']::-webkit-search-results-decoration {
 .form-textarea,
 .form-multiselect,
 .form-select {
-    @apply border-slate-200 px-3 py-2.5 text-sm leading-5 text-slate-800 shadow-sm hover:border-blue-300 focus:border-blue-300 dark:border-slate-700 dark:text-slate-100 dark:hover:border-blue-600;
+    @apply border-slate-200 px-3 py-2.5 text-sm leading-5 text-slate-800 shadow-sm focus:border-blue-600 dark:border-slate-700 dark:text-slate-100 dark:hover:border-blue-600;
 }
 
 .form-input,
@@ -44,7 +44,13 @@ input[type='search']::-webkit-search-results-decoration {
 }
 
 .form-select {
-    @apply pr-10;
+    @apply flex items-center cursor-pointer;
+    &.with-icon-left {
+        @apply pl-10;
+    }
+    &.with-icon-right {
+        @apply pr-10;
+    }
 }
 
 .form-checkbox,

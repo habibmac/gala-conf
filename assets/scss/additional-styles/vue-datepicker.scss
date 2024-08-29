@@ -8,7 +8,7 @@
     --dp-font-family: "Inter Variable", sans-serif;
     --dp-border-radius: 8px;
     --dp-cell-border-radius: 4px;
-    --dp-transition-length: 22px;
+    --dp-transition-length: 10px;
     --dp-transition-timing-general: 0.1s;
     --dp-button-height: 35px;
     --dp-month-year-row-height: 35px;
@@ -36,7 +36,7 @@
 }
 
 .dp__theme_dark {
-    --dp-background-color: #1e293b;
+    --dp-background-color: #020617;
     --dp-text-color: #cbd5e1;
     --dp-hover-color: #0f172a;
     --dp-hover-text-color: #cbd5e1;
@@ -46,7 +46,8 @@
     --dp-primary-text-color: #fff;
     --dp-secondary-color: #475569;
     --dp-border-color: #475569a0;
-    --dp-menu-border-color: #313944;
+    --dp-menu-border-color: #1e293b;
+    --dp-border-color-focus: #1e293b;
     --dp-border-color-hover: #aaaeb7;
     --dp-disabled-color: #0f172a47;
     --dp-disabled-color-text: #d0d0d0;
@@ -75,9 +76,10 @@
     --dp-primary-disabled-color: #6bacea;
     --dp-primary-text-color: #f8f5f5;
     --dp-secondary-color: #c0c4cc;
-    --dp-border-color: #ddd;
-    --dp-menu-border-color: #ddd;
+    --dp-border-color: #e2e8f0;
+    --dp-menu-border-color: #e2e8f0;
     --dp-border-color-hover: #6a96ff;
+    --dp-border-color-focus: #6a96ff;
     --dp-disabled-color: #f6f6f6;
     --dp-scroll-bar-background: #f3f3f3;
     --dp-scroll-bar-color: #959595;

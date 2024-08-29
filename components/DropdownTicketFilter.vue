@@ -1,17 +1,22 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, type Ref, toRef, watch } from "vue";
+import { ref, type Ref, watch } from "vue";
 import { useQuery } from "@tanstack/vue-query";
+import { Icon } from "@iconify/vue";
+import {
+  Listbox,
+  ListboxButton,
+  ListboxOptions,
+  ListboxOption,
+} from "@headlessui/vue";
 
 const props = defineProps<{
   modelValue: string;
-  evtId: string;
 }>();
 
-const selectedTicket = ref(props.modelValue); // Make modelValue reactive
+const { event } = useEvent();
+const evtId = computed(() => event.value?.id);
 
-const dropdownOpen = ref(false);
-const trigger = ref<HTMLElement | null>(null);
-const dropdown = ref<HTMLElement | null>(null);
+const selectedTicket = ref(props.modelValue); // Make modelValue reactive
 
 const emits = defineEmits(["update:modelValue"]);
 
@@ -38,9 +43,9 @@ const {
   error,
   data: tickets,
 } = useQuery({
-  queryKey: ["tickets", toRef(props, "evtId")],
-  queryFn: () => getData(toRef(props.evtId)),
-  enabled: !!props.evtId,
+  queryKey: ["tickets", evtId.value],
+  queryFn: () => getData(evtId),
+  enabled: !!evtId.value,
   staleTime: 1000 * 60 * 5, // 5 minutes
 });
 
@@ -56,94 +61,76 @@ function updateValue(value: string) {
   emits("update:modelValue", value);
   selectedTicket.value = value; // Also update local state to ensure reactivity
 }
-
-// Close on click outside
-const clickHandler = (event: MouseEvent) => {
-  const target = event.target as HTMLElement;
-  if (
-    !dropdownOpen.value ||
-    (dropdown.value && dropdown.value.contains(target)) ||
-    (trigger.value && trigger.value.contains(target))
-  )
-    return;
-  dropdownOpen.value = false;
-};
-
-// Close if the ESC key is pressed
-const keyHandler = (event: KeyboardEvent) => {
-  if (!dropdownOpen.value || event.key !== "Escape") return;
-  dropdownOpen.value = false;
-};
-
-onMounted(() => {
-  document.addEventListener("click", clickHandler);
-  document.addEventListener("keydown", keyHandler);
-});
-
-onUnmounted(() => {
-  document.removeEventListener("click", clickHandler);
-  document.removeEventListener("keydown", keyHandler);
-});
 </script>
 
 <template>
-  <div class="w-full">
-    <button
-      ref="trigger"
-      aria-haspopup="true"
-      class="form-select w-full text-left font-medium !text-slate-600 dark:!text-slate-400"
-      @click.prevent="dropdownOpen = !dropdownOpen"
-      :aria-expanded="dropdownOpen"
-    >
-      <div class="line-clamp-1">
-        {{ selectedTicket || "All Tickets" }}
-      </div>
-    </button>
-    <Transition
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      enter-active-class="transition duration-100 ease-out"
-      leave-active-class="transition duration-100 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div
-        v-show="dropdownOpen"
-        class="absolute z-50 mt-1 grid max-h-[500px] w-full grid-cols-1 rounded-md border bg-white p-3 text-sm font-medium shadow-lg ring-black/5 focus:outline-none md:max-w-sm dark:border-slate-700 dark:bg-slate-800 scroll-area overflow-y-scroll"
-      >
-        <template v-if="isLoading">
-          <div as="template" disabled>
-            <div class="list-option">Loading...</div>
-          </div>
-        </template>
-        <template v-else-if="isError">
-          <div as="template" disabled>{{ error }}</div>
-        </template>
-        <template v-else>
-          <ul>
-            <li
-              @click="updateValue('')"
-              :class="`${selectedTicket === '' ? 'active' : ''} list-option`"
-            >
-              All Tickets
-            </li>
-            <li
+  <ClientOnly>
+    <Listbox v-model="selectedTicket">
+      <div class="relative">
+        <ListboxButton
+          class="form-select font-medium !w-auto space-x-2 max-w-xs"
+        >
+          <span v-if="selectedTicket" class="text-xs text-slate-500 border-r pr-2">
+            Ticket
+          </span>
+          <span class="truncate">
+            {{ selectedTicket ? selectedTicket : "All Tickets" }}
+          </span>
+          <Icon
+            icon="heroicons:chevron-down"
+          />
+        </ListboxButton>
+        <Transition
+          enter-active-class="transition ease-out duration-200 transform"
+          enter-from-class="opacity-0 -translate-y-2"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition ease-out duration-200"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
+        >
+          <ListboxOptions
+            class="absolute left-0 top-full z-20 min-w-80 origin-top-left overflow-y-scroll scroll-area max-h-[400px] rounded-md mt-1 border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950"
+          >
+            <ListboxOption :value="null" as="template">
+              <li
+                :class="[
+                  selectedTicket === '' ? 'selected' : '',
+                  'dropdown-item justify-between',
+                ]"
+                @click="updateValue('')"
+              >
+                <span class="text-sm">All Tickets</span>
+                <Icon
+                  icon="heroicons:check"
+                  v-if="selectedTicket === ''"
+                  class="check"
+                />
+              </li>
+            </ListboxOption>
+            <ListboxOption
               v-for="ticket in tickets"
               :key="ticket.id"
               :value="ticket.name"
-              :class="[
-                selectedTicket === ticket.name ? 'active' : '',
-                'list-option',
-              ]"
-              @click="updateValue(ticket.name)"
+              as="template"
             >
-              <div class="line-clamp-1 overflow-ellipsis">
-                {{ ticket.name }}
-              </div>
-            </li>
-          </ul>
-        </template>
+              <li
+                :class="[
+                  ticket.name === selectedTicket ? 'selected' : '',
+                  'dropdown-item justify-between',
+                ]"
+                @click="updateValue(ticket.name)"
+              >
+                <span class="text-sm">{{ ticket.name }}</span>
+                <Icon
+                  icon="heroicons:check"
+                  v-if="ticket.name === selectedTicket"
+                  class="check"
+                />
+              </li>
+            </ListboxOption>
+          </ListboxOptions>
+        </Transition>
       </div>
-    </Transition>
-  </div>
+    </Listbox>
+  </ClientOnly>
 </template>

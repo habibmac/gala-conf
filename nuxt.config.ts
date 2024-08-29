@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       bodyAttrs: {
-        class: 'font-inter antialiased text-slate-800 dark:text-slate-400'
+        class: 'font-inter antialiased text-slate-950 dark:text-slate-400'
       },
     },
   },

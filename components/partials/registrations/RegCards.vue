@@ -34,20 +34,18 @@ watch(
 </script>
 
 <template>
-  <div v-if="isLoading" class="py-16">
-    <Skeleton class="h-8 w-1/2 mb-10" />
-    <div class="grid gap-4 grid-cols-12">
-      <Skeleton v-for="i in 4" class="h-[125px] rounded-xl col-span-3" />
-      <Skeleton class="h-[400px] col-span-8 rounded-xl" />
-      <Skeleton class="h-[400px] col-span-4 rounded-xl" />
-    </div>
+  <div v-if="isLoading" class="grid gap-4 grid-cols-12">
+    <Skeleton
+      v-for="i in 4"
+      class="h-[125px] rounded-xl col-span-3 dark:bg-slate-900"
+    />
   </div>
   <div v-else-if="isError" class="py-16">
     <div class="flex h-32 items-center justify-center">
       Error fetching event summary. Please try again later.
     </div>
   </div>
-  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" v-else-if="event">
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5" v-else-if="event">
     <Card
       v-for="item in summaryData"
       :key="item.title"
@@ -56,7 +54,7 @@ watch(
       <CardHeader
         class="flex flex-row items-center justify-between space-y-0 pb-2"
       >
-        <CardTitle class="text-sm font-medium">
+        <CardTitle class="text-sm font-medium tracking-normal">
           {{ item.title }}
         </CardTitle>
         <Button

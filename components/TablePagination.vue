@@ -161,11 +161,11 @@ const shouldShowPage = (page: number) => {
       class="text-right text-sm text-slate-500 dark:text-slate-400 whitespace order-2 sm:order-3"
     >
       Page
-      <span class="font-medium text-slate-600 dark:text-slate-300">{{
+      <span class="font-medium text-slate-900 dark:text-slate-300">{{
         currentPage
       }}</span>
       of
-      <span class="font-medium text-slate-600 dark:text-slate-300">{{
+      <span class="font-medium text-slate-900 dark:text-slate-300">{{
         pageCount
       }}</span>
     </div>
@@ -173,14 +173,14 @@ const shouldShowPage = (page: number) => {
 </template>
 <style lang="scss">
 .page-link {
-  @apply flex transition-colors items-center justify-center leading-5 hover:shadow-sm dark:text-slate-300 text-sm w-6 h-6 hover:bg-slate-300/50 dark:hover:bg-slate-700 dark:hover:text-slate-100 rounded-full p-5 relative;
+  @apply flex transition-colors items-center justify-center leading-5 hover:shadow-sm dark:text-slate-300 text-sm w-6 h-6 hover:bg-slate-200/50 dark:hover:bg-slate-700 dark:hover:text-slate-100 rounded-full p-5 relative;
 
   > svg {
     @apply w-5 h-5 absolute;
   }
 
   &.active {
-    @apply bg-slate-100 text-slate-900 dark:bg-blue-600 dark:text-white pointer-events-none;
+    @apply bg-white text-slate-900 dark:bg-blue-600 dark:text-white pointer-events-none;
   }
 
   &.disabled {

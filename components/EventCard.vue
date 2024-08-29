@@ -32,7 +32,7 @@ defineProps({
     <!-- Content -->
     <div class="flex grow flex-col p-5 text-center sm:text-left">
       <div class="grow">
-        <div class="text-xs font-medium uppercase text-slate-400">
+        <div class="text-xs text-slate-400">
           {{ event.start }} - {{ event.end }}
         </div>
         <h3

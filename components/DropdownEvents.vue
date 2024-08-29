@@ -123,7 +123,7 @@ watch(search, (newValue) => {
           leave-to-class="opacity-0"
         >
           <ListboxOptions
-            class="absolute left-0 mt-0 sm:mt-1 w-full flex h-[calc(100dvh-64px)] md:max-h-[calc(100dvh-64px)] flex-col border bg-white text-sm shadow-lg ring-black/5 focus:outline-none sm:left-auto sm:h-auto sm:min-h-min sm:w-96 sm:rounded-lg dark:border-slate-700 dark:bg-slate-800"
+            class="absolute left-0 mt-0 sm:mt-1 w-full flex h-[calc(100dvh-64px)] md:max-h-[calc(100dvh-64px)] flex-col border bg-white text-sm shadow-lg ring-black/5 focus:outline-none sm:left-auto sm:h-auto sm:min-h-min sm:w-96 sm:rounded-lg dark:border-slate-800 dark:bg-slate-950"
           >
             <template v-if="isLoading">
               <li class="flex w-full justify-center py-10">
@@ -143,7 +143,7 @@ watch(search, (newValue) => {
               >
                 <div class="sticky z-10 top-0 pointer-events-none">
                   <div
-                    class="p-3 bg-white dark:bg-slate-800 relative pointer-events-auto"
+                    class="p-3 bg-white dark:bg-slate-950 relative pointer-events-auto"
                   >
                     <div
                       class="absolute top-1/2 -translate-y-1/2 left-6 pointer-events-none"
@@ -166,7 +166,7 @@ watch(search, (newValue) => {
                     />
                   </div>
                   <div
-                    class="h-3 bg-gradient-to-b from-white dark:from-slate-800"
+                    class="h-3 bg-gradient-to-b from-white dark:from-slate-950"
                   ></div>
                 </div>
 
@@ -213,47 +213,49 @@ watch(search, (newValue) => {
                   No events found
                 </div>
               </div>
-              <div
-                class="pointer-events-none absolute bottom-12 z-20 h-20 w-full bg-gradient-to-t from-white sm:hidden dark:from-slate-800"
-              ></div>
-              <div
-                class="flex h-12 w-full shrink-0 items-center justify-end border-t border-slate-200 p-3 sm:col-span-2 dark:border-slate-700"
-              >
-                <div class="flex space-x-px">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    v-if="page > 1"
-                    @click="prevPage"
-                    :class="
-                      cn('rounded-l-md', { 'text-slate-500': page === 1 })
-                    "
-                  >
-                    <svg class="h-6 w-6" viewBox="0 0 24 24">
-                      <path
-                        fill="currentColor"
-                        d="M14.121 17.243a.997.997 0 0 1-.707-.293l-4.242-4.243a1 1 0 0 1 0-1.414l4.242-4.243a1 1 0 0 1 1.414 1.414L11.293 12l3.535 3.536a1 1 0 0 1-.707 1.707"
-                      />
-                    </svg>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    v-if="page < maxPage"
-                    @click="nextPage"
-                    :class="
-                      cn('rounded-l-md', { 'text-slate-500': page === 1 })
-                    "
-                  >
-                    <svg class="h-6 w-6" viewBox="0 0 24 24">
-                      <path
-                        fill="currentColor"
-                        d="M9.879 17.243a1 1 0 0 1-.707-1.707L12.707 12L9.172 8.464a1 1 0 0 1 1.414-1.414l4.242 4.243a1 1 0 0 1 0 1.414l-4.242 4.243a.997.997 0 0 1-.707.293"
-                      />
-                    </svg>
-                  </Button>
+              <template v-if="events.length >0">
+                <div
+                  class="pointer-events-none absolute bottom-12 z-20 h-20 w-full bg-gradient-to-t from-white sm:hidden dark:from-slate-950"
+                ></div>
+                <div
+                  class="flex h-12 w-full shrink-0 items-center justify-end border-t border-slate-200 p-3 sm:col-span-2 dark:border-slate-800"
+                >
+                  <div class="flex space-x-px">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      v-if="page > 1"
+                      @click="prevPage"
+                      :class="
+                        cn('rounded-l-md', { 'text-slate-500': page === 1 })
+                      "
+                    >
+                      <svg class="h-6 w-6" viewBox="0 0 24 24">
+                        <path
+                          fill="currentColor"
+                          d="M14.121 17.243a.997.997 0 0 1-.707-.293l-4.242-4.243a1 1 0 0 1 0-1.414l4.242-4.243a1 1 0 0 1 1.414 1.414L11.293 12l3.535 3.536a1 1 0 0 1-.707 1.707"
+                        />
+                      </svg>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      v-if="page < maxPage"
+                      @click="nextPage"
+                      :class="
+                        cn('rounded-l-md', { 'text-slate-500': page === 1 })
+                      "
+                    >
+                      <svg class="h-6 w-6" viewBox="0 0 24 24">
+                        <path
+                          fill="currentColor"
+                          d="M9.879 17.243a1 1 0 0 1-.707-1.707L12.707 12L9.172 8.464a1 1 0 0 1 1.414-1.414l4.242 4.243a1 1 0 0 1 0 1.414l-4.242 4.243a.997.997 0 0 1-.707.293"
+                        />
+                      </svg>
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              </template>
             </template>
             <template v-else>
               <li class="flex w-full justify-center py-10">No events found</li>

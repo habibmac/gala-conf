@@ -1,7 +1,13 @@
 <!-- DropdownTableColumns.vue -->
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
+import {
+  Listbox,
+  ListboxButton,
+  ListboxOptions,
+  ListboxOption,
+} from "@headlessui/vue";
 
 interface ColumnConfig {
   key: string;
@@ -11,131 +17,97 @@ interface ColumnConfig {
 }
 
 const props = defineProps<{
-  modelValue: Record<string, boolean>;
-  columns: ColumnConfig[];
+  modelValue: ColumnConfig[];
 }>();
 
-const dropdownOpen = ref(false);
-const trigger = ref<HTMLElement | null>(null);
-const dropdown = ref<HTMLElement | null>(null);
+const columns = ref(props.modelValue);
 
-const emit = defineEmits<{
-  (e: "update:modelValue", value: Record<string, boolean>): void;
-}>();
-
-const localColumnVisibility = ref(props.modelValue);
-
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    localColumnVisibility.value = { ...newValue };
-  }
-);
-
-const toggleColumn = (column: string) => {
-  if (props.columns.find((c) => c.key === column)?.isHideable) {
-    localColumnVisibility.value[column] = !localColumnVisibility.value[column];
-    emit("update:modelValue", { ...localColumnVisibility.value });
-  }
-};
-
-// Close on click outside
-const clickHandler = (event: MouseEvent) => {
-  const target = event.target as HTMLElement;
-  if (!dropdownOpen.value) return;
-
-  // Check if the click is inside the dropdown
-  if (dropdown.value && dropdown.value.contains(target)) {
-    // If the clicked element is a form-switch or its children, don't close the dropdown
-    if (target.closest(".form-switch")) {
-      return;
-    }
-  }
-
-  // If the click is on the trigger, don't close (it's handled elsewhere)
-  if (trigger.value && trigger.value.contains(target)) {
-    return;
-  }
-
-  // If we've reached here, close the dropdown
-  dropdownOpen.value = false;
-};
-
-// Close if the ESC key is pressed
-const keyHandler = (event: KeyboardEvent) => {
-  if (!dropdownOpen.value || event.key !== "Escape") return;
-  dropdownOpen.value = false;
-};
+const emits = defineEmits(["update:columns"]);
 
 onMounted(() => {
-  document.addEventListener("click", clickHandler);
-  document.addEventListener("keydown", keyHandler);
+  watch(
+    columns,
+    (newValue) => {
+      emits("update:columns", newValue);
+    },
+    { deep: true }
+  );
 });
 
-onUnmounted(() => {
-  document.removeEventListener("click", clickHandler);
-  document.removeEventListener("keydown", keyHandler);
-});
+function toggleColumnVisibility(column: ColumnConfig) {
+  column.isVisible = !column.isVisible;
+}
 </script>
 
 <template>
-  <div class="relative w-full">
-    <ClientOnly>
-      <!-- Dropdown trigger button -->
-      <button
-        ref="trigger"
-        size="icon"
-        aria-haspopup="true"
-        class="form-select w-full text-left font-medium !text-slate-600 dark:!text-slate-400"
-        @click.prevent="dropdownOpen = !dropdownOpen"
-        :aria-expanded="dropdownOpen"
-      >
-        <Icon icon="heroicons:view-columns" class="w-5 h-5" />
-      </button>
-      <Transition
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        enter-active-class="transition duration-100 ease-out"
-        leave-active-class="transition duration-100 ease-in"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
-      >
-        <div
-          v-show="dropdownOpen"
-          ref="dropdown"
-          class="absolute z-50 mt-1 max-h-[300px] min-w-80 right-0 rounded-md border bg-white p-3 text-sm font-medium shadow-lg ring-black/5 focus:outline-none md:max-w-sm dark:border-slate-700 dark:bg-slate-800"
+  <ClientOnly>
+    <div class="relative">
+      <Listbox multiple>
+        <ListboxButton
+          class="form-select !w-auto space-x-2 h-[42px]"
         >
-          <ul class="grid grid-rows-9 grid-flow-col gap-2">
-            <li
+          <Icon icon="teenyicons:adjust-horizontal-alt-outline" class="w-4 h-4" />
+        </ListboxButton>
+        <Transition
+          enter-active-class="transition ease-out duration-200 transform"
+          enter-from-class="opacity-0 -translate-y-2"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition ease-out duration-200"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
+          >
+          <ListboxOptions
+            class="absolute z-20 mt-1 max-h-[400px] overflow-y-auto min-w-40 right-0 rounded-md border p-1 text-sm font-medium ring-black/5 focus:outline-none md:max-w-sm border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950"
+          >
+            <ListboxOption
               v-for="column in columns"
               :key="column.key"
               :value="column.key"
-              class="flex space-x-1"
+              @click="
+                (e) => {
+                  if (!column.isHideable) return;
+                  toggleColumnVisibility(column);
+                }
+              "
+              :disabled="!column.isHideable"
+              as="div"
+              class="dropdown-item relative !py-0.5 !pl-0"
+              :class="{
+                'opacity-50 !cursor-not-allowed': !column.isHideable,
+              }"
             >
-              <div
-                class="form-switch form-switch-sm"
-                :class="{ 'opacity-50 cursor-not-allowed': !column.isHideable }"
-              >
+              <div class="form-switch form-switch-sm">
                 <input
                   type="checkbox"
                   :id="column.key"
                   class="sr-only"
-                  :checked="localColumnVisibility[column.key]"
-                  @change="toggleColumn(column.key)"
+                  :checked="column.isVisible"
                   :disabled="!column.isHideable"
-                  true-value="On"
-                  false-value="Off"
                 />
-                <label class="bg-slate-400 dark:bg-slate-700" :for="column.key">
+                <label class="bg-slate-400 dark:bg-slate-700" for="toggle2">
                   <span class="bg-white shadow-sm" aria-hidden="true"></span>
                   <span class="sr-only">Toggle</span>
                 </label>
               </div>
-              <span class="ml-2">{{ column.header }}</span>
-            </li>
-          </ul>
-        </div>
-      </Transition>
-    </ClientOnly>
-  </div>
+              <div>
+                <span class="block truncate">{{ column.header }}</span>
+              </div>
+              <!-- <span
+                :class="{ 'font-semibold': column.isVisible }"
+                class="block truncate"
+              >
+                {{ column.header }}
+              </span>
+              <span
+                v-if="column.isVisible"
+                class="absolute inset-y-0 right-0 flex items-center pr-4"
+              >
+                <Icon icon="bi:check2" class="h-5 w-5 text-blue-600" />
+              </span> -->
+            </ListboxOption>
+          </ListboxOptions>
+        </Transition>
+      </Listbox>
+    </div>
+  </ClientOnly>
 </template>

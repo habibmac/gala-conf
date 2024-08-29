@@ -10,7 +10,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="flex relative h-[100dvh] bg-slate-200 dark:bg-slate-950">
+  <div class="flex relative h-[100dvh] bg-slate-100 dark:bg-slate-950">
     <NuxtLoadingIndicator color="#34d399" />
     <NuxtLayout>
       <NuxtPage />
