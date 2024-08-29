@@ -78,7 +78,7 @@ onUnmounted(() => {
     <div
       id="sidebar"
       ref="sidebar"
-      class="no-scrollbar lg:sidebar-expanded:!w-64 z-30 absolute left-0 top-0 flex h-[100dvh] w-64 shrink-0 flex-col overflow-y-scroll bg-gradient-to-t from-blue-700 to-blue-700 transition-all duration-200 ease-in-out lg:static lg:left-auto lg:top-auto lg:w-20 lg:translate-x-0 lg:overflow-y-auto 2xl:!w-64"
+      class="no-scrollbar lg:sidebar-expanded:!w-64 z-40 absolute left-0 top-0 flex h-[100dvh] w-64 shrink-0 flex-col overflow-y-scroll bg-gradient-to-t from-blue-700 to-blue-700 transition-all duration-200 ease-in-out lg:static lg:left-auto lg:top-auto lg:w-20 lg:translate-x-0 lg:overflow-y-auto 2xl:!w-64"
       :class="sidebarOpen ? 'translate-x-0' : '-translate-x-64'"
     >
       <!-- Sidebar header -->
@@ -90,7 +90,7 @@ onUnmounted(() => {
           ref="trigger"
           variant="ghost"
           size="icon"
-          class="text-slate-300 hover:text-slate-100 lg:hidden"
+          class="text-slate-300 hover:text-slate-100 lg:hidden hover:bg-transparent"
           @click.stop="$emit('close-sidebar')"
           aria-controls="sidebar"
           :aria-expanded="sidebarOpen"
@@ -145,7 +145,7 @@ onUnmounted(() => {
                   <MenuIcon
                     v-if="linkItem.icon"
                     :name="linkItem.icon"
-                    class="h-7 w-7 fill-current shrink-0 p-2.5 box-content"
+                    class="h-7 w-7 fill-current shrink-0 px-2.5 p-1.5 box-content"
                   />
                   <span
                     class="lg:sidebar-expanded:opacity-100 text-sm font-medium lg:opacity-0 2xl:opacity-100"
