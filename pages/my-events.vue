@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TabGroup, TabList, Tab, TabPanel, TabPanels } from "@headlessui/vue";
 
 definePageMeta({
   title: "My Events",
@@ -11,10 +10,9 @@ definePageMeta({
   layout: "dashboard",
 });
 
-const route = useRoute();
 const router = useRouter();
 
-const { $galantisApi } = useNuxtApp();
+const { $galantisApi, $router } = useNuxtApp();
 const { data: evtCount } = useQuery({
   queryKey: ["events-count"],
   queryFn: () => $galantisApi.get("/events/count").then((res) => res.data),
@@ -22,7 +20,7 @@ const { data: evtCount } = useQuery({
 });
 
 const activeTab = computed(() =>
-  route.query.status === "past" ? "past" : "active"
+  $router.currentRoute.value.query.status === "past" ? "past" : "active"
 );
 
 const tabsMeta = computed(() => [
@@ -89,7 +87,7 @@ const translationClass = computed(() => {
                   <Badge
                     v-if="tab.count"
                     :variant="tab.value === activeTab ? 'default' : 'outline'"
-                    class="ml-2 flex text-xs h-6 min-w-6 px-1.5 shrink-0 items-center justify-center rounded-full"
+                    class="ml-2 scale-90 flex text-xs h-6 min-w-6 px-1.5 shrink-0 items-center justify-center rounded-full"
                   >
                     {{ tab.count }}
                   </Badge>
