@@ -9,15 +9,15 @@ const { event, isLoading, isError } = useEvent();
 const eventId = computed(() => event.value?.id);
 
 // Use queryClient to fetch data
-const getEventSummary = async (evtId: number) => {
+const getEventSummary = async (evtId: Ref) => {
   const { $galantisApi } = useNuxtApp();
-  const response = await $galantisApi.get(`/event/${evtId}/summary`);
+  const response = await $galantisApi.get(`/event/${evtId.value}/summary`);
   return response.data;
 };
 
 const { data, refetch, isRefetching } = useQuery({
   queryKey: ["eventSummary", eventId],
-  queryFn: () => getEventSummary(eventId.value),
+  queryFn: () => getEventSummary(eventId),
   enabled: !!eventId,
 });
 

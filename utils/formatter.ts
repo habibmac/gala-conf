@@ -1,4 +1,4 @@
-import { format, fromUnixTime } from 'date-fns';
+import { format, fromUnixTime, formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale/id';
 
 export const formatValue = (value: number) =>
@@ -52,3 +52,7 @@ export const formatThousandsToK = (number: number) => {
         return Math.floor(number / 1000) + 'k+';
     }
 };
+
+export const formatTimeAgo = (date: Date): string => {
+    return formatDistanceToNow(date, { addSuffix: true });
+}
