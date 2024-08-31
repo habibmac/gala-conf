@@ -15,17 +15,34 @@ jobs:
       with:
         key: ${{ secrets.GALA_VPS_SSH_KEY }}
         known_hosts: ${{ secrets.KNOWN_HOSTS }}
-    
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
         
     - name: Install dependencies
-      run: npm install
+      run: bun install
       
     - name: Build
-      run: npm run build
+      run: bun run build
+      
+    - name: Create ecosystem.config.cjs
+      run: |
+        cat << EOF > ecosystem.config.cjs
+        module.exports = {
+          apps: [
+            {
+              name: 'live.galanesia.com',
+              exec_mode: 'cluster',
+              instances: 'max',
+              script: './.output/server/index.mjs',
+              env: {
+                GALA_OAUTH_CLIENT_SECRET: process.env.GALA_OAUTH_CLIENT_SECRET,
+                NUXT_PUBLIC_GALA_API_URL: process.env.NUXT_PUBLIC_GALA_API_URL,
+                NUXT_PUBLIC_GALA_OAUTH_URL: process.env.NUXT_PUBLIC_GALA_OAUTH_URL,
+                NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID: process.env.NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID,
+                NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI: process.env.NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI
+              }
+            }
+          ]
+        }
+        EOF
       
     - name: Deploy to server
       env:
@@ -39,16 +56,11 @@ jobs:
         NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID: ${{ secrets.NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID }}
         NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI: ${{ secrets.NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI }}
       run: |
-        rsync -avz -e "ssh -p $SERVER_PORT" --delete .nuxt/ package.json ecosystem.config.js $SERVER_USER@$SERVER_IP:$SERVER_PATH
+        rsync -avz -e "ssh -p $SERVER_PORT" --delete .nuxt/ package.json bun.lockb ecosystem.config.cjs $SERVER_USER@$SERVER_IP:$SERVER_PATH
         
         ssh -p $SERVER_PORT $SERVER_USER@$SERVER_IP '
           cd $SERVER_PATH
-          npm ci --production
+          bun install --production
           pm2 stop live.galanesia.com || true
-          GALA_OAUTH_CLIENT_SECRET=${{ secrets.GALA_OAUTH_CLIENT_SECRET }} \
-          NUXT_PUBLIC_GALA_API_URL=${{ secrets.NUXT_PUBLIC_GALA_API_URL }} \
-          NUXT_PUBLIC_GALA_OAUTH_URL=${{ secrets.NUXT_PUBLIC_GALA_OAUTH_URL }} \
-          NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID=${{ secrets.NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID }} \
-          NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI=${{ secrets.NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI }} \
-          pm2 start ecosystem.config.js
+          pm2 start ecosystem.config.cjs
         '
