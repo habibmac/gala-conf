@@ -25,6 +25,9 @@ jobs:
     - name: Build
       run: bun run build
       
+    - name: Check build output
+      run: ls -R
+
     - name: Create ecosystem.config.cjs
       run: |
         cat << EOF > ecosystem.config.cjs
@@ -34,7 +37,7 @@ jobs:
               name: 'live.galanesia.com',
               exec_mode: 'cluster',
               instances: 'max',
-              script: './.output/server/index.mjs',
+              script: './server/index.mjs',
               env: {
                 GALA_OAUTH_CLIENT_SECRET: process.env.GALA_OAUTH_CLIENT_SECRET,
                 NUXT_PUBLIC_GALA_API_URL: process.env.NUXT_PUBLIC_GALA_API_URL,
@@ -59,7 +62,7 @@ jobs:
         NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID: ${{ secrets.NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID }}
         NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI: ${{ secrets.NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI }}
       run: |
-        rsync -avz -e "ssh -p $SERVER_PORT" --delete .output/ package.json bun.lockb ecosystem.config.cjs $SERVER_USER@$SERVER_IP:$SERVER_PATH
+        rsync -avz -e "ssh -p $SERVER_PORT" --delete .nuxt/ server/ public/ package.json bun.lockb ecosystem.config.cjs nitro.json $SERVER_USER@$SERVER_IP:$SERVER_PATH
         
         ssh -p $SERVER_PORT $SERVER_USER@$SERVER_IP "
           cd $SERVER_PATH
