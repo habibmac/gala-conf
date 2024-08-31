@@ -3,6 +3,15 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
 
     try {
+        console.table({
+            'exchange-token': true,
+            'oauthUrl': config.public.oauthUrl,
+            'oauthClientId': config.public.oauthClientId,
+            'oauthRedirectUri': config.public.oauthRedirectUri,
+            'oauthClientSecret': config.oauthClientSecret,
+            'code': body.code,
+        });
+
         const response = await $fetch(config.public.oauthUrl + '/token', {
             method: 'POST',
             headers: {
