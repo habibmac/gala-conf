@@ -9,6 +9,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     const oauthApi = axios.create({
         baseURL: config.public.oauthUrl,
+        withCredentials: true,
     })
 
     const galantisApi = axios.create({
