@@ -15,14 +15,17 @@ jobs:
       with:
         key: ${{ secrets.GALA_VPS_SSH_KEY }}
         known_hosts: ${{ secrets.KNOWN_HOSTS }}
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
         
     - name: Install dependencies
-      uses: oven-sh/setup-bun@v2
-      with:
-        bun-version: latest
+      run: npm ci
       
     - name: Build
-      run: bun run build
+      run: npm run build
       
     - name: Deploy to server
       env:
