@@ -1,0 +1,54 @@
+name: Deploy Gala EO to Server
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install SSH Key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.GALA_VPS_SSH_KEY }}
+        known_hosts: ${{ secrets.KNOWN_HOSTS }}
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build
+      run: npm run build
+      
+    - name: Deploy to server
+      env:
+        SERVER_IP: ${{ secrets.SERVER_IP }}
+        SERVER_PORT: ${{ secrets.SERVER_PORT }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+        SERVER_PATH: ${{ secrets.SERVER_PATH }}
+        GALA_OAUTH_CLIENT_SECRET: ${{ secrets.GALA_OAUTH_CLIENT_SECRET }}
+        NUXT_PUBLIC_GALA_API_URL: ${{ secrets.NUXT_PUBLIC_GALA_API_URL }}
+        NUXT_PUBLIC_GALA_OAUTH_URL: ${{ secrets.NUXT_PUBLIC_GALA_OAUTH_URL }}
+        NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID: ${{ secrets.NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID }}
+        NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI: ${{ secrets.NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI }}
+      run: |
+        rsync -avz -e "ssh -p $SERVER_PORT" --delete .nuxt/ package.json package-lock.json ecosystem.config.js $SERVER_USER@$SERVER_IP:$SERVER_PATH
+        
+        ssh -p $SERVER_PORT $SERVER_USER@$SERVER_IP '
+          cd $SERVER_PATH
+          npm ci --production
+          pm2 stop live.galanesia.com || true
+          GALA_OAUTH_CLIENT_SECRET=${{ secrets.GALA_OAUTH_CLIENT_SECRET }} \
+          NUXT_PUBLIC_GALA_API_URL=${{ secrets.NUXT_PUBLIC_GALA_API_URL }} \
+          NUXT_PUBLIC_GALA_OAUTH_URL=${{ secrets.NUXT_PUBLIC_GALA_OAUTH_URL }} \
+          NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID=${{ secrets.NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID }} \
+          NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI=${{ secrets.NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI }} \
+          pm2 start ecosystem.config.js
+        '
