@@ -12,7 +12,7 @@ import { useRegs } from "@/composables/useRegs";
 import { useInsight } from "@/composables/useInsight";
 import { fromUnixTime, format } from "date-fns";
 import { formatThousands } from "@/utils";
-import {Icon } from "@iconify/vue";
+import { Icon } from "@iconify/vue";
 
 import type { Reg, ColumnConfig } from "@/types";
 import TablePagination from "@/components/TablePagination.vue";
@@ -372,8 +372,8 @@ const tabIndicatorWidth = computed(() => {
         :to="`/event/${eventId}/insights`"
         class="pb-5 inline-flex hover:underline text-xs items-center space-x-1 text-slate-500"
       >
-      <Icon icon="heroicons-outline:arrow-left" class="w-3 h-3" />
-       <span>Back to All Insights</span>
+        <Icon icon="heroicons-outline:arrow-left" class="w-3 h-3" />
+        <span>Back to All Insights</span>
       </NuxtLink>
       <!-- subtitle -->
       <h2 class="text-slate-500 font-medium">Insight</h2>
@@ -428,24 +428,8 @@ const tabIndicatorWidth = computed(() => {
     <div
       class="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between sm:px-8"
     >
-      <!-- Left: Avatars -->
-      <div
-        class="justify-start gap-2 space-y-2 sm:grid sm:grid-flow-col sm:space-y-0"
-      >
-        <TableSearchForm
-          v-model="filters.search"
-          placeholder="Search Registrant..."
-        />
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div
-      class="flex flex-col justify-between items-end min-h-12 w-full gap-2 bg-slate-50 px-4 py-3 sm:flex-row sm:px-6 sm:py-3 dark:bg-slate-950"
-    >
       <div class="shrink-0">
-        <h3 >
+        <h3>
           Group:
           <span class="font-semibold text-slate-950 dark:text-slate-200">
             {{ activeTab }}
@@ -463,9 +447,24 @@ const tabIndicatorWidth = computed(() => {
           </li>
         </ul>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <div
+      class="flex flex-col justify-between items-center min-h-12 w-full gap-2 bg-slate-50 px-4 py-2 sm:flex-row sm:px-6 sm:py-2 dark:bg-slate-950"
+    >
+      <div
+        class=""
+      >
+        <TableSearchForm
+          v-model="filters.search"
+          placeholder="Search Registrant..."
+        />
+      </div>
 
       <div
-        v-if="!isInsightLoading"
+        v-if="!isInsightLoading && !isLoading"
         class="number shrink-0 text-slate-500 text-sm"
       >
         <template v-if="totalData"
@@ -479,7 +478,7 @@ const tabIndicatorWidth = computed(() => {
       </div>
     </div>
   </section>
-  
+
   <section
     class="relative"
     :class="{ 'overflow-x-auto scroll-area': !isLoading }"

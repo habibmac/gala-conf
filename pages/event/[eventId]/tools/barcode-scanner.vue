@@ -11,9 +11,16 @@ definePageMeta({
   permissions: ["ee_read_insights"],
   layout: "dashboard-with-sidebar",
 });
+
+const handlePaused = (isPaused: boolean) => {
+  console.log("Paused: ", isPaused);
+};
 </script>
+
 <template>
-  <div>
+  <div class="container">
     <h1>Barcode Scanner</h1>
+
+    <TicketScanner @paused="handlePaused" />
   </div>
 </template>

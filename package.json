@@ -30,6 +30,7 @@
     "jsbarcode": "3",
     "nuxt": "^3.12.4",
     "pinia": "^2.2.2",
+    "qr-scanner": "^1.4.2",
     "radix-vue": "^1.9.4",
     "shadcn-nuxt": "^0.10.4",
     "tailwind-merge": "^2.5.2",
