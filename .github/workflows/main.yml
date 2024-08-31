@@ -59,11 +59,11 @@ jobs:
         NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID: ${{ secrets.NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID }}
         NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI: ${{ secrets.NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI }}
       run: |
-        rsync -avz -e "ssh -p $SERVER_PORT" --delete .nuxt/ package.json bun.lockb ecosystem.config.cjs $SERVER_USER@$SERVER_IP:$SERVER_PATH
+        rsync -avz -e "ssh -p $SERVER_PORT" --delete .output/ package.json bun.lockb ecosystem.config.cjs $SERVER_USER@$SERVER_IP:$SERVER_PATH
         
-        ssh -p $SERVER_PORT $SERVER_USER@$SERVER_IP '
+        ssh -p $SERVER_PORT $SERVER_USER@$SERVER_IP "
           cd $SERVER_PATH
           bun install --production
           pm2 stop live.galanesia.com || true
           pm2 start ecosystem.config.cjs
-        '
+        "
