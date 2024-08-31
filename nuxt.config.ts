@@ -30,12 +30,12 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
-    oauthClientSecret: process.env.GALA_OAUTH_CLIENT_SECRET,
+    oauthClientSecret: process.env.OAUTH_CLIENT_SECRET,
     public: {
-      apiUrl: process.env.NUXT_PUBLIC_GALA_API_URL,
-      oauthUrl: process.env.NUXT_PUBLIC_GALA_OAUTH_URL,
-      oauthClientId: process.env.NUXT_PUBLIC_GALA_OAUTH_CLIENT_ID,
-      oauthRedirectUri: process.env.NUXT_PUBLIC_GALA_OAUTH_REDIRECT_URI,
+      apiUrl: process.env.NUXT_PUBLIC_API_URL,
+      oauthUrl: process.env.NUXT_PUBLIC_OAUTH_URL,
+      oauthClientId: process.env.NUXT_PUBLIC_OAUTH_CLIENT_ID,
+      oauthRedirectUri: process.env.NUXT_PUBLIC_OAUTH_REDIRECT_URI,
     }
   },
   plugins: [
