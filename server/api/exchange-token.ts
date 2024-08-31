@@ -3,15 +3,6 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
 
     try {
-        console.table({
-            'exchange-token': true,
-            'oauthUrl': config.public.oauthUrl,
-            'oauthClientId': config.public.oauthClientId,
-            'oauthRedirectUri': config.public.oauthRedirectUri,
-            'oauthClientSecret': config.oauthClientSecret,
-            'code': body.code,
-        });
-
         const response = await $fetch(config.public.oauthUrl + '/token', {
             method: 'POST',
             headers: {
@@ -27,10 +18,10 @@ export default defineEventHandler(async (event) => {
         });
         return response;
     } catch (error) {
-        console.error('Detailed error:', error);
+        console.error(error);
         throw createError({
             statusCode: 500,
-            statusMessage: 'Failed to exchange code for tokens',
+            statusMessage: 'API: Failed to exchange code for tokens',
             cause: error,
         });
     }
