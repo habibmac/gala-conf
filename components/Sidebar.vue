@@ -128,14 +128,14 @@ onUnmounted(() => {
               v-for="(linkItem, index) in group.menus"
               :to="linkItem.generatedLink?.path"
               custom
-              v-slot="{ href, navigate, isExactActive }"
+              v-slot="{ href, navigate, isActive }"
               :key="index"
             >
               <li class="mb-0.5 last:mb-0">
                 <a
                   class="flex items-center truncate rounded-md text-slate-200 transition"
                   :class="
-                    isExactActive
+                    isActive
                       ? 'bg-blue-950 hover:bg-blue-950 hover:text-slate-200'
                       : 'hover:bg-blue-900/60 hover:text-white'
                   "

@@ -62,11 +62,10 @@ watch(search, (newValue) => {
       <Listbox v-model="selectedEventId" v-slot="{ open }">
         <div class="relative h-full w-full max-w-full">
           <ListboxButton
-            class="relative rounded-md group-focus-within:bg-white dark:group-focus-within:bg-slate-700/40 flex h-14 w-full cursor-default items-center space-x-2 border bg-white text-left text-sm text-slate-900 transition-colors duration-200 hover:border-blue-600 2xl:text-sm dark:border-slate-800 dark:bg-transparent dark:text-slate-300 dark:hover:border-blue-600 dark:group-focus-within:border-slate-700 dark:focus:bg-slate-800 dark:focus:bg-slate-700/30 dark:focus:ring-offset-slate-800"
-            :class="{ 'rounded-t': open, rounded: !open }"
+            class="relative rounded-lg group-focus-within:bg-white dark:group-focus-within:bg-slate-700/40 flex h-11 w-full cursor-default items-center space-x-2 border bg-white text-left text-sm text-slate-900 transition-colors duration-200 hover:border-blue-600 2xl:text-sm dark:border-slate-800 dark:bg-transparent dark:text-slate-300 dark:hover:border-blue-600 dark:group-focus-within:border-slate-700 dark:focus:bg-slate-800 dark:focus:bg-slate-700/30 dark:focus:ring-offset-slate-800"
           >
             <div v-if="isLoading" class="flex w-full justify-center px-5">
-              <SpinnerDots class="h-10 w-10 text-blue-700" />
+              <SpinnerDots class="h-8 w-8 text-blue-700" />
             </div>
             <div
               v-else-if="isError"
@@ -82,7 +81,7 @@ watch(search, (newValue) => {
                 <EventCover
                   :src="event.logo"
                   :title="event.title"
-                  class="h-10 w-10"
+                  class="h-5 w-5"
                 />
                 <div
                   class="flex items-center font-medium leading-tight w-px sm:w-auto"
@@ -123,7 +122,7 @@ watch(search, (newValue) => {
           leave-to-class="opacity-0"
         >
           <ListboxOptions
-            class="absolute left-0 mt-0 sm:mt-1 w-full flex h-[calc(100dvh-64px)] md:max-h-[calc(100dvh-64px)] flex-col border bg-white text-sm shadow-lg ring-black/5 focus:outline-none sm:left-auto sm:h-auto sm:min-h-min sm:w-96 sm:rounded-lg dark:border-slate-800 dark:bg-slate-950"
+            class="absolute left-0 mt-0 sm:mt-1 w-full flex h-[calc(100dvh-64px)] md:max-h-[calc(100dvh-64px)] flex-col border bg-white text-sm shadow-lg ring-black/5 focus:outline-none sm:left-auto sm:h-auto sm:min-h-min sm:w-96 sm:rounded-lg overflow-hidden dark:border-slate-800 dark:bg-slate-950"
           >
             <template v-if="isLoading">
               <li class="flex w-full justify-center py-10">

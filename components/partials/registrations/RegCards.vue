@@ -4,9 +4,8 @@ import { useQuery } from "@tanstack/vue-query";
 import { Icon } from "@iconify/vue";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const { event, isLoading, isError } = useEvent();
-
-const eventId = computed(() => event.value?.id);
+const route = useRoute();
+const eventId = ref(route.params.eventId as string) || ref("");
 
 // Use queryClient to fetch data
 const getEventSummary = async (evtId: Ref) => {
@@ -15,30 +14,20 @@ const getEventSummary = async (evtId: Ref) => {
   return response.data;
 };
 
-const { data, refetch, isRefetching } = useQuery({
+const { data, isLoading, isError, refetch, isRefetching } = useQuery({
   queryKey: ["eventSummary", eventId],
   queryFn: () => getEventSummary(eventId),
   enabled: !!eventId,
 });
 
 const summaryData = computed(() => data?.value);
-
-watch(
-  () => event.value,
-  (newEvent) => {
-    if (newEvent) {
-      refetch();
-    }
-  },
-  { immediate: true }
-);
 </script>
 
 <template>
   <div v-if="isLoading || isRefetching" class="grid gap-4 grid-cols-12">
     <Skeleton
       v-for="i in 4"
-      class="h-28 rounded-xl col-span-3 bg-white dark:bg-slate-900"
+      class="h-28 rounded-xl col-span-12 sm:col-span-6 md:col-span-3 bg-white dark:bg-slate-900"
     />
   </div>
   <div v-else-if="isError" class="py-16">
@@ -46,7 +35,7 @@ watch(
       Error fetching event summary. Please try again later.
     </div>
   </div>
-  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5" v-else-if="event">
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5" v-else-if="data">
     <Card
       v-for="item in summaryData"
       :key="item.title"

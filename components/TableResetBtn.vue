@@ -14,6 +14,6 @@ const handleResetFilters = () => {
     class="flex items-center space-x-1 text-xs px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors dark:hover:text-slate-200"
   >
     <span>Reset</span>
-    <Icon icon="iconamoon:close-thin" class="w-6 h-6" />
+    <Icon icon="iconamoon:close-thin" class="w-6 h-6 dark:text-slate-600" />
   </button>
 </template>
