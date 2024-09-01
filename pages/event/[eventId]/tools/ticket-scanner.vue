@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button";
-import { Toggle } from "@/components/ui/toggle";
 import { Icon } from "@iconify/vue";
 
 definePageMeta({
-  title: "Barcode Scanner",
+  title: "Ticket Scanner",
   group: "tools",
   showInMenu: true,
   order: 1,
@@ -22,13 +21,6 @@ const handlePaused = (isPaused: boolean) => {
 
 const isOpen = ref(false);
 
-function closeModal() {
-  isOpen.value = false;
-}
-function openModal() {
-  isOpen.value = true;
-}
-
 function toggleModal() {
   isOpen.value = !isOpen.value;
 }
@@ -40,7 +32,7 @@ function toggleModal() {
       class="flex flex-col sm:flex-row justify-between items-start pt-10 gap-5"
     >
       <header class="sm:grow">
-        <h1 class="h2">Barcode Scanner</h1>
+        <h1 class="h2">Ticket Scanner</h1>
       </header>
 
       <div class="w-full sm:w-auto flex flex-col sm:items-end gap-4 sm:shrink-0">
@@ -63,7 +55,7 @@ function toggleModal() {
           class="relative mx-auto max-h-80 max-w-60 object-center object-cover"
           v-if="isOpen"
         >
-          <TicketScanner @paused="handlePaused" />
+          <BarQrScanner @paused="handlePaused" />
         </div>
       </div>
     </div>
