@@ -68,6 +68,7 @@ const eventId = computed(() => event.value?.id);
 
 const route = useRoute();
 const router = useRouter();
+const colorMode = useColorMode();
 
 const endpoint = "registrations";
 
@@ -237,9 +238,9 @@ const columns = computed(() => {
               return h(
                 "a",
                 {
-                  href: `/dashboard/${eventId.value}/${endpoint}?${new URLSearchParams(
-                    newParams
-                  ).toString()}`,
+                  href: `/dashboard/${
+                    eventId.value
+                  }/${endpoint}?${new URLSearchParams(newParams).toString()}`,
                   class:
                     "number text-center group inline-block whitespace-nowrap",
                   onClick: (e: Event) => {
@@ -530,75 +531,86 @@ watch(
 
 <template>
   <div class="container mx-auto 2xl:mx-0">
-    <header class="pt-10">
-      <h1 class="h2 mb-5">Registrations</h1>
-    </header>
-    <RegCards />
-  </div>
-
-  <section>
-    <!-- Search and filter -->
-    <div
-      class="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-8"
+    <header
+      class="pt-10 pb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
     >
-      <!-- Left: Avatars -->
-      <div
-        class="justify-start gap-2 space-y-2 sm:grid sm:grid-flow-col sm:space-y-0"
-      >
-        <TableSearchForm
-          v-model="filters.search"
-          placeholder="Search Registrant..."
-        />
-        <DropdownTicketFilter v-model="filters.ticket_name" :evtId="eventId" />
-        <DropdownStatusFilter v-model="filters.status" />
-        <TableResetBtn
-          @click.prevent="handleResetFilters"
-          v-if="isAnyFilterActive"
-        />
-      </div>
-      <!-- Right: Actions -->
+      <h1 class="h2 mb-5">Registrations</h1>
       <div class="flex shrink-0 space-x-2 justify-self-end">
         <div class="min-w-64 grow">
           <!-- Datepicker -->
           <Datepicker
             :date-range="dateRange"
             @update:date-range="handleSetDateRange"
+            :dark="colorMode"
           />
         </div>
-        <DropdownTableColumns v-model="columnConfigs" />
+      </div>
+    </header>
+    <RegCards />
+  </div>
+
+  <section>
+    <!-- Search and filter -->
+    <div class="container 2xl:mx-0 py-4">
+      <div
+        class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+      >
+        <!-- Left: Avatars -->
+        <div
+          class="justify-start gap-2 space-y-2 sm:grid sm:grid-flow-col sm:space-y-0"
+        >
+          <TableSearchForm
+            v-model="filters.search"
+            placeholder="Search Registrant..."
+          />
+          <DropdownTicketFilter
+            v-model="filters.ticket_name"
+            :evtId="eventId"
+          />
+          <DropdownStatusFilter v-model="filters.status" />
+          <TableResetBtn
+            @click.prevent="handleResetFilters"
+            v-if="isAnyFilterActive"
+          />
+        </div>
+        <!-- Right: Actions -->
+        <div class="flex shrink-0 space-x-2 justify-self-end">
+          <DropdownTableColumns v-model="columnConfigs" />
+        </div>
       </div>
     </div>
   </section>
 
-  <section>
-    <div
-      class="flex justify-between items-center min-h-12 w-full gap-2 bg-slate-50 px-4 py-3 sm:flex-row sm:px-6 sm:py-3 dark:bg-slate-950"
-      :class="[
-        isAnyFilterActive
-          ? 'flex-col items-start'
-          : 'flex-row items-center justify-between',
-      ]"
-    >
-      <h3 class="shrink-0">
-        <span
-          v-if="isAnyFilterActive"
-          class="font-semibold text-slate-950 dark:text-slate-300"
-          >Filtered Registrations
-        </span>
-        <span v-else class="font-semibold text-slate-950 dark:text-slate-200"
-          >All Registrations</span
-        >
-      </h3>
-      <div class="number shrink-0 text-slate-500 text-sm" v-if="!isLoading">
-        <template v-if="totalData"
-          >Found
-          <span class="font-semibold text-slate-900 dark:text-slate-300">{{
-            formatThousands(totalData)
-          }}</span>
-          results.</template
-        >
-
-        <div v-else>No data found.</div>
+  <section class="bg-slate-50 dark:bg-slate-900/60">
+    <div class="container 2xl:mx 2xl:max-w-none">
+      <div
+        class="flex justify-between items-center min-h-12 w-full gap-2 py-3 sm:flex-row sm:py-3"
+        :class="[
+          isAnyFilterActive
+            ? 'flex-col items-start'
+            : 'flex-row items-center justify-between',
+        ]"
+      >
+        <h3 class="shrink-0">
+          <span
+            v-if="isAnyFilterActive"
+            class="font-semibold text-slate-950 dark:text-slate-300"
+            >Filtered Registrations
+          </span>
+          <span v-else class="font-semibold text-slate-950 dark:text-slate-200"
+            >All Registrations</span
+          >
+        </h3>
+        <div class="number shrink-0 text-slate-500 text-sm" v-if="!isLoading">
+          <template v-if="totalData"
+            >Found
+            <span class="font-semibold text-slate-900 dark:text-slate-300">{{
+              formatThousands(totalData)
+            }}</span>
+            results.</template
+          >
+          <div v-else>No data found.</div>
+        </div>
       </div>
     </div>
   </section>

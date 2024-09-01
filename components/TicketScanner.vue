@@ -4,19 +4,6 @@ import { Button } from "~/components/ui/button";
 import { Icon } from "@iconify/vue";
 import { useVibrate } from "@vueuse/core";
 
-definePageMeta({
-  title: "Barcode Scanner",
-  group: "tools",
-  showInMenu: true,
-  order: 1,
-  icon: "solar:qr-code-bold-duotone",
-  packages: ["optima"],
-  roles: ["administrator", "ee_event_organizer"],
-  capabilities: ["ee_read_insights"],
-  permissions: ["ee_read_insights"],
-  layout: "dashboard-with-sidebar",
-});
-
 const emit = defineEmits(["paused"]);
 
 const { vibrate, stop, isSupported } = useVibrate({ pattern: [300, 100, 300] });
@@ -71,7 +58,6 @@ onMounted(async () => {
 });
 
 function decodeError(error: Error | string) {
-  console.error(error);
   errorText.value = error instanceof Error ? error.message : error;
 }
 
@@ -143,9 +129,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="max-w-140 rounded p-8 text-center transition">
-    <p class="mb-12 w-full break-all text-lg">Result: {{ text }}</p>
-    <div class="rounded-lg shadow-lg">
+  <div class="rounded-lg bg-white dark:bg-slate-800 text-center">
+    <p v-if="text" class="mb-12 w-full break-all text-lg">{{ text }}</p>
+    <div class="rounded-lg">
       <div
         v-if="cams && cams.length > 1"
         class="flex place-content-center items-center p-2 text-sm"
@@ -176,9 +162,9 @@ onUnmounted(() => {
         style="display: none"
       ></canvas>
     </div>
-    <p v-if="errorText && !text" class="mt-4 text-sm text-red-500">
+    <!-- <p v-if="errorText && !text" class="mt-4 text-sm text-red-500">
       {{ errorText }}
-    </p>
+    </p> -->
     <Button v-if="isPaused" @click="resumeScanner" class="mt-4">
       Continue Scanning
     </Button>
