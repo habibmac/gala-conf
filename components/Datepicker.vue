@@ -1,16 +1,28 @@
 <script setup lang="ts">
-import { ref, toRef } from "vue";
-import { endOfMonth, startOfMonth, startOfYear, subMonths } from "date-fns";
+import { ref, toRef, computed } from "vue";
+import { addDays, endOfDay, endOfMonth, startOfDay, startOfMonth, startOfYear, subMonths } from "date-fns";
 import { id } from "date-fns/locale";
 import VueDatePicker from "@vuepic/vue-datepicker";
 
 const props = defineProps<{
-  dateRange: Date[] | null;
+  dateRange?: Date[];
+  enableTimePicker?: boolean | false;
+  format?: string | "d LLL yyyy";
+  maxDate?: Date | null;
+  minDate?: Date | null;
 }>();
 
-const dateRangeRef = toRef(props, "dateRange");
-const emits = defineEmits(["update:dateRange"]);
+const defaultDateRange = computed(() => {
+  if (props.dateRange && Array.isArray(props.dateRange) && props.dateRange.length === 2) {
+    return props.dateRange;
+  }
+  return [
+    startOfDay(new Date()),
+    endOfDay(addDays(new Date(), 1)),
+  ];
+});
 
+const emits = defineEmits(["update:dateRange"]);
 const colorMode = useColorMode();
 
 const updateDateRange = (value: Date[]) => {
@@ -35,17 +47,18 @@ const presetDates = ref([
   <div class="relative">
     <ClientOnly>
       <VueDatePicker
-        :model-value="dateRangeRef"
+        :model-value="dateRange"
         range
         multi-calendars
-        :enable-time-picker="false"
+        :enable-time-picker="enableTimePicker"
         :format-locale="id"
         @update:model-value="updateDateRange"
         placeholder="All Time"
         :preset-dates="presetDates"
-        :max-date="new Date()"
-        format="d LLL yyyy"
-        :dark="colorMode.preference === 'dark'"
+        :max-date="maxDate || undefined"
+        :min-date="minDate || undefined"
+        :format="format"
+        :dark="colorMode.value === 'dark'"
         input-class-name="placeholder:!text-slate-600 placeholder:!font-medium dark:!text-slate-400 dark:placeholder:!text-slate-400"
         menu-class-name="dark:bg-slate-800"
       >

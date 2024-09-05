@@ -539,9 +539,7 @@ watch(
         <div class="min-w-64 grow">
           <!-- Datepicker -->
           <Datepicker
-            :date-range="dateRange"
             @update:date-range="handleSetDateRange"
-            :dark="colorMode"
           />
         </div>
       </div>
@@ -557,7 +555,7 @@ watch(
       >
         <!-- Left: Avatars -->
         <div
-          class="justify-start gap-2 space-y-2 sm:grid sm:grid-flow-col sm:space-y-0"
+          class="sm:gap-2 sm:grid sm:grid-flow-col sm:space-y-0"
         >
           <TableSearchForm
             v-model="filters.search"
