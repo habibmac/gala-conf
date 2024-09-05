@@ -55,7 +55,7 @@ const translationClass = computed(() => {
           <h1 class="text-2xl font-semibold tracking-tight h2">My Events</h1>
           <div class="flex items-center space-x-2">
             <Button as-child>
-              <NuxtLink to="/new-event"> Create New </NuxtLink>
+              <NuxtLink to="/new-event"> Create New Event ⚡️ </NuxtLink>
             </Button>
           </div>
         </div>

@@ -2,6 +2,12 @@
 import { Icon } from "@iconify/vue";
 
 defineProps(["sidebarOpen", "showEvents"]);
+
+const route = useRoute();
+
+const navTitle = computed(() => {
+  return route.meta.navTitle
+})
 </script>
 
 <template>
@@ -34,6 +40,11 @@ defineProps(["sidebarOpen", "showEvents"]);
           </NuxtLink>
           <!-- <EventSwitcher v-if="showEvents" /> -->
           <DropdownEvents v-if="showEvents" />
+
+          <div v-if="navTitle" class="border-l pl-3 ml-3">
+            <!-- if has page meta navTitle -->
+            <h1  class="text-sm font-semibold tracking-tight text-foreground">{{ navTitle }}</h1>
+          </div>
         </div>
 
         <!-- Header: Right side -->
