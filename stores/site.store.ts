@@ -40,8 +40,9 @@ export const useSiteStore = defineStore({
             this.blurred = false;
         },
         initSidebarExpanded() {
-            const storedExpanded = useLocalStorage('sidebar-expanded', false);
-            this.setSidebarExpanded(storedExpanded.value);
+            const storedExpanded = useLocalStorage('sidebar-expanded', false)
+            this.sidebarExpanded = storedExpanded.value
+            this.setSidebarExpanded(this.sidebarExpanded)
         },
         toggleSidebarExpanded() {
             if(this.sidebarExpanded) {

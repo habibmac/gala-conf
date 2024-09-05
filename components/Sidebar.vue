@@ -3,7 +3,6 @@ import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useLocalStorage } from "#imports";
 import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 import { Icon } from "@iconify/vue";
-
 import { useMenu } from "@/composables/useMenu";
 import MenuIcon from "@/components/MenuIcon.vue";
 import { Button } from "@/components/ui/button";
@@ -20,23 +19,29 @@ const sidebar = ref<HTMLElement | null>(null);
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const lgAndSmaller = breakpoints.smallerOrEqual("lg");
+const isLargeScreen = breakpoints.greater('lg');
 
 const sidebarExpanded = useLocalStorage("sidebar-expanded", false);
 
 const clickHandler = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
   if (!sidebar.value || !trigger.value) return;
-  if (
-    !props.sidebarOpen ||
-    !lgAndSmaller.value
-  )
+  
+  // Close sidebar if clicking outside when sidebar is open on small screens
+  if (props.sidebarOpen && lgAndSmaller.value && !sidebar.value.contains(target) && !trigger.value.contains(target)) {
+    emit('close-sidebar');
     return;
-  emit("close-sidebar");
+  }
+  
+  // Close sidebar when clicking on a menu item on small screens
+  if (props.sidebarOpen && lgAndSmaller.value && sidebar.value.contains(target) && target.closest('a')) {
+    emit('close-sidebar');
+    return;
+  }
 };
 
 const keyHandler = (event: KeyboardEvent) => {
-  if (!props.sidebarOpen || event.key !== "Escape" || !lgAndSmaller.value)
-    return;
+  if (!props.sidebarOpen || event.key !== "Escape" || !lgAndSmaller.value) return;
   emit("close-sidebar");
 };
 
@@ -54,14 +59,20 @@ watch(sidebarExpanded, () => {
   updateBodyClass();
 });
 
+watch(isLargeScreen, (isLarge) => {
+  if (isLarge && props.sidebarOpen) {
+    emit('close-sidebar');
+  }
+});
+
 onMounted(() => {
-	document.addEventListener('click', clickHandler);
-	document.addEventListener('keydown', keyHandler);
+  document.addEventListener('click', clickHandler);
+  document.addEventListener('keydown', keyHandler);
 });
 
 onUnmounted(() => {
-	document.removeEventListener('click', clickHandler);
-	document.removeEventListener('keydown', keyHandler);
+  document.removeEventListener('click', clickHandler);
+  document.removeEventListener('keydown', keyHandler);
 });
 </script>
 
@@ -78,7 +89,7 @@ onUnmounted(() => {
     <div
       id="sidebar"
       ref="sidebar"
-      class="no-scrollbar lg:sidebar-expanded:!w-64 z-40 absolute left-0 top-0 flex h-[100dvh] w-64 shrink-0 flex-col overflow-y-scroll bg-gradient-to-t from-blue-700 to-blue-700 transition-all duration-200 ease-in-out lg:static lg:left-auto lg:top-auto lg:w-20 lg:translate-x-0 lg:overflow-y-auto 2xl:!w-64"
+      class="no-scrollbar lg:sidebar-expanded:!w-64 z-40 absolute left-0 top-0 flex h-[100dvh] w-64 shrink-0 flex-col overflow-y-scroll bg-gradient-to-t from-blue-700 to-blue-700 transition-all duration-200 ease-in-out lg:static lg:left-auto lg:top-auto lg:w-20 lg:translate-x-0 lg:overflow-y-auto"
       :class="sidebarOpen ? 'translate-x-0' : '-translate-x-64'"
     >
       <!-- Sidebar header -->
@@ -115,11 +126,11 @@ onUnmounted(() => {
             class="pl-3 text-xs uppercase tracking-wider text-slate-400"
           >
             <span
-              class="lg:sidebar-expanded:hidden hidden w-6 text-center lg:block 2xl:hidden"
+              class="lg:sidebar-expanded:hidden hidden w-6 text-center lg:block"
               aria-hidden="true"
               >•••</span
             >
-            <span class="lg:sidebar-expanded:block lg:hidden 2xl:block">{{
+            <span class="lg:sidebar-expanded:block lg:hidden">{{
               group.label
             }}</span>
           </h3>
