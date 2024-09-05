@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useAuthStore } from "@/stores";
 import { useRouter } from 'vue-router';
+import { useLocalStorage } from "#imports";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -11,7 +12,10 @@ const statuses = [
   'Loading components...',
   'Painting the walls...',
 ];
+
 const currentStatus = ref(statuses[0]);
+const loadingShown = useLocalStorage('loadingShown', false);
+
 let timeouts: NodeJS.Timeout[] = [];
 
 const showStatuses = () => {
@@ -19,23 +23,30 @@ const showStatuses = () => {
     timeouts.push(setTimeout(() => {
       currentStatus.value = status;
       
-      // If it's the last status, redirect after a short delay
       if (index === statuses.length - 1) {
         timeouts.push(setTimeout(() => {
-          if (authStore.isAuthenticated) {
-            router.replace('/my-events');
-          } else {
-            router.replace('/auth/login');
-          }
-        }, 1000)); // Wait 1 second after the last status before redirecting
+          redirectBasedOnAuth();
+          loadingShown.value = true;
+        }, 1000));
       }
-      // Show each status for random time between 0.5 and 1.5 seconds
     }, index * 800 + Math.random() * 1000));
   });
 };
 
+const redirectBasedOnAuth = () => {
+  if (authStore.isAuthenticated) {
+    router.replace('/my-events');
+  } else {
+    router.replace('/auth/login');
+  }
+};
+
 onMounted(() => {
-  showStatuses();
+  if (!loadingShown.value) {
+    showStatuses();
+  } else {
+    redirectBasedOnAuth();
+  }
 });
 
 onUnmounted(() => {
@@ -49,10 +60,15 @@ watch(() => authStore.isAuthenticated, (isAuthenticated) => {
     router.replace('/my-events');
   }
 }, { immediate: true });
+
+// Function to reset loading (for testing purposes)
+const resetLoading = () => {
+  loadingShown.value = false;
+};
 </script>
 
 <template>
-  <div class="max-w-9xl mx-auto w-full px-4 py-8 flex sm:px-6 lg:px-8 min-h-screen">
+  <div v-if="!loadingShown" class="max-w-9xl mx-auto w-full px-4 py-8 flex sm:px-6 lg:px-8 min-h-screen">
     <div class="m-auto max-w-2xl">
       <div class="px-4 text-center">
         <SpinnerRing />
