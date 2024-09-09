@@ -28,10 +28,17 @@ const currentSchema = computed(() => {
   return props.validationSchema[currentStepIdx.value];
 });
 
-const { values, handleSubmit, errors, meta } = useForm({
+const { values, handleSubmit, errors, meta, setFieldValue } = useForm({
   validationSchema: currentSchema,
   keepValuesOnUnmount: true,
 });
+
+function updateFormField(field: string, value: any) {
+  setFieldValue(field, value);
+}
+
+// Expose the method to the parent component
+defineExpose({ updateFormField });
 
 const onSubmit = handleSubmit((values) => {
   if (!isLastStep.value) {

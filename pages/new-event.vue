@@ -43,7 +43,7 @@ const steps = [
   },
 ];
 
-const formValues = ref<FormValues>({})
+const formValues = ref<FormValues>({});
 const currentStep = ref(0);
 
 const eventScaleOptions = ref([
@@ -125,67 +125,71 @@ const step1Schema = z.object({
   venueCountry: z.string().min(1, "Venue country is required"),
 });
 
-const step2Schema = z.object({
-  eventDatetimes: z
-    .array(
-      z.object({
-        name: z.string().min(1, "Name is required"),
-        rangeDate: z.array(z.string()).length(2, "Date range is required"),
-        quota: z.number().int().min(1, "Quota must be more than 0"),
-      })
-    )
-    .min(1, "At least one event datetime is required")
-    .refine(
-      (datetimes) => {
-        const names = datetimes.map((dt) => dt.name);
-        return new Set(names).size === names.length;
-      },
-      {
-        message: "Event datetime names must be unique",
-        path: ["eventDatetimes"],
-      }
-    ),
-  tickets: z
-    .array(
-      z.object({
-        name: z.string().min(1, "Name is required"),
-        rangeDate: z.array(z.string()).length(2, "Date range is required"),
-        price: z.number().min(0, "Price must be a positive number"),
-        quota: z.number().int().min(1, "Quota must be more than 0"),
-        sessions: z
-          .array(z.string())
-          .min(1, "At least one session is required"),
-      })
-    )
-    .min(1, "At least one ticket is required")
-    .refine(
-      (tickets) => {
-        const names = tickets.map((ticket) => ticket.name);
-        return new Set(names).size === names.length;
-      },
-      {
-        message: "Ticket names must be unique",
-        path: ["tickets"],
-      }
-    )
-}).superRefine((data, ctx) => {
-  const validSessionNames = new Set(data.eventDatetimes.map(dt => dt.name));
-  
-  const validatedTickets = data.tickets.filter(ticket => {
-    const validSessions = ticket.sessions.filter(session => validSessionNames.has(session));
-    return validSessions.length > 0;
-  });
+const step2Schema = z
+  .object({
+    eventDatetimes: z
+      .array(
+        z.object({
+          name: z.string().min(1, "Name is required"),
+          rangeDate: z.array(z.string()).length(2, "Date range is required"),
+          quota: z.number().int().min(1, "Quota must be more than 0"),
+        })
+      )
+      .min(1, "At least one event datetime is required")
+      .refine(
+        (datetimes) => {
+          const names = datetimes.map((dt) => dt.name);
+          return new Set(names).size === names.length;
+        },
+        {
+          message: "Event datetime names must be unique",
+          path: ["eventDatetimes"],
+        }
+      ),
+    tickets: z
+      .array(
+        z.object({
+          name: z.string().min(1, "Name is required"),
+          rangeDate: z.array(z.string()).length(2, "Date range is required"),
+          price: z.number().min(0, "Price must be a positive number"),
+          quota: z.number().int().min(1, "Quota must be more than 0"),
+          sessions: z
+            .array(z.string())
+            .min(1, "At least one session is required"),
+        })
+      )
+      .min(1, "At least one ticket is required")
+      .refine(
+        (tickets) => {
+          const names = tickets.map((ticket) => ticket.name);
+          return new Set(names).size === names.length;
+        },
+        {
+          message: "Ticket names must be unique",
+          path: ["tickets"],
+        }
+      ),
+  })
+  .superRefine((data, ctx) => {
+    const validSessionNames = new Set(data.eventDatetimes.map((dt) => dt.name));
 
-  if (validatedTickets.length !== data.tickets.length) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Some tickets have been removed due to invalid sessions",
-      path: ["tickets"]
+    const validatedTickets = data.tickets.filter((ticket) => {
+      const validSessions = ticket.sessions.filter((session) =>
+        validSessionNames.has(session)
+      );
+      return validSessions.length > 0;
     });
-  }
 
-  return { ...data, tickets: validatedTickets };
-});
+    if (validatedTickets.length !== data.tickets.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Some tickets have been removed due to invalid sessions",
+        path: ["tickets"],
+      });
+    }
+
+    return { ...data, tickets: validatedTickets };
+  });
 
 const step3Schema = z.object({
   bankName: z.string().min(1, "Bank name is required"),
@@ -216,6 +220,49 @@ const colorMode = useColorMode();
 function onSubmit(formData: FormData) {
   console.log(JSON.stringify(formData, null, 2));
 }
+
+const isDragging = ref(false);
+const dragOverIndex = ref<number | null>(null);
+const draggedItemIndex = ref<number | null>(null);
+const draggedFieldName = ref<"eventDatetimes" | "tickets" | null>(null);
+
+// Define a type for the FormWizard component
+interface FormWizardExpose {
+  updateFormField: (field: string, value: any) => void;
+}
+
+const formWizardRef = ref<FormWizardExpose | null>(null);
+
+const dragStart = (index: number, fieldName: "eventDatetimes" | "tickets") => {
+  draggedItemIndex.value = index;
+  draggedFieldName.value = fieldName;
+  isDragging.value = true;
+};
+
+const dragEnter = (index: number) => {
+  dragOverIndex.value = index;
+};
+
+const dragEnd = () => {
+  isDragging.value = false;
+  dragOverIndex.value = null;
+};
+
+const drop = (index: number, fieldName: "eventDatetimes" | "tickets") => {
+  if (draggedItemIndex.value !== null && formValues.value[fieldName]) {
+    const items = [...formValues.value[fieldName]];
+    const [reorderedItem] = items.splice(draggedItemIndex.value, 1);
+    items.splice(index, 0, reorderedItem);
+
+    if (formWizardRef.value) {
+      formWizardRef.value.updateFormField(fieldName, items);
+    } else {
+      console.error("FormWizard reference is not available");
+    }
+
+    draggedItemIndex.value = null;
+  }
+};
 </script>
 
 <template>
@@ -224,6 +271,7 @@ function onSubmit(formData: FormData) {
       class="grow flex flex-col md:translate-x-0 transition-transform duration-300 ease-in-out translate-x-0"
     >
       <FormWizard
+        ref="formWizardRef"
         @submit="onSubmit"
         :validation-schema="validationSchema"
         @update:currentStep="currentStep = $event"
@@ -288,7 +336,6 @@ function onSubmit(formData: FormData) {
         </template>
 
         <template v-slot:form-content>
-          <pre>{{ formValues }}</pre>
           <FormStep>
             <!-- Event Details -->
             <div class="space-y-5">
@@ -518,102 +565,119 @@ function onSubmit(formData: FormData) {
                     name="eventDatetimes"
                     v-slot="{ fields, push, remove }"
                   >
-                    <div
-                      v-for="(field, index) in fields"
-                      :key="field.key"
-                      class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5"
-                    >
-                      <Icon
-                        icon="mdi:drag-vertical"
-                        class="size-6 absolute -left-6 text-muted-foreground"
-                      />
-                      <FormField
-                        v-slot="{ componentField }"
-                        :name="`eventDatetimes[${index}].name`"
-                      >
-                        <FormItem class="w-full sm:w-1/3 md:w-1/3">
-                          <FormLabel>Session Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="text"
-                              :placeholder="`Day ${index + 1}`"
-                              v-bind="componentField"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      </FormField>
-                      <FormField
-                        v-slot="{ field, value, handleChange, errors }"
-                        :name="`eventDatetimes[${index}].rangeDate`"
-                      >
-                        <FormItem class="flex-1 w-full">
-                          <FormLabel>Start - End</FormLabel>
-                          <FormControl>
-                            <VueDatePicker
-                              v-bind="field"
-                              :modelValue="value"
-                              range
-                              multi-calendars
-                              :dark="colorMode.value === 'dark'"
-                              :enable-time-picker="false"
-                              model-type="yyyy-MM-dd HH:mm"
-                              format="d LLL yyyy HH:mm"
-                              :min-date="minDate"
-                              @update:modelValue="handleChange"
-                            >
-                              <template #dp-input="{ value }">
-                                <input
-                                  type="text"
-                                  class="form-input w-full"
-                                  :class="{ 'is-invalid': !!errors.length }"
-                                  placeholder="Start - End Date & Time"
-                                  :value="value"
-                                  autocomplete="off"
-                                />
-                              </template>
-                            </VueDatePicker>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      </FormField>
-                      <FormField
-                        v-slot="{ value, handleChange }"
-                        :name="`eventDatetimes[${index}].quota`"
-                      >
-                        <FormItem class="max-w-32">
-                          <FormLabel>Quota</FormLabel>
-                          <NumberField
-                            class="gap-2"
-                            :min="0"
-                            :model-value="value"
-                            @update:model-value="handleChange"
-                          >
-                            <NumberFieldContent>
-                              <NumberFieldDecrement />
-                              <FormControl>
-                                <NumberFieldInput />
-                              </FormControl>
-                              <NumberFieldIncrement />
-                            </NumberFieldContent>
-                          </NumberField>
-                          <FormMessage />
-                        </FormItem>
-                      </FormField>
+                    <div v-for="(field, index) in fields" :key="field.key">
                       <div
-                        class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8"
+                        class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5 transition-all duration-300"
+                        draggable="true"
+                        @dragstart="dragStart(index, 'eventDatetimes')"
+                        @dragover.prevent
+                        @dragenter.prevent
+                        @drop="drop(index, 'eventDatetimes')"
+                        :class="{
+                          'border-primary':
+                            isDragging && draggedItemIndex === index,
+                          'transform translate-y-1':
+                            dragOverIndex === index &&
+                            draggedItemIndex !== null &&
+                            draggedItemIndex < index,
+                          'transform -translate-y-1':
+                            dragOverIndex === index &&
+                            draggedItemIndex !== null &&
+                            draggedItemIndex > index,
+                        }"
                       >
-                        <Button
-                          @click.prevent="remove(index)"
-                          size="icon"
-                          class="text-red-500"
-                          variant="ghost"
+                        <Icon
+                          icon="mdi:drag-vertical"
+                          class="size-6 absolute -left-6 cursor-move text-muted-foreground"
+                        />
+                        <FormField
+                          v-slot="{ componentField }"
+                          :name="`eventDatetimes[${index}].name`"
                         >
-                          <Icon
-                            icon="material-symbols-light:close-rounded"
-                            class="size-6"
-                          />
-                        </Button>
+                          <FormItem class="w-full sm:w-1/3 md:w-1/3">
+                            <FormLabel>Session Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="text"
+                                :placeholder="`Day ${index + 1}`"
+                                v-bind="componentField"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        </FormField>
+                        <FormField
+                          v-slot="{ field, value, handleChange, errors }"
+                          :name="`eventDatetimes[${index}].rangeDate`"
+                        >
+                          <FormItem class="flex-1 w-full">
+                            <FormLabel>Start - End</FormLabel>
+                            <FormControl>
+                              <VueDatePicker
+                                v-bind="field"
+                                :modelValue="value"
+                                range
+                                multi-calendars
+                                :dark="colorMode.value === 'dark'"
+                                :enable-time-picker="false"
+                                model-type="yyyy-MM-dd HH:mm"
+                                format="d LLL yyyy HH:mm"
+                                :min-date="minDate"
+                                @update:modelValue="handleChange"
+                              >
+                                <template #dp-input="{ value }">
+                                  <input
+                                    type="text"
+                                    class="form-input w-full"
+                                    :class="{ 'is-invalid': !!errors.length }"
+                                    placeholder="Start - End Date & Time"
+                                    :value="value"
+                                    autocomplete="off"
+                                  />
+                                </template>
+                              </VueDatePicker>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        </FormField>
+                        <FormField
+                          v-slot="{ value, handleChange }"
+                          :name="`eventDatetimes[${index}].quota`"
+                        >
+                          <FormItem class="max-w-32">
+                            <FormLabel>Quota</FormLabel>
+                            <NumberField
+                              class="gap-2"
+                              :min="0"
+                              :model-value="value"
+                              @update:model-value="handleChange"
+                            >
+                              <NumberFieldContent>
+                                <NumberFieldDecrement />
+                                <FormControl>
+                                  <NumberFieldInput />
+                                </FormControl>
+                                <NumberFieldIncrement />
+                              </NumberFieldContent>
+                            </NumberField>
+                            <FormMessage />
+                          </FormItem>
+                        </FormField>
+                        <div
+                          class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8"
+                        >
+                          <Button
+                            @click.prevent="remove(index)"
+                            size="icon"
+                            class="text-red-500"
+                            variant="ghost"
+                          >
+                            <Icon
+                              icon="material-symbols-light:close-rounded"
+                              class="size-6"
+                            />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     <Button
@@ -647,172 +711,175 @@ function onSubmit(formData: FormData) {
                 </div>
                 <div v-else class="flex flex-col gap-2 mt-2">
                   <FieldArray name="tickets" v-slot="{ fields, push, remove }">
-                    <div
-                      v-for="(field, index) in fields"
-                      :key="field.key"
-                      class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5"
-                    >
-                      <Icon
-                        icon="mdi:drag-vertical"
-                        class="size-6 absolute -left-6 text-muted-foreground"
-                      />
-                      <div class="flex-1 grid grid-cols-12 gap-2">
-                        <FormField
-                          v-slot="{ componentField }"
-                          :name="`tickets[${index}].name`"
-                        >
-                          <FormItem class="col-span-12">
-                            <FormLabel>Ticket Name</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="text"
-                                :placeholder="`Category ${index + 1}`"
-                                v-bind="componentField"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        </FormField>
-
-                        <FormField
-                          v-slot="{ field, value, handleChange, errors }"
-                          :name="`tickets[${index}].rangeDate`"
-                        >
-                          <FormItem
-                            class="col-span-12 sm:col-span-6 md:col-span-6"
+                    <div v-for="(field, index) in fields" :key="field.key">
+                      <div
+                        class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5"
+                        draggable="true"
+                        @dragstart="dragStart(index, 'tickets')"
+                        @dragover.prevent
+                        @dragenter.prevent
+                        @drop="drop(index, 'tickets')"
+                      >
+                        <Icon
+                          icon="mdi:drag-vertical"
+                          class="size-6 absolute -left-6 text-muted-foreground"
+                        />
+                        <div class="flex-1 grid grid-cols-12 gap-2">
+                          <FormField
+                            v-slot="{ componentField }"
+                            :name="`tickets[${index}].name`"
                           >
-                            <FormLabel>Selling Period</FormLabel>
-                            <FormControl>
-                              <VueDatePicker
-                                v-bind="field"
-                                :modelValue="value"
-                                range
-                                multi-calendars
-                                :dark="colorMode.value === 'dark'"
-                                :enable-time-picker="false"
-                                model-type="yyyy-MM-dd HH:mm"
-                                format="d LLL yyyy HH:mm"
-                                :min-date="minDate"
-                                @update:modelValue="handleChange"
-                              >
-                                <template #dp-input="{ value }">
-                                  <input
-                                    type="text"
-                                    class="form-input w-full"
-                                    :class="{ 'is-invalid': !!errors.length }"
-                                    placeholder="Start - End Date & Time"
-                                    :value="value"
-                                    autocomplete="off"
-                                  />
-                                </template>
-                              </VueDatePicker>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        </FormField>
-                        <FormField
-                          v-slot="{ value, handleChange }"
-                          :name="`tickets[${index}].price`"
-                        >
-                          <FormItem
-                            class="col-span-7 sm:col-span-3 md:col-span-3"
+                            <FormItem class="col-span-12">
+                              <FormLabel>Ticket Name</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="text"
+                                  :placeholder="`Category ${index + 1}`"
+                                  v-bind="componentField"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          </FormField>
+                          <FormField
+                            v-slot="{ field, value, handleChange, errors }"
+                            :name="`tickets[${index}].rangeDate`"
                           >
-                            <FormLabel>Price</FormLabel>
-                            <NumberField
-                              class="gap-2"
-                              :min="0"
-                              :model-value="value"
-                              :format-options="{
-                                style: 'currency',
-                                currency: 'IDR',
-                                currencyDisplay: 'code',
-                                currencySign: 'accounting',
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0,
-                              }"
-                              :step="1000"
-                              @update:model-value="handleChange"
+                            <FormItem
+                              class="col-span-12 sm:col-span-6 md:col-span-6"
                             >
-                              <NumberFieldContent>
-                                <NumberFieldDecrement />
-                                <FormControl>
-                                  <NumberFieldInput />
-                                </FormControl>
-                                <NumberFieldIncrement />
-                              </NumberFieldContent>
-                            </NumberField>
-                            <FormMessage />
-                          </FormItem>
-                        </FormField>
-                        <FormField
-                          v-slot="{ value, handleChange }"
-                          :name="`tickets[${index}].quota`"
-                        >
-                          <FormItem class="col-span-5 sm:col-span-3">
-                            <FormLabel>Quota</FormLabel>
-                            <NumberField
-                              class="gap-2"
-                              :min="0"
-                              :model-value="value"
-                              @update:model-value="handleChange"
-                            >
-                              <NumberFieldContent>
-                                <NumberFieldDecrement />
-                                <FormControl>
-                                  <NumberFieldInput />
-                                </FormControl>
-                                <NumberFieldIncrement />
-                              </NumberFieldContent>
-                            </NumberField>
-                            <FormMessage />
-                          </FormItem>
-                        </FormField>
-
-                        <div class="col-span-9 py-2 flex flex-col gap-2">
-                          <label class="text-sm font-semibold w-full"
-                            >Sessions scope of this ticket</label
-                          >
+                              <FormLabel>Selling Period</FormLabel>
+                              <FormControl>
+                                <VueDatePicker
+                                  v-bind="field"
+                                  :modelValue="value"
+                                  range
+                                  multi-calendars
+                                  :dark="colorMode.value === 'dark'"
+                                  :enable-time-picker="false"
+                                  model-type="yyyy-MM-dd HH:mm"
+                                  format="d LLL yyyy HH:mm"
+                                  :min-date="minDate"
+                                  @update:modelValue="handleChange"
+                                >
+                                  <template #dp-input="{ value }">
+                                    <input
+                                      type="text"
+                                      class="form-input w-full"
+                                      :class="{ 'is-invalid': !!errors.length }"
+                                      placeholder="Start - End Date & Time"
+                                      :value="value"
+                                      autocomplete="off"
+                                    />
+                                  </template>
+                                </VueDatePicker>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          </FormField>
                           <FormField
                             v-slot="{ value, handleChange }"
-                            :name="`tickets[${index}].sessions`"
-                            v-for="datetime in formValues.eventDatetimes"
-                            :key="datetime.name"
-                            type="checkbox"
-                            :value="datetime.name"
+                            :name="`tickets[${index}].price`"
                           >
-                            <template v-if="datetime.name">
-                              <FormItem
-                                class="flex flex-row items-start space-x-3 space-y-0"
+                            <FormItem
+                              class="col-span-7 sm:col-span-3 md:col-span-3"
+                            >
+                              <FormLabel>Price</FormLabel>
+                              <NumberField
+                                class="gap-2"
+                                :min="0"
+                                :model-value="value"
+                                :format-options="{
+                                  style: 'currency',
+                                  currency: 'IDR',
+                                  currencyDisplay: 'code',
+                                  currencySign: 'accounting',
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 0,
+                                }"
+                                :step="1000"
+                                @update:model-value="handleChange"
                               >
-                                <!-- Sessions checkboxes -->
-                                <FormControl>
-                                  <Checkbox
-                                    :checked="value.includes(datetime.name)"
-                                    @update:checked="handleChange"
-                                  />
-                                </FormControl>
-                                <FormLabel class="font-normal">
-                                  {{ datetime.name }}
-                                </FormLabel>
-                              </FormItem>
-                            </template>
+                                <NumberFieldContent>
+                                  <NumberFieldDecrement />
+                                  <FormControl>
+                                    <NumberFieldInput />
+                                  </FormControl>
+                                  <NumberFieldIncrement />
+                                </NumberFieldContent>
+                              </NumberField>
+                              <FormMessage />
+                            </FormItem>
                           </FormField>
+                          <FormField
+                            v-slot="{ value, handleChange }"
+                            :name="`tickets[${index}].quota`"
+                          >
+                            <FormItem class="col-span-5 sm:col-span-3">
+                              <FormLabel>Quota</FormLabel>
+                              <NumberField
+                                class="gap-2"
+                                :min="0"
+                                :model-value="value"
+                                @update:model-value="handleChange"
+                              >
+                                <NumberFieldContent>
+                                  <NumberFieldDecrement />
+                                  <FormControl>
+                                    <NumberFieldInput />
+                                  </FormControl>
+                                  <NumberFieldIncrement />
+                                </NumberFieldContent>
+                              </NumberField>
+                              <FormMessage />
+                            </FormItem>
+                          </FormField>
+                          <div class="col-span-9 py-2 flex flex-col gap-2">
+                            <label class="text-sm font-semibold w-full"
+                              >Sessions scope of this ticket</label
+                            >
+                            <FormField
+                              v-slot="{ value, handleChange }"
+                              :name="`tickets[${index}].sessions`"
+                              v-for="datetime in formValues.eventDatetimes"
+                              :key="datetime.name"
+                              type="checkbox"
+                              :value="datetime.name"
+                            >
+                              <template v-if="datetime.name">
+                                <FormItem
+                                  class="flex flex-row items-start space-x-3 space-y-0"
+                                >
+                                  <!-- Sessions checkboxes -->
+                                  <FormControl>
+                                    <Checkbox
+                                      :checked="value.includes(datetime.name)"
+                                      @update:checked="handleChange"
+                                    />
+                                  </FormControl>
+                                  <FormLabel class="font-normal">
+                                    {{ datetime.name }}
+                                  </FormLabel>
+                                </FormItem>
+                              </template>
+                            </FormField>
+                          </div>
                         </div>
-                      </div>
-                      <div
-                        class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8"
-                      >
-                        <Button
-                          @click.prevent="remove(index)"
-                          size="icon"
-                          class="text-red-500"
-                          variant="ghost"
+                        <div
+                          class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8"
                         >
-                          <Icon
-                            icon="material-symbols-light:close-rounded"
-                            class="size-6"
-                          />
-                        </Button>
+                          <Button
+                            @click.prevent="remove(index)"
+                            size="icon"
+                            class="text-red-500"
+                            variant="ghost"
+                          >
+                            <Icon
+                              icon="material-symbols-light:close-rounded"
+                              class="size-6"
+                            />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     <Button
