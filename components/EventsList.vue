@@ -53,7 +53,7 @@ watch(
 
 <template>
   <div v-if="isLoading || isRefetching" class="grid h-full grid-cols-1 gap-6">
-    <Skeleton class="h-80 bg-white dark:bg-slate-800 w-full sm:h-32 max-w-xs sm:max-w-none mx-auto" />
+    <Skeleton class="h-80 bg-muted w-full sm:h-32 max-w-xs sm:max-w-none mx-auto" />
   </div>
   <template v-else-if="isError">
     <div class="flex h-32 items-center justify-center">

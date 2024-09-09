@@ -59,8 +59,6 @@ const presetDates = ref([
         :min-date="minDate || undefined"
         :format="format"
         :dark="colorMode.value === 'dark'"
-        input-class-name="placeholder:!text-slate-600 placeholder:!font-medium dark:!text-slate-400 dark:placeholder:!text-slate-400"
-        menu-class-name="dark:bg-slate-800"
       >
         <template #preset-date-range-button="{ label, value, presetDate }">
           <span

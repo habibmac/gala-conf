@@ -2,6 +2,7 @@
 import { useForm } from "vee-validate";
 import { ref, computed, provide, type PropType } from "vue";
 import { Icon } from "@iconify/vue";
+import { onBeforeRouteLeave } from "vue-router";
 
 const props = defineProps({
   validationSchema: {
@@ -11,8 +12,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["submit", "update:currentStep", "formValuesUpdate"]);
-const currentStepIdx = ref(0);
 
+const currentStepIdx = ref(0);
 const stepCounter = ref(0);
 
 const isLastStep = computed(() => {
@@ -27,7 +28,7 @@ const currentSchema = computed(() => {
   return props.validationSchema[currentStepIdx.value];
 });
 
-const { values, handleSubmit, errors } = useForm({
+const { values, handleSubmit, errors, meta } = useForm({
   validationSchema: currentSchema,
   keepValuesOnUnmount: true,
 });
@@ -38,7 +39,6 @@ const onSubmit = handleSubmit((values) => {
     emit("update:currentStep", currentStepIdx.value);
     return;
   }
-
   emit("submit", values);
 });
 
@@ -46,7 +46,6 @@ function goToPrev() {
   if (currentStepIdx.value === 0) {
     return;
   }
-
   currentStepIdx.value--;
   emit("update:currentStep", currentStepIdx.value);
 }
@@ -54,30 +53,56 @@ function goToPrev() {
 provide("STEP_COUNTER", stepCounter);
 provide("CURRENT_STEP_INDEX", currentStepIdx);
 
-watch(values, (newValues) => {
-  emit('formValuesUpdate', newValues);
-}, { deep: true });
+watch(
+  values,
+  (newValues) => {
+    emit("formValuesUpdate", newValues);
+  },
+  { deep: true }
+);
 
-
+onBeforeRouteLeave((to, from, next) => {
+  if (meta.value.dirty) {
+    const answer = window.confirm(
+      "You have unsaved changes. Do you really want to leave?"
+    );
+    if (answer) {
+      next();
+    } else {
+      next(false);
+    }
+  } else {
+    next();
+  }
+});
 </script>
 <template>
   <form @submit="onSubmit" class="grow flex flex-col">
     <header
-      class="bg-card sticky backdrop-blur-sm w-full px-4 py-5 border-b"
+      class="bg-muted/30 sticky backdrop-blur-sm w-full px-4 py-5 border-b"
     >
-      <div class="flex justify-between items-center">
-         <slot name="form-back-link">
+      <div class="flex justify-between items-center gap-2">
+        <slot name="form-back-link">
           <div></div>
         </slot>
         <slot name="form-steps">
           <div></div>
         </slot>
-        <div class="flex items-center space-x-2">
-          <Button v-if="hasPrevious" @click.prevent="goToPrev" variant="outline">
-            Previous
+        <div class="flex items-center space-x-2 shrink-0">
+          <Button
+            v-if="hasPrevious"
+            @click.prevent="goToPrev"
+            variant="outline"
+             class="flex items-center justify-center gap-1"
+          >
+            <Icon icon="heroicons:chevron-left" class="size-4 sm:hidden" />
+            <span class="hidden sm:inline-block">Previous</span>
           </Button>
-          <Button type="submit">
-            {{ isLastStep ? "Submit" : "Next" }}
+          <Button type="submit" class="flex items-center justify-center gap-1">
+            <span class="hidden sm:inline-block">{{
+              isLastStep ? "Save draft" : "Next"
+            }}</span>
+            <Icon icon="heroicons:chevron-right" class="size-4 sm:hidden" />
           </Button>
         </div>
       </div>
@@ -85,9 +110,9 @@ watch(values, (newValues) => {
 
     <div class="flex-1 grow">
       <div class="container pt-5 pb-40">
-        <div class="mx-auto max-w-2xl py-10">
+        <div class="mx-auto max-w-3xl py-10">
           <div v-if="errors.length" class="mb-4">
-            {{errors}}
+            {{ errors }}
             <div class="bg-red-100 text-red-500 p-4 rounded-lg mb-4">
               <Icon icon="akar-icons:warning" class="w-6 h-6" />
               <span class="ml-2">Please fix the errors below</span>
