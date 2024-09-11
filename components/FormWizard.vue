@@ -115,6 +115,8 @@ onBeforeRouteLeave((to, from, next) => {
       </div>
     </header>
 
+    <pre class="absolute top-0 left-0 text-xs">{{ values }}</pre>
+
     <div class="flex-1 grow">
       <div class="container pt-5 pb-40">
         <div class="mx-auto max-w-3xl py-10">

@@ -3,6 +3,7 @@ import { Field, ErrorMessage } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import { z } from "zod";
 import VueDatePicker from "@vuepic/vue-datepicker";
+import { VueDraggable, type SortableEvent } from "vue-draggable-plus";
 import { Icon } from "@iconify/vue";
 import {
   NumberField,
@@ -19,6 +20,11 @@ import { startOfDay, format, endOfDay } from "date-fns";
 interface FormValues {
   eventDatetimes?: Array<{ name: string }>;
   tickets?: Array<{ name: string }>;
+}
+const formValues = ref<FormValues>({});
+
+interface FormWizardExpose {
+  updateFormField: (field: any, value: any) => void;
 }
 
 definePageMeta({
@@ -43,7 +49,8 @@ const steps = [
   },
 ];
 
-const formValues = ref<FormValues>({});
+const formWizardRef = ref<FormWizardExpose | null>(null);
+const eventDatetimesRef = ref<Array<any>>([]);
 const currentStep = ref(0);
 
 const eventScaleOptions = ref([
@@ -206,63 +213,61 @@ const validationSchema = [
   toTypedSchema(step3Schema),
 ];
 
+const onAdd = () => {
+  const length = formValues.value?.eventDatetimes?.length || 0;
+
+  formWizardRef.value?.updateFormField("eventDatetimes", [
+    ...(formValues.value?.eventDatetimes || []),
+    {
+      name: "",
+      rangeDate: [newDateStart.value, newDateEnd.value],
+      quota: 0,
+    },
+  ]);
+};
+
+const onSort = (e: SortableEvent, fieldName: "eventDatetimes" | "tickets") => {
+  const { oldIndex, newIndex } = e;
+
+  if (
+    oldIndex === undefined ||
+    newIndex === undefined ||
+    oldIndex === newIndex
+  ) {
+    return;
+  }
+
+  if (!formValues.value?.[fieldName]) {
+    return;
+  }
+
+  // Clone the array, sort it, and update the form values
+  const field = [...formValues.value[fieldName]];
+  const [removed] = field.splice(oldIndex, 1);
+  field.splice(newIndex, 0, removed);
+
+  formWizardRef.value?.updateFormField(fieldName, field);
+};
+
+const isAnySessionExists = computed(() => {
+  // Check if there are any event datetimes with non-empty names
+  return formValues.value?.eventDatetimes?.some((dt) => dt.name.trim() !== "");
+});
+
 // Range date picker options
 const minDate = ref(startOfDay(new Date()));
 const newDateStart = ref(format(startOfDay(new Date()), "yyyy-MM-dd HH:mm"));
 const newDateEnd = ref(format(endOfDay(new Date()), "yyyy-MM-dd HH:mm"));
 
-function updateFormValues(newValues: any) {
-  formValues.value = newValues;
-}
-
 const colorMode = useColorMode();
+
+const updateFormValues = (values: FormValues) => {
+  formValues.value = values;
+};
 
 function onSubmit(formData: FormData) {
   console.log(JSON.stringify(formData, null, 2));
 }
-
-const isDragging = ref(false);
-const dragOverIndex = ref<number | null>(null);
-const draggedItemIndex = ref<number | null>(null);
-const draggedFieldName = ref<"eventDatetimes" | "tickets" | null>(null);
-
-// Define a type for the FormWizard component
-interface FormWizardExpose {
-  updateFormField: (field: string, value: any) => void;
-}
-
-const formWizardRef = ref<FormWizardExpose | null>(null);
-
-const dragStart = (index: number, fieldName: "eventDatetimes" | "tickets") => {
-  draggedItemIndex.value = index;
-  draggedFieldName.value = fieldName;
-  isDragging.value = true;
-};
-
-const dragEnter = (index: number) => {
-  dragOverIndex.value = index;
-};
-
-const dragEnd = () => {
-  isDragging.value = false;
-  dragOverIndex.value = null;
-};
-
-const drop = (index: number, fieldName: "eventDatetimes" | "tickets") => {
-  if (draggedItemIndex.value !== null && formValues.value[fieldName]) {
-    const items = [...formValues.value[fieldName]];
-    const [reorderedItem] = items.splice(draggedItemIndex.value, 1);
-    items.splice(index, 0, reorderedItem);
-
-    if (formWizardRef.value) {
-      formWizardRef.value.updateFormField(fieldName, items);
-    } else {
-      console.error("FormWizard reference is not available");
-    }
-
-    draggedItemIndex.value = null;
-  }
-};
 </script>
 
 <template>
@@ -563,29 +568,26 @@ const drop = (index: number, fieldName: "eventDatetimes" | "tickets") => {
                 <div class="flex flex-col gap-2 md:gap-4 mt-2">
                   <FieldArray
                     name="eventDatetimes"
-                    v-slot="{ fields, push, remove }"
+                    v-slot="{ fields, push, remove, move }"
                   >
-                    <div v-for="(field, index) in fields" :key="field.key">
+                    <VueDraggable
+                      :model-value="fields"
+                      :animation="150"
+                      ghostClass="ghost"
+                      @change="onSort($event, 'eventDatetimes')"
+                      @add="console.log('add')"
+                      @move="($event) => console.log('move', $event.clonedData.value)"
+                      @end="console.log('end')"
+                      @filter="console.log('filter')"
+                      @choose="console.log('choose', $event.oldIndex)"
+                    >
                       <div
+                        v-for="(field, index) in fields"
+                        :key="field.key"
                         class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5 transition-all duration-300"
-                        draggable="true"
-                        @dragstart="dragStart(index, 'eventDatetimes')"
-                        @dragover.prevent
-                        @dragenter.prevent
-                        @drop="drop(index, 'eventDatetimes')"
-                        :class="{
-                          'border-primary':
-                            isDragging && draggedItemIndex === index,
-                          'transform translate-y-1':
-                            dragOverIndex === index &&
-                            draggedItemIndex !== null &&
-                            draggedItemIndex < index,
-                          'transform -translate-y-1':
-                            dragOverIndex === index &&
-                            draggedItemIndex !== null &&
-                            draggedItemIndex > index,
-                        }"
                       >
+                        <pre class="text-xs">{{ field }}</pre>
+
                         <Icon
                           icon="mdi:drag-vertical"
                           class="size-6 absolute -left-6 cursor-move text-muted-foreground"
@@ -679,15 +681,9 @@ const drop = (index: number, fieldName: "eventDatetimes" | "tickets") => {
                           </Button>
                         </div>
                       </div>
-                    </div>
+                    </VueDraggable>
                     <Button
-                      @click.prevent="
-                        push({
-                          name: `Day ${fields.length + 1}`,
-                          rangeDate: [newDateStart, newDateEnd],
-                          quota: 0,
-                        })
-                      "
+                      @click.prevent="onAdd"
                       variant="ghost"
                       class="mt-2 flex gap-1"
                     >
@@ -703,22 +699,11 @@ const drop = (index: number, fieldName: "eventDatetimes" | "tickets") => {
               <!-- Tickets -->
               <div>
                 <label class="text-sm font-semibold">Tickets</label>
-
-                <div v-if="!formValues.eventDatetimes?.length">
-                  <p class="text-sm text-gray-500">
-                    Please add at least one event datetime to add tickets
-                  </p>
-                </div>
-                <div v-else class="flex flex-col gap-2 mt-2">
+                <div v-if="isAnySessionExists" class="flex flex-col gap-2 mt-2">
                   <FieldArray name="tickets" v-slot="{ fields, push, remove }">
                     <div v-for="(field, index) in fields" :key="field.key">
                       <div
                         class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5"
-                        draggable="true"
-                        @dragstart="dragStart(index, 'tickets')"
-                        @dragover.prevent
-                        @dragenter.prevent
-                        @drop="drop(index, 'tickets')"
                       >
                         <Icon
                           icon="mdi:drag-vertical"
@@ -904,6 +889,11 @@ const drop = (index: number, fieldName: "eventDatetimes" | "tickets") => {
                     </Button>
                   </FieldArray>
                 </div>
+                <div v-else>
+                  <p class="text-sm text-gray-500">
+                    Please add at least one event datetime to add tickets
+                  </p>
+                </div>
               </div>
             </div>
           </FormStep>
@@ -955,7 +945,7 @@ const drop = (index: number, fieldName: "eventDatetimes" | "tickets") => {
           <FormStep>
             <div class="space-y-6">
               <h2 class="text-2xl font-semibold">Preview</h2>
-              <pre>{{ formValues }}</pre>
+              <pre>{{ formWizardRef }}</pre>
             </div>
           </FormStep>
         </template>
@@ -963,9 +953,31 @@ const drop = (index: number, fieldName: "eventDatetimes" | "tickets") => {
     </div>
   </section>
 </template>
-
-<style>
+<style scoped>
 .err-msg {
   @apply text-red-500 text-xs;
+}
+
+.ghost {
+  @apply opacity-0 border-2 border-dashed border-border;
+}
+
+.fade-move,
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: scaleY(0.01) translate(30px, 0);
+}
+
+.fade-leave-active {
+  position: absolute;
+}
+.sort-target {
+  padding: 0 1rem;
 }
 </style>
