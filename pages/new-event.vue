@@ -51,6 +51,7 @@ const steps = [
 
 const formWizardRef = ref<FormWizardExpose | null>(null);
 const eventDatetimesRef = ref<Array<any>>([]);
+const eventTicketsRef = ref<Array<any>>([]);
 const currentStep = ref(0);
 
 const eventScaleOptions = ref([
@@ -213,19 +214,6 @@ const validationSchema = [
   toTypedSchema(step3Schema),
 ];
 
-const onAdd = () => {
-  const length = formValues.value?.eventDatetimes?.length || 0;
-
-  formWizardRef.value?.updateFormField("eventDatetimes", [
-    ...(formValues.value?.eventDatetimes || []),
-    {
-      name: "",
-      rangeDate: [newDateStart.value, newDateEnd.value],
-      quota: 0,
-    },
-  ]);
-};
-
 const onSort = (e: SortableEvent, fieldName: "eventDatetimes" | "tickets") => {
   const { oldIndex, newIndex } = e;
 
@@ -263,6 +251,16 @@ const colorMode = useColorMode();
 
 const updateFormValues = (values: FormValues) => {
   formValues.value = values;
+
+  // Update the event datetimes reference
+  if (values.eventDatetimes) {
+    eventDatetimesRef.value = values.eventDatetimes;
+  }
+
+  // Update the event tickets reference
+  if (values.tickets) {
+    eventTicketsRef.value = values.tickets;
+  }
 };
 
 function onSubmit(formData: FormData) {
@@ -568,29 +566,23 @@ function onSubmit(formData: FormData) {
                 <div class="flex flex-col gap-2 md:gap-4 mt-2">
                   <FieldArray
                     name="eventDatetimes"
-                    v-slot="{ fields, push, remove, move }"
+                    v-slot="{ fields, push, remove }"
                   >
                     <VueDraggable
-                      :model-value="fields"
+                      v-model="eventDatetimesRef"
                       :animation="150"
-                      ghostClass="ghost"
-                      @change="onSort($event, 'eventDatetimes')"
-                      @add="console.log('add')"
-                      @move="($event) => console.log('move', $event.clonedData.value)"
-                      @end="console.log('end')"
-                      @filter="console.log('filter')"
-                      @choose="console.log('choose', $event.oldIndex)"
+                      handle=".handle"
+                      ghostClass="is-ghost"
+                      dragClass="is-dragging"
+                      @end="onSort($event, 'eventDatetimes')"
                     >
                       <div
-                        v-for="(field, index) in fields"
-                        :key="field.key"
-                        class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5 transition-all duration-300"
+                        v-for="(field, index) in eventDatetimesRef"
+                        class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5 py-2"
                       >
-                        <pre class="text-xs">{{ field }}</pre>
-
                         <Icon
                           icon="mdi:drag-vertical"
-                          class="size-6 absolute -left-6 cursor-move text-muted-foreground"
+                          class="handle size-6 absolute -left-6 cursor-move text-muted-foreground"
                         />
                         <FormField
                           v-slot="{ componentField }"
@@ -683,7 +675,13 @@ function onSubmit(formData: FormData) {
                       </div>
                     </VueDraggable>
                     <Button
-                      @click.prevent="onAdd"
+                      @click.prevent="
+                        push({
+                          name: '',
+                          rangeDate: [newDateStart, newDateEnd],
+                          quota: 0,
+                        })
+                      "
                       variant="ghost"
                       class="mt-2 flex gap-1"
                     >
@@ -701,13 +699,22 @@ function onSubmit(formData: FormData) {
                 <label class="text-sm font-semibold">Tickets</label>
                 <div v-if="isAnySessionExists" class="flex flex-col gap-2 mt-2">
                   <FieldArray name="tickets" v-slot="{ fields, push, remove }">
-                    <div v-for="(field, index) in fields" :key="field.key">
+                    <VueDraggable
+                      v-model="eventTicketsRef"
+                      :animation="150"
+                      handle=".handle"
+                      ghostClass="is-ghost"
+                      dragClass="is-dragging"
+                      @end="onSort($event, 'tickets')"
+                    >
                       <div
+                        v-for="(field, index) in fields"
+                        :key="field.key"
                         class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5"
                       >
                         <Icon
                           icon="mdi:drag-vertical"
-                          class="size-6 absolute -left-6 text-muted-foreground"
+                          class="handle size-6 absolute -left-6 cursor-move text-muted-foreground"
                         />
                         <div class="flex-1 grid grid-cols-12 gap-2">
                           <FormField
@@ -751,7 +758,9 @@ function onSubmit(formData: FormData) {
                                     <input
                                       type="text"
                                       class="form-input w-full"
-                                      :class="{ 'is-invalid': !!errors.length }"
+                                      :class="{
+                                        'is-invalid': !!errors.length,
+                                      }"
                                       placeholder="Start - End Date & Time"
                                       :value="value"
                                       autocomplete="off"
@@ -866,7 +875,7 @@ function onSubmit(formData: FormData) {
                           </Button>
                         </div>
                       </div>
-                    </div>
+                    </VueDraggable>
                     <Button
                       type="button"
                       @click.prevent="
@@ -958,26 +967,11 @@ function onSubmit(formData: FormData) {
   @apply text-red-500 text-xs;
 }
 
-.ghost {
-  @apply opacity-0 border-2 border-dashed border-border;
+.is-ghost {
+  @apply text-transparent bg-muted;
 }
 
-.fade-move,
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: scaleY(0.01) translate(30px, 0);
-}
-
-.fade-leave-active {
-  position: absolute;
-}
-.sort-target {
-  padding: 0 1rem;
+.is-dragging {
+  @apply border border-accent bg-muted;
 }
 </style>
