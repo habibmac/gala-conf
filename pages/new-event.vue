@@ -25,6 +25,7 @@ const formValues = ref<FormValues>({});
 
 interface FormWizardExpose {
   updateFormField: (field: any, value: any) => void;
+  errorMessages: (field: string) => string;
 }
 
 definePageMeta({
@@ -143,17 +144,7 @@ const step2Schema = z
           quota: z.number().int().min(1, "Quota must be more than 0"),
         })
       )
-      .min(1, "At least one event datetime is required")
-      .refine(
-        (datetimes) => {
-          const names = datetimes.map((dt) => dt.name);
-          return new Set(names).size === names.length;
-        },
-        {
-          message: "Event datetime names must be unique",
-          path: ["eventDatetimes"],
-        }
-      ),
+      .min(1, "At least one event datetime is required"),
     tickets: z
       .array(
         z.object({
@@ -166,21 +157,33 @@ const step2Schema = z
             .min(1, "At least one session is required"),
         })
       )
-      .min(1, "At least one ticket is required")
-      .refine(
-        (tickets) => {
-          const names = tickets.map((ticket) => ticket.name);
-          return new Set(names).size === names.length;
-        },
-        {
-          message: "Ticket names must be unique",
-          path: ["tickets"],
-        }
-      ),
+      .min(1, "At least one ticket is required"),
   })
   .superRefine((data, ctx) => {
-    const validSessionNames = new Set(data.eventDatetimes.map((dt) => dt.name));
+    // Check for unique session names
+    const sessionNames = data.eventDatetimes.map((dt) => dt.name);
+    const uniqueSessionNames = new Set(sessionNames);
+    if (sessionNames.length !== uniqueSessionNames.size) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Session names must be unique",
+        path: ["eventDatetimes", "duplicate"],
+      });
+    }
 
+    // Check for unique ticket names
+    const ticketNames = data.tickets.map((ticket) => ticket.name);
+    const uniqueTicketNames = new Set(ticketNames);
+    if (ticketNames.length !== uniqueTicketNames.size) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Ticket names must be unique",
+        path: ["tickets", "duplicate"],
+      });
+    }
+
+    // Validate sessions in tickets
+    const validSessionNames = new Set(sessionNames);
     const validatedTickets = data.tickets.filter((ticket) => {
       const validSessions = ticket.sessions.filter((session) =>
         validSessionNames.has(session)
@@ -263,6 +266,14 @@ const updateFormValues = (values: FormValues) => {
   }
 };
 
+// Check if there are any duplicate errors
+const hasDuplicateErrors = computed(() => {
+  return (
+    !!formWizardRef.value?.errorMessages("eventDatetimes.duplicate") ||
+    !!formWizardRef.value?.errorMessages("tickets.duplicate")
+  );
+});
+
 function onSubmit(formData: FormData) {
   console.log(JSON.stringify(formData, null, 2));
 }
@@ -343,7 +354,7 @@ function onSubmit(formData: FormData) {
             <!-- Event Details -->
             <div class="space-y-5">
               <FormField v-slot="{ componentField }" name="eventTitle">
-                <FormItem>
+                <FormItem v-auto-animate>
                   <FormLabel>Event Title</FormLabel>
                   <FormControl>
                     <Input
@@ -356,7 +367,7 @@ function onSubmit(formData: FormData) {
                 </FormItem>
               </FormField>
               <FormField v-slot="{ componentField }" name="eventDescription">
-                <FormItem>
+                <FormItem v-auto-animate>
                   <FormLabel>Event Description</FormLabel>
                   <FormControl>
                     <Textarea
@@ -452,7 +463,7 @@ function onSubmit(formData: FormData) {
                 <ErrorMessage name="eventCategory" class="err-msg" />
               </div>
               <FormField v-slot="{ componentField }" name="website">
-                <FormItem>
+                <FormItem v-auto-animate>
                   <FormLabel>Website</FormLabel>
                   <FormControl>
                     <Input
@@ -489,7 +500,7 @@ function onSubmit(formData: FormData) {
               </div>
               <div class="grid sm:grid-cols-3 gap-4">
                 <FormField v-slot="{ componentField }" name="venueName">
-                  <FormItem class="sm:col-span-3">
+                  <FormItem v-auto-animate class="sm:col-span-3">
                     <FormLabel>Venue Name</FormLabel>
                     <FormControl>
                       <Input
@@ -502,7 +513,7 @@ function onSubmit(formData: FormData) {
                   </FormItem>
                 </FormField>
                 <FormField v-slot="{ componentField }" name="venueAddress">
-                  <FormItem class="sm:col-span-3">
+                  <FormItem v-auto-animate class="sm:col-span-3">
                     <FormLabel>Venue Address</FormLabel>
                     <FormControl>
                       <Input
@@ -515,7 +526,7 @@ function onSubmit(formData: FormData) {
                   </FormItem>
                 </FormField>
                 <FormField v-slot="{ componentField }" name="venueCity">
-                  <FormItem>
+                  <FormItem v-auto-animate>
                     <FormLabel>Venue City</FormLabel>
                     <FormControl>
                       <Input
@@ -528,7 +539,7 @@ function onSubmit(formData: FormData) {
                   </FormItem>
                 </FormField>
                 <FormField v-slot="{ componentField }" name="venueState">
-                  <FormItem>
+                  <FormItem v-auto-animate>
                     <FormLabel>Venue State</FormLabel>
                     <FormControl>
                       <Input
@@ -541,7 +552,7 @@ function onSubmit(formData: FormData) {
                   </FormItem>
                 </FormField>
                 <FormField v-slot="{ componentField }" name="venueCountry">
-                  <FormItem>
+                  <FormItem v-auto-animate>
                     <FormLabel>Venue Country</FormLabel>
                     <FormControl>
                       <Input
@@ -564,6 +575,38 @@ function onSubmit(formData: FormData) {
                   >Sessions & Datetimes</label
                 >
                 <div class="flex flex-col gap-2 md:gap-4 mt-2">
+                  <div
+                    v-if="hasDuplicateErrors"
+                    class="bg-destructive-foreground text-sm text-destructive p-4 rounded-lg mb-4"
+                  >
+                    <div class="flex gap-1 items-center text-xs">
+                      <Icon
+                        icon="heroicons-solid:exclamation-circle"
+                        class="size-6"
+                      />
+                      <div>Please fix the errors below</div>
+                    </div>
+                    <ul class="list-disc list-inside ml-2.5">
+                      <li
+                        v-if="
+                          formWizardRef?.errorMessages(
+                            'eventDatetimes.duplicate'
+                          )
+                        "
+                      >
+                        {{
+                          formWizardRef?.errorMessages(
+                            "eventDatetimes.duplicate"
+                          )
+                        }}
+                      </li>
+                      <li
+                        v-if="formWizardRef?.errorMessages('tickets.duplicate')"
+                      >
+                        {{ formWizardRef?.errorMessages("tickets.duplicate") }}
+                      </li>
+                    </ul>
+                  </div>
                   <FieldArray
                     name="eventDatetimes"
                     v-slot="{ fields, push, remove }"
@@ -588,7 +631,7 @@ function onSubmit(formData: FormData) {
                           v-slot="{ componentField }"
                           :name="`eventDatetimes[${index}].name`"
                         >
-                          <FormItem class="w-full sm:w-1/3 md:w-1/3">
+                          <FormItem v-auto-animate class="w-full sm:w-1/3 md:w-1/3">
                             <FormLabel>Session Name</FormLabel>
                             <FormControl>
                               <Input
@@ -604,7 +647,7 @@ function onSubmit(formData: FormData) {
                           v-slot="{ field, value, handleChange, errors }"
                           :name="`eventDatetimes[${index}].rangeDate`"
                         >
-                          <FormItem class="flex-1 w-full">
+                          <FormItem v-auto-animate class="flex-1 w-full">
                             <FormLabel>Start - End</FormLabel>
                             <FormControl>
                               <VueDatePicker
@@ -638,7 +681,7 @@ function onSubmit(formData: FormData) {
                           v-slot="{ value, handleChange }"
                           :name="`eventDatetimes[${index}].quota`"
                         >
-                          <FormItem class="max-w-32">
+                          <FormItem v-auto-animate class="max-w-32">
                             <FormLabel>Quota</FormLabel>
                             <NumberField
                               class="gap-2"
@@ -721,7 +764,7 @@ function onSubmit(formData: FormData) {
                             v-slot="{ componentField }"
                             :name="`tickets[${index}].name`"
                           >
-                            <FormItem class="col-span-12">
+                            <FormItem v-auto-animate class="col-span-12">
                               <FormLabel>Ticket Name</FormLabel>
                               <FormControl>
                                 <Input
@@ -809,7 +852,7 @@ function onSubmit(formData: FormData) {
                             v-slot="{ value, handleChange }"
                             :name="`tickets[${index}].quota`"
                           >
-                            <FormItem class="col-span-5 sm:col-span-3">
+                            <FormItem v-auto-animate class="col-span-5 sm:col-span-3">
                               <FormLabel>Quota</FormLabel>
                               <NumberField
                                 class="gap-2"
@@ -910,7 +953,7 @@ function onSubmit(formData: FormData) {
             <!-- Venue, Billing, and Agreement -->
             <div class="space-y-6">
               <FormField v-slot="{ componentField }" name="bankName">
-                <FormItem>
+                <FormItem v-auto-animate>
                   <FormLabel>Bank Name</FormLabel>
                   <FormControl>
                     <Input
@@ -923,7 +966,7 @@ function onSubmit(formData: FormData) {
                 </FormItem>
               </FormField>
               <FormField v-slot="{ componentField }" name="bankAccount">
-                <FormItem>
+                <FormItem v-auto-animate>
                   <FormLabel>Bank Account Number</FormLabel>
                   <FormControl>
                     <Input

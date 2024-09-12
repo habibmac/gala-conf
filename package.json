@@ -13,6 +13,7 @@
     "@chenfengyuan/vue-barcode": "^2.0.2",
     "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@fontsource-variable/inter": "^5.0.20",
+    "@formkit/auto-animate": "^0.8.2",
     "@nuxt/eslint": "^0.5.1",
     "@nuxt/fonts": "^0.7.2",
     "@nuxtjs/tailwindcss": "^6.12.1",

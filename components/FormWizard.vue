@@ -37,8 +37,13 @@ function updateFormField(field: string, value: any) {
   setFieldValue(field, value);
 }
 
+function errorMessages(field: string) {
+  console.log(errors.value);
+  return errors.value[field];
+}
+
 // Expose the method to the parent component
-defineExpose({ updateFormField });
+defineExpose({ updateFormField, errorMessages });
 
 const onSubmit = handleSubmit((values) => {
   if (!isLastStep.value) {
@@ -100,7 +105,7 @@ onBeforeRouteLeave((to, from, next) => {
             v-if="hasPrevious"
             @click.prevent="goToPrev"
             variant="outline"
-             class="flex items-center justify-center gap-1"
+            class="flex items-center justify-center gap-1"
           >
             <Icon icon="heroicons:chevron-left" class="size-4 sm:hidden" />
             <span class="hidden sm:inline-block">Previous</span>
@@ -118,16 +123,7 @@ onBeforeRouteLeave((to, from, next) => {
     <div class="flex-1 grow">
       <div class="container pt-5 pb-40">
         <div class="mx-auto max-w-3xl py-10">
-          <div v-if="errors.length" class="mb-4">
-            {{ errors }}
-            <div class="bg-red-100 text-red-500 p-4 rounded-lg mb-4">
-              <Icon icon="akar-icons:warning" class="w-6 h-6" />
-              <span class="ml-2">Please fix the errors below</span>
-              <ul>
-                <li v-for="error in errors" :key="error">{{ error }}</li>
-              </ul>
-            </div>
-          </div>
+          
           <slot name="form-content" />
         </div>
       </div>

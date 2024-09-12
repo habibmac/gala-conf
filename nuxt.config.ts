@@ -1,7 +1,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
-  modules: ['@pinia/nuxt', "@nuxtjs/tailwindcss", "shadcn-nuxt", "@nuxt/eslint", '@vueuse/nuxt', '@nuxtjs/color-mode', 'nuxt-headlessui', '@nuxt/fonts', '@vee-validate/nuxt',
+  modules: ['@pinia/nuxt', "@nuxtjs/tailwindcss", "shadcn-nuxt", "@nuxt/eslint", '@vueuse/nuxt', '@nuxtjs/color-mode', 'nuxt-headlessui', '@nuxt/fonts', '@vee-validate/nuxt', '@formkit/auto-animate/nuxt'
   ],
   app: {
     head: {
