@@ -1,0 +1,109 @@
+<script setup lang="ts">
+import { ref, watch } from "vue";
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxButton,
+  ComboboxOptions,
+  ComboboxOption,
+  TransitionRoot,
+} from "@headlessui/vue";
+import { Icon } from "@iconify/vue";
+import { useCitySearch } from "~/composables/useCitySearch";
+
+const props = defineProps<{
+  modelValue: string;
+}>();
+
+const emit = defineEmits<{
+  (e: "update:modelValue", value: string): void;
+  (e: "select", value: { city: string; state: string; country: string }): void;
+}>();
+
+const { venueCity, cityOptions } = useCitySearch();
+
+const selectedCity = ref(null);
+
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    venueCity.value = newValue;
+  }
+);
+
+const updateQuery = (query: string) => {
+  venueCity.value = query;
+  emit("update:modelValue", query);
+};
+
+const onSelect = (city: { city: string; state: string; country: string }) => {
+  emit("update:modelValue", city.city);
+  emit("select", city);
+};
+</script>
+<template>
+  <div class="relative">
+    <Combobox v-model="selectedCity" @update:modelValue="onSelect">
+      <div class="relative">
+        <ComboboxInput
+          class="form-input w-full"
+          :displayValue="(city: any) => city?.city || ''"
+          :modelValue="venueCity"
+          @update:modelValue="updateQuery"
+          placeholder="Start typing city name..."
+          autocomplete="new-password"
+        />
+        <ComboboxButton
+          class="absolute inset-y-0 right-0 flex items-center pr-2"
+        >
+          <Icon icon="heroicons:chevron-down" class="h-5 w-5 text-gray-400" aria-hidden="true" />
+        </ComboboxButton>
+      </div>
+      <TransitionRoot
+        leave="transition ease-in duration-100"
+        leaveFrom="opacity-100"
+        leaveTo="opacity-0"
+      >
+        <ComboboxOptions
+          class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+        >
+          <div
+            v-if="cityOptions.length === 0 && venueCity !== ''"
+            class="relative cursor-default select-none py-2 px-4 text-gray-700"
+          >
+            Nothing found.
+          </div>
+          <ComboboxOption
+            v-for="city in cityOptions"
+            :key="city.city"
+            :value="city"
+            v-slot="{ selected, active }"
+          >
+
+            <li
+              class="relative cursor-default select-none p-2"
+              :class="{
+                'bg-teal-600 text-white': active,
+                'text-gray-900': !active,
+              }"
+            >
+              <span
+                class="block truncate"
+                :class="{ 'font-medium': selected, 'font-normal': !selected }"
+              >
+                {{ city.city }} - {{ city.state }}, {{ city.country_code }}
+              </span>
+              <span
+                v-if="selected"
+                class="absolute inset-y-0 left-0 flex items-center pl-3"
+                :class="{ 'text-white': active, 'text-teal-600': !active }"
+              >
+                <Icon icon="heroicons:check" class="h-5 w-5" aria-hidden="true" />
+              </span>
+            </li>
+          </ComboboxOption>
+        </ComboboxOptions>
+      </TransitionRoot>
+    </Combobox>
+  </div>
+</template>

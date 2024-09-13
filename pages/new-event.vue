@@ -16,6 +16,8 @@ import {
 import FormWizard from "@/components/FormWizard.vue";
 import FormStep from "@/components/FormStep.vue";
 import { startOfDay, format, endOfDay } from "date-fns";
+import { useCitySearch } from "~/composables/useCitySearch";
+import CitySearchCombobox from "@/components/CitySearchCombobox.vue";
 
 interface FormValues {
   eventDatetimes?: Array<{ name: string }>;
@@ -54,6 +56,7 @@ const formWizardRef = ref<FormWizardExpose | null>(null);
 const eventDatetimesRef = ref<Array<any>>([]);
 const eventTicketsRef = ref<Array<any>>([]);
 const currentStep = ref(0);
+const { venueCity, cityOptions } = useCitySearch();
 
 const eventScaleOptions = ref([
   { label: "International", value: "International" },
@@ -216,6 +219,17 @@ const validationSchema = [
   toTypedSchema(step2Schema),
   toTypedSchema(step3Schema),
 ];
+
+const selectCity = (option: {
+  city: string;
+  state: string;
+  country: string;
+}) => {
+  formWizardRef.value?.updateFormField("venueCity", option.city);
+  formWizardRef.value?.updateFormField("venueState", option.state);
+  formWizardRef.value?.updateFormField("venueCountry", option.country);
+  venueCity.value = option.city;
+};
 
 const onSort = (e: SortableEvent, fieldName: "eventDatetimes" | "tickets") => {
   const { oldIndex, newIndex } = e;
@@ -529,10 +543,10 @@ function onSubmit(formData: FormData) {
                   <FormItem v-auto-animate>
                     <FormLabel>Venue City</FormLabel>
                     <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Venue City"
+                      <CitySearchCombobox
+                        v-model="venueCity"
                         v-bind="componentField"
+                        @select="selectCity"
                       />
                     </FormControl>
                     <FormMessage />
@@ -631,7 +645,10 @@ function onSubmit(formData: FormData) {
                           v-slot="{ componentField }"
                           :name="`eventDatetimes[${index}].name`"
                         >
-                          <FormItem v-auto-animate class="w-full sm:w-1/3 md:w-1/3">
+                          <FormItem
+                            v-auto-animate
+                            class="w-full sm:w-1/3 md:w-1/3"
+                          >
                             <FormLabel>Session Name</FormLabel>
                             <FormControl>
                               <Input
@@ -852,7 +869,10 @@ function onSubmit(formData: FormData) {
                             v-slot="{ value, handleChange }"
                             :name="`tickets[${index}].quota`"
                           >
-                            <FormItem v-auto-animate class="col-span-5 sm:col-span-3">
+                            <FormItem
+                              v-auto-animate
+                              class="col-span-5 sm:col-span-3"
+                            >
                               <FormLabel>Quota</FormLabel>
                               <NumberField
                                 class="gap-2"
@@ -997,7 +1017,7 @@ function onSubmit(formData: FormData) {
           <FormStep>
             <div class="space-y-6">
               <h2 class="text-2xl font-semibold">Preview</h2>
-              <pre>{{ formWizardRef }}</pre>
+              <pre class="text-xs">{{ formValues }}</pre>
             </div>
           </FormStep>
         </template>
