@@ -532,9 +532,9 @@ watch(
 <template>
   <div class="container mx-auto 2xl:mx-0">
     <header
-      class="pt-10 pb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+      class="pt-10 mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
     >
-      <h1 class="h2 mb-5">Registrations</h1>
+      <h1 class="h2">Registrations</h1>
       <div class="flex shrink-0 space-x-2 justify-self-end">
         <div class="min-w-64 grow">
           <!-- Datepicker -->

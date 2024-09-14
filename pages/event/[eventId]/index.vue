@@ -17,8 +17,8 @@ definePageMeta({
 
 <template>
   <div class="container mx-auto 2xl:mx-0">
-    <header class="pt-10">
-      <h1 class="h2 mb-5">Dashboard</h1>
+    <header class="pt-10 mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+      <h1 class="h2 mb">Dashboard</h1>
     </header>
     <RegCards />
   </div>

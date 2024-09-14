@@ -19,7 +19,7 @@ defineProps({
 <template>
   <NuxtLink
     :to="`/event/${event.id}`"
-    class="relative mx-auto flex flex-col max-w-xs sm:max-w-none overflow-hidden rounded-lg border border-border bg-card transition hover:shadow-lg hover:ring-2 hover:ring-blue-600 w-full sm:flex-row dark:hover:ring-blue-600"
+    class="relative mx-auto flex flex-col max-w-xs sm:max-w-none overflow-hidden rounded-lg border border-border bg-card hover:border-secondary transition w-full sm:flex-row"
   >
     <!-- Image -->
     <EventCover
@@ -32,11 +32,11 @@ defineProps({
     <!-- Content -->
     <div class="flex grow flex-col p-5 text-center sm:text-left">
       <div class="grow">
-        <div class="text-xs text-slate-400">
+        <div class="text-xs text-muted-foreground">
           {{ event.start }} - {{ event.end }}
         </div>
         <h3
-          class="font-semibold leading-snug tracking-tight text-slate-800 dark:text-slate-100"
+          class="font-semibold leading-snug tracking-tight"
           :class="[isPast ? 'line-clamp-2 text-lg' : 'line-clamp-3 text-2xl']"
         >
           {{ event.title }}
@@ -54,7 +54,7 @@ defineProps({
       >
         <!-- Location -->
         <div
-          class="hidden items-center rounded-full bg-slate-100 px-2.5 py-1 text-center text-xs font-medium text-slate-600 sm:inline-flex dark:bg-slate-700 dark:text-slate-400"
+          class="hidden items-center rounded-full px-2.5 py-1 text-center text-xs font-medium sm:inline-flex bg-accent text-accent-foreground/70"
         >
           <span class="line-clamp-1" v-if="event.location">{{
             event.location
@@ -65,20 +65,20 @@ defineProps({
     </div>
 
     <div
-      class="order-1 flex shrink-0 flex-col items-center justify-center space-x-2 border-t from-white p-4 text-center sm:w-1/5 sm:border-none dark:border-slate-700"
+      class="order-1 flex shrink-0 flex-col items-center justify-center space-x-2 border-t p-4 text-center sm:w-1/5 sm:border-none"
     >
       <div
         class="number lining-nums"
         :class="[
           isPast
-            ? 'text-xl text-slate-900 dark:text-slate-300'
+            ? 'text-xl'
             : 'text-3xl text-green-500 ',
         ]"
       >
         {{ event.regs }}
       </div>
       <div
-        class="text-slate-500 dark:text-slate-400"
+        class="text-muted-foreground"
         :class="[isPast ? 'text-xs' : 'text-sm']"
       >
         Regs

@@ -66,21 +66,20 @@ const translationClass = computed(() => {
         <div class="px-4 py-4 sm:px-6 sm:py-6">
           <div class="flex mb-6">
             <div
-              class="relative flex w-full max-w-sm p-1 bg-slate-200 dark:bg-slate-700/40 rounded-md mx-auto sm:mx-0"
+              class="relative flex w-full max-w-sm p-1 bg-muted rounded-md mx-auto sm:mx-0"
             >
               <span
                 class="absolute inset-0 m-1 pointer-events-none"
                 aria-hidden="true"
               >
                 <span
-                  class="absolute inset-0 w-1/2 bg-white dark:bg-slate-950/70 rounded-md transition-transform duration-150 ease-in-out"
+                  class="absolute inset-0 w-1/2 bg-background rounded-md transition-transform duration-150 ease-in-out"
                   :class="translationClass"
                 ></span>
               </span>
               <template v-for="tab in tabsMeta" :key="tab.value">
                 <button
                   class="relative flex-1 justify-center items-center z-20 flex text-sm font-medium p-1 duration-150 ease-in-out"
-                  :class="tab.value === activeTab && 'dark:text-slate-100'"
                   @click.prevent="handleTabChange(tab.value)"
                 >
                   {{ tab.label }}

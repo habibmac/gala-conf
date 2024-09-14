@@ -12,7 +12,7 @@ const navTitle = computed(() => {
 
 <template>
   <header
-    class="sticky top-0 z-20 h-16 border-b border-slate-200 bg-white/60 bg-opacity-80 backdrop-blur-sm backdrop-filter dark:border-slate-800 dark:bg-slate-950 dark:bg-opacity-80"
+    class="sticky top-0 z-20 h-16 border-b backdrop-blur backdrop-filter"
   >
     <div class="h-full px-4 lg:px-8">
       <div class="-mb-px flex h-full items-center justify-between">
@@ -35,7 +35,7 @@ const navTitle = computed(() => {
             to="/my-events"
             class="text-sm flex items-center font-medium text-muted-foreground transition-colors hover:text-primary"
           >
-            <Logo class="h-12 w-12 fill-black" :colored="true" />
+            <Logo class="h-12 w-12" :colored="true" />
             <span class="sr-only">Galanesia ID</span>
           </NuxtLink>
           <!-- <EventSwitcher v-if="showEvents" /> -->
@@ -63,7 +63,7 @@ const navTitle = computed(() => {
           <!-- <Notifications align="right" /> -->
           <ThemeToggle />
           <!-- Divider -->
-          <hr class="h-6 w-px border-none bg-slate-200 dark:bg-slate-700" />
+          <hr class="h-6 w-px border-none" />
           <div class="flex h-full shrink-0 items-center">
             <UserMenu />
           </div>

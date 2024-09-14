@@ -56,7 +56,7 @@ const onSelect = (city: { city: string; state: string; country: string }) => {
         <ComboboxButton
           class="absolute inset-y-0 right-0 flex items-center pr-2"
         >
-          <Icon icon="heroicons:chevron-down" class="h-5 w-5 text-gray-400" aria-hidden="true" />
+          <Icon icon="heroicons:chevron-down" class="h-5 w-5" aria-hidden="true" />
         </ComboboxButton>
       </div>
       <TransitionRoot
@@ -65,11 +65,11 @@ const onSelect = (city: { city: string; state: string; country: string }) => {
         leaveTo="opacity-0"
       >
         <ComboboxOptions
-          class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+          class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-card py-1 shadow-lg focus:outline-none text-sm"
         >
           <div
             v-if="cityOptions.length === 0 && venueCity !== ''"
-            class="relative cursor-default select-none py-2 px-4 text-gray-700"
+            class="relative cursor-default select-none py-2 px-4"
           >
             Nothing found.
           </div>
@@ -79,24 +79,21 @@ const onSelect = (city: { city: string; state: string; country: string }) => {
             :value="city"
             v-slot="{ selected, active }"
           >
-
             <li
               class="relative cursor-default select-none p-2"
               :class="{
-                'bg-teal-600 text-white': active,
-                'text-gray-900': !active,
+                'bg-muted': active,
               }"
             >
               <span
                 class="block truncate"
-                :class="{ 'font-medium': selected, 'font-normal': !selected }"
+                :class="{ 'font-medium pl-7': selected, 'font-normal': !selected }"
               >
                 {{ city.city }} - {{ city.state }}, {{ city.country_code }}
               </span>
               <span
                 v-if="selected"
                 class="absolute inset-y-0 left-0 flex items-center pl-3"
-                :class="{ 'text-white': active, 'text-teal-600': !active }"
               >
                 <Icon icon="heroicons:check" class="h-5 w-5" aria-hidden="true" />
               </span>
