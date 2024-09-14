@@ -6,13 +6,18 @@ export function useCitySearch() {
     const venueCity = ref('')
     const minCityLength = 3
     const cityOptions = ref<CityOption[]>([])
+    const isLoading = ref(false)
+    const hasMinLength = ref(false)
 
     const searchCities = useDebounceFn(async (query: string) => {
         if (query.length < minCityLength) {
             cityOptions.value = []
+            hasMinLength.value = false
             return
         }
 
+        hasMinLength.value = true
+        isLoading.value = true
         try {
             const response: CityOption[] = await $fetch('/api/search-cities', {
                 params: { city: query }
@@ -21,6 +26,8 @@ export function useCitySearch() {
         } catch (error) {
             console.error('Error fetching cities:', error)
             cityOptions.value = []
+        } finally {
+            isLoading.value = false
         }
     }, 300)
 
@@ -31,6 +38,8 @@ export function useCitySearch() {
     return {
         venueCity,
         cityOptions,
-        searchCities
+        searchCities,
+        isLoading,
+        hasMinLength
     }
 }
