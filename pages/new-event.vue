@@ -16,8 +16,10 @@ import {
 import FormWizard from "@/components/FormWizard.vue";
 import FormStep from "@/components/FormStep.vue";
 import { startOfDay, format, endOfDay } from "date-fns";
-import { useCitySearch } from "~/composables/useCitySearch";
-import CitySearchCombobox from "@/components/CitySearchCombobox.vue";
+import { useCitySearch } from "@/composables/useCitySearch";
+
+import FieldInput from "@/components/FieldInput.vue";
+import ComboCityFilter from "@/components/ComboCityFilter.vue";
 
 interface FormValues {
   eventDatetimes?: Array<{ name: string }>;
@@ -56,7 +58,7 @@ const formWizardRef = ref<FormWizardExpose | null>(null);
 const eventDatetimesRef = ref<Array<any>>([]);
 const eventTicketsRef = ref<Array<any>>([]);
 const currentStep = ref(0);
-const { venueCity, cityOptions } = useCitySearch();
+const { venueCity } = useCitySearch();
 
 const eventScaleOptions = ref([
   { label: "International", value: "International" },
@@ -367,115 +369,32 @@ function onSubmit(formData: FormData) {
           <FormStep>
             <!-- Event Details -->
             <div class="space-y-5">
-              <FormField v-slot="{ componentField }" name="eventTitle">
-                <FormItem v-auto-animate>
-                  <FormLabel>Event Title</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Your event title..."
-                      v-bind="componentField"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-              <FormField v-slot="{ componentField }" name="eventDescription">
-                <FormItem v-auto-animate>
-                  <FormLabel>Event Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Tell us a bit about your event..."
-                      v-bind="componentField"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-
-              <div class="space-y-3 mb-8">
-                <label for="eventScale" class="text-sm font-medium"
-                  >Event Scale</label
-                >
-                <Field
-                  v-slot="{ field }"
-                  name="eventScale"
-                  as="div"
-                  class="grid grid-cols-2 gap-2"
-                >
-                  <div v-for="scale in eventScaleOptions" :key="scale.value">
-                    <label class="relative block cursor-pointer">
-                      <input
-                        type="radio"
-                        name="eventScale"
-                        class="peer sr-only"
-                        :checked="field.value === scale.value"
-                        :value="scale.value"
-                        @change="field.onChange"
-                      />
-                      <div
-                        class="flex items-center bg-card text-sm font-medium px-2 py-2.5 rounded-lg border border-border shadow-sm duration-150 ease-in-out peer-checked:text-blue-600"
-                      >
-                        <Icon
-                          v-if="field.value === scale.value"
-                          icon="heroicons:check-circle-20-solid"
-                          class="w-5 h-5 mr-2"
-                        />
-                        <span
-                          :class="[
-                            field.value === scale.value ? 'text-primary' : '',
-                          ]"
-                          >{{ scale.label }}</span
-                        >
-                      </div>
-                      <div
-                        class="absolute inset-0 border border-transparent peer-checked:border-blue-600 rounded-lg pointer-events-none"
-                        aria-hidden="true"
-                      ></div>
-                    </label>
-                  </div>
-                </Field>
-                <ErrorMessage name="eventScale" class="err-msg" />
-              </div>
-              <div class="space-y-6 mb-8">
-                <label for="eventCategory" class="text-sm font-semibold"
-                  >Event Category</label
-                >
-                <Field name="eventCategory" v-slot="{ field }">
-                  <div class="grid grid-cols-2 gap-2 mt-2 sm:grid-cols-3">
-                    <div v-for="category in eventCategories" :key="category.id">
-                      <label class="relative block cursor-pointer">
-                        <input
-                          type="radio"
-                          name="eventCategory"
-                          class="peer sr-only"
-                          :value="category.label"
-                          :checked="field.value === category.label"
-                          @change="field.onChange"
-                        />
-                        <div
-                          class="flex flex-col items-center justify-center bg-card text-sm font-medium text-center p-4 rounded-lg border shadow-sm duration-150 ease-in-out peer-checked:text-blue-600 peer-checked:border-blue-600 gap-2"
-                        >
-                          <Icon :icon="category.icon" class="size-7" />
-                          <span
-                            :class="[
-                              field.value === category.label
-                                ? 'text-primary'
-                                : '',
-                            ]"
-                            >{{ category.label }}</span
-                          >
-                        </div>
-                        <div
-                          class="absolute inset-0 border border-transparent peer-checked:border-blue-60 rounded-lg pointer-events-none"
-                          aria-hidden="true"
-                        ></div>
-                      </label>
-                    </div>
-                  </div>
-                </Field>
-                <ErrorMessage name="eventCategory" class="err-msg" />
-              </div>
+              <FieldInput
+                name="eventTitle"
+                label="Event Title"
+                type="text"
+                placeholder="Your event title..."
+              />
+              <FieldInput
+                name="eventDescription"
+                label="Event Description"
+                type="textarea"
+                placeholder="Tell us a bit about your event..."
+              />
+              <FieldRadioGroup
+                name="eventScale"
+                label="Event Scale"
+                :options="eventScaleOptions"
+                layout="horizontal"
+                wrapperClass="grid grid-cols-2 gap-2"
+              />
+              <FieldRadioGroup
+                name="eventCategory"
+                label="Event Category"
+                :options="eventCategories"
+                layout="vertical"
+                wrapperClass="grid grid-cols-2 gap-2 mt-2 sm:grid-cols-3"
+              />
               <FormField v-slot="{ componentField }" name="website">
                 <FormItem v-auto-animate>
                   <FormLabel>Website</FormLabel>
@@ -513,37 +432,25 @@ function onSubmit(formData: FormData) {
                 <ErrorMessage name="backgroundImage" class="err-msg" />
               </div>
               <div class="grid sm:grid-cols-3 gap-4">
-                <FormField v-slot="{ componentField }" name="venueName">
-                  <FormItem v-auto-animate class="sm:col-span-3">
-                    <FormLabel>Venue Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Venue Name"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-                <FormField v-slot="{ componentField }" name="venueAddress">
-                  <FormItem v-auto-animate class="sm:col-span-3">
-                    <FormLabel>Venue Address</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Venue Address"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
+                <FieldInput
+                  name="venueName"
+                  label="Venue Name"
+                  type="text"
+                  placeholder="Venue Name"
+                  wrapperClass="sm:col-span-3"
+                />
+                <FieldInput
+                  name="venueAddress"
+                  label="Venue Address"
+                  type="text"
+                  placeholder="Address..."
+                  wrapperClass="sm:col-span-3"
+                />
                 <FormField v-slot="{ componentField }" name="venueCity">
                   <FormItem v-auto-animate>
                     <FormLabel>Venue City</FormLabel>
                     <FormControl>
-                      <CitySearchCombobox
+                      <ComboCityFilter
                         v-model="venueCity"
                         v-bind="componentField"
                         @select="selectCity"
@@ -552,75 +459,55 @@ function onSubmit(formData: FormData) {
                     <FormMessage />
                   </FormItem>
                 </FormField>
-                <FormField v-slot="{ componentField }" name="venueState">
-                  <FormItem v-auto-animate>
-                    <FormLabel>Venue State</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Venue State"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
-                <FormField v-slot="{ componentField }" name="venueCountry">
-                  <FormItem v-auto-animate>
-                    <FormLabel>Venue Country</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Venue State"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
+                <FieldInput
+                  name="venueState"
+                  label="Venue State"
+                  type="text"
+                  placeholder="State..."
+                />
+                <FieldInput
+                  name="venueCountry"
+                  label="Venue Country"
+                  type="text"
+                  placeholder="Country..."
+                />
               </div>
             </div>
           </FormStep>
           <FormStep>
             <!-- Event Datetimes and Tickets -->
             <div class="space-y-6">
+              <div
+                v-if="hasDuplicateErrors"
+                class="bg-destructive-foreground text-sm text-destructive p-4 rounded-lg mb-4"
+              >
+                <div class="flex gap-1 items-center text-xs">
+                  <Icon
+                    icon="heroicons-solid:exclamation-circle"
+                    class="size-6"
+                  />
+                  <div>Please fix the errors below</div>
+                </div>
+                <ul class="list-disc list-inside ml-2.5">
+                  <li
+                    v-if="
+                      formWizardRef?.errorMessages('eventDatetimes.duplicate')
+                    "
+                  >
+                    {{
+                      formWizardRef?.errorMessages("eventDatetimes.duplicate")
+                    }}
+                  </li>
+                  <li v-if="formWizardRef?.errorMessages('tickets.duplicate')">
+                    {{ formWizardRef?.errorMessages("tickets.duplicate") }}
+                  </li>
+                </ul>
+              </div>
               <div class="">
                 <label class="text-sm font-semibold"
                   >Sessions & Datetimes</label
                 >
                 <div class="flex flex-col gap-2 md:gap-4 mt-2">
-                  <div
-                    v-if="hasDuplicateErrors"
-                    class="bg-destructive-foreground text-sm text-destructive p-4 rounded-lg mb-4"
-                  >
-                    <div class="flex gap-1 items-center text-xs">
-                      <Icon
-                        icon="heroicons-solid:exclamation-circle"
-                        class="size-6"
-                      />
-                      <div>Please fix the errors below</div>
-                    </div>
-                    <ul class="list-disc list-inside ml-2.5">
-                      <li
-                        v-if="
-                          formWizardRef?.errorMessages(
-                            'eventDatetimes.duplicate'
-                          )
-                        "
-                      >
-                        {{
-                          formWizardRef?.errorMessages(
-                            "eventDatetimes.duplicate"
-                          )
-                        }}
-                      </li>
-                      <li
-                        v-if="formWizardRef?.errorMessages('tickets.duplicate')"
-                      >
-                        {{ formWizardRef?.errorMessages("tickets.duplicate") }}
-                      </li>
-                    </ul>
-                  </div>
                   <FieldArray
                     name="eventDatetimes"
                     v-slot="{ fields, push, remove }"
@@ -972,46 +859,35 @@ function onSubmit(formData: FormData) {
           <FormStep>
             <!-- Venue, Billing, and Agreement -->
             <div class="space-y-6">
-              <FormField v-slot="{ componentField }" name="bankName">
-                <FormItem v-auto-animate>
-                  <FormLabel>Bank Name</FormLabel>
+              <FieldInput
+                name="bankName"
+                label="Bank Name"
+                type="text"
+                placeholder="Your bank name..."
+              />
+              <FieldInput
+                name="bankAccount"
+                label="Bank Account Number"
+                type="text"
+                placeholder="Your bank account number..."
+              />
+
+              <FormField v-slot="{ value, handleChange }" name="acceptTerms">
+                <FormItem
+                  class="flex flex-row items-start gap-x-3 space-y-0 rounded-md border p-4 shadow"
+                >
                   <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Your bank name..."
-                      v-bind="componentField"
-                    />
+                    <Checkbox :checked="value" @update:checked="handleChange" />
                   </FormControl>
-                  <FormMessage />
+                  <div class="space-y-1 leading-none">
+                    <FormLabel>Accept Terms</FormLabel>
+                    <FormDescription>
+                      I agree to the terms and conditions.
+                    </FormDescription>
+                    <FormMessage />
+                  </div>
                 </FormItem>
               </FormField>
-              <FormField v-slot="{ componentField }" name="bankAccount">
-                <FormItem v-auto-animate>
-                  <FormLabel>Bank Account Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Your bank account number..."
-                      v-bind="componentField"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-            </div>
-            <div class="flex items-center">
-              <Field
-                v-slot="{ field }"
-                name="acceptTerms"
-                type="checkbox"
-                :value="true"
-                :unchecked-value="false"
-              >
-                <label>
-                  <input type="checkbox" v-bind="field" :value="true" />
-                  I agree
-                </label>
-              </Field>
             </div>
           </FormStep>
           <FormStep>
@@ -1031,10 +907,10 @@ function onSubmit(formData: FormData) {
 }
 
 .is-ghost {
-  @apply text-transparent bg-muted;
+  @apply opacity-40 bg-muted;
 }
 
 .is-dragging {
-  @apply border border-accent bg-muted;
+  @apply border border-primary bg-primary-foreground rounded-md;
 }
 </style>

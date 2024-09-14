@@ -38,7 +38,6 @@ function updateFormField(field: string, value: any) {
 }
 
 function errorMessages(field: string) {
-  console.log(errors.value);
   return errors.value[field];
 }
 
