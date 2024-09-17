@@ -79,10 +79,10 @@ watch(search, (newValue) => {
             >
               <div class="flex grow items-center space-x-2 sm:space-x-3">
                 <EventCover
-                  :src="event.logo"
-                  :title="event.title"
-                  class="h-5 w-5"
-                />
+                    class="h-6 w-6"
+                    :src="event.logo"
+                    :title="event.title"
+                  />
                 <div
                   class="flex items-center font-medium leading-tight w-px sm:w-auto"
                 >
@@ -190,7 +190,6 @@ watch(search, (newValue) => {
                       <EventCover
                         :src="event?.logo"
                         :title="event.title"
-                        class="h-10 w-10 relative shrink-0 overflow-hidden"
                       />
                       <p
                         :class="[
