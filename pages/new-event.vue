@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Field, ErrorMessage } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import { z } from "zod";
 import VueDatePicker from "@vuepic/vue-datepicker";
@@ -20,6 +19,7 @@ import { useCitySearch } from "@/composables/useCitySearch";
 
 import FieldInput from "@/components/FieldInput.vue";
 import ComboCityFilter from "@/components/ComboCityFilter.vue";
+import FieldInputText from "~/components/FieldInputText.vue";
 
 interface FormValues {
   eventDatetimes?: Array<{ name: string }>;
@@ -103,7 +103,9 @@ const eventCategories = ref([
 
 // Define the schema for each step
 const step1Schema = z.object({
-  eventTitle: z.string().min(1, "Event title is required"),
+  eventTitle: z
+    .string()
+    .min(5, "Event title must be at least 5 characters long"),
   eventDescription: z
     .string()
     .min(10, "Event description must be at least 10 characters long"),
@@ -129,9 +131,9 @@ const step1Schema = z.object({
         message: "Please choose a valid event category",
       }
     ),
-  website: z.string().url("Invalid URL"),
+  website: z.string().url().optional(),
   logo: z.any(),
-  backgroundImage: z.any(),
+  coverImg: z.any(),
   venueName: z.string().min(1, "Venue name is required"),
   venueAddress: z.string().min(1, "Venue address is required"),
   venueCity: z.string().min(1, "Venue city is required"),
@@ -290,6 +292,11 @@ const hasDuplicateErrors = computed(() => {
   );
 });
 
+const handleStepChange = (step: number) => {
+  console.log("Step changed to", step);
+  currentStep.value = step;
+};
+
 function onSubmit(formData: FormData) {
   console.log(JSON.stringify(formData, null, 2));
 }
@@ -304,7 +311,7 @@ function onSubmit(formData: FormData) {
         ref="formWizardRef"
         @submit="onSubmit"
         :validation-schema="validationSchema"
-        @update:currentStep="currentStep = $event"
+        @update:currentStep="handleStepChange"
         @formValuesUpdate="updateFormValues"
       >
         <template v-slot:form-back-link>
@@ -369,12 +376,7 @@ function onSubmit(formData: FormData) {
           <FormStep>
             <!-- Event Details -->
             <div class="space-y-5">
-              <FieldInput
-                name="eventTitle"
-                label="Event Title"
-                type="text"
-                placeholder="Your event title..."
-              />
+              <FieldInputText name="eventTitle" label="Event Title" />
               <FieldInput
                 name="eventDescription"
                 label="Event Description"
@@ -395,55 +397,29 @@ function onSubmit(formData: FormData) {
                 layout="vertical"
                 wrapperClass="grid grid-cols-2 gap-2 mt-2 sm:grid-cols-3"
               />
-              <FormField v-slot="{ componentField }" name="website">
-                <FormItem v-auto-animate>
-                  <FormLabel>Website</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="https://example.com"
-                      v-bind="componentField"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
+              <FieldInputText name="website" label="Website" />
+              <ImageUpload
+                name="logo"
+                label="Logo"
+                id="logo-upload"
+                type="logo"
+              />
+              <ImageUpload
+                name="coverImg"
+                label="Cover Image"
+                id="cover-img-upload"
+                type="coverImg"
+              />
 
-              <div>
-                <label for="logo" class="text-sm font-semibold">Logo</label>
-                <Field
-                  name="logo"
-                  type="file"
-                  id="logo"
-                  class="form-input w-full !my-1"
-                />
-                <ErrorMessage name="logo" class="err-msg" />
-              </div>
-              <div>
-                <label for="backgroundImage" class="text-sm font-semibold"
-                  >Background Image</label
-                >
-                <Field
-                  name="backgroundImage"
-                  type="file"
-                  id="backgroundImage"
-                  class="form-input w-full !my-1"
-                />
-                <ErrorMessage name="backgroundImage" class="err-msg" />
-              </div>
               <div class="grid sm:grid-cols-3 gap-4">
-                <FieldInput
+                <FieldInputText
                   name="venueName"
                   label="Venue Name"
-                  type="text"
-                  placeholder="Venue Name"
                   wrapperClass="sm:col-span-3"
                 />
-                <FieldInput
+                <FieldInputText
                   name="venueAddress"
                   label="Venue Address"
-                  type="text"
-                  placeholder="Address..."
                   wrapperClass="sm:col-span-3"
                 />
                 <FormField v-slot="{ componentField }" name="venueCity">
@@ -459,18 +435,8 @@ function onSubmit(formData: FormData) {
                     <FormMessage />
                   </FormItem>
                 </FormField>
-                <FieldInput
-                  name="venueState"
-                  label="Venue State"
-                  type="text"
-                  placeholder="State..."
-                />
-                <FieldInput
-                  name="venueCountry"
-                  label="Venue Country"
-                  type="text"
-                  placeholder="Country..."
-                />
+                <FieldInputText name="venueState" label="Venue State" />
+                <FieldInputText name="venueCountry" label="Venue Country" />
               </div>
             </div>
           </FormStep>
