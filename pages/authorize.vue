@@ -4,8 +4,8 @@ import { useRoute, useRouter } from "nuxt/app";
 import { useAuthStore } from "@/stores";
 import SpinnerRing from "@/components/SpinnerRing.vue";
 
-definePageMeta({
-   title: "Authorize",
+useHead({
+  title: "Authorizing...",
 })
 
 const authStore = useAuthStore();

@@ -4,9 +4,14 @@ import { useQuery } from "@tanstack/vue-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-definePageMeta({
+useHead({
   title: "My Events",
-  description: "List of active events",
+  meta: [
+    { name: 'description', content: 'List of active events' }
+  ]
+})
+
+definePageMeta({
   layout: "dashboard",
 });
 

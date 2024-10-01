@@ -28,6 +28,10 @@ import SpinnerRing from "@/components/SpinnerRing.vue";
 import NoData from "@/components/partials/registrations/NoData.vue";
 import Datepicker from "@/components/Datepicker.vue";
 
+useHead({
+  title: "Registrations",
+});
+
 definePageMeta({
   title: "Registrations",
   showInMenu: true,

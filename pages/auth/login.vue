@@ -3,6 +3,16 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 
+useHead({
+  title: "Login",
+  meta: [
+    {
+      name: "description",
+      content: "Login to your Galanesia account",
+    },
+  ],
+});
+
 const config = useRuntimeConfig();
 
 const loginWithOAuth = () => {

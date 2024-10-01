@@ -3,6 +3,10 @@ import { ref, computed } from "vue";
 import { useAuthStore } from "@/stores";
 import { useRouter } from "#app";
 
+useHead({
+  title: "Logging out...",
+});
+
 const authStore = useAuthStore();
 const router = useRouter();
 

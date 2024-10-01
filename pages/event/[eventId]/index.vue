@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import RegCards from "~/components/partials/registrations/RegCards.vue";
 
+useHead({
+  title: "Dashboard",
+})
+
 definePageMeta({
   title: "Dashboard",
   group: "dashboard",

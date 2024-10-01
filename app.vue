@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { useLocalStorage } from "#imports";
 
+useHead({
+  titleTemplate: (titleChunk) => {
+    console.log(titleChunk)
+    return titleChunk ? `${titleChunk} | Galanesia ID` : 'Galanesia ID';
+  }
+})
+
 onMounted(() => {
   if (useLocalStorage("sidebar-expanded", false)) {
     document.body.classList.add("sidebar-expanded");

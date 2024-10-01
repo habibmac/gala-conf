@@ -32,10 +32,18 @@ interface FormWizardExpose {
   errorMessages: (field: string) => string;
 }
 
-definePageMeta({
+useHead({
   title: "New Event",
+  meta: [
+    {
+      name: "description",
+      content: "Create a new event on Galanesia ID",
+    },
+  ],
+});
+
+definePageMeta({
   navTitle: "Create New Event",
-  description: "Create a new event",
   layout: "dashboard",
 });
 
