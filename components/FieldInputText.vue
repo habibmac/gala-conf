@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import type { HTMLAttributes } from "vue";
-import { useField } from "vee-validate";
+import { useField, useFieldError } from "vee-validate";
 import { cn } from "@/lib/utils";
-import { useFormField } from "@/components/ui/form/useFormField";
 import {
   FormControl,
   FormItem,
@@ -93,8 +92,8 @@ watch(value, (newValue) => {
             :class="
               cn(
                 'z-1 grid cursor-text rounded-md border min-h-[50px] transition-all duration-200 ease-in-out border-input',
-                error && 'border-destructive',
-                isInteracting && 'border-secondary'
+                {'border-destructive': error},
+                {'border-secondary': isInteracting},
               )
             "
           >
@@ -119,7 +118,10 @@ watch(value, (newValue) => {
           </div>
         </FormControl>
       </div>
-      <FormMessage v-show="!isInteracting" />
+      <Transition
+        name="fade">
+        <FormMessage v-if="error && !isInteracting" :message="error" />
+      </Transition>
     </FormItem>
   </FormField>
 </template>
