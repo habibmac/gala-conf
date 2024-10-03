@@ -1,146 +1,149 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import {
-  Listbox,
-  ListboxButton,
-  ListboxOptions,
-  ListboxOption,
-} from "@headlessui/vue";
 import { Icon } from "@iconify/vue";
 import { allRegStatuses } from "@/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const props = defineProps<{
-  modelValue: string;
+  modelValue: string[];
 }>();
 
-// Computed property to get the list of statuses
-const statuses = computed(() => [
-  ...allRegStatuses.map((status) => ({
+const statuses = computed(() =>
+  allRegStatuses.map((status) => ({
     label: status.label,
-    value: status.label, // Assuming value should match id for consistency
+    value: status.label,
     color: status.color,
-  })),
-]);
+  }))
+);
 
-// Get the selected index from the modelValue
-const selectedStatus = ref(props.modelValue);
+const selectedStatuses = ref<string[]>(props.modelValue);
 
 const emits = defineEmits(["update:modelValue"]);
 
 watch(
   () => props.modelValue,
   (newValue) => {
-    selectedStatus.value = newValue;
+    selectedStatuses.value = newValue;
   }
 );
 
-// Use a method to handle selection changes
 function updateValue(value: string) {
-  emits("update:modelValue", value);
-  selectedStatus.value = value; // Also update local state to ensure reactivity
+  const updatedStatuses = selectedStatuses.value.includes(value)
+    ? selectedStatuses.value.filter((status) => status !== value)
+    : [...selectedStatuses.value, value];
+
+  emits("update:modelValue", updatedStatuses);
+  selectedStatuses.value = updatedStatuses;
 }
 
-// Computed property to find the label for the current selected value
-const selectedStatusLabel = computed(() => {
-  const status = statuses.value.find(
-    (status) => status.value === selectedStatus.value
-  );
-  return status ? status.label : "All Status"; // Default label if not found
+const selectedStatusLabels = computed(() => {
+  return selectedStatuses.value.length
+    ? selectedStatuses.value.map((value) => {
+        const status = statuses.value.find((s) => s.value === value);
+        return status ? status.label : "";
+      })
+    : ["All Status"];
 });
 
-// Computed property to get the class for the selected status label
-const selectedStatusClass = computed(() => {
-  const status = statuses.value.find(
-    (status) => status.value === selectedStatus.value
-  );
-  return status ? status.color : ""; // Default to empty string if not found
+const selectedValues = computed(() => new Set(selectedStatuses.value));
+
+const buttonLabel = computed(() => {
+  if (selectedStatusLabels.value.length === 0) return "All Status";
+  if (selectedStatusLabels.value.length === 1)
+    return selectedStatusLabels.value[0];
+  return `${selectedStatusLabels.value.length} selected`;
 });
+
+function clearAllStatuses() {
+  emits("update:modelValue", []);
+  selectedStatuses.value = [];
+}
 </script>
 
 <template>
-  <ClientOnly>
-    <Listbox v-model="selectedStatus">
-      <div class="relative">
-        <ListboxButton
-          class="form-select !w-auto space-x-2"
-          v-slot="{ open }"
+  <Popover>
+    <PopoverTrigger as-child>
+      <Button variant="outline" class="h-10 relative">
+        <span
+          v-if="selectedStatuses.length > 0"
+          class="text-xs text-slate-500 border-r pr-2"
         >
-          <span v-if="selectedStatus" class="text-xs text-slate-500 border-r pr-2">
-            Status
-            <span
-              :class="`dot ${selectedStatusClass} h-2 w-2 rounded-full`"
-            ></span>
-          </span>
-          <span class="font-medium">
-            {{ selectedStatusLabel }}
-          </span>
-          <Icon
-            icon="heroicons:chevron-down"
-            :class="
-              [
-                open ? 'transform rotate-180' : '',
-                'w-3.5 h-3.w-3.5 text-slate-600 dark:text-slate-400',
-              ]
-            "
-          />
-        </ListboxButton>
-        <Transition
-          enter-active-class="transition ease-out duration-200 transform"
-          enter-from-class="opacity-0 -translate-y-2"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="transition ease-out duration-200"
-          leave-from-class="opacity-100"
-          leave-to-class="opacity-0"
-        >
-          <ListboxOptions
-            class="absolute left-0 top-full z-20 min-w-24 origin-top-left max-h-[400px] overflow-y-auto rounded-md mt-1 border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950 scroll-area"
-            as="ul" 
-          >
-            <ListboxOption
-              :value="null"
-              v-slot="{ active, selected }"
+          Status
+        </span>
+        <span class="font-medium ml-2">
+          {{ buttonLabel }}
+        </span>
+        <Icon
+          icon="heroicons:chevron-down"
+          class="w-3.5 h-3.5 ml-2 text-slate-600 dark:text-slate-400"
+        />
+        <span v-if="selectedStatuses.length > 0" class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500"></span>
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent class="w-[200px] p-0" align="start">
+      <Command>
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup>
+            <CommandItem
+              :value="{ label: 'All Status', value: '' }"
+              @select="clearAllStatuses"
             >
-              <li
-                :class="[
-                  selected
-                    ? 'selected'
-                    : '',
-                  'dropdown-item',
-                ]"
-                @click="updateValue('')"
+              <div
+                :class="
+                  cn(
+                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                    selectedStatuses.length === 0
+                      ? 'bg-primary text-primary-foreground'
+                      : 'opacity-50 [&_svg]:invisible'
+                  )
+                "
               >
-                <span class="dot h-2 w-2 rounded-full"></span>
-                <span>All Status</span>
-              </li>
-            </ListboxOption>
-            <ListboxOption
-              v-for="(item, index) in statuses"
-              :key="index"
-              :value="item.label"
-              :disabled="item.label === selectedStatus"
-                          v-slot="{ active, selected }"
-
-              as="template"
+                <Icon icon="radix-icons:check" class="h-4 w-4" />
+              </div>
+              <span>All Status</span>
+            </CommandItem>
+            <CommandItem
+              v-for="item in statuses"
+              :key="item.value"
+              :value="item"
+              @select="() => updateValue(item.value)"
             >
-              <li
-                :class="[
-                  selected
-                    ? 'selected'
-                    : '',
-                
-                  'dropdown-item !space-x-2',
-                ]"
-                @click="updateValue(item.label)"
+              <div
+                :class="
+                  cn(
+                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                    selectedValues.has(item.value)
+                      ? 'bg-primary text-primary-foreground'
+                      : 'opacity-50 [&_svg]:invisible'
+                  )
+                "
               >
-                <span
-                  :class="`dot ${item.color} h-2 w-2 rounded-full`"
-                ></span>
-                <span>{{ item.label }}</span>
-              </li>
-            </ListboxOption>
-          </ListboxOptions>
-        </Transition>
-      </div>
-    </Listbox>
-  </ClientOnly>
+                <Icon icon="radix-icons:check" class="h-4 w-4" />
+              </div>
+              <span
+                :class="`dot ${item.color} h-2 w-2 rounded-full inline-block mr-2`"
+              ></span>
+              <span>{{ item.label }}</span>
+            </CommandItem>
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </PopoverContent>
+  </Popover>
 </template>

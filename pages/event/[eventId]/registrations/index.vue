@@ -72,7 +72,6 @@ const eventId = computed(() => event.value?.id);
 
 const route = useRoute();
 const router = useRouter();
-const colorMode = useColorMode();
 
 const endpoint = "registrations";
 
@@ -158,38 +157,10 @@ const pagination = ref<PaginationState>({
 
 const filters = ref<Filter>({
   search: search.value ? String(search.value) : "",
-  ticket_name: ticket_name.value ? String(ticket_name.value) : "",
-  status: status.value ? String(status.value) : "",
+  ticket_name: ticket_name.value ? [String(ticket_name.value)] : [],
+  status: status.value ? [String(status.value)] : [], // Initialize as an array
   date_start: dateStart.value ? String(dateStart.value) : "",
   date_end: dateEnd.value ? String(dateEnd.value) : "",
-});
-
-// Computed property for date range
-const dateRange = computed({
-  get: () => {
-    if (filters.value.date_start === "" || filters.value.date_end === "") {
-      // Return null to signify "All Time" to VueDatePicker
-      return null;
-    }
-    return [
-      new Date(filters.value.date_start),
-      new Date(filters.value.date_end),
-    ];
-  },
-  set: (newValue) => {
-    if (newValue === null) {
-      // User clears the date range, set to "All Time"
-      filters.value.date_start = "";
-      filters.value.date_end = "";
-    } else {
-      // User selects a new date range
-      [filters.value.date_start, filters.value.date_end] = newValue.map(
-        (date) =>
-          // Format to yyyy-MM-dd hh:mm
-          format(date, "yyyy-MM-dd")
-      );
-    }
-  },
 });
 
 // Define parseDesc to accept a string and return a boolean
@@ -437,8 +408,8 @@ const isAnyFilterActive = computed(() => {
   // Check if any filter is active
   return (
     filters.value.search ||
-    filters.value.ticket_name ||
-    filters.value.status ||
+    filters.value.ticket_name.length > 0 ||
+    filters.value.status.length > 0 ||
     filters.value.date_start ||
     filters.value.date_end
   );
@@ -448,8 +419,8 @@ const isAnyFilterActive = computed(() => {
 const handleResetFilters = () => {
   filters.value = {
     search: "",
-    ticket_name: "",
-    status: "",
+    ticket_name: [],
+    status: [],
     date_start: "",
     date_end: "",
   };
@@ -479,8 +450,9 @@ watch(
   ([newFilters, newPagination, newSorting]) => {
     const query = {
       search: newFilters.search || undefined,
-      ticket: newFilters.ticket_name || undefined,
-      status: newFilters.status || undefined,
+      ticket:
+        newFilters.ticket_name.length > 0 ? newFilters.ticket_name : undefined,
+      status: newFilters.status.length > 0 ? newFilters.status : undefined,
       dateStart: newFilters.date_start || undefined,
       dateEnd: newFilters.date_end || undefined,
       page: newPagination.pageIndex + 1 || undefined,
@@ -510,8 +482,16 @@ watch(
   (newQuery) => {
     filters.value = {
       search: (newQuery.search as string) || "",
-      ticket_name: (newQuery.ticket as string) || "",
-      status: (newQuery.status as string) || "",
+      ticket_name: Array.isArray(newQuery.ticket)
+        ? (newQuery.ticket as string[])
+        : newQuery.ticket
+        ? [newQuery.ticket as string]
+        : [],
+      status: Array.isArray(newQuery.status)
+        ? (newQuery.status as string[])
+        : newQuery.status
+        ? [newQuery.status as string]
+        : [],
       date_start: (newQuery.dateStart as string) || "",
       date_end: (newQuery.dateEnd as string) || "",
     };
@@ -542,9 +522,7 @@ watch(
       <div class="flex shrink-0 space-x-2 justify-self-end">
         <div class="min-w-64 grow">
           <!-- Datepicker -->
-          <Datepicker
-            @update:date-range="handleSetDateRange"
-          />
+          <Datepicker @update:date-range="handleSetDateRange" />
         </div>
       </div>
     </header>
@@ -558,16 +536,13 @@ watch(
         class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
       >
         <!-- Left: Avatars -->
-        <div
-          class="sm:gap-2 sm:grid sm:grid-flow-col sm:space-y-0"
-        >
+        <div class="sm:gap-2 sm:grid sm:grid-flow-col sm:space-y-0">
           <TableSearchForm
             v-model="filters.search"
             placeholder="Search Registrant..."
           />
           <DropdownTicketFilter
             v-model="filters.ticket_name"
-            :evtId="eventId"
           />
           <DropdownStatusFilter v-model="filters.status" />
           <TableResetBtn

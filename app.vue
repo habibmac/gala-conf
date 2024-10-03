@@ -3,7 +3,6 @@ import { useLocalStorage } from "#imports";
 
 useHead({
   titleTemplate: (titleChunk) => {
-    console.log(titleChunk)
     return titleChunk ? `${titleChunk} | Galanesia ID` : 'Galanesia ID';
   }
 })

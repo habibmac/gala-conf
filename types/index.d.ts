@@ -24,7 +24,7 @@ export interface RegRequestParams {
     page: string;
     sort_by: string;
     order: string;
-    [key: string]: string; // This allows for additional string keys
+    [key: string]: string | string[] | undefined; // Allow string arrays and undefined
 }
 
 export interface EvtRequestParams {
@@ -50,11 +50,10 @@ export interface ColumnConfig {
     width: number; // Width in percentage
 }
 
-
 interface Filter {
     search: string;
-    ticket_name: string;
-    status: string;
+    ticket_name: string[];
+    status: string[];
     date_start: string; // Allow undefined
     date_end: string; // Allow undefined
 }

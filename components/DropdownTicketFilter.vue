@@ -1,39 +1,52 @@
 <script setup lang="ts">
-import { ref, type Ref, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import { Icon } from "@iconify/vue";
+import { Button } from "@/components/ui/button";
 import {
-  Listbox,
-  ListboxButton,
-  ListboxOptions,
-  ListboxOption,
-} from "@headlessui/vue";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const props = defineProps<{
-  modelValue: string;
+  modelValue: string[];
 }>();
 
-const { event } = useEvent();
-const evtId = computed(() => event.value?.id);
+const router = useRouter();
 
-const selectedTicket = ref(props.modelValue); // Make modelValue reactive
+const eventId = ref<string>(
+  Array.isArray(router.currentRoute.value.params.eventId)
+    ? router.currentRoute.value.params.eventId[0]
+    : router.currentRoute.value.params.eventId || ""
+);
 
+const selectedTickets = ref<string[]>(props.modelValue);
 const emits = defineEmits(["update:modelValue"]);
 
-const getData = async (evtId: Ref<string>) => {
+const getData = async (eventId: Ref<string>, signal: AbortSignal) => {
   const { $galantisApi } = useNuxtApp();
   return $galantisApi
-
-    .get(`/event/${evtId.value}/tickets`)
+    .get(`/event/${eventId.value}/tickets`, { signal })
     .then((response) => {
-      if (response.data.length > 0) {
+      if (response.data && response.data.length > 0) {
         return response.data;
       } else {
-        throw new Error("No event found");
+        return [];
       }
     })
     .catch((error) => {
-      throw new Error(error);
+      console.error("Error fetching tickets:", error);
+      return [];
     });
 };
 
@@ -43,94 +56,135 @@ const {
   error,
   data: tickets,
 } = useQuery({
-  queryKey: ["tickets", evtId.value],
-  queryFn: () => getData(evtId),
-  enabled: !!evtId.value,
+  queryKey: ["tickets", eventId],
+  queryFn: ({ signal }) => getData(eventId, signal),
+  enabled: true,
   staleTime: 1000 * 60 * 5, // 5 minutes
 });
 
 watch(
   () => props.modelValue,
   (newValue) => {
-    selectedTicket.value = newValue;
+    selectedTickets.value = newValue;
   }
 );
 
-// Use a method to handle selection changes
 function updateValue(value: string) {
-  emits("update:modelValue", value);
-  selectedTicket.value = value; // Also update local state to ensure reactivity
+  const updatedTickets = selectedTickets.value.includes(value)
+    ? selectedTickets.value.filter((ticket) => ticket !== value)
+    : [...selectedTickets.value, value];
+
+  emits("update:modelValue", updatedTickets);
+  selectedTickets.value = updatedTickets;
 }
+
+const buttonLabel = computed(() => {
+  if (selectedTickets.value.length === 0) return "All Tickets";
+  if (selectedTickets.value.length === 1) return selectedTickets.value[0];
+  return `${selectedTickets.value.length} tickets selected`;
+});
+
+function clearAllTickets() {
+  emits("update:modelValue", []);
+  selectedTickets.value = [];
+}
+
+const searchTerm = ref('');
+
+const filterFunction = computed(() => {
+  return (list: any[], term: string) => {
+    if (!list) return [];
+    return list.filter(
+      (item) => item.name && item.name.toLowerCase().includes(term.toLowerCase())
+    );
+  };
+});
+
+const showSearch = computed(() => {
+  return tickets.value && tickets.value.length > 5;
+});
+
+const ticketOptions = computed(() => {
+  return tickets.value ? tickets.value : [];
+});
+
+const filteredTickets = computed(() => {
+  if (!searchTerm.value) return ticketOptions.value;
+  return filterFunction.value(ticketOptions.value, searchTerm.value);
+});
 </script>
 
 <template>
-  <ClientOnly>
-    <Listbox v-model="selectedTicket">
-      <div class="relative">
-        <ListboxButton
-          class="form-select font-medium !w-auto space-x-2 max-w-xs"
+  <Popover>
+    <PopoverTrigger as-child>
+      <Button variant="outline" class="h-10 relative">
+        <span
+          v-if="selectedTickets.length > 0"
+          class="text-xs text-slate-500 border-r pr-2"
         >
-          <span v-if="selectedTicket" class="text-xs text-slate-500 border-r pr-2">
-            Ticket
-          </span>
-          <span class="truncate">
-            {{ selectedTicket ? selectedTicket : "All Tickets" }}
-          </span>
-          <Icon
-            icon="heroicons:chevron-down"
-          />
-        </ListboxButton>
-        <Transition
-          enter-active-class="transition ease-out duration-200 transform"
-          enter-from-class="opacity-0 -translate-y-2"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="transition ease-out duration-200"
-          leave-from-class="opacity-100"
-          leave-to-class="opacity-0"
-        >
-          <ListboxOptions
-            class="absolute left-0 top-full z-20 min-w-80 origin-top-left overflow-y-scroll scroll-area max-h-[400px] rounded-md mt-1 border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950"
-          >
-            <ListboxOption :value="null" as="template">
-              <li
-                :class="[
-                  selectedTicket === '' ? 'selected' : '',
-                  'dropdown-item justify-between',
-                ]"
-                @click="updateValue('')"
-              >
-                <span class="text-sm">All Tickets</span>
-                <Icon
-                  icon="heroicons:check"
-                  v-if="selectedTicket === ''"
-                  class="check"
-                />
-              </li>
-            </ListboxOption>
-            <ListboxOption
-              v-for="ticket in tickets"
-              :key="ticket.id"
-              :value="ticket.name"
-              as="template"
+          Ticket
+        </span>
+        <span class="font-medium ml-2 truncate">
+          {{ buttonLabel }}
+        </span>
+        <Icon
+          icon="heroicons:chevron-down"
+          class="w-3.5 h-3.5 ml-2 text-slate-600 dark:text-slate-400"
+        />
+        <span v-if="selectedTickets.length > 0" class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500"></span>
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent class="p-0" align="end">
+      <Command :filter-function="filterFunction">
+        <CommandInput 
+          v-if="showSearch" 
+          v-model="searchTerm"
+          placeholder="Search tickets..." 
+        />
+        <CommandList>
+          <CommandEmpty>No tickets found.</CommandEmpty>
+          <CommandGroup>
+            <CommandItem
+              :value="{ label: 'All Tickets', value: '' }"
+              @select="clearAllTickets"
             >
-              <li
-                :class="[
-                  ticket.name === selectedTicket ? 'selected' : '',
-                  'dropdown-item justify-between',
-                ]"
-                @click="updateValue(ticket.name)"
+              <div
+                :class="
+                  cn(
+                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                    selectedTickets.length === 0
+                      ? 'bg-primary text-primary-foreground'
+                      : 'opacity-50 [&_svg]:invisible'
+                  )
+                "
               >
-                <span class="text-sm">{{ ticket.name }}</span>
-                <Icon
-                  icon="heroicons:check"
-                  v-if="ticket.name === selectedTicket"
-                  class="check"
-                />
-              </li>
-            </ListboxOption>
-          </ListboxOptions>
-        </Transition>
-      </div>
-    </Listbox>
-  </ClientOnly>
+                <Icon icon="radix-icons:check" class="h-4 w-4" />
+              </div>
+              <span>All Tickets</span>
+            </CommandItem>
+            <CommandItem
+              v-for="ticket in filteredTickets"
+              :key="ticket.id"
+              :value="ticket"
+              @select="() => updateValue(ticket.name)"
+            >
+              <div
+                :class="
+                  cn(
+                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                    selectedTickets.includes(ticket.name)
+                      ? 'bg-primary text-primary-foreground'
+                      : 'opacity-50 [&_svg]:invisible'
+                  )
+                "
+              >
+                <Icon icon="radix-icons:check" class="h-4 w-4" />
+              </div>
+              <span>{{ ticket.name }}</span>
+            </CommandItem>
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </PopoverContent>
+  </Popover>
 </template>

@@ -6,12 +6,20 @@ import type { RegRequestParams } from '@/types';
 const DEFAULT_PAGE_COUNT = -1;
 const DEFAULT_RESULT_COUNT = 0;
 
+type FilterValue = string | string[];
+
+type Filter = {
+    [key: string]: FilterValue;
+};
+
+
+
 export const useRegs = (
     eventId: Ref<string>,
     endpoint: string,
     pagination: Ref<PaginationState>,
     sorting: Ref<SortingState>,
-    filters: Ref<Record<string, string>>,
+    filters: Ref<Filter>,
 ) => {
     
     const nuxtApp = useNuxtApp();    
@@ -29,15 +37,19 @@ export const useRegs = (
         requestParams: Ref<RegRequestParams>,
         signal: AbortSignal,
     ) => {
-        // Unset all empty params
-        Object.keys(requestParams.value).forEach((key) => {
-            if (requestParams.value[key] === '') {
-                delete requestParams.value[key];
+        // Create url params
+        const searchParams = new URLSearchParams();
+        Object.entries(requestParams.value).forEach(([key, value]) => {
+            if (value !== undefined && value !== '') {
+                if (Array.isArray(value)) {
+                    // Join array values with commas
+                    searchParams.append(key, value.join(','));
+                } else {
+                    // Convert to string to ensure it's not undefined
+                    searchParams.append(key, String(value));
+                }
             }
         });
-
-        // Create url params
-        const searchParams = new URLSearchParams(requestParams.value);
 
         return nuxtApp.$galantisApi
             .get(
@@ -47,7 +59,6 @@ export const useRegs = (
                 },
             )
             .then((response) => {
-                // Assuming the API response structure includes both 'data' and 'pagination'
                 return {
                     events: response.data.data,
                     pagination: response.data.pagination,
