@@ -15,10 +15,10 @@ import {
 import FormWizard from "@/components/FormWizard.vue";
 import FormStep from "@/components/FormStep.vue";
 import { startOfDay, format, endOfDay } from "date-fns";
-import { useCitySearch } from "@/composables/useCitySearch";
 
 import FieldInput from "@/components/FieldInput.vue";
-import ComboCityFilter from "@/components/ComboCityFilter.vue";
+import FieldTextarea from "@/components/FieldTextarea.vue";
+import FieldComboFilter from "@/components/FieldComboFilter.vue";
 import FieldInputText from "~/components/FieldInputText.vue";
 
 interface FormValues {
@@ -66,7 +66,7 @@ const formWizardRef = ref<FormWizardExpose | null>(null);
 const eventDatetimesRef = ref<Array<any>>([]);
 const eventTicketsRef = ref<Array<any>>([]);
 const currentStep = ref(0);
-const { venueCity } = useCitySearch();
+const venueCity = ref("");
 
 const eventScaleOptions = ref([
   { label: "International", value: "International" },
@@ -317,6 +317,7 @@ function onSubmit(formData: FormData) {
     >
       <FormWizard
         ref="formWizardRef"
+        id="new-event-form"
         @submit="onSubmit"
         :validation-schema="validationSchema"
         @update:currentStep="handleStepChange"
@@ -385,11 +386,9 @@ function onSubmit(formData: FormData) {
             <!-- Event Details -->
             <div class="space-y-5">
               <FieldInputText name="eventTitle" label="Event Title" />
-              <FieldInput
+              <FieldTextarea
                 name="eventDescription"
                 label="Event Description"
-                type="textarea"
-                placeholder="Tell us a bit about your event..."
               />
               <FieldRadioGroup
                 name="eventScale"
@@ -430,19 +429,11 @@ function onSubmit(formData: FormData) {
                   label="Venue Address"
                   wrapperClass="sm:col-span-3"
                 />
-                <FormField v-slot="{ componentField }" name="venueCity">
-                  <FormItem v-auto-animate>
-                    <FormLabel>Venue City</FormLabel>
-                    <FormControl>
-                      <ComboCityFilter
-                        v-model="venueCity"
-                        v-bind="componentField"
-                        @select="selectCity"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                </FormField>
+                <FieldComboFilter
+                  name="venueCity"
+                  label="Venue City"
+                  @select="selectCity"
+                />
                 <FieldInputText name="venueState" label="Venue State" />
                 <FieldInputText name="venueCountry" label="Venue Country" />
               </div>

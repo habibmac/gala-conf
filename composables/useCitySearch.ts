@@ -2,8 +2,7 @@ import { ref, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import type { CityOption } from '~/types/city'
 
-export function useCitySearch(initialValue: string = '') {
-    const venueCity = ref(initialValue)
+export function useCitySearch(venueCity?: Ref<string>) {
     const minCityLength = 3
     const cityOptions = ref<CityOption[]>([])
     const isLoading = ref(false)
@@ -31,9 +30,12 @@ export function useCitySearch(initialValue: string = '') {
         }
     }, 300)
 
-    watch(venueCity, (newValue) => {
-        searchCities(newValue)
-    })
+    if (venueCity) {
+        watch(venueCity, (newValue) => {
+            if (newValue.length < minCityLength) 
+            searchCities(newValue)
+        })
+    }
 
     return {
         venueCity,
