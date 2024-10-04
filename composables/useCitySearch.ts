@@ -1,21 +1,19 @@
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import type { CityOption } from '~/types/city'
 
-export function useCitySearch(venueCity?: Ref<string>) {
+export function useCitySearch(venueCity: Ref<string>) {
     const minCityLength = 3
     const cityOptions = ref<CityOption[]>([])
     const isLoading = ref(false)
-    const hasMinLength = ref(false)
+    const hasMinLength = computed(() => (venueCity?.value?.length ?? 0) >= minCityLength)
     const selectedCity = ref<CityOption | null>(null)
 
     const searchCities = useDebounceFn(async (query: string) => {
         if (query.length < minCityLength) {
             cityOptions.value = []
-            hasMinLength.value = false
             return
         }
-        hasMinLength.value = true
         isLoading.value = true
         try {
             const response: CityOption[] = await $fetch('/api/search-cities', {
@@ -29,13 +27,6 @@ export function useCitySearch(venueCity?: Ref<string>) {
             isLoading.value = false
         }
     }, 300)
-
-    if (venueCity) {
-        watch(venueCity, (newValue) => {
-            if (newValue.length < minCityLength) 
-            searchCities(newValue)
-        })
-    }
 
     return {
         venueCity,

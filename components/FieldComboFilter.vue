@@ -42,9 +42,10 @@ const emits = defineEmits<{
 const {
   value,
   validate,
+  resetField,
   handleChange: fieldHandleChange,
 } = useField(() => props.name, undefined, {
-  initialValue: props.defaultValue || '',
+  initialValue: props.defaultValue,
 });
 
 const error = useFieldError(props.name);
@@ -82,16 +83,15 @@ const selectCity = (city: CityOption) => {
 const clearSelection = () => {
   selectedCity.value = null;
   value.value = "";
-  fieldHandleChange("");
   emits("update:modelValue", "");
   emits("select", { city: "", state: "", country: "" });
+  resetField();
 };
 
 const updateQuery = (event: Event) => {
   const target = event.target as HTMLInputElement;
   const query = target.value;
   value.value = query;
-  fieldHandleChange(query);
   emits("update:modelValue", query);
   searchCities(query);
 };
@@ -102,6 +102,14 @@ const displayValue = (item: unknown): string => {
   }
   return String(value.value);
 };
+
+watch(value, (newValue) => {
+  if (newValue) {
+    useCitySearch(ref(newValue));
+  } else if (newValue === "") {
+    resetField();
+  }
+});
 </script>
 
 <template>
@@ -128,7 +136,7 @@ const displayValue = (item: unknown): string => {
                 cn(
                   'z-1 grid cursor-text rounded-md shadow-sm border min-h-[50px] transition-all duration-200 ease-in-out border-input',
                   { 'border-destructive': error },
-                  { 'border-secondary': isInteracting }
+                  { 'border-primary': isInteracting }
                 )
               "
             >
@@ -143,7 +151,7 @@ const displayValue = (item: unknown): string => {
                 autocomplete="password"
                 :class="
                   cn(
-                    'text-sm w-full appearance-none transition-all duration-200 ease-in-out rounded-md p-3 border-none outline-none focus:outline-none focus:ring-2 ring-secondary focus:border-none text-ellipsis placeholder:text-muted-foreground',
+                    'text-sm w-full bg-transparent appearance-none transition-all duration-200 ease-in-out rounded-md p-3 border-none outline-none focus:outline-none focus:ring-2 ring-primary focus:border-none text-ellipsis placeholder:text-muted-foreground',
                     showLabel
                       ? 'pt-4 pb-1 placeholder:opacity-0'
                       : 'placeholder:opacity-100'

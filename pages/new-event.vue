@@ -66,7 +66,6 @@ const formWizardRef = ref<FormWizardExpose | null>(null);
 const eventDatetimesRef = ref<Array<any>>([]);
 const eventTicketsRef = ref<Array<any>>([]);
 const currentStep = ref(0);
-const venueCity = ref("");
 
 const eventScaleOptions = ref([
   { label: "International", value: "International" },
@@ -240,7 +239,6 @@ const selectCity = (option: {
   formWizardRef.value?.updateFormField("venueCity", option.city);
   formWizardRef.value?.updateFormField("venueState", option.state);
   formWizardRef.value?.updateFormField("venueCountry", option.country);
-  venueCity.value = option.city;
 };
 
 const onSort = (e: SortableEvent, fieldName: "eventDatetimes" | "tickets") => {
