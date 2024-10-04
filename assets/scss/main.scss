@@ -63,3 +63,10 @@ html.dark {
         @apply w-4 h-4;
     }
 }
+
+
+#new-event-form {
+    textarea {
+        field-sizing: content;
+    }
+}
