@@ -91,9 +91,9 @@ watch(value, (newValue) => {
           <div
             :class="
               cn(
-                'z-1 grid cursor-text rounded-md border min-h-[50px] transition-all duration-200 ease-in-out border-input',
+                'z-1 grid cursor-text rounded-md shadow-sm border min-h-[50px] transition-all duration-200 ease-in-out border-input',
                 {'border-destructive': error},
-                {'border-secondary': isInteracting},
+                {'border-primary': isInteracting},
               )
             "
           >
@@ -104,7 +104,7 @@ watch(value, (newValue) => {
               :placeholder="showPlaceholder ? placeholder : ''"
               :class="
                 cn(
-                  'text-sm w-full h-full bg-background appearance-none transition-all duration-200 ease-in-out rounded-md p-3 border-none outline-none focus:outline-none focus:ring-2 ring-secondary focus:border-none text-ellipsis placeholder:text-muted-foreground shadow-sm',
+                  'text-sm w-full bg-background h-full appearance-none transition-all duration-200 ease-in-out rounded-md p-3 border-none outline-none focus:outline-none focus:ring-2 ring-primary focus:border-none text-ellipsis placeholder:text-muted-foreground',
                   showLabel
                     ? 'pt-4 pb-1 placeholder:opacity-0'
                     : 'placeholder:opacity-100',

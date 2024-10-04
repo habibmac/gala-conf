@@ -28,7 +28,7 @@ const icon = Icon;
         :class="
           cn(
             { 'mb-2': layout === 'vertical' },
-            error ? 'text-destructive' : 'text-primary'
+            error ? 'text-destructive' : 'text-body'
           )
         "
         >{{ label }}</FormLabel
@@ -49,9 +49,9 @@ const icon = Icon;
                 layout === 'horizontal'
                   ? 'flex items-center px-2 py-2.5'
                   : 'flex flex-col items-center justify-center p-4',
-                'bg-card text-sm font-medium rounded-lg border-2 shadow-sm duration-100 ease-in-out outline-none',
+                'bg-background text-sm font-medium rounded-lg border shadow-sm duration-100 ease-in-out outline-none',
                 field.value === (option.value || option.label)
-                  ? 'text-secondary peer-checked:border-secondary'
+                  ? 'text-primary peer-checked:border-primary'
                   : '',
               ]"
             >
@@ -74,7 +74,7 @@ const icon = Icon;
               <span
                 :class="[
                   field.value === (option.value || option.label)
-                    ? 'text-secondary'
+                    ? 'text-primary'
                     : '',
                 ]"
               >
@@ -82,7 +82,7 @@ const icon = Icon;
               </span>
             </div>
             <div
-              class="absolute inset-0 border border-transparent peer-checked:border-secondary rounded-lg pointer-events-none"
+              class="absolute inset-0 border border-transparent peer-checked:border-primary rounded-lg pointer-events-none"
               aria-hidden="true"
             ></div>
           </label>
