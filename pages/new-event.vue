@@ -139,7 +139,12 @@ const step1Schema = z.object({
       }
     ),
   website: z.string().url().optional(),
-  logo: z.any(),
+  logo: z
+    .string()
+    .min(1, "Logo ID is required")
+    .refine((value) => value.length > 0, {
+      message: "Please upload your logo",
+    }),
   coverImg: z.any(),
   venueName: z.string().min(1, "Venue name is required"),
   venueAddress: z.string().min(1, "Venue address is required"),
@@ -299,7 +304,6 @@ const hasDuplicateErrors = computed(() => {
 });
 
 const handleStepChange = (step: number) => {
-  console.log("Step changed to", step);
   currentStep.value = step;
 };
 
@@ -403,17 +407,17 @@ function onSubmit(formData: FormData) {
                 wrapperClass="grid grid-cols-2 gap-2 mt-2 sm:grid-cols-3"
               />
               <FieldInputText name="website" label="Website" />
-              <ImageUpload
+              <FieldImageUpload
                 name="logo"
                 label="Logo"
                 id="logo-upload"
                 type="logo"
               />
-              <ImageUpload
+              <FieldImageUpload
                 name="coverImg"
                 label="Cover Image"
                 id="cover-img-upload"
-                type="coverImg"
+                type="cover"
               />
 
               <div class="grid sm:grid-cols-3 gap-4">
@@ -592,7 +596,6 @@ function onSubmit(formData: FormData) {
                           quota: 0,
                         })
                       "
-                      variant="ghost"
                       class="mt-2 flex gap-1"
                     >
                       <Icon
@@ -800,7 +803,6 @@ function onSubmit(formData: FormData) {
                           sessions: [],
                         })
                       "
-                      variant="ghost"
                       class="mt-2 flex gap-1"
                     >
                       <Icon
@@ -822,19 +824,16 @@ function onSubmit(formData: FormData) {
           <FormStep>
             <!-- Venue, Billing, and Agreement -->
             <div class="space-y-6">
-              <FieldInput
+              <FieldInputText
                 name="bankName"
                 label="Bank Name"
                 type="text"
-                placeholder="Your bank name..."
               />
-              <FieldInput
+              <FieldInputText
                 name="bankAccount"
                 label="Bank Account Number"
                 type="text"
-                placeholder="Your bank account number..."
               />
-
               <FormField v-slot="{ value, handleChange }" name="acceptTerms">
                 <FormItem
                   class="flex flex-row items-start gap-x-3 space-y-0 rounded-md border p-4 shadow"
