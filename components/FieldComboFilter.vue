@@ -24,7 +24,6 @@ import { cn } from "@/lib/utils";
 const props = defineProps<{
   name: string;
   defaultValue?: string;
-  modelValue?: string;
   class?: HTMLAttributes["class"];
   label?: string;
   placeholder?: string;
@@ -43,7 +42,7 @@ const {
   value,
   validate,
   resetField,
-  handleChange: fieldHandleChange,
+  handleChange,
 } = useField(() => props.name, undefined, {
   initialValue: props.defaultValue,
 });
@@ -64,14 +63,13 @@ const handleBlur = async () => {
   await validate();
 };
 
-const { cityOptions, isLoading, hasMinLength, searchCities, selectedCity } = useCitySearch(
-  ref(props.defaultValue || "")
-);
+const { cityOptions, isLoading, hasMinLength, searchCities, selectedCity } =
+  useCitySearch(value);
 
 const selectCity = (city: CityOption) => {
   value.value = city.city;
   selectedCity.value = city;
-  fieldHandleChange(city.city);
+  handleChange(city.city);
   emits("update:modelValue", city.city);
   emits("select", {
     city: city.city,
@@ -96,11 +94,14 @@ const updateQuery = (event: Event) => {
   searchCities(query);
 };
 
-const displayValue = (item: unknown): string => {
+const displayValue = (item: unknown): any => {
   if (typeof item === "object" && item !== null && "city" in item) {
     return (item as CityOption).city;
+  } else {
+    if (value) {
+      return value.value;
+    }
   }
-  return String(value.value);
 };
 
 watch(value, (newValue) => {
@@ -115,7 +116,7 @@ watch(value, (newValue) => {
 <template>
   <FormField :name="name">
     <FormItem :class="wrapperClass">
-      <Combobox v-model="selectedCity" @update:modelValue="selectCity">
+      <Combobox v-model="value" @update:modelValue="selectCity">
         <div class="group relative transition-all duration-200">
           <FormLabel
             :for="props.name"
@@ -143,7 +144,7 @@ watch(value, (newValue) => {
               <ComboboxInput
                 id="city-search"
                 :displayValue="displayValue"
-                :modelValue="value"
+                v-model="value"
                 @change="updateQuery"
                 @focus="handleFocus"
                 @blur="handleBlur"
@@ -158,29 +159,31 @@ watch(value, (newValue) => {
                   )
                 "
               />
-              <ComboboxButton
-                class="absolute inset-y-0 right-0 flex items-center pr-2"
-              >
-                <Icon
-                  v-if="isLoading"
-                  icon="eos-icons:loading"
-                  class="h-5 w-5 animate-spin"
-                  aria-hidden="true"
-                />
-                <Icon
-                  v-else-if="selectedCity"
-                  icon="heroicons:x-mark"
-                  @click.stop="clearSelection"
-                  class="h-5 w-5 cursor-pointer"
-                  aria-hidden="true"
-                />
-                <Icon
-                  v-else
-                  icon="heroicons:chevron-down"
-                  class="h-4 w-4"
-                  aria-hidden="true"
-                />
-              </ComboboxButton>
+              <ClientOnly>
+                <ComboboxButton
+                  class="absolute inset-y-0 right-0 flex items-center pr-2"
+                >
+                  <Icon
+                    v-if="isLoading"
+                    icon="eos-icons:loading"
+                    class="h-5 w-5 animate-spin"
+                    aria-hidden="true"
+                  />
+                  <Icon
+                    v-else-if="selectedCity"
+                    icon="heroicons:x-mark"
+                    @click.stop="clearSelection"
+                    class="h-5 w-5 cursor-pointer"
+                    aria-hidden="true"
+                  />
+                  <Icon
+                    v-else
+                    icon="heroicons:chevron-down"
+                    class="h-4 w-4"
+                    aria-hidden="true"
+                  />
+                </ComboboxButton>
+              </ClientOnly>
             </div>
           </FormControl>
         </div>
@@ -196,7 +199,7 @@ watch(value, (newValue) => {
               v-if="cityOptions.length === 0 && value !== ''"
               class="relative cursor-default select-none py-2 px-4"
             >
-              {{ hasMinLength ? 'No cities found.' : 'Type more to search...' }}
+              {{ hasMinLength ? "No cities found." : "Type more to search..." }}
             </div>
             <ComboboxOption
               v-for="city in cityOptions"

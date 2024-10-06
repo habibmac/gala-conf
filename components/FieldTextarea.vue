@@ -13,7 +13,6 @@ import {
 const props = defineProps<{
   name: string;
   defaultValue?: string;
-  modelValue?: string;
   class?: HTMLAttributes["class"];
   label?: string;
   placeholder?: string;
