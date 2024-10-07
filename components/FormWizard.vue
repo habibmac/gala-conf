@@ -92,14 +92,17 @@ onBeforeRouteLeave((to, from, next) => {
     <header
       class="bg-muted/30 sticky backdrop-blur-sm w-full px-4 py-5 border-b"
     >
-      <div class="flex justify-between items-center gap-2">
-        <slot name="form-back-link">
-          <div></div>
-        </slot>
+      <div class="relative flex justify-between items-center gap-2">
+        <div class="absolute top-1/2 -translate-y-1/2 left-0 md:left-5 z-10">
+          <slot name="form-back-link">
+            <div></div>
+          </slot>
+        </div>
+
         <slot name="form-steps">
           <div></div>
         </slot>
-        <div class="flex items-center space-x-2 shrink-0">
+        <div class="flex items-center space-x-2 absolute top-1/2 -translate-y-1/2 right-0 md:right-5">
           <Button
             v-if="hasPrevious"
             @click.prevent="goToPrev"
@@ -119,13 +122,10 @@ onBeforeRouteLeave((to, from, next) => {
       </div>
     </header>
 
-    <div class="flex-1 grow">
-      <div class="container pt-5 pb-40">
-        <div class="mx-auto max-w-3xl py-10">
-          
-          <slot name="form-content" />
-        </div>
-      </div>
+    <!-- <pre>{{ values }}</pre> -->
+
+    <div class="flex-1 grow pb-32">
+      <slot name="form-content" />
     </div>
   </form>
 </template>
