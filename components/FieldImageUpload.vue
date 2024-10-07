@@ -236,75 +236,75 @@ watch(fieldValue, (newValue) => {
     <FormItem>
       <FormControl class="relative">
         <ClientOnly>
-          <div
-            :class="
-              cn({
-                'pattern-bg': props.type === 'cover',
-              })
-            "
-          >
-            <template v-if="props.type === 'logo'">
-              <FilePond
-                :name="props.name"
-                :id="id"
-                :value="fieldValue"
-                :label-idle="labelIdle"
-                :files="files"
-                :accepted-file-types="['image/*']"
-                :server="server"
-                :max-file-size="'1MB'"
-                @updatefiles="handleUpdateFiles"
-                v-bind="filePondOptions"
-                :class="
-                  cn('filepond-custom', {
-                    'filepond--logo': props.type === 'logo',
-                    'has-error': error,
-                  })
-                "
-                :credits="[]"
+          <template v-if="props.type === 'logo'">
+            <FilePond
+              :name="props.name"
+              :id="id"
+              :value="fieldValue"
+              :label-idle="labelIdle"
+              :files="files"
+              :accepted-file-types="['image/*']"
+              :server="server"
+              :max-file-size="'1MB'"
+              @updatefiles="handleUpdateFiles"
+              v-bind="filePondOptions"
+              :class="
+                cn('filepond-custom', {
+                  'filepond--logo': props.type === 'logo',
+                  'has-error': error,
+                })
+              "
+              :credits="[]"
+            />
+          </template>
+          <template v-else-if="props.type === 'cover'">
+            <div
+              :class="
+                cn({
+                  'pattern-bg inset-0 absolute dark:opacity-25':
+                    props.type === 'cover',
+                })
+              "
+            ></div>
+            <div
+              v-if="uploadedFile"
+              class="absolute inset-0 flex items-center justify-center aspect-[851/315]"
+            >
+              <img
+                :src="uploadedFile"
+                alt="Cover image"
+                class="object-cover w-full h-full pointer-events-none"
               />
-            </template>
-            <template v-else-if="props.type === 'cover'">
-              <div
-                v-if="uploadedFile"
-                class="absolute inset-0 flex items-center justify-center aspect-[851/315]"
+              <Button
+                variant="outline"
+                class="absolute top-4 right-4"
+                @click.prevent="handleRemoveCover"
+                size="sm"
               >
-                <img
-                  :src="uploadedFile"
-                  alt="Cover image"
-                  class="object-cover w-full h-full pointer-events-none"
-                />
-                <Button
-                  variant="outline"
-                  class="absolute top-4 right-4"
-                  @click.prevent="handleRemoveCover"
-                  size="sm"
-                >
-                  Remove
-                </Button>
-              </div>
-              <FilePond
-                v-else
-                :name="props.name"
-                :id="id"
-                :value="fieldValue"
-                :label-idle="labelIdle"
-                :files="files"
-                :accepted-file-types="['image/*']"
-                :server="server"
-                :max-file-size="'1MB'"
-                @updatefiles="handleUpdateFiles"
-                v-bind="filePondOptions"
-                :class="
-                  cn('filepond-custom', {
-                    'filepond--cover': props.type === 'cover',
-                    'has-error': error,
-                  })
-                "
-                :credits="[]"
-              />
-            </template>
-          </div>
+                Remove
+              </Button>
+            </div>
+            <FilePond
+              v-else
+              :name="props.name"
+              :id="id"
+              :value="fieldValue"
+              :label-idle="labelIdle"
+              :files="files"
+              :accepted-file-types="['image/*']"
+              :server="server"
+              :max-file-size="'1MB'"
+              @updatefiles="handleUpdateFiles"
+              v-bind="filePondOptions"
+              :class="
+                cn('filepond-custom', {
+                  'filepond--cover': props.type === 'cover',
+                  'has-error': error,
+                })
+              "
+              :credits="[]"
+            />
+          </template>
         </ClientOnly>
       </FormControl>
       <Transition name="fade">
@@ -347,16 +347,15 @@ watch(fieldValue, (newValue) => {
     }
 
     .filepond--drop-label {
-      @apply h-full text-sm font-semibold text-muted-foreground;
-    }
-
-    .filepond--label-wrapper {
-      @apply font-semibold text-base;
-      .filepond--label-action {
-        @apply text-primary no-underline;
+      @apply h-full text-sm;
+      .filepond--label-wrapper {
+        @apply font-semibold;
+        .filepond--label-action {
+          @apply text-primary no-underline;
+        }
       }
       .filepond--label-info {
-        @apply text-muted-foreground text-xs;
+        @apply text-muted-foreground;
       }
     }
 
