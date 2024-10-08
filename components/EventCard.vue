@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import EventCover from "@/components/EventCover.vue";
+import { devImgPath } from "~/utils";
+import { cn } from "~/lib/utils";
 
 defineProps({
   event: {
@@ -19,15 +21,21 @@ defineProps({
 <template>
   <NuxtLink
     :to="`/event/${event.id}`"
-    class="relative mx-auto flex flex-col max-w-xs sm:max-w-none overflow-hidden rounded-lg border border-border bg-card hover:border-secondary transition w-full sm:flex-row"
+    class="relative mx-auto flex flex-col max-w-xs sm:max-w-none overflow-hidden rounded-lg border border-border bg-card dark:bg-slate-900 hover:border-primary transition w-full sm:flex-row group"
   >
     <!-- Image -->
-    <EventCover
-      class="relative mx-auto inline-block w-full max-w-40 shrink-0 p-3 sm:block"
-      :class="[isPast ? 'sm:h-32 sm:w-32' : 'sm:h-40 sm:w-40']"
-      :title="event.title"
-      :src="event.logo"
-    />
+    <div class="relative flex items-center justify-center w-full sm:w-44 overflow-hidden md:shrink-0 mx-auto p-3"> 
+      <EventCover
+        :class="cn( 'scale-125 absolute transition-transform duration-200 group-hover:scale-150 group-hover:blur-lg inset-0 w-full h-full blur-xl opacity-25 dark:opacity-45 object-cover', 'z-0')"
+        :title="event.title"
+        :src="event.logo"
+      />
+      <EventCover
+        :class="cn(isPast ? 'h-32 w-32' : 'h-40 w-40', 'z-10')"
+        :title="event.title"
+        :src="event.logo"
+      />
+    </div>
 
     <!-- Content -->
     <div class="flex grow flex-col p-5 text-center sm:text-left">

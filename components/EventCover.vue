@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/vue";
+import { devImgPath } from "~/utils";
 
 const props = defineProps({
   src: {
@@ -9,7 +9,7 @@ const props = defineProps({
   },
   title: {
     type: String,
-    required: true,
+    default: '',
   },
   size: {
     type: Number,
@@ -32,18 +32,14 @@ const props = defineProps({
   },
 });
 
-function modifyImgPath() {
-  // If is dev environment, replace .test with .com
-  if (import.meta.env.MODE === "development") {
-    const modifiedPath = props.src.replace(".test", ".com");
-    return modifiedPath;
-  }
-  return props.src;
-}
+const imgTitle = computed(() => {
+  return props.title || "Event Logo";
+});
+
 </script>
 <template>
-  <Avatar :class="cn(wrapperClass, 'aspect-square shrink-0')" shape="eventLogo">
-    <AvatarImage :src="modifyImgPath()" alt="title" />
+  <Avatar :class="wrapperClass" shape="eventLogo">
+    <AvatarImage :src="devImgPath(src)" :alt="title" loading="lazy" />
     <AvatarFallback class="bg-muted h-full w-full p-1 flex items-center justify-center">
 			<Icon icon="heroicons-solid:photograph" class="text-muted-foreground w-10 h-10" />
 		</AvatarFallback>
