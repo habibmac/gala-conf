@@ -158,7 +158,7 @@ const step2Schema = z
     eventDatetimes: z
       .array(
         z.object({
-          name: z.string().min(1, "Name is required"),
+          name: z.string().min(1, "Session Name is required"),
           rangeDate: z.array(z.string()).length(2, "Date range is required"),
           quota: z.number().int().min(1, "Quota must be more than 0"),
         })
@@ -167,7 +167,7 @@ const step2Schema = z
     tickets: z
       .array(
         z.object({
-          name: z.string().min(1, "Name is required"),
+          name: z.string().min(1, "Ticket Name is required"),
           rangeDate: z.array(z.string()).length(2, "Date range is required"),
           price: z.number().min(0, "Price must be a positive number"),
           quota: z.number().int().min(1, "Quota must be more than 0"),
@@ -325,22 +325,10 @@ function onSubmit(formData: FormData) {
         @update:currentStep="handleStepChange"
         @formValuesUpdate="updateFormValues"
       >
-        <template v-slot:form-back-link>
-          <Button
-            as-child
-            variant="link"
-            class="flex shrink-0 text-muted-foreground"
-          >
-            <NuxtLink to="/my-events" class="items-center flex gap-1">
-              <Icon icon="heroicons:arrow-long-left" class="size-5" />
-              <span class="hidden lg:inline-block"> Back to My Events </span>
-            </NuxtLink>
-          </Button>
-        </template>
         <template v-slot:form-steps>
           <div class="flex-1 relative w-full overflow-auto">
             <div
-              class="flex py-3 sm:py-6 px-4 sm:px-0  space-x-0 sm:space-x-6 sm:max-w-5xl sm:justify-center sm:items-center mx-auto"
+              class="flex py-3 sm:py-6 px-4 sm:px-0  space-x-0 sm:space-x-6 sm:max-w-5xl justify-center items-center mx-auto"
             >
               <div
                 v-for="(step, index) in validationSchema.map(
@@ -399,7 +387,7 @@ function onSubmit(formData: FormData) {
             <!-- Event Details -->
             <div class="container pb-10">
               <div class="mx-auto max-w-3xl py-10">
-                <div class="-mt-40 mb-6">
+                <div class="-mt-40 mx-auto sm:-mt-40 mb-6 text-center">
                   <FieldImageUpload
                     name="logo"
                     label="Logo"
@@ -431,6 +419,7 @@ function onSubmit(formData: FormData) {
                   <FieldInputText name="website" label="Website" />
 
                   <div class="grid sm:grid-cols-3 gap-4">
+                    <label class="font-semibold text-sm">Venue</label>
                     <FieldInputText
                       name="venueName"
                       label="Venue Name"
@@ -446,8 +435,8 @@ function onSubmit(formData: FormData) {
                       label="Venue City"
                       @select="selectCity"
                     />
-                    <FieldInputText name="venueState" label="Venue State" />
-                    <FieldInputText name="venueCountry" label="Venue Country" />
+                    <FieldInputText name="venueState" label="Venue State" disabled />
+                    <FieldInputText name="venueCountry" label="Venue Country" disabled />
                   </div>
                 </div>
               </div>

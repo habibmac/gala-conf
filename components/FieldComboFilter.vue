@@ -115,7 +115,7 @@ watch(value, (newValue) => {
 
 <template>
   <FormField :name="name">
-    <FormItem :class="wrapperClass">
+    <FormItem :class="cn('relative', wrapperClass)">
       <Combobox v-model="value" @update:modelValue="selectCity">
         <div class="group relative transition-all duration-200">
           <FormLabel
@@ -193,7 +193,7 @@ watch(value, (newValue) => {
           leaveTo="opacity-0"
         >
           <ComboboxOptions
-            class="absolute z-10 mt-1 max-h-60 max-w-sm w-full overflow-auto rounded-md bg-card py-1 shadow-lg focus:outline-none text-sm"
+            class="absolute z-20 max-h-60 max-w-sm w-full overflow-auto rounded-md bg-card py-1 shadow-lg focus:outline-none text-sm"
           >
             <div
               v-if="cityOptions.length === 0 && value !== ''"

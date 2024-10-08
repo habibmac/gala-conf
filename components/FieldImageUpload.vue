@@ -268,7 +268,7 @@ watch(fieldValue, (newValue) => {
             ></div>
             <div
               v-if="uploadedFile"
-              class="absolute inset-0 flex items-center justify-center aspect-[851/315]"
+              class="absolute inset-0 flex h-full w-full items-center justify-center aspect-[851/315]"
             >
               <img
                 :src="uploadedFile"
@@ -360,7 +360,7 @@ watch(fieldValue, (newValue) => {
     }
 
     .filepond--image-preview-wrapper {
-      @apply rounded-md overflow-hidden;
+      @apply h-full rounded-md overflow-hidden;
     }
   }
 }

@@ -17,6 +17,7 @@ const props = defineProps<{
   label?: string;
   placeholder?: string;
   wrapperClass?: string;
+  disabled?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -107,12 +108,14 @@ watch(value, (newValue) => {
                   showLabel
                     ? 'pt-4 pb-1 placeholder:opacity-0'
                     : 'placeholder:opacity-100',
-                  props.class
+                  disabled ? 'cursor-not-allowed bg-muted' : '',
+                  props.class,
                 )
               "
               @input="handleInput"
               @focus="handleFocus"
               @blur="handleBlur"
+              :disabled="props.disabled"
             />
           </div>
         </FormControl>

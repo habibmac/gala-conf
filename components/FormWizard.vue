@@ -93,31 +93,49 @@ onBeforeRouteLeave((to, from, next) => {
       class="bg-muted/30 sticky backdrop-blur-sm w-full px-4 py-5 border-b"
     >
       <div class="relative flex justify-between items-center gap-2">
-        <div class="absolute top-1/2 -translate-y-1/2 left-0 md:left-5 z-10">
-          <slot name="form-back-link">
-            <div></div>
-          </slot>
+        <div
+          class="absolute top-1/2 -translate-y-1/2 hidden lg:block lg:left-5 z-10"
+        >
+          <Button
+            as-child
+            variant="link"
+            class="flex shrink-0 text-muted-foreground"
+          >
+            <NuxtLink to="/my-events" class="items-center flex gap-1">
+              <Icon icon="heroicons:arrow-long-left" class="size-5" />
+              <span class="hidden lg:inline-block"> Back to My Events </span>
+            </NuxtLink>
+          </Button>
         </div>
 
         <slot name="form-steps">
           <div></div>
         </slot>
-        <div class="flex items-center space-x-2 absolute top-1/2 -translate-y-1/2 right-0 md:right-5">
-          <Button
-            v-if="hasPrevious"
-            @click.prevent="goToPrev"
-            variant="outline"
-            class="flex items-center justify-center gap-1"
-          >
-            <Icon icon="heroicons:chevron-left" class="size-4 sm:hidden" />
-            <span class="hidden sm:inline-block">Previous</span>
-          </Button>
-          <Button type="submit" class="flex items-center justify-center gap-1">
-            <span class="hidden sm:inline-block">{{
-              isLastStep ? "Save draft" : "Next"
-            }}</span>
-            <Icon icon="heroicons:chevron-right" class="size-4 sm:hidden" />
-          </Button>
+
+        <div
+          class="absolute w-full lg:w-auto lg:right-0 top-1/2 -translate-y-1/2 flex justify-center"
+        >
+          <div class="flex w-full justify-between gap-3">
+            <Button
+              v-if="hasPrevious"
+              @click.prevent="goToPrev"
+              variant="outline"
+              class="flex items-center justify-center gap-1"
+            >
+              <Icon icon="heroicons:chevron-left" class="size-4 sm:hidden" />
+              <span class="hidden sm:inline-block">Previous</span>
+            </Button>
+            <div v-else></div>
+            <Button
+              type="submit"
+              class="flex left-auto items-center justify-center gap-1"
+            >
+              <span class="hidden sm:inline-block">{{
+                isLastStep ? "Save draft" : "Next"
+              }}</span>
+              <Icon icon="heroicons:chevron-right" class="size-4 sm:hidden" />
+            </Button>
+          </div>
         </div>
       </div>
     </header>
