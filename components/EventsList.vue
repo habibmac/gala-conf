@@ -53,7 +53,7 @@ watch(
 
 <template>
   <div v-if="isLoading || isRefetching" class="grid h-full grid-cols-1 gap-6">
-    <Skeleton class="h-80 bg-muted w-full sm:h-32 max-w-xs sm:max-w-none mx-auto" />
+    <Skeleton class="h-80 bg-muted-foreground/10 w-full sm:h-32 max-w-xs sm:max-w-none mx-auto" />
   </div>
   <template v-else-if="isError">
     <div class="flex h-32 items-center justify-center">
@@ -68,25 +68,16 @@ watch(
       </div>
 
       <!-- Pagination -->
-      <Pagination
-        v-if="pagination && pagination.total_pages > 1"
-        :total-pages="pagination.total_pages"
-        :current-page="currentPage"
-        @update:page="updatePage"
-      />
+      <Pagination v-if="pagination && pagination.total_pages > 1" :total-pages="pagination.total_pages"
+        :current-page="currentPage" @update:page="updatePage" />
     </div>
-    <EmptyState
-      v-else
-      :title="evtStatus === 'active' ? 'No Active Events' : 'No Past Events'"
-      :description="
+    <EmptyState v-else :title="evtStatus === 'active' ? 'No Active Events' : 'No Past Events'" :description="
         evtStatus === 'active'
           ? 'You have no active events. Create one now!'
           : 'You have no past events.'
-      "
-      :cta="{
+      " :cta="{
         label: 'Create Event',
         to: { name: 'new-event' },
-      }"
-    />
+      }" />
   </template>
 </template>

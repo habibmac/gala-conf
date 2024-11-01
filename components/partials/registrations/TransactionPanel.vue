@@ -114,24 +114,24 @@ onUnmounted(async () => {
       v-show="transactionPanelOpen"
     >
       <div
-				class="no-scrollbar sticky top-16 h-[calc(100dvh-64px)] w-full shrink-0 overflow-y-auto overflow-x-hidden border-l border-slate-200 bg-slate-50 sm:w-[390px] dark:border-slate-700 dark:bg-gradient-to-b dark:from-slate-800 dark:to-slate-900"      >
+				class="no-scrollbar sticky top-16 h-[calc(100dvh-64px)] w-full shrink-0 overflow-y-auto overflow-x-hidden border-l border-border bg-muted sm:w-[390px]">
         <button
           ref="closeBtn"
           @click.stop="$emit('close-transactionpanel')"
           class="group absolute right-0 top-0 mr-6 mt-6 p-2"
         >
-          <Icon icon="iconamoon:close-thin" class="w-6 h-6 text-slate-800 dark:text-slate-100" />
+          <Icon icon="iconamoon:close-thin" class="w-6 h-6" />
         </button>
 
         <div class="px-4 py-8 lg:px-8">
           <div v-if="isRefetching" class="grid gap-4">
             <div>
               <Skeleton
-                class="h-8 w-40 mx-auto p-4 bg-white dark:bg-slate-700/60"
+                class="h-8 w-40 mx-auto p-4 bg-muted-foreground/10"
               />
             </div>
-            <Skeleton class="h-96 p-4 bg-white dark:bg-slate-700/60" />
-            <Skeleton class="h-20 p-4 bg-white dark:bg-slate-700/60" />
+            <Skeleton class="h-96 p-4 bg-muted-foreground/10" />
+            <Skeleton class="h-20 p-4 bg-muted-foreground/10" />
           </div>
 
           <div v-if="loading" class="absolute left-0 top-0 z-10 w-full">
@@ -200,7 +200,7 @@ onUnmounted(async () => {
                     <qr-code :value="data.reg_url_link"></qr-code>
                   </ClientOnly>
                   <span
-                    class="number font-semibold text-slate-600 dark:text-slate-300 tabular font-mono"
+                    class="number font-semibold  tabular font-mono"
                     >{{ data.code }}</span
                   >
                 </div>
@@ -398,7 +398,7 @@ onUnmounted(async () => {
                   :key="answer.id"
                   class="transition-colors px-4 py-2 flex flex-col hover:bg-slate-200/70 dark:hover:bg-slate-900"
                 >
-                  <div class="text-slate text-xs dark:text-slate-500">
+                  <div class="text-muted-foreground text-xs dark:text-slate-500">
                     {{ answer.qst }}
                   </div>
                   <div class="font-medium text-slate-800 dark:text-slate-100">

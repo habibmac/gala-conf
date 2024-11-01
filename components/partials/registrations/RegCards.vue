@@ -27,7 +27,7 @@ const summaryData = computed(() => data?.value);
   <div v-if="isLoading || isRefetching" class="grid gap-4 grid-cols-12">
     <Skeleton
       v-for="i in 4"
-      class="h-28 rounded-xl col-span-12 sm:col-span-6 md:col-span-3 bg-muted"
+      class="h-28 rounded-xl col-span-12 sm:col-span-6 md:col-span-3 bg-muted-foreground/10"
     />
   </div>
   <div v-else-if="isError" class="py-16">
