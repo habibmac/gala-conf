@@ -56,15 +56,6 @@ const login = () => {
         <Logo class="h-12 w-12 fill-white" />
         <span class="sr-only">Galanesia</span>
       </div>
-      <div class="relative z-20 mt-auto">
-        <blockquote class="space-y-2">
-          <p class="text-lg">
-            &ldquo;
-            .&rdquo;
-          </p>
-          <footer class="text-sm">Sofia Davis</footer>
-        </blockquote>
-      </div>
     </div>
     <div class="lg:p-8">
       <div
