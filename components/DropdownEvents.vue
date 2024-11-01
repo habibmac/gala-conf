@@ -1,30 +1,24 @@
 <script setup lang="ts">
-import { useRouter } from "vue-router";
-import {
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions,
-} from "@headlessui/vue";
-import EventCover from "./EventCover.vue";
-import SpinnerDots from "@/components/SpinnerDots.vue";
-import { ref, watch } from "vue";
-import { Icon } from "@iconify/vue";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { cn } from "~/lib/utils";
-import { useDebounceFn } from "@vueuse/core";
+import { useRouter } from 'vue-router';
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/vue';
+import EventCover from './EventCover.vue';
+import SpinnerDots from '@/components/SpinnerDots.vue';
+import { ref, watch } from 'vue';
+import { Icon } from '@iconify/vue';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { cn } from '~/lib/utils';
+import { useDebounceFn } from '@vueuse/core';
 
 const router = useRouter();
 const selectedEventId = ref<string | null>(null);
-const search = ref<string>(""); // Provide a default value for search
+const search = ref<string>(''); // Provide a default value for search
 
 // Fetch events
 const { event, isLoading, isError, error } = useEvent();
-const { events, page, maxPage, prevPage, nextPage, refetch, isRefetching } =
-  useEvents({
-    search,
-  });
+const { events, page, maxPage, prevPage, nextPage, refetch, isRefetching } = useEvents({
+  search,
+});
 
 // User action to select an event
 const handleselectEvent = (newEventId: string) => {
@@ -39,20 +33,20 @@ const isSelected = (eventId: string) => {
 // Handle search with debounce
 const debouncedSearch = useDebounceFn((newValue: string) => {
   if (newValue.length > 3) {
-    console.log("Triggering refetch for search");
+    console.log('Triggering refetch for search');
     page.value = 1;
     refetch();
   } else if (newValue.length === 0) {
-    console.log("Triggering refetch for empty search");
+    console.log('Triggering refetch for empty search');
     page.value = 1;
     refetch();
   } else {
-    console.log("Search length not sufficient, no refetch triggered");
+    console.log('Search length not sufficient, no refetch triggered');
   }
 }, 300);
 
 watch(search, (newValue) => {
-  console.log("Search value changed:", newValue);
+  console.log('Search value changed:', newValue);
   debouncedSearch(newValue);
 });
 </script>
@@ -67,36 +61,20 @@ watch(search, (newValue) => {
             <div v-if="isLoading" class="flex w-full justify-center px-5">
               <SpinnerDots class="h-8 w-8 text-blue-700" />
             </div>
-            <div
-              v-else-if="isError"
-              class="flex w-auto text-xs justify-center px-5"
-            >
+            <div v-else-if="isError" class="flex w-auto text-xs justify-center px-5">
               ⚠️ Cannot fetch events, please try again later.
             </div>
-            <div
-              v-else-if="event"
-              class="flex w-full items-center justify-between space-x-1 pl-4 md:pl-2 pr-10"
-            >
+            <div v-else-if="event" class="flex w-full items-center justify-between space-x-1 pl-4 md:pl-2 pr-10">
               <div class="flex grow items-center space-x-2 sm:space-x-3">
-                <EventCover
-                    class="h-6 w-6"
-                    :src="event.logo"
-                    :title="event.title"
-                  />
-                <div
-                  class="flex items-center font-medium leading-tight w-px sm:w-auto"
-                >
+                <EventCover class="h-6 w-6" :src="event.logo" :title="event.title" />
+                <div class="flex items-center font-medium leading-tight w-px sm:w-auto">
                   <span class="line-clamp-2">{{ event.title }}</span>
                 </div>
               </div>
               <div class="shrink-0">
-                <Badge :class="`event-package ${event.package}`">{{
-                  event.package
-                }}</Badge>
+                <Badge :class="`event-package ${event.package}`">{{ event.package }}</Badge>
               </div>
-              <div
-                class="pointer-events-none absolute inset-y-0 right-0 flex shrink-0 items-center pr-2"
-              >
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex shrink-0 items-center pr-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-5 w-5 transition"
@@ -141,21 +119,10 @@ watch(search, (newValue) => {
                 class="relative grid grow auto-rows-min grid-cols-1 overflow-y-auto overscroll-y-contain gap-0.5 pb-10 sm:pb-4 md:max-h-96 scroll-area"
               >
                 <div class="sticky z-10 top-0 pointer-events-none">
-                  <div
-                    class="px-2 py-3 bg-white dark:bg-slate-950 relative pointer-events-auto"
-                  >
-                    <div
-                      class="absolute top-1/2 -translate-y-1/2 left-5 pointer-events-none"
-                    >
-                      <SpinnerDots
-                        v-if="isRefetching"
-                        class="h-5 w-5 text-slate-400 dark:text-slate-500"
-                      />
-                      <Icon
-                        v-else
-                        class="h-5 w-5 text-slate-400 dark:text-slate-500"
-                        icon="heroicons-outline:search"
-                      />
+                  <div class="px-2 py-3 bg-white dark:bg-slate-950 relative pointer-events-auto">
+                    <div class="absolute top-1/2 -translate-y-1/2 left-5 pointer-events-none">
+                      <SpinnerDots v-if="isRefetching" class="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                      <Icon v-else class="h-5 w-5 text-slate-400 dark:text-slate-500" icon="heroicons-outline:search" />
                     </div>
                     <Input
                       type="search"
@@ -164,9 +131,7 @@ watch(search, (newValue) => {
                       v-model="search"
                     />
                   </div>
-                  <div
-                    class="h-3 bg-gradient-to-b from-white dark:from-slate-950"
-                  ></div>
+                  <div class="h-3 bg-gradient-to-b from-white dark:from-slate-950"></div>
                 </div>
 
                 <ul class="-mt-4 flex flex-col px-2 gap-1" v-if="events.length > 0">
@@ -187,15 +152,9 @@ watch(search, (newValue) => {
                       <SpinnerDots class="mx-auto h-10 w-10 text-blue-50" />
                     </template>
                     <template v-else-if="event">
-                      <EventCover
-                        :src="event?.logo"
-                        :title="event.title"
-                      />
+                      <EventCover :src="event?.logo" :title="event.title" />
                       <p
-                        :class="[
-                          isSelected(event.id) ? 'font-bold' : 'font-medium',
-                          'line-clamp-2 pr-5 leading-tight',
-                        ]"
+                        :class="[isSelected(event.id) ? 'font-bold' : 'font-medium', 'line-clamp-2 pr-5 leading-tight']"
                       >
                         {{ event.title }}
                       </p>
@@ -207,11 +166,9 @@ watch(search, (newValue) => {
                     </template>
                   </ListboxOption>
                 </ul>
-                <div v-else class="flex w-full justify-center py-10">
-                  No events found
-                </div>
+                <div v-else class="flex w-full justify-center py-10">No events found</div>
               </div>
-              <template v-if="events.length >0">
+              <template v-if="events.length > 0">
                 <div
                   class="pointer-events-none absolute bottom-12 z-20 h-20 w-full bg-gradient-to-t from-white sm:hidden dark:from-slate-950"
                 ></div>
@@ -224,9 +181,7 @@ watch(search, (newValue) => {
                       size="icon"
                       v-if="page > 1"
                       @click="prevPage"
-                      :class="
-                        cn('rounded-l-md', { 'text-slate-500': page === 1 })
-                      "
+                      :class="cn('rounded-l-md', { 'text-slate-500': page === 1 })"
                     >
                       <Icon class="h-4 w-4" icon="heroicons-outline:chevron-left" />
                     </Button>
@@ -235,9 +190,7 @@ watch(search, (newValue) => {
                       size="icon"
                       v-if="page < maxPage"
                       @click="nextPage"
-                      :class="
-                        cn('rounded-l-md', { 'text-slate-500': page === 1 })
-                      "
+                      :class="cn('rounded-l-md', { 'text-slate-500': page === 1 })"
                     >
                       <Icon class="h-4 w-4" icon="heroicons-outline:chevron-right" />
                     </Button>

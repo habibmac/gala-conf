@@ -3,9 +3,9 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: [
     '@pinia/nuxt',
-    "@nuxtjs/tailwindcss",
-    "shadcn-nuxt",
-    "@nuxt/eslint",
+    '@nuxtjs/tailwindcss',
+    'shadcn-nuxt',
+    '@nuxt/eslint',
     '@vueuse/nuxt',
     '@nuxtjs/color-mode',
     'nuxt-headlessui',
@@ -16,28 +16,26 @@ export default defineNuxtConfig({
   app: {
     head: {
       bodyAttrs: {
-        class: 'font-inter'
+        class: 'font-inter',
       },
     },
   },
   build: {
-    transpile: ['@vuepic/vue-datepicker']
+    transpile: ['@vuepic/vue-datepicker'],
   },
-  css: [
-    '~/assets/scss/main.scss'
-  ],
+  css: ['~/assets/scss/main.scss'],
   colorMode: {
-    classSuffix: ''
+    classSuffix: '',
   },
   fonts: {
     google: {
       families: [
         {
           name: 'Inter',
-          styles: ['400', '500', '600', '700']
-        }
-      ]
-    }
+          styles: ['400', '500', '600', '700'],
+        },
+      ],
+    },
   },
   runtimeConfig: {
     oauthClientSecret: '',
@@ -50,9 +48,7 @@ export default defineNuxtConfig({
       oauthUrl: '',
       oauthClientId: '',
       oauthRedirectUri: '',
-    }
+    },
   },
-  plugins: [
-    '~/plugins/api.ts'
-  ],
-})
+  plugins: ['~/plugins/api.ts'],
+});

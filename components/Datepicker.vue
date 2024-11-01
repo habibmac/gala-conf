@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, toRef, computed } from "vue";
-import { addDays, endOfDay, endOfMonth, startOfDay, startOfMonth, startOfYear, subMonths } from "date-fns";
-import { id } from "date-fns/locale";
-import VueDatePicker from "@vuepic/vue-datepicker";
+import { ref, toRef, computed } from 'vue';
+import { addDays, endOfDay, endOfMonth, startOfDay, startOfMonth, startOfYear, subMonths } from 'date-fns';
+import { id } from 'date-fns/locale';
+import VueDatePicker from '@vuepic/vue-datepicker';
 
 const props = defineProps<{
   dateRange?: Date[];
   enableTimePicker?: boolean | false;
-  format?: string | "d LLL yyyy";
+  format?: string | 'd LLL yyyy';
   maxDate?: Date | null;
   minDate?: Date | null;
 }>();
@@ -16,30 +16,24 @@ const defaultDateRange = computed(() => {
   if (props.dateRange && Array.isArray(props.dateRange) && props.dateRange.length === 2) {
     return props.dateRange;
   }
-  return [
-    startOfDay(new Date()),
-    endOfDay(addDays(new Date(), 1)),
-  ];
+  return [startOfDay(new Date()), endOfDay(addDays(new Date(), 1))];
 });
 
-const emits = defineEmits(["update:dateRange"]);
+const emits = defineEmits(['update:dateRange']);
 const colorMode = useColorMode();
 
 const updateDateRange = (value: Date[]) => {
-  emits("update:dateRange", value);
+  emits('update:dateRange', value);
 };
 
 const presetDates = ref([
-  { label: "Today", value: [new Date(), new Date()] },
-  { label: "This month", value: [startOfMonth(new Date()), new Date()] },
+  { label: 'Today', value: [new Date(), new Date()] },
+  { label: 'This month', value: [startOfMonth(new Date()), new Date()] },
   {
-    label: "Last month",
-    value: [
-      startOfMonth(subMonths(new Date(), 1)),
-      endOfMonth(subMonths(new Date(), 1)),
-    ],
+    label: 'Last month',
+    value: [startOfMonth(subMonths(new Date(), 1)), endOfMonth(subMonths(new Date(), 1))],
   },
-  { label: "This year", value: [startOfYear(new Date()), new Date()] },
+  { label: 'This year', value: [startOfYear(new Date()), new Date()] },
 ]);
 </script>
 

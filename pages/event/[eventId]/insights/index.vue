@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { useQuery } from "@tanstack/vue-query";
-import { Separator } from "@/components/ui/separator";
-import { getInitials } from "@/utils";
-import { formatTimeAgo } from "@vueuse/core";
-import { Icon } from "@iconify/vue";
+import { useQuery } from '@tanstack/vue-query';
+import { Separator } from '@/components/ui/separator';
+import { getInitials } from '@/utils';
+import { formatTimeAgo } from '@vueuse/core';
+import { Icon } from '@iconify/vue';
 
 definePageMeta({
-  title: "Insights",
-  group: "reports",
+  title: 'Insights',
+  group: 'reports',
   showInMenu: true,
   order: 2,
-  icon: "solar:layers-bold-duotone",
-  packages: ["optima"],
-  roles: ["administrator", "ee_event_organizer"],
-  capabilities: ["ee_read_insights"],
-  permissions: ["ee_read_insights"],
-  layout: "dashboard-with-sidebar",
+  icon: 'solar:layers-bold-duotone',
+  packages: ['optima'],
+  roles: ['administrator', 'ee_event_organizer'],
+  capabilities: ['ee_read_insights'],
+  permissions: ['ee_read_insights'],
+  layout: 'dashboard-with-sidebar',
 });
 
 const { event, isLoading, isError } = useEvent();
@@ -29,7 +29,7 @@ const getInsights = async (evtId: Ref) => {
 };
 
 const { data, refetch, isRefetching } = useQuery({
-  queryKey: ["eventInsights", eventId],
+  queryKey: ['eventInsights', eventId],
   queryFn: () => getInsights(eventId),
   enabled: !!eventId,
 });
@@ -54,8 +54,13 @@ const { data, refetch, isRefetching } = useQuery({
           </div>
         </div>
         <div class="grid gap-4 grid-cols-1 md:grid-cols-2 2xl:grid-cols-3" v-else-if="data">
-          <NuxtLink v-for="item in data" :key="item.id" :to="`/event/${eventId}/insight/${item.id}`" custom
-            v-slot="{ href, navigate }">
+          <NuxtLink
+            v-for="item in data"
+            :key="item.id"
+            :to="`/event/${eventId}/insight/${item.id}`"
+            custom
+            v-slot="{ href, navigate }"
+          >
             <a :href="href" @click="navigate" class="group">
               <Card class="relative overflow-hidden group-hover:border-blue-600 transition-colors">
                 <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -75,7 +80,7 @@ const { data, refetch, isRefetching } = useQuery({
                   </div>
                   <div class="relative max-h-40 overflow-hidden">
                     <Separator class="my-4" label="Ticket Groups" />
-                    <div v-if="item.groups?.length" class=" grid rounded-lg gap-1">
+                    <div v-if="item.groups?.length" class="grid rounded-lg gap-1">
                       <div v-for="ticket in item.groups" :key="ticket.id" class="">
                         <div class="text-sm border p-2 font-medium rounded-md">
                           {{ ticket.name }}
@@ -91,9 +96,8 @@ const { data, refetch, isRefetching } = useQuery({
                     </div>
 
                     <div
-                      class="sticky pointer-events-none bottom-0 h-10 bg-gradient-to-t from-white inset-0 dark:from-slate-900">
-                    </div>
-
+                      class="sticky pointer-events-none bottom-0 h-10 bg-gradient-to-t from-white inset-0 dark:from-slate-900"
+                    ></div>
                   </div>
                 </CardContent>
                 <CardFooter class="flex text-xs justify-between text-slate-500">
@@ -102,9 +106,7 @@ const { data, refetch, isRefetching } = useQuery({
                     <div class="flex items-center space-x-1">
                       <Avatar class="w-5 h-5">
                         <AvatarImage :src="item.avatar" />
-                        <AvatarFallback>{{
-                          getInitials(item.author)
-                          }}</AvatarFallback>
+                        <AvatarFallback>{{ getInitials(item.author) }}</AvatarFallback>
                       </Avatar>
                       <span class="text-slate-800 font-medium dark:text-slate-300">
                         {{ item.author }}

@@ -7,7 +7,11 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "lint": "bun lint:eslint && bun lint:prettier",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier . --check",
+    "fix:prettier": "prettier --write ."
   },
   "dependencies": {
     "@chenfengyuan/vue-barcode": "^2.0.2",
@@ -51,13 +55,17 @@
     "vue": "latest",
     "vue-draggable-plus": "^0.5.3",
     "vue-filepond": "^7.0.4",
+    "xlsx": "^0.18.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@iconify-json/radix-icons": "^1.1.15",
     "@iconify/vue": "^4.1.2",
     "@nuxtjs/color-mode": "^3.4.4",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "nuxt-headlessui": "^1.2.0",
+    "prettier": "^3.3.3",
     "sass": "^1.77.8",
     "typescript": "^5.5.4"
   }

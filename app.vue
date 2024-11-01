@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { useLocalStorage } from "#imports";
+import { useLocalStorage } from '#imports';
 
 useHead({
   titleTemplate: (titleChunk) => {
     return titleChunk ? `${titleChunk} | Galanesia ID` : 'Galanesia ID';
-  }
-})
+  },
+});
 
 onMounted(() => {
-  if (useLocalStorage("sidebar-expanded", false)) {
-    document.body.classList.add("sidebar-expanded");
+  if (useLocalStorage('sidebar-expanded', false)) {
+    document.body.classList.add('sidebar-expanded');
   } else {
-    document.body.classList.remove("sidebar-expanded");
+    document.body.classList.remove('sidebar-expanded');
   }
 });
 </script>

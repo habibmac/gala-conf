@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { Button } from "@/components/ui/button";
-import { Icon } from "@iconify/vue";
+import { Button } from '@/components/ui/button';
+import { Icon } from '@iconify/vue';
 
 definePageMeta({
-  title: "Ticket Scanner",
-  group: "tools",
+  title: 'Ticket Scanner',
+  group: 'tools',
   showInMenu: true,
   order: 1,
-  icon: "solar:qr-code-bold-duotone",
-  packages: ["optima"],
-  roles: ["administrator", "ee_event_organizer"],
-  capabilities: ["ee_read_checkins"],
-  permissions: ["ee_read_checkins"],
-  layout: "dashboard-with-sidebar",
+  icon: 'solar:qr-code-bold-duotone',
+  packages: ['optima'],
+  roles: ['administrator', 'ee_event_organizer'],
+  capabilities: ['ee_read_checkins'],
+  permissions: ['ee_read_checkins'],
+  layout: 'dashboard-with-sidebar',
 });
 
 const handlePaused = (isPaused: boolean) => {
-  console.log("Paused: ", isPaused);
+  console.log('Paused: ', isPaused);
 };
 
 const isOpen = ref(false);
@@ -28,9 +28,7 @@ function toggleModal() {
 
 <template>
   <div class="container mx-auto">
-    <div
-      class="flex flex-col sm:flex-row justify-between items-start pt-10 gap-5"
-    >
+    <div class="flex flex-col sm:flex-row justify-between items-start pt-10 gap-5">
       <header class="sm:grow">
         <h1 class="h2">Ticket Scanner</h1>
       </header>
@@ -44,17 +42,11 @@ function toggleModal() {
         </div>
         <div class="hidden sm:block">
           <Button @click="toggleModal" variant="outline">
-            <Icon :icon="isOpen ? 'ei:close' : 'heroicons:camera'"
-             class="w-5 h-5"></Icon>
-            <span class="ml-2">{{ 
-              isOpen ? 'Close' : 'Use camera'
-             }}</span>
+            <Icon :icon="isOpen ? 'ei:close' : 'heroicons:camera'" class="w-5 h-5"></Icon>
+            <span class="ml-2">{{ isOpen ? 'Close' : 'Use camera' }}</span>
           </Button>
         </div>
-        <div
-          class="relative mx-auto max-h-80 max-w-60 object-center object-cover"
-          v-if="isOpen"
-        >
+        <div class="relative mx-auto max-h-80 max-w-60 object-center object-cover" v-if="isOpen">
           <BarQrScanner @paused="handlePaused" />
         </div>
       </div>

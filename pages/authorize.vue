@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from "nuxt/app";
+import { useRoute, useRouter } from 'nuxt/app';
 
-import { useAuthStore } from "@/stores";
-import SpinnerRing from "@/components/SpinnerRing.vue";
+import { useAuthStore } from '@/stores';
+import SpinnerRing from '@/components/SpinnerRing.vue';
 
 useHead({
-  title: "Authorizing...",
-})
+  title: 'Authorizing...',
+});
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -19,7 +19,7 @@ const exchangeCodeForTokens = async (code: string) => {
     // Redirect to the main page after successful authentication
     router.replace('/my-events');
   } catch (error) {
-    console.error("Failed to exchange code for tokens", error);
+    console.error('Failed to exchange code for tokens', error);
     // Redirect to login page if there's an error
     router.replace('/auth/login');
   }
@@ -37,9 +37,7 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <div
-    class="max-w-9xl mx-auto w-full px-4 py-8 flex sm:px-6 lg:px-8 min-h-screen"
-  >
+  <div class="max-w-9xl mx-auto w-full px-4 py-8 flex sm:px-6 lg:px-8 min-h-screen">
     <div class="m-auto max-w-2xl">
       <div class="px-4 text-center">
         <SpinnerRing />

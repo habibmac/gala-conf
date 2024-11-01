@@ -1,3 +1,1 @@
-<template>
-    Edit Insight
-</template>
+<template>Edit Insight</template>

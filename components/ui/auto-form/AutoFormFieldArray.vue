@@ -1,57 +1,52 @@
 <script setup lang="ts" generic="T extends z.ZodAny">
-import * as z from 'zod'
-import { computed, provide } from 'vue'
-import { Icon } from '@iconify/vue'
-import { FieldArray, FieldContextKey, useField } from 'vee-validate'
-import type { Config, ConfigItem } from './interface'
-import { beautifyObjectName, getBaseType } from './utils'
-import AutoFormField from './AutoFormField.vue'
-import AutoFormLabel from './AutoFormLabel.vue'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { FormItem, FormMessage } from '@/components/ui/form'
+import * as z from 'zod';
+import { computed, provide } from 'vue';
+import { Icon } from '@iconify/vue';
+import { FieldArray, FieldContextKey, useField } from 'vee-validate';
+import type { Config, ConfigItem } from './interface';
+import { beautifyObjectName, getBaseType } from './utils';
+import AutoFormField from './AutoFormField.vue';
+import AutoFormLabel from './AutoFormLabel.vue';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { FormItem, FormMessage } from '@/components/ui/form';
 
 const props = defineProps<{
-  fieldName: string
-  required?: boolean
-  config?: Config<T>
-  schema?: z.ZodArray<T>
-  disabled?: boolean
-}>()
+  fieldName: string;
+  required?: boolean;
+  config?: Config<T>;
+  schema?: z.ZodArray<T>;
+  disabled?: boolean;
+}>();
 
-function isZodArray(
-  item: z.ZodArray<any> | z.ZodDefault<any>,
-): item is z.ZodArray<any> {
-  return item instanceof z.ZodArray
+function isZodArray(item: z.ZodArray<any> | z.ZodDefault<any>): item is z.ZodArray<any> {
+  return item instanceof z.ZodArray;
 }
 
-function isZodDefault(
-  item: z.ZodArray<any> | z.ZodDefault<any>,
-): item is z.ZodDefault<any> {
-  return item instanceof z.ZodDefault
+function isZodDefault(item: z.ZodArray<any> | z.ZodDefault<any>): item is z.ZodDefault<any> {
+  return item instanceof z.ZodDefault;
 }
 
 const itemShape = computed(() => {
-  if (!props.schema)
-    return
+  if (!props.schema) return;
 
   const schema: z.ZodAny = isZodArray(props.schema)
     ? props.schema._def.type
     : isZodDefault(props.schema)
-    // @ts-expect-error missing schema
-      ? props.schema._def.innerType._def.type
-      : null
+      ? // @ts-expect-error missing schema
+        props.schema._def.innerType._def.type
+      : null;
 
   return {
     type: getBaseType(schema),
     schema,
-  }
-})
+  };
+});
 
-const fieldContext = useField(props.fieldName)
+const fieldContext = useField(props.fieldName);
 // @ts-expect-error ignore missing `id`
-provide(FieldContextKey, fieldContext)
+provide(FieldContextKey, fieldContext);
 </script>
 
 <template>
@@ -77,25 +72,15 @@ provide(FieldContextKey, fieldContext)
                   />
 
                   <div class="!my-4 flex justify-end">
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="secondary"
-                      @click="remove(index)"
-                    >
-                     <Icon icon="heroicon:plus" class="mr-2 w-5 h-5" />
+                    <Button type="button" size="icon" variant="secondary" @click="remove(index)">
+                      <Icon icon="heroicon:plus" class="mr-2 w-5 h-5" />
                     </Button>
                   </div>
                   <Separator v-if="!field.isLast" />
                 </div>
               </template>
 
-              <Button
-                type="button"
-                variant="secondary"
-                class="mt-4 flex items-center"
-                @click="push(null)"
-              >
+              <Button type="button" variant="secondary" class="mt-4 flex items-center" @click="push(null)">
                 <Icon icon="heroicon:plus" class="mr-2 w-5 h-5" />
                 Add
               </Button>

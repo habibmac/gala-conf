@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { getStatusInfo } from "@/utils/status-map";
+import { ref } from 'vue';
+import { getStatusInfo } from '@/utils/status-map';
 
 defineProps<{
   status: string;

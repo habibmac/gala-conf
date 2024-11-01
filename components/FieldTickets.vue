@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
-import { Icon } from "@iconify/vue";
-import VueDatePicker from "@vuepic/vue-datepicker";
-import { VueDraggable, type SortableEvent } from "vue-draggable-plus";
-import { Button } from "@/components/ui/button";
+import { ref, watch } from 'vue';
+import { Icon } from '@iconify/vue';
+import VueDatePicker from '@vuepic/vue-datepicker';
+import { VueDraggable, type SortableEvent } from 'vue-draggable-plus';
+import { Button } from '@/components/ui/button';
 import {
   NumberField,
   NumberFieldContent,
   NumberFieldDecrement,
   NumberFieldIncrement,
   NumberFieldInput,
-} from "@/components/ui/number-field";
-import { Checkbox } from "@/components/ui/checkbox";
-import FieldInput from "./FieldInput.vue";
+} from '@/components/ui/number-field';
+import { Checkbox } from '@/components/ui/checkbox';
+import FieldInput from './FieldInput.vue';
 
-import { useColorMode } from "@vueuse/core";
+import { useColorMode } from '@vueuse/core';
 
 const colorMode = useColorMode();
 
@@ -27,7 +27,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: any[]): void;
+  (e: 'update:modelValue', value: any[]): void;
 }>();
 
 const ticketsRef = ref(props.modelValue);
@@ -35,11 +35,7 @@ const ticketsRef = ref(props.modelValue);
 const onSort = (e: SortableEvent) => {
   const { oldIndex, newIndex } = e;
 
-  if (
-    oldIndex === undefined ||
-    newIndex === undefined ||
-    oldIndex === newIndex
-  ) {
+  if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
     return;
   }
 
@@ -53,13 +49,13 @@ const onSort = (e: SortableEvent) => {
   field.splice(newIndex, 0, removed);
 
   // This should update the ticketsRef and emit the change
-  emit("update:modelValue", field);
+  emit('update:modelValue', field);
 };
 
 watch(
   ticketsRef,
   (newValue) => {
-    emit("update:modelValue", newValue);
+    emit('update:modelValue', newValue);
   },
   { deep: true }
 );
@@ -81,10 +77,7 @@ watch(
             v-for="(field, index) in fields"
             class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5"
           >
-            <Icon
-              icon="mdi:drag-vertical"
-              class="handle size-6 absolute -left-6 cursor-move text-muted-foreground"
-            />
+            <Icon icon="mdi:drag-vertical" class="handle size-6 absolute -left-6 cursor-move text-muted-foreground" />
             <div class="flex-1 grid grid-cols-12 gap-2">
               <FieldInput
                 :name="`tickets[${index}].name`"
@@ -93,10 +86,7 @@ watch(
                 :placeholder="`Category ${index + 1}`"
                 wrapperClass="col-span-12"
               />
-              <FormField
-                v-slot="{ field, value, handleChange, errors }"
-                :name="`tickets[${index}].rangeDate`"
-              >
+              <FormField v-slot="{ field, value, handleChange, errors }" :name="`tickets[${index}].rangeDate`">
                 <FormItem class="col-span-12 sm:col-span-6 md:col-span-6">
                   <FormLabel>Selling Period</FormLabel>
                   <FormControl>
@@ -129,10 +119,7 @@ watch(
                   <FormMessage />
                 </FormItem>
               </FormField>
-              <FormField
-                v-slot="{ value, handleChange }"
-                :name="`tickets[${index}].price`"
-              >
+              <FormField v-slot="{ value, handleChange }" :name="`tickets[${index}].price`">
                 <FormItem class="col-span-7 sm:col-span-3 md:col-span-3">
                   <FormLabel>Price</FormLabel>
                   <NumberField
@@ -161,18 +148,10 @@ watch(
                   <FormMessage />
                 </FormItem>
               </FormField>
-              <FormField
-                v-slot="{ value, handleChange }"
-                :name="`tickets[${index}].quota`"
-              >
+              <FormField v-slot="{ value, handleChange }" :name="`tickets[${index}].quota`">
                 <FormItem v-auto-animate class="col-span-5 sm:col-span-3">
                   <FormLabel>Quota</FormLabel>
-                  <NumberField
-                    class="gap-2"
-                    :min="0"
-                    :model-value="value"
-                    @update:model-value="handleChange"
-                  >
+                  <NumberField class="gap-2" :min="0" :model-value="value" @update:model-value="handleChange">
                     <NumberFieldContent>
                       <NumberFieldDecrement />
                       <FormControl>
@@ -185,9 +164,7 @@ watch(
                 </FormItem>
               </FormField>
               <div class="col-span-9 py-2 flex flex-col gap-2">
-                <label class="text-sm font-semibold w-full">
-                  Sessions scope of this ticket
-                </label>
+                <label class="text-sm font-semibold w-full"> Sessions scope of this ticket </label>
                 <FormField
                   v-for="datetime in eventDatetimes"
                   :key="datetime.name"
@@ -197,14 +174,9 @@ watch(
                   :value="datetime.name"
                 >
                   <template v-if="datetime.name">
-                    <FormItem
-                      class="flex flex-row items-start space-x-3 space-y-0"
-                    >
+                    <FormItem class="flex flex-row items-start space-x-3 space-y-0">
                       <FormControl>
-                        <Checkbox
-                          :checked="value.includes(datetime.name)"
-                          @update:checked="handleChange"
-                        />
+                        <Checkbox :checked="value.includes(datetime.name)" @update:checked="handleChange" />
                       </FormControl>
                       <FormLabel class="font-normal">
                         {{ datetime.name }}
@@ -214,19 +186,9 @@ watch(
                 </FormField>
               </div>
             </div>
-            <div
-              class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8"
-            >
-              <Button
-                @click.prevent="remove(index)"
-                size="icon"
-                class="text-red-500"
-                variant="ghost"
-              >
-                <Icon
-                  icon="material-symbols-light:close-rounded"
-                  class="size-6"
-                />
+            <div class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8">
+              <Button @click.prevent="remove(index)" size="icon" class="text-red-500" variant="ghost">
+                <Icon icon="material-symbols-light:close-rounded" class="size-6" />
               </Button>
             </div>
           </div>

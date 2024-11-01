@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import { Icon } from "@iconify/vue";
+import { Icon } from '@iconify/vue';
 
-defineProps(["sidebarOpen", "showEvents"]);
+defineProps(['sidebarOpen', 'showEvents']);
 
 const route = useRoute();
 
 const navTitle = computed(() => {
-  return route.meta.navTitle
-})
+  return route.meta.navTitle;
+});
 </script>
 
 <template>
-  <header
-    class="sticky top-0 z-20 h-16 border-b backdrop-blur backdrop-filter"
-  >
+  <header class="sticky top-0 z-20 h-16 border-b backdrop-blur backdrop-filter">
     <div class="h-full px-4 lg:px-8">
       <div class="-mb-px flex h-full items-center justify-between">
         <!-- Header: Left side -->
@@ -43,7 +41,7 @@ const navTitle = computed(() => {
 
           <div v-if="navTitle" class="border-l pl-3 ml-3">
             <!-- if has page meta navTitle -->
-            <h1  class="text-sm font-semibold tracking-tight text-foreground">{{ navTitle }}</h1>
+            <h1 class="text-sm font-semibold tracking-tight text-foreground">{{ navTitle }}</h1>
           </div>
         </div>
 

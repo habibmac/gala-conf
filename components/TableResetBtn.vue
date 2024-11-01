@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Icon } from "@iconify/vue";
-const emit = defineEmits(["resetFilters"]);
+import { Icon } from '@iconify/vue';
+const emit = defineEmits(['resetFilters']);
 
 // Emit an event to reset filters
 const handleResetFilters = () => {
-  emit("resetFilters");
+  emit('resetFilters');
 };
 </script>
 <template>

@@ -6,68 +6,67 @@
 @import 'additional-styles/filepond.scss';
 
 html {
-    color-scheme: light dark;
+  color-scheme: light dark;
 }
 
 html.dark {
-    color-scheme: dark;
+  color-scheme: dark;
 }
 
 html.light {
-    color-scheme: light;
+  color-scheme: light;
 }
 
 ::-webkit-scrollbar {
-    width: .5rem;
-    height: .5rem
+  width: 0.5rem;
+  height: 0.5rem;
 }
 
 ::-webkit-scrollbar-track {
-    background-color: hsl(var(--muted)) !important
+  background-color: hsl(var(--muted)) !important;
 }
 
 ::-webkit-scrollbar-thumb {
-    border-radius: calc(var(--radius) - 4px);
-    background-color: hsl(var(--muted-foreground) / .3) !important
+  border-radius: calc(var(--radius) - 4px);
+  background-color: hsl(var(--muted-foreground) / 0.3) !important;
 }
 
 html {
-    scrollbar-color: hsl(215.4 16.3% 46.9% / .3)
+  scrollbar-color: hsl(215.4 16.3% 46.9% / 0.3);
 }
 
 html.dark {
-    scrollbar-color: hsl(215.4 16.3% 56.9% / .3)
+  scrollbar-color: hsl(215.4 16.3% 56.9% / 0.3);
 }
 
 /* Custom styles */
 .number {
-    font-feature-settings: 'ss02', 'ss03', 'ss04';
+  font-feature-settings: 'ss02', 'ss03', 'ss04';
 }
 
 .tabular {
-    font-variant-numeric: 'tnum';
+  font-variant-numeric: 'tnum';
 }
 
 .scroll-area {
-    scrollbar-width: thin;
+  scrollbar-width: thin;
 }
 
 .dropdown-item {
-    @apply text-sm flex items-center space-x-1 px-3 py-1.5 m-1 rounded dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-default select-none relative;
-    > a {
-        @apply flex items-center space-x-1 cursor-default;
-    }
-    &.selected {
-        @apply bg-slate-100 hover:bg-slate-100 dark:bg-slate-800;
-    }
-    > .check {
-        @apply w-4 h-4;
-    }
+  @apply text-sm flex items-center space-x-1 px-3 py-1.5 m-1 rounded dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-default select-none relative;
+  > a {
+    @apply flex items-center space-x-1 cursor-default;
+  }
+  &.selected {
+    @apply bg-slate-100 hover:bg-slate-100 dark:bg-slate-800;
+  }
+  > .check {
+    @apply w-4 h-4;
+  }
 }
 
-
 #new-event-form {
-    textarea {
-        field-sizing: content;
-    }
+  textarea {
+    field-sizing: content;
+  }
 }

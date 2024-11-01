@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
-import { useField } from "vee-validate";
-import createVueFilePond from "vue-filepond";
-import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css";
-import "filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css";
-import FilePondPluginImagePreview from "filepond-plugin-image-preview";
-import FilePondPluginImageCrop from "filepond-plugin-image-crop";
-import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
-import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
-import FilePondPluginFilePoster from "filepond-plugin-file-poster";
-import { cn } from "~/lib/utils";
+import { ref, watch, computed } from 'vue';
+import { useField } from 'vee-validate';
+import createVueFilePond from 'vue-filepond';
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css';
+import 'filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css';
+import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
+import FilePondPluginImageCrop from 'filepond-plugin-image-crop';
+import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
+import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+import FilePondPluginFilePoster from 'filepond-plugin-file-poster';
+import { cn } from '~/lib/utils';
 
 const FilePond = createVueFilePond(
   FilePondPluginImageCrop,
@@ -24,11 +24,11 @@ const props = defineProps<{
   modelValue?: string;
   label: string;
   id: string;
-  type?: "logo" | "cover";
+  type?: 'logo' | 'cover';
   isMultiple?: boolean;
 }>();
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(['update:modelValue']);
 
 const {
   value: fieldValue,
@@ -43,7 +43,7 @@ const error = useFieldError(props.name);
 const files = ref<any[]>([]);
 const uploadedFile = ref<any>(null);
 const subLabel = computed(() => {
-  return props.type === "logo" ? "500x500" : "851x315";
+  return props.type === 'logo' ? '500x500' : '851x315';
 });
 const labelIdle = computed(() => {
   return `<div class='filepond--label-wrapper'>${props.label}</div><div class='filepond--label-info'>Dimension: <span>${subLabel.value}</span><br />Max size: <span>1 MB</span></div>`;
@@ -52,19 +52,19 @@ const labelIdle = computed(() => {
 const filePondOptions = computed(() => {
   const common = {
     allowMultiple: props.isMultiple || false,
-    styleLoadIndicatorPosition: "center bottom",
-    styleProgressIndicatorPosition: "right bottom",
-    styleButtonRemoveItemPosition: "left bottom",
-    styleButtonProcessItemPosition: "right bottom",
+    styleLoadIndicatorPosition: 'center bottom',
+    styleProgressIndicatorPosition: 'right bottom',
+    styleButtonRemoveItemPosition: 'left bottom',
+    styleButtonProcessItemPosition: 'right bottom',
   };
 
-  if (props.type === "logo") {
+  if (props.type === 'logo') {
     return {
       ...common,
-      stylePanelLayout: "compact",
+      stylePanelLayout: 'compact',
       imagePreviewHeight: 200,
       imagePreviewWidth: 200,
-      imageCropAspectRatio: "1:1",
+      imageCropAspectRatio: '1:1',
       imageResizeTargetWidth: 500,
       imageResizeTargetHeight: 500,
     };
@@ -72,7 +72,7 @@ const filePondOptions = computed(() => {
     return {
       ...common,
       imagePreviewHeight: 300,
-      imageCropAspectRatio: "851:315",
+      imageCropAspectRatio: '851:315',
       imageResizeTargetWidth: 851,
       imageResizeTargetHeight: 315,
     };
@@ -92,7 +92,7 @@ const loadExistingFile = async (fileId: string) => {
         {
           source: fileId,
           options: {
-            type: "local",
+            type: 'local',
             file: {
               name: response.data.name,
               size: response.data.size,
@@ -106,7 +106,7 @@ const loadExistingFile = async (fileId: string) => {
       ];
     }
   } catch (error) {
-    console.error("Error loading existing file:", error);
+    console.error('Error loading existing file:', error);
   }
 };
 
@@ -117,24 +117,17 @@ const server = {
     metadata: any,
     load: (uniqueFileId: string) => void,
     error: (errorText: string) => void,
-    progress: (
-      isDone: boolean,
-      bytesWritten: number,
-      bytesTotal: number
-    ) => void,
+    progress: (isDone: boolean, bytesWritten: number, bytesTotal: number) => void,
     abort: () => void
   ) => {
     const formData = new FormData();
 
     if (file instanceof File) {
-      formData.append("image", file, file.name);
+      formData.append('image', file, file.name);
     } else if (file instanceof Blob) {
-      formData.append(
-        "image",
-        new File([file], "image.jpg", { type: file.type })
-      );
+      formData.append('image', new File([file], 'image.jpg', { type: file.type }));
     } else {
-      error("Invalid file object");
+      error('Invalid file object');
       return;
     }
 
@@ -142,10 +135,10 @@ const server = {
     const signal = controller.signal;
 
     $galantisApi
-      .post("/events/upload-logo", formData, {
+      .post('/events/upload-logo', formData, {
         signal,
         headers: {
-          "Content-Type": "multipart/form-data",
+          'Content-Type': 'multipart/form-data',
         },
         onUploadProgress: (progressEvent: any) => {
           if (progressEvent.total) {
@@ -158,22 +151,22 @@ const server = {
           // Pass both the id and the processed image URL
           load(response.data.id.toString());
           handleChange(response.data.id.toString());
-          emit("update:modelValue", response.data.id.toString());
+          emit('update:modelValue', response.data.id.toString());
 
           // Return the processed image URL
           return response.data.url;
         } else {
-          error("Invalid response format");
+          error('Invalid response format');
         }
       })
       .catch((err) => {
         resetField();
-        if (err.name === "CanceledError") {
-          console.log("Request aborted");
+        if (err.name === 'CanceledError') {
+          console.log('Request aborted');
         } else if (err.response && err.response.data) {
-          error(err.response.data.message || "Error uploading file");
+          error(err.response.data.message || 'Error uploading file');
         } else {
-          error("Error uploading file");
+          error('Error uploading file');
         }
       });
 
@@ -186,24 +179,20 @@ const server = {
     };
   },
 
-  revert: (
-    uniqueFileId: string,
-    load: () => void,
-    error: (errorText: string) => void
-  ) => {
+  revert: (uniqueFileId: string, load: () => void, error: (errorText: string) => void) => {
     $galantisApi
       .delete(`/events/delete-image/${uniqueFileId}`)
       .then(() => {
         // Reset the model value when the file is removed
         resetField();
-        emit("update:modelValue", "");
+        emit('update:modelValue', '');
       })
       .catch((err) => {
         resetField();
         if (err.response && err.response.data) {
-          error(err.response.data.message || "Error deleting file");
+          error(err.response.data.message || 'Error deleting file');
         } else {
-          error("Error deleting file");
+          error('Error deleting file');
         }
       });
   },
@@ -227,7 +216,7 @@ onMounted(() => {
 
 watch(fieldValue, (newValue) => {
   loadExistingFile(newValue);
-  emit("update:modelValue", newValue);
+  emit('update:modelValue', newValue);
 });
 </script>
 
@@ -261,8 +250,7 @@ watch(fieldValue, (newValue) => {
             <div
               :class="
                 cn({
-                  'pattern-bg inset-0 absolute dark:opacity-25':
-                    props.type === 'cover',
+                  'pattern-bg inset-0 absolute dark:opacity-25': props.type === 'cover',
                 })
               "
             ></div>
@@ -270,17 +258,8 @@ watch(fieldValue, (newValue) => {
               v-if="uploadedFile"
               class="absolute inset-0 flex h-full w-full items-center justify-center aspect-[851/315]"
             >
-              <img
-                :src="uploadedFile"
-                alt="Cover image"
-                class="object-cover w-full h-full pointer-events-none"
-              />
-              <Button
-                variant="outline"
-                class="absolute top-4 right-4"
-                @click.prevent="handleRemoveCover"
-                size="sm"
-              >
+              <img :src="uploadedFile" alt="Cover image" class="object-cover w-full h-full pointer-events-none" />
+              <Button variant="outline" class="absolute top-4 right-4" @click.prevent="handleRemoveCover" size="sm">
                 Remove
               </Button>
             </div>

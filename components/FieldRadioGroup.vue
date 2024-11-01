@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Field, ErrorMessage } from "vee-validate";
-import { Icon } from "@iconify/vue";
-import { cn } from "@/lib/utils";
+import { Field, ErrorMessage } from 'vee-validate';
+import { Icon } from '@iconify/vue';
+import { cn } from '@/lib/utils';
 
 interface RadioOption {
   value?: string;
@@ -14,7 +14,7 @@ const props = defineProps<{
   name: string;
   label: string;
   options: RadioOption[];
-  layout: "horizontal" | "vertical";
+  layout: 'horizontal' | 'vertical';
   wrapperClass?: string;
 }>();
 
@@ -24,15 +24,9 @@ const icon = Icon;
 <template>
   <FormField :name="name">
     <FormItem class="space-y-3 mb-8">
-      <FormLabel
-        :class="
-          cn(
-            { 'mb-2': layout === 'vertical' },
-            error ? 'text-destructive' : 'text-body'
-          )
-        "
-        >{{ label }}</FormLabel
-      >
+      <FormLabel :class="cn({ 'mb-2': layout === 'vertical' }, error ? 'text-destructive' : 'text-body')">{{
+        label
+      }}</FormLabel>
       <Field v-slot="{ field }" :name="name" as="div" :class="wrapperClass">
         <div v-for="option in options" :key="option.value || option.id">
           <label class="relative block cursor-pointer">
@@ -50,9 +44,7 @@ const icon = Icon;
                   ? 'flex items-center px-2 py-2.5'
                   : 'flex flex-col items-center justify-center p-4',
                 'bg-background text-sm font-medium rounded-lg border shadow-sm duration-100 ease-in-out outline-none',
-                field.value === (option.value || option.label)
-                  ? 'text-primary peer-checked:border-primary'
-                  : '',
+                field.value === (option.value || option.label) ? 'text-primary peer-checked:border-primary' : '',
               ]"
             >
               <template v-if="layout === 'horizontal'">
@@ -64,20 +56,9 @@ const icon = Icon;
                 />
               </template>
               <template v-else>
-                <component
-                  :is="icon"
-                  v-if="option.icon"
-                  :icon="option.icon"
-                  class="size-7 mb-2"
-                />
+                <component :is="icon" v-if="option.icon" :icon="option.icon" class="size-7 mb-2" />
               </template>
-              <span
-                :class="[
-                  field.value === (option.value || option.label)
-                    ? 'text-primary'
-                    : '',
-                ]"
-              >
+              <span :class="[field.value === (option.value || option.label) ? 'text-primary' : '']">
                 {{ option.label }}
               </span>
             </div>

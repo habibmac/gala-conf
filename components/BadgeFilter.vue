@@ -10,11 +10,11 @@ defineProps({
   },
 });
 
-const emit = defineEmits(["clear-filter"]);
+const emit = defineEmits(['clear-filter']);
 
 const handleClearFilter = () => {
   // Emit an event to clear the filter
-  emit("clear-filter");
+  emit('clear-filter');
 };
 </script>
 <template>

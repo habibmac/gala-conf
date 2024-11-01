@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Icon } from "@iconify/vue";
-import VueDatePicker from "@vuepic/vue-datepicker";
-import { VueDraggable, type SortableEvent } from "vue-draggable-plus";
-import { Button } from "@/components/ui/button";
+import { ref } from 'vue';
+import { Icon } from '@iconify/vue';
+import VueDatePicker from '@vuepic/vue-datepicker';
+import { VueDraggable, type SortableEvent } from 'vue-draggable-plus';
+import { Button } from '@/components/ui/button';
 import {
   NumberField,
   NumberFieldContent,
   NumberFieldDecrement,
   NumberFieldIncrement,
   NumberFieldInput,
-} from "@/components/ui/number-field";
-import FieldInput from "./FieldInput.vue";
-import { useColorMode } from "@vueuse/core";
+} from '@/components/ui/number-field';
+import FieldInput from './FieldInput.vue';
+import { useColorMode } from '@vueuse/core';
 
 const colorMode = useColorMode();
 
@@ -24,7 +24,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: any[]): void;
+  (e: 'update:modelValue', value: any[]): void;
 }>();
 
 const eventDatetimesRef = ref(props.modelValue);
@@ -32,11 +32,7 @@ const eventDatetimesRef = ref(props.modelValue);
 const onSort = (e: SortableEvent) => {
   const { oldIndex, newIndex } = e;
 
-  if (
-    oldIndex === undefined ||
-    newIndex === undefined ||
-    oldIndex === newIndex
-  ) {
+  if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
     return;
   }
 
@@ -50,13 +46,13 @@ const onSort = (e: SortableEvent) => {
   field.splice(newIndex, 0, removed);
 
   // This should update the eventDatetimesRef and emit the change
-  emit("update:modelValue", field);
+  emit('update:modelValue', field);
 };
 
 watch(
   eventDatetimesRef,
   (newValue) => {
-    emit("update:modelValue", newValue);
+    emit('update:modelValue', newValue);
   },
   { deep: true }
 );
@@ -78,10 +74,7 @@ watch(
             v-for="(field, index) in eventDatetimesRef"
             class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5 py-2"
           >
-            <Icon
-              icon="mdi:drag-vertical"
-              class="handle size-6 absolute -left-6 cursor-move text-muted-foreground"
-            />
+            <Icon icon="mdi:drag-vertical" class="handle size-6 absolute -left-6 cursor-move text-muted-foreground" />
             <FieldInput
               :name="`eventDatetimes[${index}].name`"
               label="Session Name"
@@ -89,10 +82,7 @@ watch(
               :placeholder="`Day ${index + 1}`"
               wrapperClass="w-full sm:w-1/3 md:w-1/3"
             />
-            <FormField
-              v-slot="{ field, value, handleChange, errors }"
-              :name="`eventDatetimes[${index}].rangeDate`"
-            >
+            <FormField v-slot="{ field, value, handleChange, errors }" :name="`eventDatetimes[${index}].rangeDate`">
               <FormItem v-auto-animate class="flex-1 w-full">
                 <FormLabel>Start - End</FormLabel>
                 <FormControl>
@@ -123,18 +113,10 @@ watch(
                 <FormMessage />
               </FormItem>
             </FormField>
-            <FormField
-              v-slot="{ value, handleChange }"
-              :name="`eventDatetimes[${index}].quota`"
-            >
+            <FormField v-slot="{ value, handleChange }" :name="`eventDatetimes[${index}].quota`">
               <FormItem v-auto-animate class="max-w-32">
                 <FormLabel>Quota</FormLabel>
-                <NumberField
-                  class="gap-2"
-                  :min="0"
-                  :model-value="value"
-                  @update:model-value="handleChange"
-                >
+                <NumberField class="gap-2" :min="0" :model-value="value" @update:model-value="handleChange">
                   <NumberFieldContent>
                     <NumberFieldDecrement />
                     <FormControl>
@@ -146,19 +128,9 @@ watch(
                 <FormMessage />
               </FormItem>
             </FormField>
-            <div
-              class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8"
-            >
-              <Button
-                @click.prevent="remove(index)"
-                size="icon"
-                class="text-red-500"
-                variant="ghost"
-              >
-                <Icon
-                  icon="material-symbols-light:close-rounded"
-                  class="size-6"
-                />
+            <div class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8">
+              <Button @click.prevent="remove(index)" size="icon" class="text-red-500" variant="ghost">
+                <Icon icon="material-symbols-light:close-rounded" class="size-6" />
               </Button>
             </div>
           </div>

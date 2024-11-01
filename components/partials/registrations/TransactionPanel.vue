@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, toRef, watchEffect } from "vue";
-import { useQuery, useQueryClient } from "@tanstack/vue-query";
-import { Icon } from "@iconify/vue";
+import { ref, onMounted, onUnmounted, toRef, watchEffect } from 'vue';
+import { useQuery, useQueryClient } from '@tanstack/vue-query';
+import { Icon } from '@iconify/vue';
 
-import { formatDate, formatCurrency, getCountryFlagWithName } from "@/utils";
-import SpinnerRing from "@/components/SpinnerRing.vue";
-import PayMethodLogo from "@/components/partials/registrations/PayMethodLogo.vue";
-import { getStatusInfo } from "@/utils/status-map";
+import { formatDate, formatCurrency, getCountryFlagWithName } from '@/utils';
+import SpinnerRing from '@/components/SpinnerRing.vue';
+import PayMethodLogo from '@/components/partials/registrations/PayMethodLogo.vue';
+import { getStatusInfo } from '@/utils/status-map';
 
 const props = defineProps({
   transactionPanelOpen: Boolean,
@@ -14,7 +14,7 @@ const props = defineProps({
   regId: String,
 });
 
-const emit = defineEmits(["close-transactionpanel"]);
+const emit = defineEmits(['close-transactionpanel']);
 
 const loading = ref(false);
 const panelContent = ref<HTMLElement | null>(null);
@@ -34,7 +34,7 @@ const clickHandler = (event: MouseEvent) => {
 
 // close if the esc key is pressed
 const keyHandler = (event: KeyboardEvent) => {
-  if (!props.transactionPanelOpen || event.key !== "Escape") return;
+  if (!props.transactionPanelOpen || event.key !== 'Escape') return;
   closePanel();
 };
 
@@ -62,7 +62,7 @@ const getData = async (signal: AbortSignal) => {
 
 // Fetching data with useQuery and TypeScript for response typing
 const { isError, error, data, refetch, isRefetching } = useQuery({
-  queryKey: ["regDetails", { regId: toRef(props.regId), evtId: props.evtId }],
+  queryKey: ['regDetails', { regId: toRef(props.regId), evtId: props.evtId }],
   queryFn: ({ signal }) => getData(signal),
   // After the data is fetched, set loading to false
   enabled: !!props.evtId && !!props.regId,
@@ -84,37 +84,34 @@ const closePanel = () => {
   queryClient.cancelQueries();
   // Add a slight delay to allow the animation to complete
   setTimeout(() => {
-    emit("close-transactionpanel");
+    emit('close-transactionpanel');
   }, 200); // Match this with your leave transition duration
 };
 
 onMounted(() => {
-  document.addEventListener("click", clickHandler);
-  document.addEventListener("keydown", keyHandler);
+  document.addEventListener('click', clickHandler);
+  document.addEventListener('keydown', keyHandler);
 });
 
 onUnmounted(async () => {
   loading.value = false;
-  document.removeEventListener("click", clickHandler);
-  document.removeEventListener("keydown", keyHandler);
+  document.removeEventListener('click', clickHandler);
+  document.removeEventListener('keydown', keyHandler);
 });
 </script>
 <template>
   <Transition
-		enter-active-class="transition duration-100 ease-in-out"
-		enter-from-class="translate-x-[20%] opacity-0"
-		enter-to-class="translate-x-0 opacity-100"
-		leave-active-class="transition duration-200"
-		leave-from-class="translate-x-0 "
-		leave-to-class="translate-x-[20%] opacity-0"
+    enter-active-class="transition duration-100 ease-in-out"
+    enter-from-class="translate-x-[20%] opacity-0"
+    enter-to-class="translate-x-0 opacity-100"
+    leave-active-class="transition duration-200"
+    leave-from-class="translate-x-0 "
+    leave-to-class="translate-x-[20%] opacity-0"
   >
-    <div
-      ref="panelContent"
-      class="absolute inset-0 z-30 sm:block sm:left-auto"
-      v-show="transactionPanelOpen"
-    >
+    <div ref="panelContent" class="absolute inset-0 z-30 sm:block sm:left-auto" v-show="transactionPanelOpen">
       <div
-				class="no-scrollbar sticky top-16 h-[calc(100dvh-64px)] w-full shrink-0 overflow-y-auto overflow-x-hidden border-l border-border bg-muted sm:w-[390px]">
+        class="no-scrollbar sticky top-16 h-[calc(100dvh-64px)] w-full shrink-0 overflow-y-auto overflow-x-hidden border-l border-border bg-muted sm:w-[390px]"
+      >
         <button
           ref="closeBtn"
           @click.stop="$emit('close-transactionpanel')"
@@ -126,9 +123,7 @@ onUnmounted(async () => {
         <div class="px-4 py-8 lg:px-8">
           <div v-if="isRefetching" class="grid gap-4">
             <div>
-              <Skeleton
-                class="h-8 w-40 mx-auto p-4 bg-muted-foreground/10"
-              />
+              <Skeleton class="h-8 w-40 mx-auto p-4 bg-muted-foreground/10" />
             </div>
             <Skeleton class="h-96 p-4 bg-muted-foreground/10" />
             <Skeleton class="h-20 p-4 bg-muted-foreground/10" />
@@ -138,14 +133,12 @@ onUnmounted(async () => {
             <SpinnerRing size="25" class="relative left-6 top-6" />
           </div>
           <div v-else-if="isError">
-            {{ error ? error.message : "Error" }}
+            {{ error ? error.message : 'Error' }}
           </div>
           <div class="mx-auto max-w-sm lg:max-w-none" v-else-if="data">
-            <div
-              class="mb-1 text-center font-semibold text-slate-800 dark:text-slate-100"
-            ></div>
+            <div class="mb-1 text-center font-semibold text-slate-800 dark:text-slate-100"></div>
             <div class="text-center text-xs">
-              {{ data.date ? formatDate(data.date, "d MMM yyyy hh:mm") : "-" }}
+              {{ data.date ? formatDate(data.date, 'd MMM yyyy hh:mm') : '-' }}
             </div>
             <!-- Details -->
             <div class="mt-8 drop-shadow-lg">
@@ -154,7 +147,7 @@ onUnmounted(async () => {
                 class="rounded-t-xl bg-white px-5 pb-2.5 pt-4 text-center text-slate-800 dark:bg-slate-700 dark:text-slate-100"
               >
                 <div class="b-1 text-2xl font-semibold">
-                  {{ data.fullname || "-" }}
+                  {{ data.fullname || '-' }}
                 </div>
                 <div class="mb-3 text-sm font-medium">
                   {{ data.ticket_name }}
@@ -168,23 +161,13 @@ onUnmounted(async () => {
               </div>
               <!-- Divider -->
               <div class="flex items-center justify-between" aria-hidden="true">
-                <svg
-                  class="h-5 w-5 fill-white dark:fill-slate-700"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                <svg class="h-5 w-5 fill-white dark:fill-slate-700" xmlns="http://www.w3.org/2000/svg">
                   <path d="M0 20c5.523 0 10-4.477 10-10S5.523 0 0 0h20v20H0Z" />
                 </svg>
-                <div
-                  class="flex h-5 w-full grow flex-col justify-center bg-white dark:bg-slate-700"
-                >
-                  <div
-                    class="h-px w-full border-t border-dashed border-slate-200 dark:border-slate-600"
-                  ></div>
+                <div class="flex h-5 w-full grow flex-col justify-center bg-white dark:bg-slate-700">
+                  <div class="h-px w-full border-t border-dashed border-slate-200 dark:border-slate-600"></div>
                 </div>
-                <svg
-                  class="h-5 w-5 rotate-180 fill-white dark:fill-slate-700"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                <svg class="h-5 w-5 rotate-180 fill-white dark:fill-slate-700" xmlns="http://www.w3.org/2000/svg">
                   <path d="M0 20c5.523 0 10-4.477 10-10S5.523 0 0 0h20v20H0Z" />
                 </svg>
               </div>
@@ -192,58 +175,37 @@ onUnmounted(async () => {
               <div
                 class="space-y-3 rounded-b-xl bg-white p-5 pt-2.5 text-sm dark:bg-slate-800 dark:bg-gradient-to-b dark:from-slate-700 dark:to-slate-700/70"
               >
-                <div
-                  class="flex flex-col items-center justify-center space-y-2"
-                  v-if="data.code"
-                >
+                <div class="flex flex-col items-center justify-center space-y-2" v-if="data.code">
                   <ClientOnly>
                     <qr-code :value="data.reg_url_link"></qr-code>
                   </ClientOnly>
-                  <span
-                    class="number font-semibold  tabular font-mono"
-                    >{{ data.code }}</span
-                  >
+                  <span class="number font-semibold tabular font-mono">{{ data.code }}</span>
                 </div>
                 <div class="flex justify-between space-x-1">
                   <span class="">Age/Gender</span>
-                  <span
-                    class="text-right font-medium text-slate-700 dark:text-slate-100"
+                  <span class="text-right font-medium text-slate-700 dark:text-slate-100"
                     >{{ data.age }} / {{ data.gender }}</span
                   >
                 </div>
                 <div class="flex justify-between space-x-1">
                   <span class="">Email:</span>
-                  <span
-                    class="text-right font-medium text-slate-700 dark:text-slate-100"
-                    >{{ data.email }}</span
-                  >
+                  <span class="text-right font-medium text-slate-700 dark:text-slate-100">{{ data.email }}</span>
                 </div>
                 <div class="flex justify-between space-x-1">
                   <span class="">Phone:</span>
-                  <span
-                    class="text-right font-medium text-slate-700 dark:text-slate-100"
-                    >{{ data.phone }}</span
-                  >
+                  <span class="text-right font-medium text-slate-700 dark:text-slate-100">{{ data.phone }}</span>
                 </div>
                 <div class="flex justify-between space-x-1">
                   <span class="">Address:</span>
-                  <span
-                    class="text-right font-medium text-slate-700 dark:text-slate-100"
-                    >{{ data.address }}</span
-                  >
+                  <span class="text-right font-medium text-slate-700 dark:text-slate-100">{{ data.address }}</span>
                 </div>
                 <div class="flex justify-between space-x-1">
                   <span class="">City:</span>
-                  <span
-                    class="text-right font-medium text-slate-700 dark:text-slate-100"
-                    >{{ data.city }}</span
-                  >
+                  <span class="text-right font-medium text-slate-700 dark:text-slate-100">{{ data.city }}</span>
                 </div>
                 <div class="flex justify-between space-x-1">
                   <span class="">Nationality:</span>
-                  <span
-                    class="text-right font-medium text-slate-700 dark:text-slate-100"
-                  >
+                  <span class="text-right font-medium text-slate-700 dark:text-slate-100">
                     {{ getCountryFlagWithName(data.country_code) }}
                   </span>
                 </div>
@@ -251,11 +213,7 @@ onUnmounted(async () => {
             </div>
             <!-- Payments -->
             <div class="mt-6">
-              <div
-                class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100"
-              >
-                Payments
-              </div>
+              <div class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Payments</div>
               <div
                 class="number rounded border border-slate-200 p-4 shadow-sm duration-150 ease-in-out hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
               >
@@ -265,9 +223,7 @@ onUnmounted(async () => {
                       <div class="text-sm font-medium">Total</div>
                     </div>
                   </div>
-                  <div
-                    class="col-span-4 text-right text-slate-800 dark:text-slate-100"
-                  >
+                  <div class="col-span-4 text-right text-slate-800 dark:text-slate-100">
                     {{ data.total ? formatCurrency(data.total) : 0 }}
                   </div>
                 </div>
@@ -277,24 +233,17 @@ onUnmounted(async () => {
                       <div class="text-sm font-medium">Paid</div>
                     </div>
                   </div>
-                  <div
-                    class="col-span-4 text-right text-slate-800 dark:text-slate-100"
-                  >
+                  <div class="col-span-4 text-right text-slate-800 dark:text-slate-100">
                     {{ data.paid ? formatCurrency(data.paid) : 0 }}
                   </div>
                 </div>
-                <div
-                  class="mt-2 grid grid-cols-12 items-center gap-x-2"
-                  v-if="data.txn?.pay_method"
-                >
+                <div class="mt-2 grid grid-cols-12 items-center gap-x-2" v-if="data.txn?.pay_method">
                   <!-- Card -->
                   <div class="col-span-8 flex items-center space-x-2">
                     <PayMethodLogo :payMethod="data.txn?.pay_method" />
                     <div>
-                      <div
-                        class="text-sm font-medium text-slate-800 dark:text-slate-100"
-                      >
-                        {{ data.txn?.pay_method || "Other" }}
+                      <div class="text-sm font-medium text-slate-800 dark:text-slate-100">
+                        {{ data.txn?.pay_method || 'Other' }}
                       </div>
                     </div>
                   </div>
@@ -317,11 +266,7 @@ onUnmounted(async () => {
                   target="_blank"
                   class="btn w-full border border-slate-100 bg-white text-sm font-medium text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6 shrink-0"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
                       d="M13.5 9.75a.75.75 0 0 0-.75-.75h-6a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 .75-.75m-1 3a.75.75 0 0 0-.75-.75h-5a.75.75 0 1 0 0 1.5h5a.75.75 0 0 0 .75-.75m.25 2.25a.75.75 0 1 1 0 1.5h-6a.75.75 0 0 1 0-1.5z"
@@ -342,11 +287,7 @@ onUnmounted(async () => {
                   target="_blank"
                   class="btn border-emerald-border w-full bg-emerald-400 text-sm font-medium text-white hover:border-slate-300 hover:bg-emerald-500 dark:border-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6 shrink-0"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" viewBox="0 0 24 24">
                     <path
                       fill="none"
                       stroke="currentColor"
@@ -365,11 +306,7 @@ onUnmounted(async () => {
                   target="_blank"
                   class="btn w-full border border-slate-100 bg-white text-sm font-medium text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6 shrink-0"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
                       d="M7.23 18.25a4 4 0 0 1-2.83-1.16a4.23 4.23 0 0 1 .15-5.95l3.76-3.79A4.44 4.44 0 0 1 11.42 6a4 4 0 0 1 2.83 1.2a4.25 4.25 0 0 1-.15 6l-1.26 1.26a.75.75 0 1 1-1.06-1.06L13 12.1a2.73 2.73 0 0 0 .14-3.84a2.77 2.77 0 0 0-3.8.15l-3.73 3.78A2.74 2.74 0 0 0 5.46 16a2.5 2.5 0 0 0 2 .71a.74.74 0 0 1 .81.67a.75.75 0 0 1-.67.82Z"
@@ -385,11 +322,7 @@ onUnmounted(async () => {
             </div>
             <!-- Answers -->
             <div class="mt-6">
-              <div
-                class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100"
-              >
-                Answers
-              </div>
+              <div class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Answers</div>
               <div
                 class="number rounded border border-slate-200 text-sm shadow-sm duration-150 ease-in-out hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
               >
@@ -402,18 +335,14 @@ onUnmounted(async () => {
                     {{ answer.qst }}
                   </div>
                   <div class="font-medium text-slate-800 dark:text-slate-100">
-                    {{ answer.ans.length > 0 ? answer.ans : "-" }}
+                    {{ answer.ans.length > 0 ? answer.ans : '-' }}
                   </div>
                 </div>
               </div>
             </div>
             <!-- Notes -->
             <div class="mt-6">
-              <div
-                class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100"
-              >
-                Notes
-              </div>
+              <div class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Notes</div>
               <form>
                 <label class="sr-only" for="notes">Write a note</label>
                 <textarea

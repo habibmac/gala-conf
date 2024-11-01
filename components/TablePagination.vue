@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 const props = defineProps({
   currentPage: Number,
@@ -10,18 +10,18 @@ const props = defineProps({
   totalData: Number,
 });
 
-const emits = defineEmits(["update:pageSize", "update:currentPage"]);
+const emits = defineEmits(['update:pageSize', 'update:currentPage']);
 
 const route = useRoute();
 
 const handlePageSizeChange = (event: Event) => {
-  emits("update:pageSize", Number((event.target as HTMLSelectElement).value));
+  emits('update:pageSize', Number((event.target as HTMLSelectElement).value));
 };
 
 const navigateToPage = (page: number) => {
   if (page >= 1 && page <= pageCount.value) {
     // Emitting navigate event with the page number instead of direction
-    emits("update:currentPage", page);
+    emits('update:currentPage', page);
   }
 };
 
@@ -36,11 +36,7 @@ const createLink = (page: number) => {
 
 const pageCount = computed(() => props.pageCount ?? 1);
 const currentPage = computed(() =>
-  props.currentPage
-    ? props.currentPage > pageCount.value
-      ? pageCount.value
-      : props.currentPage
-    : 1
+  props.currentPage ? (props.currentPage > pageCount.value ? pageCount.value : props.currentPage) : 1
 );
 
 const shouldShowPage = (page: number) => {
@@ -48,10 +44,7 @@ const shouldShowPage = (page: number) => {
     return true;
   }
 
-  const start = Math.max(
-    1,
-    Math.min(currentPage.value - 2, pageCount.value - 4)
-  );
+  const start = Math.max(1, Math.min(currentPage.value - 2, pageCount.value - 4));
   const end = Math.min(pageCount.value, start + 4);
 
   return page >= start && page <= end;
@@ -59,25 +52,13 @@ const shouldShowPage = (page: number) => {
 </script>
 
 <template>
-  <div
-    class="mb-20 mt-5 p-4 pt-0 sm:items-center sm:justify-between sm:p-6 sm:pt-0 grid grid-cols-2 sm:grid-cols-3"
-  >
+  <div class="mb-20 mt-5 p-4 pt-0 sm:items-center sm:justify-between sm:p-6 sm:pt-0 grid grid-cols-2 sm:grid-cols-3">
     <div class="order-2 sm:order-1">
-      <select
-        @change="handlePageSizeChange"
-        :value="pageSize"
-        class="form-select"
-      >
-        <option v-for="(size, index) in pageSizes" :key="index" :value="size">
-          Show {{ size }}
-        </option>
+      <select @change="handlePageSizeChange" :value="pageSize" class="form-select">
+        <option v-for="(size, index) in pageSizes" :key="index" :value="size">Show {{ size }}</option>
       </select>
     </div>
-    <nav
-      role="navigation"
-      aria-label="Pagination"
-      class="order-3 sm:order-2 col-span-2 sm:col-span-1"
-    >
+    <nav role="navigation" aria-label="Pagination" class="order-3 sm:order-2 col-span-2 sm:col-span-1">
       <ul class="flex justify-center items-center space-x-1">
         <li>
           <RouterLink
@@ -124,9 +105,7 @@ const shouldShowPage = (page: number) => {
         <li>
           <RouterLink
             :to="createLink(currentPage + 1)"
-            @click.prevent="
-              currentPage < pageCount && navigateToPage(currentPage + 1)
-            "
+            @click.prevent="currentPage < pageCount && navigateToPage(currentPage + 1)"
             class="page-link"
             :class="{ disabled: currentPage >= pageCount }"
           >
@@ -141,9 +120,7 @@ const shouldShowPage = (page: number) => {
         <li>
           <RouterLink
             :to="createLink(pageCount)"
-            @click.prevent="
-              currentPage < pageCount && navigateToPage(pageCount)
-            "
+            @click.prevent="currentPage < pageCount && navigateToPage(pageCount)"
             class="page-link"
             :class="{ disabled: currentPage >= pageCount }"
           >
@@ -157,17 +134,11 @@ const shouldShowPage = (page: number) => {
         </li>
       </ul>
     </nav>
-    <div
-      class="text-right text-sm text-slate-500 dark:text-slate-400 whitespace order-2 sm:order-3"
-    >
+    <div class="text-right text-sm text-slate-500 dark:text-slate-400 whitespace order-2 sm:order-3">
       Page
-      <span class="font-medium text-slate-900 dark:text-slate-300">{{
-        currentPage
-      }}</span>
+      <span class="font-medium text-slate-900 dark:text-slate-300">{{ currentPage }}</span>
       of
-      <span class="font-medium text-slate-900 dark:text-slate-300">{{
-        pageCount
-      }}</span>
+      <span class="font-medium text-slate-900 dark:text-slate-300">{{ pageCount }}</span>
     </div>
   </div>
 </template>

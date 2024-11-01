@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from "vue";
-import { useLocalStorage } from "#imports";
-import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
-import { Icon } from "@iconify/vue";
-import { useMenu } from "@/composables/useMenu";
-import MenuIcon from "@/components/MenuIcon.vue";
-import { Button } from "@/components/ui/button";
-import Logo from "@/components/Logo.vue";
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { useLocalStorage } from '#imports';
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
+import { Icon } from '@iconify/vue';
+import { useMenu } from '@/composables/useMenu';
+import MenuIcon from '@/components/MenuIcon.vue';
+import { Button } from '@/components/ui/button';
+import Logo from '@/components/Logo.vue';
 
-const props = defineProps(["sidebarOpen"]);
-const emit = defineEmits(["close-sidebar"]);
+const props = defineProps(['sidebarOpen']);
+const emit = defineEmits(['close-sidebar']);
 
 const { menuItems } = useMenu();
 const { isLoading: isFetchingEvent } = useEvent();
@@ -18,21 +18,21 @@ const trigger = ref<HTMLElement | null>(null);
 const sidebar = ref<HTMLElement | null>(null);
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
-const lgAndSmaller = breakpoints.smallerOrEqual("lg");
+const lgAndSmaller = breakpoints.smallerOrEqual('lg');
 const isLargeScreen = breakpoints.greater('lg');
 
-const sidebarExpanded = useLocalStorage("sidebar-expanded", false);
+const sidebarExpanded = useLocalStorage('sidebar-expanded', false);
 
 const clickHandler = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
   if (!sidebar.value || !trigger.value) return;
-  
+
   // Close sidebar if clicking outside when sidebar is open on small screens
   if (props.sidebarOpen && lgAndSmaller.value && !sidebar.value.contains(target) && !trigger.value.contains(target)) {
     emit('close-sidebar');
     return;
   }
-  
+
   // Close sidebar when clicking on a menu item on small screens
   if (props.sidebarOpen && lgAndSmaller.value && sidebar.value.contains(target) && target.closest('a')) {
     emit('close-sidebar');
@@ -41,16 +41,16 @@ const clickHandler = (event: MouseEvent) => {
 };
 
 const keyHandler = (event: KeyboardEvent) => {
-  if (!props.sidebarOpen || event.key !== "Escape" || !lgAndSmaller.value) return;
-  emit("close-sidebar");
+  if (!props.sidebarOpen || event.key !== 'Escape' || !lgAndSmaller.value) return;
+  emit('close-sidebar');
 };
 
 const updateBodyClass = () => {
   if (import.meta.client) {
     if (sidebarExpanded.value) {
-      document.body.classList.add("sidebar-expanded");
+      document.body.classList.add('sidebar-expanded');
     } else {
-      document.body.classList.remove("sidebar-expanded");
+      document.body.classList.remove('sidebar-expanded');
     }
   }
 };
@@ -121,18 +121,9 @@ onUnmounted(() => {
       <div class="space-y-8 p-4" v-else-if="menuItems">
         <!-- Pages group -->
         <div v-for="group in menuItems" :key="group.id">
-          <h3
-            v-if="group.label"
-            class="pl-3 text-xs uppercase tracking-wider text-slate-400"
-          >
-            <span
-              class="lg:sidebar-expanded:hidden hidden w-6 text-center lg:block"
-              aria-hidden="true"
-              >•••</span
-            >
-            <span class="lg:sidebar-expanded:block lg:hidden">{{
-              group.label
-            }}</span>
+          <h3 v-if="group.label" class="pl-3 text-xs uppercase tracking-wider text-slate-400">
+            <span class="lg:sidebar-expanded:hidden hidden w-6 text-center lg:block" aria-hidden="true">•••</span>
+            <span class="lg:sidebar-expanded:block lg:hidden">{{ group.label }}</span>
           </h3>
           <ul class="mt-2">
             <NuxtLink
@@ -158,10 +149,9 @@ onUnmounted(() => {
                     :name="linkItem.icon"
                     class="h-7 w-7 fill-current shrink-0 px-2.5 p-1.5 box-content"
                   />
-                  <span
-                    class="lg:sidebar-expanded:opacity-100 text-sm font-medium lg:opacity-0 2xl:opacity-100"
-                    >{{ linkItem.name }}</span
-                  >
+                  <span class="lg:sidebar-expanded:opacity-100 text-sm font-medium lg:opacity-0 2xl:opacity-100">{{
+                    linkItem.name
+                  }}</span>
                 </a>
               </li>
             </NuxtLink>
@@ -172,17 +162,9 @@ onUnmounted(() => {
 
       <!-- Expand / collapse button -->
       <div class="mt-auto hidden justify-end lg:inline-flex p-4">
-        <Button
-          @click="sidebarExpanded = !sidebarExpanded"
-          variant="ghost"
-          size="icon"
-          class="text-slate-200"
-        >
+        <Button @click="sidebarExpanded = !sidebarExpanded" variant="ghost" size="icon" class="text-slate-200">
           <span class="sr-only">Expand / collapse sidebar</span>
-          <Icon
-            icon="radix-icons:pin-right"
-            class="h-6 w-6 sidebar-expanded:rotate-180"
-          />
+          <Icon icon="radix-icons:pin-right" class="h-6 w-6 sidebar-expanded:rotate-180" />
         </Button>
       </div>
     </div>

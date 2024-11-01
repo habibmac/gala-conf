@@ -1,17 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { useAuthStore } from "@/stores";
+import { useAuthStore } from '@/stores';
 import { useRouter } from 'vue-router';
-import { useLocalStorage } from "#imports";
+import { useLocalStorage } from '#imports';
 
 const router = useRouter();
 const authStore = useAuthStore();
 
-const statuses = [
-  'Booting up...',
-  'Loading components...',
-  'Painting the walls...',
-];
+const statuses = ['Booting up...', 'Loading components...', 'Painting the walls...'];
 
 const currentStatus = ref(statuses[0]);
 const loadingShown = useLocalStorage('loadingShown', false);
@@ -20,16 +16,23 @@ let timeouts: NodeJS.Timeout[] = [];
 
 const showStatuses = () => {
   statuses.forEach((status, index) => {
-    timeouts.push(setTimeout(() => {
-      currentStatus.value = status;
-      
-      if (index === statuses.length - 1) {
-        timeouts.push(setTimeout(() => {
-          redirectBasedOnAuth();
-          loadingShown.value = true;
-        }, 1000));
-      }
-    }, index * 800 + Math.random() * 1000));
+    timeouts.push(
+      setTimeout(
+        () => {
+          currentStatus.value = status;
+
+          if (index === statuses.length - 1) {
+            timeouts.push(
+              setTimeout(() => {
+                redirectBasedOnAuth();
+                loadingShown.value = true;
+              }, 1000)
+            );
+          }
+        },
+        index * 800 + Math.random() * 1000
+      )
+    );
   });
 };
 
@@ -54,12 +57,16 @@ onUnmounted(() => {
 });
 
 // Watch for authentication state changes
-watch(() => authStore.isAuthenticated, (isAuthenticated) => {
-  if (isAuthenticated) {
-    timeouts.forEach(clearTimeout);
-    router.replace('/my-events');
-  }
-}, { immediate: true });
+watch(
+  () => authStore.isAuthenticated,
+  (isAuthenticated) => {
+    if (isAuthenticated) {
+      timeouts.forEach(clearTimeout);
+      router.replace('/my-events');
+    }
+  },
+  { immediate: true }
+);
 
 // Function to reset loading (for testing purposes)
 const resetLoading = () => {

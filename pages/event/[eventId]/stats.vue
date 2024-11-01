@@ -6,10 +6,10 @@ definePageMeta({
   icon: 'solar:pie-chart-2-bold-duotone',
   group: 'reports',
   layout: 'dashboard-with-sidebar',
-})
+});
 </script>
 <template>
-    <div>
-        <h1>Stats</h1>
-    </div>
+  <div>
+    <h1>Stats</h1>
+  </div>
 </template>

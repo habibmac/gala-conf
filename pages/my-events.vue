@@ -1,55 +1,51 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { useQuery } from "@tanstack/vue-query";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { computed } from 'vue';
+import { useQuery } from '@tanstack/vue-query';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 useHead({
-  title: "My Events",
-  meta: [
-    { name: 'description', content: 'List of active events' }
-  ]
-})
+  title: 'My Events',
+  meta: [{ name: 'description', content: 'List of active events' }],
+});
 
 definePageMeta({
-  layout: "dashboard",
+  layout: 'dashboard',
 });
 
 const router = useRouter();
 
 const { $galantisApi, $router } = useNuxtApp();
 const { data: evtCount } = useQuery({
-  queryKey: ["events-count"],
-  queryFn: () => $galantisApi.get("/events/count").then((res) => res.data),
+  queryKey: ['events-count'],
+  queryFn: () => $galantisApi.get('/events/count').then((res) => res.data),
   staleTime: 1000 * 60 * 60, // 1 hour
 });
 
-const activeTab = computed(() =>
-  $router.currentRoute.value.query.status === "past" ? "past" : "active"
-);
+const activeTab = computed(() => ($router.currentRoute.value.query.status === 'past' ? 'past' : 'active'));
 
 const tabsMeta = computed(() => [
   {
-    value: "active",
-    label: "Active",
+    value: 'active',
+    label: 'Active',
     count: evtCount.value?.active,
-    link: "/my-events",
+    link: '/my-events',
   },
   {
-    value: "past",
-    label: "Past",
+    value: 'past',
+    label: 'Past',
     count: evtCount.value?.inactive,
-    link: "/my-events?status=past",
+    link: '/my-events?status=past',
   },
 ]);
 
 const handleTabChange = (value: string) => {
-  const status = value === "active" ? undefined : value.toString();
+  const status = value === 'active' ? undefined : value.toString();
   router.push({ query: { status } });
 };
 
 const translationClass = computed(() => {
-  return activeTab.value === "past" ? "translate-x-full" : "translate-x-0";
+  return activeTab.value === 'past' ? 'translate-x-full' : 'translate-x-0';
 });
 </script>
 <template>
@@ -70,13 +66,8 @@ const translationClass = computed(() => {
       <div class="mx-auto sm:max-w-4xl">
         <div class="px-4 py-4 sm:px-6 sm:py-6">
           <div class="flex mb-6">
-            <div
-              class="relative flex w-full max-w-sm p-1 bg-muted-foreground/10 rounded-md mx-auto sm:mx-0"
-            >
-              <span
-                class="absolute inset-0 m-1 pointer-events-none"
-                aria-hidden="true"
-              >
+            <div class="relative flex w-full max-w-sm p-1 bg-muted-foreground/10 rounded-md mx-auto sm:mx-0">
+              <span class="absolute inset-0 m-1 pointer-events-none" aria-hidden="true">
                 <span
                   class="absolute inset-0 w-1/2 bg-card rounded-md transition-transform duration-150 ease-in-out"
                   :class="translationClass"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted } from 'vue';
 
 const { user } = useUserProfile();
 const config = useRuntimeConfig();
@@ -24,18 +24,18 @@ const clickHandler = (event: MouseEvent) => {
 
 // Close if the ESC key is pressed
 const keyHandler = (event: KeyboardEvent) => {
-  if (!dropdownOpen.value || event.key !== "Escape") return;
+  if (!dropdownOpen.value || event.key !== 'Escape') return;
   dropdownOpen.value = false;
 };
 
 onMounted(() => {
-  document.addEventListener("click", clickHandler);
-  document.addEventListener("keydown", keyHandler);
+  document.addEventListener('click', clickHandler);
+  document.addEventListener('keydown', keyHandler);
 });
 
 onUnmounted(() => {
-  document.removeEventListener("click", clickHandler);
-  document.removeEventListener("keydown", keyHandler);
+  document.removeEventListener('click', clickHandler);
+  document.removeEventListener('keydown', keyHandler);
 });
 </script>
 <template>
@@ -55,10 +55,7 @@ onUnmounted(() => {
         height="32"
         alt="User"
       />
-      <div
-        v-else
-        class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-700"
-      ></div>
+      <div v-else class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-700"></div>
     </button>
     <Transition
       enter-active-class="transition ease-out duration-200 transform"
@@ -72,16 +69,9 @@ onUnmounted(() => {
         v-show="dropdownOpen"
         class="absolute right-0 top-full z-10 min-w-64 origin-top-right overflow-hidden rounded-md mt-1 border border-slate-200 bg-white py-1.5 shadow-lg dark:border-slate-800 dark:bg-slate-950"
       >
-        <ul
-          ref="dropdown"
-          class="text-left"
-          @focusin="dropdownOpen = true"
-          @focusout="dropdownOpen = false"
-        >
+        <ul ref="dropdown" class="text-left" @focusin="dropdownOpen = true" @focusout="dropdownOpen = false">
           <template v-if="user">
-            <li
-              class="mb-1 border-b border-slate-200 px-3 pb-2 pt-0.5 dark:border-slate-900"
-            >
+            <li class="mb-1 border-b border-slate-200 px-3 pb-2 pt-0.5 dark:border-slate-900">
               <div class="font-medium text-sm text-slate-800 dark:text-slate-100">
                 {{ user.display_name }}
               </div>
@@ -92,9 +82,7 @@ onUnmounted(() => {
             <template v-if="user.user_roles.includes('administrator')">
               <NuxtLink :to="backendUrl" custom v-slot="{ href, navigate }">
                 <li>
-                  <a :href="href" class="dropdown-item" @click="navigate"
-                    >🚨 Backend</a
-                  >
+                  <a :href="href" class="dropdown-item" @click="navigate">🚨 Backend</a>
                 </li>
               </NuxtLink>
               <hr class="h-1 dark:border-slate-900" />
@@ -102,24 +90,18 @@ onUnmounted(() => {
 
             <NuxtLink to="/my-events" custom v-slot="{ href, navigate }">
               <li>
-                <a :href="href" class="dropdown-item" @click="navigate"
-                  >My Events</a
-                >
+                <a :href="href" class="dropdown-item" @click="navigate">My Events</a>
               </li>
             </NuxtLink>
             <NuxtLink to="/my-events" custom v-slot="{ href, navigate }">
               <li>
-                <a :href="href" class="dropdown-item" @click="navigate"
-                  >Settings</a
-                >
+                <a :href="href" class="dropdown-item" @click="navigate">Settings</a>
               </li>
             </NuxtLink>
             <hr class="h-1 dark:border-slate-900" />
             <NuxtLink to="/auth/logout" custom v-slot="{ href, navigate }">
               <li>
-                <a :href="href" class="dropdown-item" @click="navigate"
-                  >Logout</a
-                >
+                <a :href="href" class="dropdown-item" @click="navigate">Logout</a>
               </li>
             </NuxtLink>
           </template>
@@ -128,4 +110,3 @@ onUnmounted(() => {
     </Transition>
   </div>
 </template>
-

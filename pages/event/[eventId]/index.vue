@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import RegCards from "~/components/partials/registrations/RegCards.vue";
+import RegCards from '~/components/partials/registrations/RegCards.vue';
 
 useHead({
-  title: "Dashboard",
-})
+  title: 'Dashboard',
+});
 
 definePageMeta({
-  title: "Dashboard",
-  group: "dashboard",
+  title: 'Dashboard',
+  group: 'dashboard',
   showInMenu: true,
   requiresSelectedEvent: true,
-  icon: "solar:widget-4-bold-duotone",
-  packages: ["starter", "smart", "optima"],
-  roles: ["administrator", "ee_event_organizer", "ee_event_operator"],
-  capabilities: ["ee_read_registrations"],
-  permissions: ["ee_read_registrations"],
-  layout: "dashboard-with-sidebar",
+  icon: 'solar:widget-4-bold-duotone',
+  packages: ['starter', 'smart', 'optima'],
+  roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
+  capabilities: ['ee_read_registrations'],
+  permissions: ['ee_read_registrations'],
+  layout: 'dashboard-with-sidebar',
 });
 </script>
 

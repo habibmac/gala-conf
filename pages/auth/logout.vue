@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useAuthStore } from "@/stores";
-import { useRouter } from "#app";
+import { ref, computed } from 'vue';
+import { useAuthStore } from '@/stores';
+import { useRouter } from '#app';
 
 useHead({
-  title: "Logging out...",
+  title: 'Logging out...',
 });
 
 const authStore = useAuthStore();
@@ -44,14 +44,12 @@ onMounted(async () => {
   clearInterval(interval);
   clearInterval(dotsInterval);
 
-  router.replace("/auth/login?loggedout=true");
+  router.replace('/auth/login?loggedout=true');
 });
 </script>
 
 <template>
-  <div
-    class="max-w-9xl mx-auto w-full px-4 py-8 flex sm:px-6 lg:px-8 min-h-screen"
-  >
+  <div class="max-w-9xl mx-auto w-full px-4 py-8 flex sm:px-6 lg:px-8 min-h-screen">
     <div class="m-auto max-w-2xl">
       <div class="px-4 text-center">
         <SpinnerRing />

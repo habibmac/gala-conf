@@ -1,38 +1,32 @@
 <script setup lang="ts">
-import {
-  Listbox,
-  ListboxButton,
-  ListboxOptions,
-  ListboxOption,
-} from "@headlessui/vue";
-import { Icon } from "@iconify/vue";
+import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps<{
   eventId: string | number;
   itemId: string | number;
 }>();
 
-const emit = defineEmits(["refresh", "delete"]);
+const emit = defineEmits(['refresh', 'delete']);
 
 const menuItems = [
-  { id: "view", label: "View", icon: "carbon:view", action: "link" },
-  { id: "edit", label: "Edit", icon: "carbon:edit", action: "link" },
+  { id: 'view', label: 'View', icon: 'carbon:view', action: 'link' },
+  { id: 'edit', label: 'Edit', icon: 'carbon:edit', action: 'link' },
   {
-    id: "refresh",
-    label: "Refresh",
-    icon: "ri:refresh-line",
-    action: "button",
+    id: 'refresh',
+    label: 'Refresh',
+    icon: 'ri:refresh-line',
+    action: 'button',
   },
-  { id: "delete", label: "Delete", icon: "carbon:trash", action: "button" },
+  { id: 'delete', label: 'Delete', icon: 'carbon:trash', action: 'button' },
 ];
 
 const handleAction = (item: { id: string; action: string }) => {
-  if (item.action === "button" && item.id === "refresh") {
-    emit("refresh");
-  } else if (item.action === "button" && item.id === "delete") {
-    emit("delete");
+  if (item.action === 'button' && item.id === 'refresh') {
+    emit('refresh');
+  } else if (item.action === 'button' && item.id === 'delete') {
+    emit('delete');
   }
-
 };
 </script>
 
@@ -57,25 +51,12 @@ const handleAction = (item: { id: string; action: string }) => {
         as="ul"
       >
         <div class="px-1 py-1">
-          <ListboxOption
-            v-for="item in menuItems"
-            :key="item.id"
-            :value="item"
-            as="li"
-            class="dropdown-item"
-          >
-            <NuxtLink
-              v-if="item.action === 'link'"
-              :to="`/event/${props.eventId}/insight/${props.itemId}/edit`"
-            >
+          <ListboxOption v-for="item in menuItems" :key="item.id" :value="item" as="li" class="dropdown-item">
+            <NuxtLink v-if="item.action === 'link'" :to="`/event/${props.eventId}/insight/${props.itemId}/edit`">
               <Icon :icon="item.icon" class="mr-2 h-4 w-4 text-slate-400" />
               {{ item.label }}
             </NuxtLink>
-            <button
-              v-else
-              @click.prevent="handleAction(item)"
-              class="flex items-center w-full cursor-default"
-            >
+            <button v-else @click.prevent="handleAction(item)" class="flex items-center w-full cursor-default">
               <Icon :icon="item.icon" class="mr-2 h-4 w-4 text-slate-400" />
               {{ item.label }}
             </button>

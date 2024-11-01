@@ -1,5 +1,5 @@
-import { defineEventHandler, getQuery } from 'h3'
-import Typesense from 'typesense'
+import { defineEventHandler, getQuery } from 'h3';
+import Typesense from 'typesense';
 
 // Define the interface for our city document
 interface CityDocument {
@@ -18,8 +18,7 @@ interface CityOption {
 }
 
 export default defineEventHandler(async (event) => {
-
-  const config = useRuntimeConfig()
+  const config = useRuntimeConfig();
 
   // Initialize Typesense client
   const typesense = new Typesense.Client({
@@ -27,46 +26,48 @@ export default defineEventHandler(async (event) => {
       {
         host: config.typesenseHost,
         port: Number(config.typesensePort),
-        protocol: config.typesenseProtocol
-      }
+        protocol: config.typesenseProtocol,
+      },
     ],
     apiKey: config.typesenseApiKey,
-    connectionTimeoutSeconds: 2
-  })
+    connectionTimeoutSeconds: 2,
+  });
 
-  const query = getQuery(event)
-  const cityQuery = query.city as string
+  const query = getQuery(event);
+  const cityQuery = query.city as string;
 
   if (!cityQuery || cityQuery.length < 3) {
-    return []
+    return [];
   }
 
   try {
     const searchParameters = {
       q: cityQuery,
       query_by: 'name',
-      filter_by: 'country_code:!=XX',  // Exclude any entries with invalid country codes
+      filter_by: 'country_code:!=XX', // Exclude any entries with invalid country codes
       sort_by: '_text_match:desc',
-      limit: 10
-    }
+      limit: 10,
+    };
 
-    const searchResults = await typesense
-      .collections('cities')
-      .documents()
-      .search(searchParameters)
+    const searchResults = await typesense.collections('cities').documents().search(searchParameters);
 
-    return (searchResults.hits as any[])?.map((hit) => ({
-      city: hit.document.name,
-      state: hit.document.state_name,
-      country: hit.document.country_name,
-      country_code: hit.document.country_code,
-      id: hit.document.id
-    } as CityOption)) || []
+    return (
+      (searchResults.hits as any[])?.map(
+        (hit) =>
+          ({
+            city: hit.document.name,
+            state: hit.document.state_name,
+            country: hit.document.country_name,
+            country_code: hit.document.country_code,
+            id: hit.document.id,
+          }) as CityOption
+      ) || []
+    );
   } catch (error) {
-    console.error('Error searching cities:', error)
+    console.error('Error searching cities:', error);
     throw createError({
       statusCode: 500,
-      statusMessage: 'Error searching cities'
-    })
+      statusMessage: 'Error searching cities',
+    });
   }
-})
+});

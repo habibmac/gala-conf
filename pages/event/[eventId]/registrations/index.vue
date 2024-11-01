@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, h, watch, toRefs } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { fromUnixTime, format } from "date-fns";
+import { ref, computed, h, watch, toRefs } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { fromUnixTime, format } from 'date-fns';
 import {
   FlexRender,
   getCoreRowModel,
@@ -9,36 +9,36 @@ import {
   createColumnHelper,
   type SortingState,
   type PaginationState,
-} from "@tanstack/vue-table";
+} from '@tanstack/vue-table';
 
-import { useRegs } from "@/composables/useRegs";
-import { formatThousands, getStatusInfo } from "@/utils";
-import type { Reg, Filter, ColumnConfig } from "@/types";
+import { useRegs } from '@/composables/useRegs';
+import { formatThousands, getStatusInfo } from '@/utils';
+import type { Reg, Filter, ColumnConfig } from '@/types';
 
-import RegCards from "@/components/partials/registrations/RegCards.vue";
-import DropdownTicketFilter from "@/components/DropdownTicketFilter.vue";
-import DropdownStatusFilter from "@/components/DropdownStatusFilter.vue";
-import DropdownTableColumns from "@/components/DropdownTableColumns.vue";
-import TableSearchForm from "@/components/TableSearchForm.vue";
-import TablePagination from "@/components/TablePagination.vue";
-import TableStatusTooltip from "@/components/TableStatusTooltip.vue";
-import TransactionPanel from "@/components/partials/registrations/TransactionPanel.vue";
-import TableResetBtn from "@/components/TableResetBtn.vue";
-import SpinnerRing from "@/components/SpinnerRing.vue";
-import NoData from "@/components/partials/registrations/NoData.vue";
-import Datepicker from "@/components/Datepicker.vue";
+import RegCards from '@/components/partials/registrations/RegCards.vue';
+import DropdownTicketFilter from '@/components/DropdownTicketFilter.vue';
+import DropdownStatusFilter from '@/components/DropdownStatusFilter.vue';
+import DropdownTableColumns from '@/components/DropdownTableColumns.vue';
+import TableSearchForm from '@/components/TableSearchForm.vue';
+import TablePagination from '@/components/TablePagination.vue';
+import TableStatusTooltip from '@/components/TableStatusTooltip.vue';
+import TransactionPanel from '@/components/partials/registrations/TransactionPanel.vue';
+import TableResetBtn from '@/components/TableResetBtn.vue';
+import SpinnerRing from '@/components/SpinnerRing.vue';
+import NoData from '@/components/partials/registrations/NoData.vue';
+import Datepicker from '@/components/Datepicker.vue';
 
 useHead({
-  title: "Registrations",
+  title: 'Registrations',
 });
 
 definePageMeta({
-  title: "Registrations",
+  title: 'Registrations',
   showInMenu: true,
   order: 1,
-  icon: "solar:users-group-two-rounded-bold-duotone",
-  group: "reports",
-  layout: "dashboard-with-sidebar",
+  icon: 'solar:users-group-two-rounded-bold-duotone',
+  group: 'reports',
+  layout: 'dashboard-with-sidebar',
 });
 
 const props = defineProps<{
@@ -54,18 +54,7 @@ const props = defineProps<{
   detail?: string;
 }>();
 
-const {
-  search,
-  ticket_name,
-  status,
-  dateStart,
-  dateEnd,
-  page,
-  perPage,
-  sortBy,
-  order,
-  detail,
-} = toRefs(props);
+const { search, ticket_name, status, dateStart, dateEnd, page, perPage, sortBy, order, detail } = toRefs(props);
 
 const { event } = useEvent();
 const eventId = computed(() => event.value?.id);
@@ -73,10 +62,10 @@ const eventId = computed(() => event.value?.id);
 const route = useRoute();
 const router = useRouter();
 
-const endpoint = "registrations";
+const endpoint = 'registrations';
 
 // Selected registration ID and details panel state
-const selectedRegId = ref<string>(detail.value || "");
+const selectedRegId = ref<string>(detail.value || '');
 
 // Pagination configs
 const INITIAL_PAGE_SIZE = 10;
@@ -84,64 +73,64 @@ const pageSizes: (number | string)[] = [10, 20, 30, 40, 50];
 
 const columnConfigs = ref<ColumnConfig[]>([
   {
-    key: "date",
-    header: "Date",
+    key: 'date',
+    header: 'Date',
     isVisible: true,
     isHideable: true,
     width: 10,
   },
   {
-    key: "code",
-    header: "Reg Code",
+    key: 'code',
+    header: 'Reg Code',
     isVisible: true,
     isHideable: false,
     width: 10,
   },
   {
-    key: "fullname",
-    header: "Full Name",
+    key: 'fullname',
+    header: 'Full Name',
     isVisible: true,
     isHideable: false,
     width: 20,
   },
   {
-    key: "ticket_name",
-    header: "Ticket",
+    key: 'ticket_name',
+    header: 'Ticket',
     isVisible: true,
     isHideable: true,
     width: 15,
   },
   {
-    key: "ticket_price",
-    header: "Price",
+    key: 'ticket_price',
+    header: 'Price',
     isVisible: true,
     isHideable: true,
     width: 10,
   },
   {
-    key: "paid",
-    header: "Paid",
+    key: 'paid',
+    header: 'Paid',
     isVisible: true,
     isHideable: true,
     width: 10,
   },
   {
-    key: "status",
-    header: "Status",
+    key: 'status',
+    header: 'Status',
     isVisible: true,
     isHideable: false,
     width: 10,
   },
   {
-    key: "email",
-    header: "Email",
+    key: 'email',
+    header: 'Email',
     isVisible: false,
     isHideable: true,
     width: 15,
   },
   {
-    key: "phone",
-    header: "Phone",
+    key: 'phone',
+    header: 'Phone',
     isVisible: false,
     isHideable: true,
     width: 15,
@@ -156,19 +145,19 @@ const pagination = ref<PaginationState>({
 });
 
 const filters = ref<Filter>({
-  search: search.value ? String(search.value) : "",
+  search: search.value ? String(search.value) : '',
   ticket_name: ticket_name.value ? [String(ticket_name.value)] : [],
   status: status.value ? [String(status.value)] : [], // Initialize as an array
-  date_start: dateStart.value ? String(dateStart.value) : "",
-  date_end: dateEnd.value ? String(dateEnd.value) : "",
+  date_start: dateStart.value ? String(dateStart.value) : '',
+  date_end: dateEnd.value ? String(dateEnd.value) : '',
 });
 
 // Define parseDesc to accept a string and return a boolean
-const parseDesc = (order: string): boolean => order.toLowerCase() === "desc";
+const parseDesc = (order: string): boolean => order.toLowerCase() === 'desc';
 const sorting = ref<SortingState>([
   {
-    id: sortBy.value || "date",
-    desc: parseDesc(order.value || "desc"),
+    id: sortBy.value || 'date',
+    desc: parseDesc(order.value || 'desc'),
   },
 ]);
 
@@ -184,26 +173,25 @@ const columns = computed(() => {
         cell: (cellProps: any) => {
           // Here you can add specific cell rendering logic based on the column key
           switch (config.key) {
-            case "date":
+            case 'date':
               const date = fromUnixTime(Number(cellProps.getValue()));
               return h(
-                "div",
+                'div',
                 {
-                  class:
-                    "text-right text-slate-900 dark:text-slate-300 text-xs",
+                  class: 'text-right text-slate-900 dark:text-slate-300 text-xs',
                 },
                 [
-                  h("div", { class: "" }, format(date, "d MMM yyyy")),
+                  h('div', { class: '' }, format(date, 'd MMM yyyy')),
                   h(
-                    "div",
+                    'div',
                     {
-                      class: "text-xs text-slate-400 dark:text-slate-600",
+                      class: 'text-xs text-slate-400 dark:text-slate-600',
                     },
-                    format(date, "hh:mm")
+                    format(date, 'hh:mm')
                   ),
                 ]
               );
-            case "code":
+            case 'code':
               const stt_id = cellProps.row.original.stt_id;
               // Add new query parameters to the existing query
               const newParams = {
@@ -211,13 +199,10 @@ const columns = computed(() => {
                 details: cellProps.row.original.id,
               };
               return h(
-                "a",
+                'a',
                 {
-                  href: `/dashboard/${
-                    eventId.value
-                  }/${endpoint}?${new URLSearchParams(newParams).toString()}`,
-                  class:
-                    "number text-center group inline-block whitespace-nowrap",
+                  href: `/dashboard/${eventId.value}/${endpoint}?${new URLSearchParams(newParams).toString()}`,
+                  class: 'number text-center group inline-block whitespace-nowrap',
                   onClick: (e: Event) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -225,56 +210,53 @@ const columns = computed(() => {
                   },
                 },
                 h(
-                  "span",
+                  'span',
                   {
-                    class: `text-status group-hover:underline ${
-                      getStatusInfo(stt_id).color
-                    }`,
+                    class: `text-status group-hover:underline ${getStatusInfo(stt_id).color}`,
                   },
                   cellProps.getValue()
                 )
               );
-            case "fullname":
+            case 'fullname':
               return h(
-                "div",
+                'div',
                 {
-                  class:
-                    "font-semibold text-left text-slate-700 dark:text-slate-300 w-full",
+                  class: 'font-semibold text-left text-slate-700 dark:text-slate-300 w-full',
                 },
                 cellProps.getValue()
               );
-            case "ticket_name":
+            case 'ticket_name':
               return h(
-                "div",
+                'div',
                 {
-                  class: "text-left",
+                  class: 'text-left',
                 },
                 cellProps.getValue()
               );
 
-            case "ticket_price":
-            case "paid":
+            case 'ticket_price':
+            case 'paid':
               return h(
-                "div",
+                'div',
                 {
-                  class: "text-right pr-4",
+                  class: 'text-right pr-4',
                 },
                 formatThousands(cellProps.getValue())
               );
-            case "status":
+            case 'status':
               return h(
                 TableStatusTooltip,
                 {
                   status: cellProps.row.original.stt_id,
-                  size: "sm",
-                  position: "top",
+                  size: 'sm',
+                  position: 'top',
                 },
                 {
                   default: () => cellProps.getValue(),
                 }
               );
             default:
-              return h("div", { class: "text-left" }, cellProps.getValue());
+              return h('div', { class: 'text-left' }, cellProps.getValue());
           }
         },
       });
@@ -282,13 +264,7 @@ const columns = computed(() => {
 });
 
 // Fetch data from the API
-const { regData, isLoading, totalPages, totalData } = useRegs(
-  eventId,
-  endpoint,
-  pagination,
-  sorting,
-  filters
-);
+const { regData, isLoading, totalPages, totalData } = useRegs(eventId, endpoint, pagination, sorting, filters);
 
 // Create the table instance
 const table = useVueTable({
@@ -312,7 +288,7 @@ const table = useVueTable({
   manualFiltering: true,
   enableMultiSort: false,
   onPaginationChange: (updater) => {
-    if (typeof updater === "function") {
+    if (typeof updater === 'function') {
       setPagination(
         updater({
           pageIndex: pagination.value.pageIndex,
@@ -324,7 +300,7 @@ const table = useVueTable({
     }
   },
   onSortingChange: (updater) => {
-    if (typeof updater === "function") {
+    if (typeof updater === 'function') {
       setSorting(updater(sorting.value));
     } else {
       setSorting(updater);
@@ -333,10 +309,7 @@ const table = useVueTable({
   getCoreRowModel: getCoreRowModel(),
 });
 
-function setPagination({
-  pageIndex,
-  pageSize,
-}: PaginationState): PaginationState {
+function setPagination({ pageIndex, pageSize }: PaginationState): PaginationState {
   pagination.value.pageIndex = pageIndex;
   pagination.value.pageSize = pageSize;
 
@@ -354,18 +327,18 @@ function handlePageSizeChange(newSize: number) {
 function handleSetDateRange(dateRange: [Date | null, Date | null] | null) {
   if (dateRange === null) {
     // Reset date range
-    filters.value.date_start = "";
-    filters.value.date_end = "";
+    filters.value.date_start = '';
+    filters.value.date_end = '';
   } else {
     const [start, end] = dateRange;
     if (!start || !end) {
       // Additional safety check if needed
-      filters.value.date_start = "";
-      filters.value.date_end = "";
+      filters.value.date_start = '';
+      filters.value.date_end = '';
     } else {
       // Format to yyyy-MM-dd
-      filters.value.date_start = format(start, "yyyy-MM-dd");
-      filters.value.date_end = format(end, "yyyy-MM-dd");
+      filters.value.date_start = format(start, 'yyyy-MM-dd');
+      filters.value.date_end = format(end, 'yyyy-MM-dd');
     }
   }
 }
@@ -399,7 +372,7 @@ const handleOpenDetails = (id: string) => {
 };
 
 const handleCloseDetails = () => {
-  selectedRegId.value = ""; // Reset the selected registration ID
+  selectedRegId.value = ''; // Reset the selected registration ID
   const currentQuery = { ...route.query };
   delete currentQuery.details; // Remove the `details` query parameter
 };
@@ -418,11 +391,11 @@ const isAnyFilterActive = computed(() => {
 // Reset filters, sorting, and pagination to their initial state
 const handleResetFilters = () => {
   filters.value = {
-    search: "",
+    search: '',
     ticket_name: [],
     status: [],
-    date_start: "",
-    date_end: "",
+    date_start: '',
+    date_end: '',
   };
 
   pagination.value = {
@@ -432,16 +405,14 @@ const handleResetFilters = () => {
 
   sorting.value = [
     {
-      id: "date",
+      id: 'date',
       desc: true,
     },
   ];
 };
 
 const totalVisibleWidth = computed(() => {
-  return columnConfigs.value
-    .filter((config) => config.isVisible)
-    .reduce((total, config) => total + config.width, 0);
+  return columnConfigs.value.filter((config) => config.isVisible).reduce((total, config) => total + config.width, 0);
 });
 
 // Watch for changes in filters, pagination, and sorting, and update the route query
@@ -450,15 +421,14 @@ watch(
   ([newFilters, newPagination, newSorting]) => {
     const query = {
       search: newFilters.search || undefined,
-      ticket:
-        newFilters.ticket_name.length > 0 ? newFilters.ticket_name : undefined,
+      ticket: newFilters.ticket_name.length > 0 ? newFilters.ticket_name : undefined,
       status: newFilters.status.length > 0 ? newFilters.status : undefined,
       dateStart: newFilters.date_start || undefined,
       dateEnd: newFilters.date_end || undefined,
       page: newPagination.pageIndex + 1 || undefined,
       perPage: newPagination.pageSize || undefined,
       sortBy: newSorting[0]?.id || undefined,
-      order: newSorting[0]?.desc ? "desc" : "asc" || undefined,
+      order: newSorting[0]?.desc ? 'desc' : 'asc',
       details: selectedRegId.value || undefined,
     };
     router.push({ query });
@@ -481,19 +451,19 @@ watch(
   () => route.query,
   (newQuery) => {
     filters.value = {
-      search: (newQuery.search as string) || "",
+      search: (newQuery.search as string) || '',
       ticket_name: Array.isArray(newQuery.ticket)
         ? (newQuery.ticket as string[])
         : newQuery.ticket
-        ? [newQuery.ticket as string]
-        : [],
+          ? [newQuery.ticket as string]
+          : [],
       status: Array.isArray(newQuery.status)
         ? (newQuery.status as string[])
         : newQuery.status
-        ? [newQuery.status as string]
-        : [],
-      date_start: (newQuery.dateStart as string) || "",
-      date_end: (newQuery.dateEnd as string) || "",
+          ? [newQuery.status as string]
+          : [],
+      date_start: (newQuery.dateStart as string) || '',
+      date_end: (newQuery.dateEnd as string) || '',
     };
     table.getState().pagination.pageIndex = pagination.value.pageIndex;
     table.getState().pagination.pageSize = pagination.value.pageSize;
@@ -503,11 +473,11 @@ watch(
     };
     sorting.value = [
       {
-        id: (newQuery.sortBy as string) || "reg_date",
-        desc: parseDesc((newQuery.order as string) || "desc"),
+        id: (newQuery.sortBy as string) || 'reg_date',
+        desc: parseDesc((newQuery.order as string) || 'desc'),
       },
     ];
-    selectedRegId.value = (newQuery.details as string) || "";
+    selectedRegId.value = (newQuery.details as string) || '';
   },
   { deep: true }
 );
@@ -515,9 +485,7 @@ watch(
 
 <template>
   <div class="container mx-auto 2xl:mx-0">
-    <header
-      class="pt-10 mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
-    >
+    <header class="pt-10 mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
       <h1 class="h2">Registrations</h1>
       <div class="flex shrink-0 space-x-2 justify-self-end">
         <div class="min-w-64 grow">
@@ -532,23 +500,13 @@ watch(
   <section>
     <!-- Search and filter -->
     <div class="container 2xl:mx-0 py-4">
-      <div
-        class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
-      >
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <!-- Left: Avatars -->
         <div class="sm:gap-2 sm:grid sm:grid-flow-col sm:space-y-0">
-          <TableSearchForm
-            v-model="filters.search"
-            placeholder="Search Registrant..."
-          />
-          <DropdownTicketFilter
-            v-model="filters.ticket_name"
-          />
+          <TableSearchForm v-model="filters.search" placeholder="Search Registrant..." />
+          <DropdownTicketFilter v-model="filters.ticket_name" />
           <DropdownStatusFilter v-model="filters.status" />
-          <TableResetBtn
-            @click.prevent="handleResetFilters"
-            v-if="isAnyFilterActive"
-          />
+          <TableResetBtn @click.prevent="handleResetFilters" v-if="isAnyFilterActive" />
         </div>
         <!-- Right: Actions -->
         <div class="flex shrink-0 space-x-2 justify-self-end">
@@ -562,28 +520,18 @@ watch(
     <div class="container 2xl:mx 2xl:max-w-none">
       <div
         class="flex justify-between items-center min-h-12 w-full gap-2 py-3 sm:flex-row sm:py-3"
-        :class="[
-          isAnyFilterActive
-            ? 'flex-col items-start'
-            : 'flex-row items-center justify-between',
-        ]"
+        :class="[isAnyFilterActive ? 'flex-col items-start' : 'flex-row items-center justify-between']"
       >
         <h3 class="shrink-0">
-          <span
-            v-if="isAnyFilterActive"
-            class="font-semibold text-slate-950 dark:text-slate-300"
+          <span v-if="isAnyFilterActive" class="font-semibold text-slate-950 dark:text-slate-300"
             >Filtered Registrations
           </span>
-          <span v-else class="font-semibold text-slate-950 dark:text-slate-200"
-            >All Registrations</span
-          >
+          <span v-else class="font-semibold text-slate-950 dark:text-slate-200">All Registrations</span>
         </h3>
         <div class="number shrink-0 text-slate-500 text-sm" v-if="!isLoading">
           <template v-if="totalData"
             >Found
-            <span class="font-semibold text-slate-900 dark:text-slate-300">{{
-              formatThousands(totalData)
-            }}</span>
+            <span class="font-semibold text-slate-900 dark:text-slate-300">{{ formatThousands(totalData) }}</span>
             results.</template
           >
           <div v-else>No data found.</div>
@@ -598,20 +546,13 @@ watch(
     :style="{ width: `${Math.max(100, totalVisibleWidth)}%` }"
   >
     <template v-if="isLoading">
-      <div
-        class="absolute z-10 h-full w-full bg-slate-500/10 dark:bg-slate-950/20 ring-0"
-      ></div>
+      <div class="absolute z-10 h-full w-full ring-0"></div>
     </template>
-    <table
-      class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90"
-    >
+    <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90">
       <thead
         class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
       >
-        <tr
-          v-for="headerGroup in table.getHeaderGroups()"
-          :key="headerGroup.id"
-        >
+        <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
           <th
             v-for="header in headerGroup.headers"
             :key="header.id"
@@ -621,31 +562,17 @@ watch(
             }"
             class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-200/20 dark:hover:bg-slate-900/50 first:pl-5 last:pr-5 text-xs"
             :class="{
-              'bg-blue-200/20 text-blue-600 dark:bg-slate-800/50':
-                header.column.getIsSorted(),
+              'bg-blue-200/20 text-blue-600 dark:bg-slate-800/50': header.column.getIsSorted(),
               'cursor-pointer select-none': header.column.getCanSort(),
             }"
-            @click="
-              header.column.getCanSort()
-                ? header.column.getToggleSortingHandler()?.($event)
-                : null
-            "
+            @click="header.column.getCanSort() ? header.column.getToggleSortingHandler()?.($event) : null"
           >
             <template v-if="!header.isPlaceholder">
               <div class="relative">
-                <FlexRender
-                  :render="header.column.columnDef.header"
-                  :props="header.getContext()"
-                />
-                <span
-                  class="absolute right-0 text-blue-500 dark:text-slate-300"
-                >
+                <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+                <span class="absolute right-0 text-blue-500 dark:text-slate-300">
                   <span>
-                    {{
-                      { asc: "↑", desc: "↓" }[
-                        header.column.getIsSorted() as string
-                      ]
-                    }}
+                    {{ { asc: '↑', desc: '↓' }[header.column.getIsSorted() as string] }}
                   </span>
                 </span>
               </div>
@@ -653,42 +580,33 @@ watch(
           </th>
         </tr>
       </thead>
-      <tbody
-        class="divide-y divide-slate-200 text-sm 2xl:text-sm dark:divide-slate-800 border-b"
-      >
+      <tbody class="text-sm 2xl:text-sm border-b">
         <template v-if="!table.getRowModel().rows.length">
-          <tr class="">
+          <tr v-if="isLoading" v-for="index in 10" :key="index">
+            <td v-for="column in columns" :key="index" class="px-2 py-2">
+              <Skeleton class="w-full h-6 rounded" />
+            </td>
+          </tr>
+          <tr v-else>
             <td colspan="10" class="py-5 text-center">
-              <div
-                v-if="isLoading"
-                class="mx-auto inline-flex select-none justify-center py-20"
-              >
-                <SpinnerRing
-                  class="h-10 w-10 text-blue-500 dark:text-blue-400"
-                />
-              </div>
-              <NoData v-else @reset-filters="handleResetFilters" />
+              <NoData reset-filters="handleResetFilters" />
             </td>
           </tr>
         </template>
         <tr
           v-for="row in table.getRowModel().rows"
           :key="row.id"
-          class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
+          class="divide-y divide-slate-200 dark:divide-slate-800 hover:bg-slate-50 dark:hover:bg-slate-950/20"
         >
           <td
             v-for="cell in row.getVisibleCells()"
             :key="cell.id"
             class="number px-2 py-3 text-center first:pl-5 last:pr-5"
             :class="{
-              'text-slate-600 bg-blue-50/50 dark:bg-slate-600/20 dark:text-slate-300':
-                cell.column.getIsSorted(),
+              'text-slate-600 bg-blue-50/50 dark:bg-slate-600/20 dark:text-slate-300': cell.column.getIsSorted(),
             }"
           >
-            <FlexRender
-              :render="cell.column.columnDef.cell"
-              :props="cell.getContext()"
-            />
+            <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
           </td>
         </tr>
       </tbody>

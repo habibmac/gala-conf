@@ -1,32 +1,32 @@
 {
-    "scss.lint.unknownAtRules": "ignore",
-    "css.lint.unknownAtRules": "ignore",
-    "workbench.colorTheme": "GitHub Dark",
-    "workbench.colorCustomizations": {
-        "activityBar.activeBackground": "#9dd8d7",
-        "activityBar.background": "#9dd8d7",
-        "activityBar.foreground": "#15202b",
-        "activityBar.inactiveForeground": "#15202b99",
-        "activityBarBadge.background": "#be5fbf",
-        "activityBarBadge.foreground": "#15202b",
-        "commandCenter.border": "#15202b99",
-        "sash.hoverBorder": "#9dd8d7",
-        "statusBar.background": "#79c9c8",
-        "statusBar.foreground": "#15202b",
-        "statusBarItem.hoverBackground": "#55bab9",
-        "statusBarItem.remoteBackground": "#79c9c8",
-        "statusBarItem.remoteForeground": "#15202b",
-        "titleBar.activeBackground": "#79c9c8",
-        "titleBar.activeForeground": "#15202b",
-        "titleBar.inactiveBackground": "#79c9c899",
-        "titleBar.inactiveForeground": "#15202b99"
-    },
-    "peacock.color": "#79c9c8",
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "files.exclude": {
-        "**/.nuxt": true,
-        "**/node_modules": true,
-        "**/.output": true,
-        "**/dist": true,
-    }
+  "scss.lint.unknownAtRules": "ignore",
+  "css.lint.unknownAtRules": "ignore",
+  "workbench.colorTheme": "GitHub Dark",
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#9dd8d7",
+    "activityBar.background": "#9dd8d7",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#be5fbf",
+    "activityBarBadge.foreground": "#15202b",
+    "commandCenter.border": "#15202b99",
+    "sash.hoverBorder": "#9dd8d7",
+    "statusBar.background": "#79c9c8",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#55bab9",
+    "statusBarItem.remoteBackground": "#79c9c8",
+    "statusBarItem.remoteForeground": "#15202b",
+    "titleBar.activeBackground": "#79c9c8",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#79c9c899",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
+  "peacock.color": "#79c9c8",
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "files.exclude": {
+    "**/.nuxt": true,
+    "**/node_modules": true,
+    "**/.output": true,
+    "**/dist": true
+  }
 }
