@@ -8,7 +8,6 @@ import {
   type SortingState,
   type PaginationState,
 } from "@tanstack/vue-table";
-import { useRegs } from "@/composables/useRegs";
 import { useInsight } from "@/composables/useInsight";
 import { fromUnixTime, format } from "date-fns";
 import { formatThousands } from "@/utils";
@@ -29,6 +28,18 @@ interface TicketGroup {
 interface TicketList {
   id: string;
   name: string;
+}
+
+interface CustomField {
+  key: string;
+  label: string;
+  slug: string;
+}
+
+interface Answer {
+  qst_id: number;
+  qst: string;
+  ans: string;
 }
 
 definePageMeta({
@@ -68,6 +79,40 @@ const activeTab = computed(() => {
 const INITIAL_PAGE_SIZE = 10;
 const pageSizes: (number | string)[] = [10, 20, 30, 40, 50];
 
+
+const pagination = ref({ pageIndex: 0, pageSize: 10 });
+const filters = ref({
+  search: search.value || "",
+  ticket_name: ticket_name.value || "",
+  status: "approved",
+});
+
+// Define parseDesc to accept a string and return a boolean
+const parseDesc = (order: string): boolean => order.toLowerCase() === "desc";
+const sorting = ref<SortingState>([
+  {
+    id: sortBy.value || "date",
+    desc: parseDesc(order.value || "desc"),
+  },
+]);
+
+const {
+  insightData,
+  regData,
+  ticketGroups,
+  totalData,
+  totalPages,
+  error,
+  isLoading,
+} = useInsight(
+  eventId,
+  route.params.insightId as string,
+  pagination,
+  sorting,
+  filters
+);
+
+
 // Table configuration
 const columnConfigs = ref<ColumnConfig[]>([
   {
@@ -99,57 +144,20 @@ const columnConfigs = ref<ColumnConfig[]>([
     width: 15,
   },
   {
-    key: "ticket_price",
-    header: "Price",
-    isVisible: true,
-    isHideable: true,
-    width: 10,
-  },
-  {
-    key: "paid",
-    header: "Paid",
-    isVisible: true,
-    isHideable: true,
-    width: 10,
-  },
-  {
-    key: "status",
-    header: "Status",
-    isVisible: true,
-    isHideable: false,
-    width: 10,
-  },
-  {
     key: "email",
     header: "Email",
-    isVisible: false,
+    isVisible: true,
     isHideable: true,
     width: 15,
   },
   {
     key: "phone",
     header: "Phone",
-    isVisible: false,
+    isVisible: true,
     isHideable: true,
     width: 15,
   },
-  // Add more columns as needed
-]);
-
-const pagination = ref({ pageIndex: 0, pageSize: 10 });
-const filters = ref({
-  search: search.value || "",
-  ticket_name: ticket_name.value || "",
-  status: "approved",
-});
-
-// Define parseDesc to accept a string and return a boolean
-const parseDesc = (order: string): boolean => order.toLowerCase() === "desc";
-const sorting = ref<SortingState>([
-  {
-    id: sortBy.value || "date",
-    desc: parseDesc(order.value || "desc"),
-  },
+  ...getCustomFieldsColumns(insightData.value?.fields ?? []),
 ]);
 
 // Define columns
@@ -158,7 +166,15 @@ const columns = computed(() => {
   return columnConfigs.value
     .filter((config) => config.isVisible)
     .map((config) => {
-      return columnHelper.accessor(config.key, {
+      return columnHelper.accessor((row: Reg) => {
+        // Handle custom fields by checking if there's an accessor function
+        if (config.accessor) {
+          return config.accessor(row);
+        }
+        // Handle regular fields
+        return row[config.key as keyof Reg];
+      }, {
+        id: config.key,
         header: config.header,
         size: config.width * 10,
         cell: (cellProps: any) => {
@@ -169,8 +185,7 @@ const columns = computed(() => {
               return h(
                 "div",
                 {
-                  class:
-                    "text-right text-slate-900 dark:text-slate-300 text-xs",
+                  class: "text-right text-slate-900 dark:text-slate-300 text-xs",
                 },
                 [
                   h("div", { class: "" }, format(date, "d MMM yyyy")),
@@ -196,8 +211,7 @@ const columns = computed(() => {
               return h(
                 "div",
                 {
-                  class:
-                    "font-semibold text-left text-slate-700 dark:text-slate-300 w-full",
+                  class: "font-semibold text-left text-slate-700 dark:text-slate-300 w-full",
                 },
                 cellProps.getValue()
               );
@@ -208,21 +222,6 @@ const columns = computed(() => {
       });
     });
 });
-
-const {
-  insightData,
-  ticketGroups,
-  error: isInsightError,
-  isLoading: isInsightLoading,
-} = useInsight(eventId, `insight/${insightId.value}`);
-
-const { regData, totalData, totalPages, error, isLoading } = useRegs(
-  eventId,
-  "registrations",
-  pagination,
-  sorting,
-  filters
-);
 
 // Create the table instance
 const table = useVueTable({
@@ -267,6 +266,21 @@ const table = useVueTable({
   getCoreRowModel: getCoreRowModel(),
 });
 
+function getCustomFieldsColumns(fields: CustomField[]): ColumnConfig[] {
+  return fields.map((field) => ({
+    key: field.slug,
+    header: field.label,
+    isVisible: true,
+    isHideable: true,
+    width: 10,
+    // Add accessor function to get the answer value
+    accessor: (row: Reg) => {
+      const answer = row.ans?.find((a: Answer) => a.qst === field.label);
+      return answer?.ans || '';
+    }
+  }));
+}
+
 function setPagination({
   pageIndex,
   pageSize,
@@ -281,11 +295,15 @@ function setSorting(state: SortingState) {
   sorting.value = state;
 }
 
-const totalVisibleWidth = computed(() => {
-  return columnConfigs.value
+function calculateMinWidth(): number {
+  const totalWidth = columnConfigs.value
     .filter((config) => config.isVisible)
-    .reduce((total, config) => total + config.width, 0);
-});
+    .reduce((total, config) => total + (config.width * 15), 0); // Multiply by a factor to get reasonable width
+
+  // Return the greater of the calculated width or minimum width (e.g., 1000px)
+  return Math.max(totalWidth, 1000);
+}
+
 
 function handlePageSizeChange(newSize: number) {
   pagination.value.pageSize = newSize;
@@ -368,10 +386,8 @@ const tabIndicatorWidth = computed(() => {
 <template>
   <div class="container mx-auto 2xl:mx-0">
     <header class="pt-5">
-      <NuxtLink
-        :to="`/event/${eventId}/insights`"
-        class="pb-5 inline-flex hover:underline text-xs items-center space-x-1 text-slate-500"
-      >
+      <NuxtLink :to="`/event/${eventId}/insights`"
+        class="pb-5 inline-flex hover:underline text-xs items-center space-x-1 text-slate-500">
         <Icon icon="heroicons-outline:arrow-left" class="w-3 h-3" />
         <span>Back to All Insights</span>
       </NuxtLink>
@@ -383,40 +399,23 @@ const tabIndicatorWidth = computed(() => {
 
   <section>
     <div class="container mx-auto 2xl:mx-0 relative">
-      <div v-if="isInsightLoading" class="grid gap-4 grid-cols-12">
-        <Skeleton
-          v-for="i in 2"
-          class="h-28 rounded-xl col-span-12 md:col-span-6 bg-white dark:bg-slate-900"
-        />
+      <div v-if="isLoading" class="grid gap-4 grid-cols-12">
+        <Skeleton v-for="i in 2" class="h-28 rounded-xl col-span-12 md:col-span-6 bg-muted-foreground/10" />
       </div>
-      <div
-        class="relative flex w-full max-w-sm p-1 bg-slate-200 dark:bg-slate-700/40 rounded-md mx-auto sm:mx-0"
-        v-else-if="ticketGroups"
-      >
-        <span
-          class="absolute inset-0 m-1 pointer-events-none"
-          aria-hidden="true"
-        >
+      <div class="relative flex w-full max-w-sm p-1 bg-slate-200 dark:bg-slate-700/40 rounded-md mx-auto sm:mx-0"
+        v-else-if="ticketGroups">
+        <span class="absolute inset-0 m-1 pointer-events-none" aria-hidden="true">
           <span
             class="absolute inset-0 bg-white dark:bg-slate-950/70 rounded-md transition-transform duration-150 ease-in-out"
-            :style="{ width: tabIndicatorWidth, transform: tabIndicatorClass }"
-          ></span>
+            :style="{ width: tabIndicatorWidth, transform: tabIndicatorClass }"></span>
         </span>
-        <button
-          v-for="(tab, index) in ticketGroups"
-          :key="index"
+        <button v-for="(tab, index) in ticketGroups" :key="index"
           class="relative flex-1 justify-center items-center z-10 flex text-sm font-medium p-1 duration-150 ease-in-out"
-          :class="
-            tab.name === activeTab && 'text-slate-900 dark:text-slate-100'
-          "
-          @click.prevent="handleTabChange(tab.name)"
-        >
+          :class="tab.name === activeTab && 'text-slate-900 dark:text-slate-100'
+            " @click.prevent="handleTabChange(tab.name)">
           {{ tab.name }}
-          <Badge
-            v-if="tab.count"
-            :variant="tab.name === activeTab ? 'default' : 'outline'"
-            class="ml-2 scale-90 flex text-xs h-6 min-w-6 px-1.5 shrink-0 items-center justify-center rounded-full"
-          >
+          <Badge v-if="tab.count" :variant="tab.name === activeTab ? 'default' : 'outline'"
+            class="ml-2 scale-90 flex text-xs h-6 min-w-6 px-1.5 shrink-0 items-center justify-center rounded-full">
             {{ tab.count }}
           </Badge>
         </button>
@@ -425,9 +424,7 @@ const tabIndicatorWidth = computed(() => {
   </section>
 
   <section>
-    <div
-      class="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between sm:px-8"
-    >
+    <div class="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between sm:px-8">
       <div class="shrink-0">
         <h3>
           Group:
@@ -438,11 +435,9 @@ const tabIndicatorWidth = computed(() => {
 
         <ul class="flex flex-wrap gap-2 items-start" v-if="ticketGroups">
           <li>Tickets:</li>
-          <li
-            v-for="ticket in ticketGroups.find((group: TicketGroup) => group.name === activeTab)?.tickets"
+          <li v-for="ticket in ticketGroups.find((group: TicketGroup) => group.name === activeTab)?.tickets"
             :key="ticket.id"
-            class="text-xs border border-slate-300 rounded-lg font-medium px-2 py-1 dark:text-slate-300 dark:border-slate-600"
-          >
+            class="text-xs border border-slate-300 rounded-lg font-medium px-2 py-1 dark:text-slate-300 dark:border-slate-600">
             {{ ticket.name }}
           </li>
         </ul>
@@ -452,143 +447,92 @@ const tabIndicatorWidth = computed(() => {
 
   <section>
     <div
-      class="flex flex-col justify-between items-center min-h-12 w-full gap-2 bg-slate-50 px-4 py-2 sm:flex-row sm:px-6 sm:py-2 dark:bg-slate-950"
-    >
-      <div
-        class=""
-      >
-        <TableSearchForm
-          v-model="filters.search"
-          placeholder="Search Registrant..."
-        />
+      class="flex flex-col justify-between items-center min-h-12 w-full gap-2 bg-slate-50 px-4 py-2 sm:flex-row sm:px-6 sm:py-2 dark:bg-slate-950">
+      <div class="">
+        <TableSearchForm v-model="filters.search" placeholder="Search Registrant..." />
       </div>
 
-      <div
-        v-if="!isInsightLoading && !isLoading"
-        class="number shrink-0 text-slate-500 text-sm"
-      >
-        <template v-if="totalData"
-          >Found
+      <div v-if="!isLoading && !isLoading" class="number shrink-0 text-slate-500 text-sm">
+        <template v-if="totalData">Found
           <span class="font-semibold text-slate-900 dark:text-slate-300">{{
             formatThousands(totalData)
           }}</span>
-          results.</template
-        >
+          results.</template>
         <div v-else>No data found.</div>
       </div>
     </div>
   </section>
 
-  <section
-    class="relative"
-    :class="{ 'overflow-x-auto scroll-area': !isLoading }"
-    :style="{ width: `${Math.max(100, totalVisibleWidth)}%` }"
-  >
-    <template v-if="isLoading">
-      <div
-        class="absolute z-10 h-full w-full bg-slate-500/10 dark:bg-slate-950/20 ring-0"
-      ></div>
-    </template>
-    <table
-      class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90"
-    >
-      <thead
-        class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
-      >
-        <tr
-          v-for="headerGroup in table.getHeaderGroups()"
-          :key="headerGroup.id"
-        >
-          <th
-            v-for="header in headerGroup.headers"
-            :key="header.id"
-            :colSpan="header.colSpan"
-            :style="{
-              minWidth: `${header.column.columnDef.size ?? 20}px`,
-            }"
-            class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-200/20 dark:hover:bg-slate-900/50 first:pl-5 last:pr-5 text-xs"
-            :class="{
-              'bg-blue-200/20 text-blue-600 dark:bg-slate-800/50':
-                header.column.getIsSorted(),
-              'cursor-pointer select-none': header.column.getCanSort(),
-            }"
-            @click="
-              header.column.getCanSort()
-                ? header.column.getToggleSortingHandler()?.($event)
-                : null
-            "
-          >
-            <template v-if="!header.isPlaceholder">
-              <div class="relative">
-                <FlexRender
-                  :render="header.column.columnDef.header"
-                  :props="header.getContext()"
-                />
-                <span
-                  class="absolute right-0 text-blue-500 dark:text-slate-300"
-                >
-                  <span>
-                    {{
-                      { asc: "↑", desc: "↓" }[
-                        header.column.getIsSorted() as string
-                      ]
-                    }}
-                  </span>
-                </span>
-              </div>
-            </template>
-          </th>
-        </tr>
-      </thead>
-      <tbody
-        class="divide-y divide-slate-200 text-sm 2xl:text-sm dark:divide-slate-800 border-b"
-      >
-        <template v-if="!table.getRowModel().rows.length">
-          <tr class="">
-            <td colspan="10" class="py-5 text-center">
-              <div
-                v-if="isLoading"
-                class="mx-auto inline-flex select-none justify-center py-20"
-              >
-                <SpinnerRing
-                  class="h-10 w-10 text-blue-500 dark:text-blue-400"
-                />
-              </div>
-              <NoData v-else @reset-filters="handleResetFilters" />
-            </td>
-          </tr>
+  <section class="relative" :class="{ 'overflow-x-auto scroll-area': !isLoading }">
+    <div
+      class="w-full overflow-x-auto scroll-area scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
+      <div :style="{ minWidth: `${calculateMinWidth()}px` }">
+
+        <template v-if="isLoading">
+          <div class="absolute z-10 h-full w-full bg-slate-500/10 dark:bg-slate-950/20 ring-0"></div>
         </template>
-        <tr
-          v-for="row in table.getRowModel().rows"
-          :key="row.id"
-          class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
-        >
-          <td
-            v-for="cell in row.getVisibleCells()"
-            :key="cell.id"
-            class="number px-2 py-3 text-center first:pl-5 last:pr-5"
-            :class="{
-              'text-slate-600 bg-blue-50/50 dark:bg-slate-600/20 dark:text-slate-300':
-                cell.column.getIsSorted(),
-            }"
-          >
-            <FlexRender
-              :render="cell.column.columnDef.cell"
-              :props="cell.getContext()"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90">
+          <thead
+            class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400">
+            <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+              <th v-for="header in headerGroup.headers" :key="header.id" :colSpan="header.colSpan" :style="{
+                minWidth: `${header.column.columnDef.size ?? 20}px`,
+              }"
+                class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-200/20 dark:hover:bg-slate-900/50 first:pl-5 last:pr-5 text-xs"
+                :class="{
+                  'bg-blue-200/20 text-blue-600 dark:bg-slate-800/50':
+                    header.column.getIsSorted(),
+                  'cursor-pointer select-none': header.column.getCanSort(),
+                }" @click="
+                  header.column.getCanSort()
+                    ? header.column.getToggleSortingHandler()?.($event)
+                    : null
+                  ">
+                <template v-if="!header.isPlaceholder">
+                  <div class="relative">
+                    <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+                    <span class="absolute right-0 text-blue-500 dark:text-slate-300">
+                      <span>
+                        {{
+                          { asc: "↑", desc: "↓" }[
+                          header.column.getIsSorted() as string
+                          ]
+                        }}
+                      </span>
+                    </span>
+                  </div>
+                </template>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-sm 2xl:text-sm dark:divide-slate-800 border-b">
+            <template v-if="!table.getRowModel().rows.length">
+              <tr class="">
+                <td colspan="10" class="py-5 text-center">
+                  <div v-if="isLoading" class="mx-auto inline-flex select-none justify-center py-20">
+                    <SpinnerRing class="h-10 w-10 text-blue-500 dark:text-blue-400" />
+                  </div>
+                  <NoData v-else @reset-filters="handleResetFilters" />
+                </td>
+              </tr>
+            </template>
+            <tr v-for="row in table.getRowModel().rows" :key="row.id"
+              class="hover:bg-slate-50 dark:hover:bg-slate-950/20">
+              <td v-for="cell in row.getVisibleCells()" :key="cell.id"
+                class="number px-2 py-3 text-center first:pl-5 last:pr-5" :class="{
+                  'text-slate-600 bg-blue-50/50 dark:bg-slate-600/20 dark:text-slate-300':
+                    cell.column.getIsSorted(),
+                }">
+                <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
   </section>
-  <TablePagination
-    v-if="table.getRowModel().rows.length > 0"
-    :currentPage="table.getState().pagination.pageIndex + 1"
-    :pageCount="table.getPageCount()"
-    :pageSizes="pageSizes"
-    :pageSize="table.getState().pagination.pageSize"
-    :totalData="totalData"
-    @update:pageSize="handlePageSizeChange"
-    @update:currentPage="handleNavigation"
-  />
+  <TablePagination v-if="table.getRowModel().rows.length > 0" :currentPage="table.getState().pagination.pageIndex + 1"
+    :pageCount="table.getPageCount()" :pageSizes="pageSizes" :pageSize="table.getState().pagination.pageSize"
+    :totalData="totalData" @update:pageSize="handlePageSizeChange" @update:currentPage="handleNavigation" />
 </template>

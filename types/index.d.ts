@@ -48,6 +48,7 @@ export interface ColumnConfig {
     isVisible: boolean;
     isHideable: boolean;
     width: number; // Width in percentage
+    accessor?: (row: Reg) => string;
 }
 
 interface Filter {

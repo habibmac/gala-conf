@@ -12,8 +12,6 @@ type Filter = {
     [key: string]: FilterValue;
 };
 
-
-
 export const useRegs = (
     eventId: Ref<string>,
     endpoint: string,
