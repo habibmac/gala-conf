@@ -117,7 +117,7 @@ const filteredTickets = computed(() => {
 <template>
   <Popover>
     <PopoverTrigger as-child>
-      <Button variant="outline" class="h-10 relative">
+      <Button variant="outline" class="h-10 relative bg-card">
         <span
           v-if="selectedTickets.length > 0"
           class="text-xs text-slate-500 border-r pr-2"
@@ -134,7 +134,7 @@ const filteredTickets = computed(() => {
         <span v-if="selectedTickets.length > 0" class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500"></span>
       </Button>
     </PopoverTrigger>
-    <PopoverContent class="p-0" align="end">
+    <PopoverContent class="p-0" align="start">
       <Command :filter-function="filterFunction">
         <CommandInput 
           v-if="showSearch" 
