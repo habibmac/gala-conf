@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/vue-query';
 import { Separator } from '@/components/ui/separator';
 import { getInitials } from '@/utils';
 import { formatTimeAgo } from '@vueuse/core';
-import { Icon } from '@iconify/vue';
 
 definePageMeta({
   title: 'Insights',
@@ -18,20 +17,21 @@ definePageMeta({
   layout: 'dashboard-with-sidebar',
 });
 
-const { event, isLoading, isError } = useEvent();
+const { event, isLoading: isEventLoading, isError } = useEvent();
 
 const eventId = computed(() => event.value?.id);
 
-const getInsights = async (evtId: Ref) => {
+const getInsights = async (eventId: Ref<string>, signal: AbortSignal) => {
   const { $galantisApi } = useNuxtApp();
-  const response = await $galantisApi.get(`/event/${evtId.value}/insights/`);
+  const response = await $galantisApi.get(`/event/${eventId.value}/insights`, { signal });
   return response.data?.data;
 };
 
 const { data, refetch, isRefetching } = useQuery({
   queryKey: ['eventInsights', eventId],
-  queryFn: () => getInsights(eventId),
+  queryFn: ({ signal }) => getInsights( eventId, signal),
   enabled: !!eventId,
+  staleTime: 1000 * 60 * 5, // 5 minutes
 });
 </script>
 <template>
@@ -42,7 +42,7 @@ const { data, refetch, isRefetching } = useQuery({
 
     <section>
       <div>
-        <div v-if="isLoading || isRefetching" class="grid gap-4 grid-cols-12">
+        <div v-if="isEventLoading || isRefetching" class="grid gap-4 grid-cols-12">
           <Skeleton v-for="i in 2" class="h-28 rounded-xl col-span-12 md:col-span-6 bg-muted-foreground/10" />
         </div>
         <div v-else-if="isError" class="py-16">
@@ -57,7 +57,7 @@ const { data, refetch, isRefetching } = useQuery({
           <NuxtLink
             v-for="item in data"
             :key="item.id"
-            :to="`/event/${eventId}/insight/${item.id}`"
+            :to="`/event/${eventId}/insights/${item.id}`"
             custom
             v-slot="{ href, navigate }"
           >
@@ -74,7 +74,7 @@ const { data, refetch, isRefetching } = useQuery({
                   <div v-if="item.fields?.length" class="flex gap-2 flex-wrap">
                     <Badge variant="outline" v-for="question in item.fields" :key="question.id">
                       <div class="text-xs">
-                        {{ question.text }}
+                        {{ question.label }}
                       </div>
                     </Badge>
                   </div>
@@ -94,7 +94,6 @@ const { data, refetch, isRefetching } = useQuery({
                         </div>
                       </div>
                     </div>
-
                     <div
                       class="sticky pointer-events-none bottom-0 h-10 bg-gradient-to-t from-white inset-0 dark:from-slate-900"
                     ></div>

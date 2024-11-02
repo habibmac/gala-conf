@@ -71,6 +71,7 @@ const selectedRegId = ref<string>(detail.value || '');
 const INITIAL_PAGE_SIZE = 10;
 const pageSizes: (number | string)[] = [10, 20, 30, 40, 50];
 
+// Table configurations
 const columnConfigs = ref<ColumnConfig[]>([
   {
     key: 'date',

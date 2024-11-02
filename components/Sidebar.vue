@@ -55,6 +55,19 @@ const updateBodyClass = () => {
   }
 };
 
+const isMenuItemActive = (linkPath: string | undefined) => {
+  if (!linkPath) return false;
+  const currentPath = useRoute().path;
+  
+  // For home/dashboard route, only match exact path
+  if (linkPath.endsWith('/event/' + useRoute().params.eventId)) {
+    return currentPath === linkPath;
+  }
+  
+  // For other routes, use startsWith
+  return currentPath.startsWith(linkPath);
+};
+
 watch(sidebarExpanded, () => {
   updateBodyClass();
 });
@@ -130,14 +143,14 @@ onUnmounted(() => {
               v-for="(linkItem, index) in group.menus"
               :to="linkItem.generatedLink?.path"
               custom
-              v-slot="{ href, navigate, isActive }"
+              v-slot="{ href, navigate }"
               :key="index"
             >
               <li class="mb-0.5 last:mb-0">
                 <a
                   class="flex items-center truncate rounded-md text-slate-200 transition"
                   :class="
-                    isActive
+                    isMenuItemActive(linkItem.generatedLink?.path)
                       ? 'bg-blue-950 hover:bg-blue-950 hover:text-slate-200'
                       : 'hover:bg-blue-900/60 hover:text-white'
                   "

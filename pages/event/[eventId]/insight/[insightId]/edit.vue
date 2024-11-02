@@ -1,1 +1,0 @@
-<template>Edit Insight</template>

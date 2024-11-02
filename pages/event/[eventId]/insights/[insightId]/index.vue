@@ -17,6 +17,7 @@ import type { Reg, ColumnConfig } from '@/types';
 import TablePagination from '@/components/TablePagination.vue';
 import { Badge } from '@/components/ui/badge';
 import NoData from '@/components/partials/registrations/NoData.vue';
+import { exportToCSV, exportToXLSX } from '@/lib/export-data';
 
 interface TicketGroup {
   id: string;
@@ -53,62 +54,65 @@ definePageMeta({
 
 const props = defineProps<{
   search?: string;
-  ticket_name?: string;
+  group?: string;
   page?: string;
   perPage?: string;
   sortBy?: string;
   order?: string;
 }>();
 
-const { search, ticket_name, page, perPage, sortBy, order } = toRefs(props);
+const { search, group, page, perPage, sortBy, order } = toRefs(props);
 
 const route = useRoute();
 const router = useRouter();
-const eventId = computed(() => route.params.eventId as string);
-const insightId = computed(() => route.params.insightId as string);
 
-const activeTab = computed(() => {
-  // Get first tab from insightData
-  const firstTab = insightData.value?.groups[0]?.name;
-
-  // Get the tab from the query or use the first tab
-  return route.query.group ?? firstTab;
-});
+const { event } = useEvent();
+const eventId = computed(() => event.value?.id);
+const insightId = route.params.insightId as string;
 
 // Pagination configs
 const INITIAL_PAGE_SIZE = 10;
 const pageSizes: (number | string)[] = [10, 20, 30, 40, 50];
 
-const pagination = ref({ pageIndex: 0, pageSize: 10 });
+// Safely extract and use query parameters with type assertion
+const pagination = ref<PaginationState>({
+  pageIndex: page.value ? Number(page.value) - 1 : 0,
+  pageSize: perPage.value ? Number(perPage.value) : INITIAL_PAGE_SIZE,
+});
+
 const filters = ref({
   search: search.value || '',
-  ticket_name: ticket_name.value || '',
-  status: 'approved',
+  group: group.value || '',
 });
 
 // Define parseDesc to accept a string and return a boolean
 const parseDesc = (order: string): boolean => order.toLowerCase() === 'desc';
 const sorting = ref<SortingState>([
   {
-    id: sortBy.value || 'date',
-    desc: parseDesc(order.value || 'desc'),
+    id: sortBy.value || 'code',
+    desc: parseDesc(order.value || 'asc'),
   },
 ]);
 
-const { insightData, regData, ticketGroups, totalData, totalPages, error, isLoading } = useInsight(
-  eventId,
-  route.params.insightId as string,
-  pagination,
-  sorting,
-  filters
-);
+const {
+  insightData,
+  regData,
+  ticketGroups,
+  fetchAllData,
+  totalData,
+  totalPages,
+  isMetaLoading,
+  isDataLoading,
+  metaError,
+  dataError,
+} = useInsight(eventId, insightId, pagination, sorting, filters);
 
 // Table configuration
 const columnConfigs = ref<ColumnConfig[]>([
   {
     key: 'date',
     header: 'Date',
-    isVisible: true,
+    isVisible: false,
     isHideable: true,
     width: 10,
   },
@@ -129,7 +133,7 @@ const columnConfigs = ref<ColumnConfig[]>([
   {
     key: 'ticket_name',
     header: 'Ticket',
-    isVisible: true,
+    isVisible: false,
     isHideable: true,
     width: 15,
   },
@@ -259,6 +263,15 @@ const table = useVueTable({
   getCoreRowModel: getCoreRowModel(),
 });
 
+const activeTab = computed({
+  get: () => {
+    return (route.query.group as string) || filters.value.group || ticketGroups.value?.[0]?.name;
+  },
+  set: (value: string) => {
+    handleTabChange(value);
+  },
+});
+
 function getCustomFieldsColumns(fields: CustomField[]): ColumnConfig[] {
   return fields.map((field) => ({
     key: field.slug,
@@ -326,8 +339,7 @@ const handleNavigation = (pageNumber: number) => {
 const handleResetFilters = () => {
   filters.value = {
     search: '',
-    ticket_name: '',
-    status: 'Approved',
+    group: ticketGroups.value?.[0]?.name || '', // Reset to first group
   };
 
   pagination.value = {
@@ -344,18 +356,26 @@ const handleResetFilters = () => {
 };
 
 const handleTabChange = (tab: string) => {
+  // Update router query
   router.push({
     query: {
       ...route.query,
       group: tab,
+      page: '1', // Reset to first page when changing tabs
     },
   });
-  // Update filter.ticket_name based on the selected tab
-  filters.value.ticket_name =
-    ticketGroups.value
-      .find((group: TicketGroup) => group.name === tab)
-      ?.tickets.map((ticket: TicketList) => ticket.name)
-      .join(',') ?? '';
+
+  // Update filters
+  filters.value = {
+    ...filters.value,
+    group: tab,
+  };
+
+  // Reset pagination
+  pagination.value = {
+    ...pagination.value,
+    pageIndex: 0, // Reset to first page
+  };
 };
 
 const tabIndicatorClass = computed(() => {
@@ -367,6 +387,96 @@ const tabIndicatorWidth = computed(() => {
   const tabCount = ticketGroups.value?.length ?? 1;
   return `calc(100% / ${tabCount})`;
 });
+
+function formatExportData(data: Reg[]) {
+  return data.map((row) => {
+    const formattedRow: { [key: string]: any } = {
+      Date: format(fromUnixTime(Number(row.date)), 'dd MMM yyyy HH:mm'),
+      'Reg Code': row.code,
+      'Full Name': row.fullname,
+      Ticket: row.ticket_name,
+      Email: row.email,
+      Phone: row.phone,
+    };
+
+    // Add custom fields
+    row.ans?.forEach((answer: Answer) => {
+      formattedRow[answer.qst] = answer.ans;
+    });
+
+    return formattedRow;
+  });
+}
+
+const isExporting = ref(false);
+
+async function handleExport(type: 'csv' | 'xlsx') {
+  if (!insightData.value) return;
+
+  try {
+    isExporting.value = true;
+
+    // Fetch all data
+    const allData = await fetchAllData();
+
+    // Format the data
+    const formattedData = formatExportData(allData);
+    const filename = `${insightData.value.title || 'export'}_${format(new Date(), 'yyyy-MM-dd')}`;
+
+    if (type === 'csv') {
+      exportToCSV(formattedData, filename);
+    } else {
+      exportToXLSX(formattedData, filename);
+    }
+  } catch (error) {
+    console.error('Export failed:', error);
+    // You might want to show an error message to the user
+  } finally {
+    isExporting.value = false;
+  }
+}
+
+// Watch for changes in filters, pagination, and sorting, and update the route query
+watch(
+  [filters, pagination, sorting],
+  ([newFilters, newPagination, newSorting]) => {
+    const query = {
+      search: newFilters.search || undefined,
+      group: newFilters.group.length > 0 ? newFilters.group : undefined,
+      page: newPagination.pageIndex + 1 || undefined,
+      perPage: newPagination.pageSize || undefined,
+      sortBy: newSorting[0]?.id || undefined,
+      order: newSorting[0]?.desc ? 'desc' : 'asc',
+    };
+    router.push({ query });
+  },
+  { deep: true }
+);
+
+// Watch for route query changes to update filters
+watch(
+  () => route.query,
+  (newQuery) => {
+    filters.value = {
+      ...filters.value,
+      search: (newQuery.search as string) || '',
+      group: (newQuery.group as string) || '',
+    };
+    table.getState().pagination.pageIndex = pagination.value.pageIndex;
+    table.getState().pagination.pageSize = pagination.value.pageSize;
+    pagination.value = {
+      pageIndex: newQuery.page ? Number(newQuery.page) - 1 : 0,
+      pageSize: newQuery.perPage ? Number(newQuery.perPage) : INITIAL_PAGE_SIZE,
+    };
+    sorting.value = [
+      {
+        id: (newQuery.sortBy as string) || 'reg_date',
+        desc: parseDesc((newQuery.order as string) || 'desc'),
+      },
+    ];
+  },
+  { deep: true }
+);
 </script>
 
 <template>
@@ -387,7 +497,7 @@ const tabIndicatorWidth = computed(() => {
 
   <section>
     <div class="container mx-auto 2xl:mx-0 relative">
-      <div v-if="isLoading" class="grid gap-4 grid-cols-12">
+      <div v-if="isMetaLoading" class="grid gap-4 grid-cols-12">
         <Skeleton v-for="i in 2" class="h-28 rounded-xl col-span-12 md:col-span-6 bg-muted-foreground/10" />
       </div>
       <div
@@ -441,6 +551,28 @@ const tabIndicatorWidth = computed(() => {
           </li>
         </ul>
       </div>
+
+      <DropdownMenu v-if="!isMetaLoading && !isDataLoading">
+        <DropdownMenuTrigger as-child>
+          <Button variant="outline" class="bg-card" :disabled="isExporting">
+            <Icon
+              :icon="isExporting ? 'svg-spinners:ring-resize' : 'heroicons:arrow-right-start-on-rectangle'"
+              class="text-muted-foreground w-5 h-5 mr-2"
+            />
+            {{ isExporting ? 'Exporting...' : 'Export' }}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem @click="handleExport('csv')" :disabled="isExporting">
+            <Icon icon="ph:file-csv" class="text-muted-foreground w-5 h-5 mr-2" />
+            Export to CSV
+          </DropdownMenuItem>
+          <DropdownMenuItem @click="handleExport('xlsx')" :disabled="isExporting">
+            <Icon icon="ph:file-xls" class="text-muted-foreground w-5 h-5 mr-2" />
+            Export to XLSX
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   </section>
 
@@ -452,7 +584,7 @@ const tabIndicatorWidth = computed(() => {
         <TableSearchForm v-model="filters.search" placeholder="Search Registrant..." />
       </div>
 
-      <div v-if="!isLoading && !isLoading" class="number shrink-0 text-slate-500 text-sm">
+      <div v-if="!isMetaLoading && !isDataLoading" class="number shrink-0 text-slate-500 text-sm">
         <template v-if="totalData"
           >Found
           <span class="font-semibold text-slate-900 dark:text-slate-300">{{ formatThousands(totalData) }}</span>
@@ -463,13 +595,13 @@ const tabIndicatorWidth = computed(() => {
     </div>
   </section>
 
-  <section class="relative" :class="{ 'overflow-x-auto scroll-area': !isLoading }">
+  <section class="relative" :class="{ 'overflow-x-auto scroll-area': !isDataLoading }">
     <div
       class="w-full overflow-x-auto scroll-area scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700"
     >
       <div :style="{ minWidth: `${calculateMinWidth()}px` }">
-        <template v-if="isLoading">
-          <div class="absolute z-10 h-full w-full bg-slate-500/10 dark:bg-slate-950/20 ring-0"></div>
+        <template v-if="isDataLoading">
+          <div class="absolute z-10 h-full w-full bg-card/10 ring-0"></div>
         </template>
         <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90">
           <thead
@@ -505,12 +637,14 @@ const tabIndicatorWidth = computed(() => {
           </thead>
           <tbody class="divide-y divide-slate-200 text-sm 2xl:text-sm dark:divide-slate-800 border-b">
             <template v-if="!table.getRowModel().rows.length">
-              <tr class="">
+              <tr v-if="isDataLoading" v-for="index in 10" :key="index">
+                <td v-for="column in columns" :key="index" class="px-2 py-2">
+                  <Skeleton class="w-full h-6 rounded" />
+                </td>
+              </tr>
+              <tr v-else>
                 <td colspan="10" class="py-5 text-center">
-                  <div v-if="isLoading" class="mx-auto inline-flex select-none justify-center py-20">
-                    <SpinnerRing class="h-10 w-10 text-blue-500 dark:text-blue-400" />
-                  </div>
-                  <NoData v-else @reset-filters="handleResetFilters" />
+                  <NoData reset-filters="handleResetFilters" />
                 </td>
               </tr>
             </template>
