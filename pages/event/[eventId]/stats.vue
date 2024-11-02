@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { format } from 'date-fns';
 import { formatThousands, formatCurrency } from '@/utils';
 import { useStats } from '~/composables/useStats';
-import type { StatsFilters, ChartDataItem, RegistrationChartData } from '@/types/stats';
+import type { StatsFilters } from '@/types/stats';
 import { useEvent } from '~/composables/useEvent';
 import { AreaChart } from '@/components/ui/chart-area';
 import { DonutChart } from '~/components/ui/chart-donut';
@@ -50,9 +50,6 @@ const {
   isAttendeeLoading,
   isTransactionLoading,
   isCustomFieldLoading,
-  attendeeError,
-  transactionError,
-  customFieldError,
 } = useStats(eventId, filters);
 
 // Chart data computeds
@@ -118,18 +115,26 @@ const formatDate = (date: Date): string => {
 
     <!-- Attendee Stats -->
     <section class="mb-8">
-      <h2 class="text-xl font-semibold mb-4">Attendee Statistics</h2>
       <div v-if="isAttendeeLoading" class="grid gap-4 grid-cols-1 md:grid-cols-3">
-        <Skeleton v-for="i in 3" :key="i" class="h-28 rounded-xl" />
+        <Skeleton v-for="i in 3" :key="i" class="bg-muted-foreground/10 h-28 rounded-xl" />
       </div>
       <div v-else-if="attendeeStats" class="grid gap-4 grid-cols-1 md:grid-cols-3">
-        <div>
+        <div class="flex flex-col gap-4">
           <Card>
             <CardHeader>
               <CardTitle>Total Attendees</CardTitle>
             </CardHeader>
             <CardContent>
               <div class="text-3xl font-bold">{{ formatThousands(attendeeStats.total) }}</div>
+            </CardContent>
+          </Card>
+
+          <Card v-if="transactionStats">
+            <CardHeader>
+              <CardTitle>Total Revenue</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div class="text-3xl font-bold">{{ formatThousands(transactionStats.total_revenue) }} <sup class="font-normal text-sm">IDR</sup></div>
             </CardContent>
           </Card>
         </div>
@@ -176,9 +181,8 @@ const formatDate = (date: Date): string => {
 
     <!-- Transaction Stats -->
     <section class="mb-8">
-      <h2 class="text-xl font-semibold mb-4">Transaction</h2>
       <div v-if="isTransactionLoading" class="grid gap-4 grid-cols-1 md:grid-cols-2">
-        <Skeleton v-for="i in 2" :key="i" class="h-28 rounded-xl" />
+        <Skeleton v-for="i in 2" :key="i" class="bg-muted-foreground/10 h-28 rounded-xl" />
       </div>
       <div v-else-if="transactionStats" class="grid gap-4 grid-cols-1 md:grid-cols-2">
         <Card class="col-span-1 md:col-span-2">
@@ -194,9 +198,9 @@ const formatDate = (date: Date): string => {
 
     <!-- Custom Field Stats -->
     <section class="mb-8" v-if="customFieldStats">
-      <h2 class="text-xl font-semibold mb-4">Custom Field Statistics</h2>
+      <h2 class="text-xl font-semibold mb-4">Custom Field</h2>
       <div v-if="isCustomFieldLoading" class="grid gap-4 grid-cols-1 md:grid-cols-2">
-        <Skeleton v-for="i in 2" :key="i" class="h-28 rounded-xl" />
+        <Skeleton v-for="i in 2" :key="i" class="bg-muted-foreground/10 h-28 rounded-xl" />
       </div>
       <div v-else class="grid gap-4 grid-cols-1 md:grid-cols-2">
         <Card v-for="(field, key) in customFieldStats" :key="key">
