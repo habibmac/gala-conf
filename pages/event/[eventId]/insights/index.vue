@@ -4,6 +4,10 @@ import { Separator } from '@/components/ui/separator';
 import { getInitials } from '@/utils';
 import { formatTimeAgo } from '@vueuse/core';
 
+useHead({
+  title: 'Insights',
+});
+
 definePageMeta({
   title: 'Insights',
   group: 'reports',
