@@ -1,8 +1,18 @@
 // types/stats.ts
 export interface AttendeeStats {
-  total: number;
+  total_approved: number;
+  total_pending: number;
   by_status: Record<string, number>;
   by_ticket: Record<string, number>;
+}
+
+export interface TransactionStats {
+  daily_registrations: {
+    date: string;
+    approved: number;
+    pending: number;
+  }[];
+  total_revenue: number;
 }
 
 interface RegistrationChartData {

@@ -58,8 +58,14 @@ const registrationChartData = computed(() => {
 
   return transactionStats.value.daily_registrations.map((item) => ({
     name: item.date,
-    Registrations: item.count,
+    Approved: item.approved,
+    Pending: item.pending
   }));
+});
+
+const totalAttendees = computed(() => {
+  if (!attendeeStats.value) return 0;
+  return attendeeStats.value.total_approved + attendeeStats.value.total_pending;
 });
 
 const statusChartData = computed(() => {
@@ -120,16 +126,31 @@ const formatDate = (date: Date): string => {
       </div>
       <div v-else-if="attendeeStats" class="grid gap-4 grid-cols-1 md:grid-cols-3">
         <div class="flex flex-col gap-4">
-          <Card>
+          <Card class="bg-gradient-to-tr from-primary to-primary/40">
             <CardHeader>
               <CardTitle>Total Attendees</CardTitle>
             </CardHeader>
             <CardContent>
-              <div class="text-3xl font-bold">{{ formatThousands(attendeeStats.total) }}</div>
+              <div class="grid divide-x divide-card/40 grid-cols-2 gap-2">
+                <div class="col-span-2">
+                  <div class="text-3xl font-bold text-slate-100">{{ formatThousands(attendeeStats.total_approved) }}</div>
+                  <div class="text-sm text-slate-300">Total</div>
+                </div>
+                
+                  <div class="pl-3">
+                    <div class="text-xl font-semibold text-slate-100">{{ formatThousands(attendeeStats.total_pending) }}</div>
+                    <div class="text-sm text-slate-300">Pending</div>
+                  </div>
+                  <div class="pl-3">
+                    <div class="text-xl font-semibold text-slate-100">{{ formatThousands(totalAttendees) }}</div>
+                    <div class="text-sm text-slate-300">Registrations</div>
+                  </div>
+                
+              </div>
             </CardContent>
           </Card>
 
-          <Card v-if="transactionStats">
+          <Card v-if="transactionStats" class="bg-gradient-to-tr from-emerald-400 to-emerald-200 dark:from-emerald-400 dark:to-emerald-400/20">
             <CardHeader>
               <CardTitle>Total Revenue</CardTitle>
             </CardHeader>
@@ -192,7 +213,12 @@ const formatDate = (date: Date): string => {
             <CardTitle>Daily Registrations</CardTitle>
           </CardHeader>
           <CardContent class="">
-            <AreaChart :data="registrationChartData" index="name" :categories="['Registrations']" :colors="['blue']" />
+           <AreaChart 
+              :data="registrationChartData" 
+              index="name" 
+              :categories="['Approved', 'Pending']" 
+              :colors="['blue', 'orange']" 
+            />
           </CardContent>
         </Card>
       </div>

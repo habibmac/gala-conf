@@ -65,7 +65,7 @@ const { insightData } = useInsight(eventId, insightId);
             </svg>
           </div>
           <h2 class="mb-2 text-xl font-bold dark:text-slate-100">Coming soon...</h2>
-          <p class="mb-5 text-sm text-slate-400 dark:text-slate-500">This feature is not yet available.</p>
+          <p class="mb-5 text-sm text-slate-400 dark:text-slate-500">This feature is not available yet.</p>
         </div>
       </div>
     </section>
