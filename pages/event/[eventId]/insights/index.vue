@@ -14,8 +14,8 @@ definePageMeta({
   showInMenu: true,
   order: 2,
   icon: 'solar:layers-bold-duotone',
-  packages: ['optima'],
-  roles: ['administrator', 'ee_event_organizer'],
+  packages: ['smart', 'pro'],
+  roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
   capabilities: ['ee_read_insights'],
   permissions: ['ee_read_insights'],
   layout: 'dashboard-with-sidebar',
@@ -33,7 +33,7 @@ const getInsights = async (eventId: Ref<string>, signal: AbortSignal) => {
 
 const { data, refetch, isRefetching } = useQuery({
   queryKey: ['eventInsights', eventId],
-  queryFn: ({ signal }) => getInsights( eventId, signal),
+  queryFn: ({ signal }) => getInsights(eventId, signal),
   enabled: !!eventId,
   staleTime: 1000 * 60 * 5, // 5 minutes
 });

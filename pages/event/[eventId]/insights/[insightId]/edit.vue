@@ -12,10 +12,10 @@ definePageMeta({
   showInMenu: true,
   requiresSelectedEvent: true,
   icon: 'solar:widget-4-bold-duotone',
-  packages: ['starter', 'smart', 'optima'],
+  packages: ['smart', 'pro'],
   roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
-  capabilities: ['ee_read_registrations'],
-  permissions: ['ee_read_registrations'],
+  capabilities: ['ee_edit_insights'],
+  permissions: ['ee_read_insights'],
   layout: 'dashboard-with-sidebar',
 });
 
@@ -25,9 +25,7 @@ const { event } = useEvent();
 const eventId = computed(() => event.value?.id);
 const insightId = route.params.insightId as string;
 
-const {
-  insightData
-} = useInsight(eventId, insightId);
+const { insightData } = useInsight(eventId, insightId);
 </script>
 
 <template>
@@ -67,7 +65,7 @@ const {
             </svg>
           </div>
           <h2 class="mb-2 text-xl font-bold dark:text-slate-100">Coming soon...</h2>
-            <p class="mb-5 text-sm text-slate-400 dark:text-slate-500">This feature is not yet available.</p>
+          <p class="mb-5 text-sm text-slate-400 dark:text-slate-500">This feature is not yet available.</p>
         </div>
       </div>
     </section>
