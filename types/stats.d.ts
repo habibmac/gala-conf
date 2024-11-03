@@ -1,48 +1,48 @@
 // types/stats.ts
 export interface AttendeeStats {
-    total: number;
-    by_status: Record<string, number>;
-    by_ticket: Record<string, number>;
+  total: number;
+  by_status: Record<string, number>;
+  by_ticket: Record<string, number>;
 }
 
 interface RegistrationChartData {
-    date: string;
-    Registrations: number;
+  date: string;
+  Registrations: number;
 }
 
 export interface TransactionStats {
-    total_revenue: number;
-    daily_registrations: {
-        date: string;
-        count: number;
-    }[];
+  total_revenue: number;
+  daily_registrations: {
+    date: string;
+    count: number;
+  }[];
 }
 
 export interface CustomFieldValue {
-    value: string;
-    count: number;
+  value: string;
+  count: number;
 }
 
 export interface CustomFieldStats {
-    [key: string]: {
-        label: string;
-        values: CustomFieldValue[];
-    };
+  [key: string]: {
+    label: string;
+    values: CustomFieldValue[];
+  };
 }
 
 export interface StatsFilters {
-    date_start?: string;
-    date_end?: string;
-    group?: string;
+  date_start?: string;
+  date_end?: string;
+  group?: string;
 }
 
 interface ChartDataItem {
-    name: string;
-    value: number;
-    category?: string;
+  name: string;
+  value: number;
+  category?: string;
 }
 
 export interface CustomFieldChartItem {
-    value: string;
-    count: number;
+  value: string;
+  count: number;
 }

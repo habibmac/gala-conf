@@ -11,7 +11,7 @@ definePageMeta({
   showInMenu: true,
   requiresSelectedEvent: true,
   icon: 'solar:widget-4-bold-duotone',
-  packages: ['starter', 'smart', 'optima'],
+  packages: ['starter', 'smart', 'pro'],
   roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
   capabilities: ['ee_read_registrations'],
   permissions: ['ee_read_registrations'],

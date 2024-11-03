@@ -52,7 +52,11 @@ const handleAction = (item: { id: string; action: string }) => {
       >
         <div class="px-1 py-1">
           <ListboxOption v-for="item in menuItems" :key="item.id" :value="item" as="li" class="dropdown-item">
-            <NuxtLink v-if="item.action === 'link'" :to="`/event/${props.eventId}/insights/${props.itemId}/${item.id}`" class="flex items-center w-full">
+            <NuxtLink
+              v-if="item.action === 'link'"
+              :to="`/event/${props.eventId}/insights/${props.itemId}/${item.id}`"
+              class="flex items-center w-full"
+            >
               <Icon :icon="item.icon" class="mr-2 h-4 w-4 text-slate-400" />
               {{ item.label }}
             </NuxtLink>

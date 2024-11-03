@@ -58,12 +58,12 @@ const updateBodyClass = () => {
 const isMenuItemActive = (linkPath: string | undefined) => {
   if (!linkPath) return false;
   const currentPath = useRoute().path;
-  
+
   // For home/dashboard route, only match exact path
   if (linkPath.endsWith('/event/' + useRoute().params.eventId)) {
     return currentPath === linkPath;
   }
-  
+
   // For other routes, use startsWith
   return currentPath.startsWith(linkPath);
 };

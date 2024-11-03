@@ -134,7 +134,9 @@ const formatDate = (date: Date): string => {
               <CardTitle>Total Revenue</CardTitle>
             </CardHeader>
             <CardContent>
-              <div class="text-3xl font-bold">{{ formatThousands(transactionStats.total_revenue) }} <sup class="font-normal text-sm">IDR</sup></div>
+              <div class="text-3xl font-bold">
+                {{ formatThousands(transactionStats.total_revenue) }} <sup class="font-normal text-sm">IDR</sup>
+              </div>
             </CardContent>
           </Card>
         </div>
