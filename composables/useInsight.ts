@@ -76,7 +76,6 @@ export const useInsight = (
   } = useQuery({
     queryKey: ['insight-data', requestParams, eventId, insightId],
     queryFn: ({ signal }) => getRegData(requestParams, signal),
-    enabled: !!metaData, // Only start loading data after metadata is loaded
     staleTime: 30000, // 30 seconds
   });
 

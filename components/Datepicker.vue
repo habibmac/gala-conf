@@ -5,7 +5,7 @@ import { id } from 'date-fns/locale';
 import VueDatePicker from '@vuepic/vue-datepicker';
 
 const props = defineProps<{
-  dateRange?: Date[];
+  dateRange?: Date[] | null;
   enableTimePicker?: boolean | false;
   format?: string | 'd LLL yyyy';
   maxDate?: Date | null;
@@ -64,8 +64,13 @@ const presetDates = ref([
           >
             {{ label }}
           </span>
+          heloooo
         </template>
       </VueDatePicker>
     </ClientOnly>
+          <span
+          v-if="dateRange"
+          class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500"
+        ></span>
   </div>
 </template>

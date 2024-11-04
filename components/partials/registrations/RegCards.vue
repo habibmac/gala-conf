@@ -3,6 +3,7 @@ import { formatThousands } from '@/utils';
 import { useQuery } from '@tanstack/vue-query';
 import { Icon } from '@iconify/vue';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 const route = useRoute();
 const eventId = ref(route.params.eventId as string) || ref('');
@@ -30,7 +31,7 @@ const summaryData = computed(() => data?.value);
   <div v-else-if="isError" class="py-16">
     <div class="flex h-32 items-center justify-center">Error fetching event summary. Please try again later.</div>
   </div>
-  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5" v-else-if="data">
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" v-else-if="data">
     <Card v-for="item in summaryData" :key="item.title" class="relative overflow-hidden">
       <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle class="text-sm font-medium tracking-normal">
@@ -45,7 +46,7 @@ const summaryData = computed(() => data?.value);
         </Button>
       </CardHeader>
       <CardContent class="relative">
-        <div class="text-2xl font-bold number tabular">
+        <div :class="cn('text-2xl font-semibold tabular-nums')">
           {{ formatThousands(item.value) }}
           <span class="text-xs font-medium text-muted-foreground" v-if="item.is_currency"> IDR </span>
         </div>

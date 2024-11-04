@@ -18,7 +18,7 @@ import type { Reg, Filter, ColumnConfig } from '@/types';
 import RegCards from '@/components/partials/registrations/RegCards.vue';
 import DropdownTicketFilter from '@/components/DropdownTicketFilter.vue';
 import DropdownStatusFilter from '@/components/DropdownStatusFilter.vue';
-import DropdownTableColumns from '@/components/DropdownTableColumns.vue';
+import DropdownTableFilter from '~/components/DropdownColumnFilter.vue';
 import TableSearchForm from '@/components/TableSearchForm.vue';
 import TablePagination from '@/components/TablePagination.vue';
 import TableStatusTooltip from '@/components/TableStatusTooltip.vue';
@@ -39,6 +39,10 @@ definePageMeta({
   icon: 'solar:users-group-two-rounded-bold-duotone',
   group: 'reports',
   layout: 'dashboard-with-sidebar',
+  packages: ['starter', 'smart', 'optima'],
+  roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
+  capabilities: ['ee_read_registrations'],
+  permissions: ['ee_read_registrations'],
 });
 
 const props = defineProps<{
@@ -344,6 +348,33 @@ function handleSetDateRange(dateRange: [Date | null, Date | null] | null) {
   }
 }
 
+const dateRange = computed({
+  get: () => {
+    if (filters.value.date_start === "" || filters.value.date_end === "") {
+      // Return null to signify "All Time" to VueDatePicker
+      return null;
+    }
+    return [
+      new Date(filters.value.date_start),
+      new Date(filters.value.date_end),
+    ];
+  },
+  set: (newValue) => {
+    if (newValue === null) {
+      // User clears the date range, set to "All Time"
+      filters.value.date_start = "";
+      filters.value.date_end = "";
+    } else {
+      // User selects a new date range
+      [filters.value.date_start, filters.value.date_end] = newValue.map(
+        (date) =>
+          // Format to yyyy-MM-dd hh:mm
+          format(date, "yyyy-MM-dd")
+      );
+    }
+  },
+});
+
 const handleNavigation = (pageNumber: number) => {
   const currentPageIndex = table.getState().pagination.pageIndex;
   const pageCount = table.getPageCount();
@@ -491,7 +522,7 @@ watch(
       <div class="flex shrink-0 space-x-2 justify-self-end">
         <div class="min-w-64 grow">
           <!-- Datepicker -->
-          <Datepicker @update:date-range="handleSetDateRange" />
+          <Datepicker @update:date-range="handleSetDateRange"             :date-range="dateRange" />
         </div>
       </div>
     </header>
@@ -511,7 +542,7 @@ watch(
         </div>
         <!-- Right: Actions -->
         <div class="flex shrink-0 space-x-2 justify-self-end">
-          <DropdownTableColumns v-model="columnConfigs" />
+          <DropdownTableFilter v-model="columnConfigs" />
         </div>
       </div>
     </div>

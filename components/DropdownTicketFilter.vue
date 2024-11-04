@@ -104,7 +104,7 @@ const filteredTickets = computed(() => {
 <template>
   <Popover>
     <PopoverTrigger as-child>
-      <Button variant="outline" class="h-10 relative bg-card">
+      <Button variant="outline" class="h-[42px] relative bg-card dark:bg-background">
         <span v-if="selectedTickets.length > 0" class="text-xs text-slate-500 border-r pr-2"> Ticket </span>
         <span class="font-medium ml-2 truncate">
           {{ buttonLabel }}

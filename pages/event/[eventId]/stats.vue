@@ -133,16 +133,16 @@ const formatDate = (date: Date): string => {
             <CardContent>
               <div class="grid divide-x divide-card/40 grid-cols-2 gap-2">
                 <div class="col-span-2">
-                  <div class="text-3xl font-bold text-slate-100">{{ formatThousands(attendeeStats.total_approved) }}</div>
+                  <div class="text-3xl font-bold text-slate-100 tabular-nums">{{ formatThousands(attendeeStats.total_approved) }}</div>
                   <div class="text-sm text-slate-300">Total</div>
                 </div>
                 
                   <div class="pl-3">
-                    <div class="text-xl font-semibold text-slate-100">{{ formatThousands(attendeeStats.total_pending) }}</div>
+                    <div class="text-xl font-semibold text-slate-100 tabular-nums">{{ formatThousands(attendeeStats.total_pending) }}</div>
                     <div class="text-sm text-slate-300">Pending</div>
                   </div>
                   <div class="pl-3">
-                    <div class="text-xl font-semibold text-slate-100">{{ formatThousands(totalAttendees) }}</div>
+                    <div class="text-xl font-semibold text-slate-100 tabular-nums">{{ formatThousands(totalAttendees) }}</div>
                     <div class="text-sm text-slate-300">Registrations</div>
                   </div>
                 
@@ -155,7 +155,7 @@ const formatDate = (date: Date): string => {
               <CardTitle>Total Revenue</CardTitle>
             </CardHeader>
             <CardContent>
-              <div class="text-3xl font-bold">
+              <div class="text-3xl font-bold tabular-nums">
                 {{ formatThousands(transactionStats.total_revenue) }} <sup class="font-normal text-sm">IDR</sup>
               </div>
             </CardContent>
@@ -252,7 +252,7 @@ const formatDate = (date: Date): string => {
               <div v-for="(value, i) in field.values.slice(0, 8)" :key="i" class="flex items-start gap-2">
                 <Badge variant="outline">
                   <span>{{ value.value }}</span>
-                  <span class="rounded-full bg-muted text-primary px-2 py-1 ml-2">{{ value.count }} </span>
+                  <span class="rounded-full number tabular-nums bg-muted text-primary px-2 py-1 ml-2">{{ value.count }} </span>
                 </Badge>
               </div>
             </div>

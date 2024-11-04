@@ -44,7 +44,7 @@ function toggleColumnVisibility(column: ColumnConfig) {
   <ClientOnly>
     <Popover>
       <PopoverTrigger>
-        <Button variant="outline" size="icon" class="bg-card">
+        <Button variant="outline" size="icon" class="h-[42px] w-[42px] bg-card dark:bg-background">
           <Icon icon="teenyicons:adjust-horizontal-alt-outline" class="w-4 h-4" />
         </Button>
       </PopoverTrigger>

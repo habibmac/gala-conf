@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
+import { Icon } from '@iconify/vue';
 import { Separator } from '@/components/ui/separator';
 import { getInitials } from '@/utils';
 import { formatTimeAgo } from '@vueuse/core';
@@ -31,7 +32,7 @@ const getInsights = async (eventId: Ref<string>, signal: AbortSignal) => {
   return response.data?.data;
 };
 
-const { data, refetch, isRefetching } = useQuery({
+const { isLoading: isDataLoading, data, refetch, isRefetching } = useQuery({
   queryKey: ['eventInsights', eventId],
   queryFn: ({ signal }) => getInsights(eventId, signal),
   enabled: !!eventId,
@@ -46,7 +47,7 @@ const { data, refetch, isRefetching } = useQuery({
 
     <section>
       <div>
-        <div v-if="isEventLoading || isRefetching" class="grid gap-4 grid-cols-12">
+        <div v-if="isEventLoading || isDataLoading || isRefetching" class="grid gap-4 grid-cols-12">
           <Skeleton v-for="i in 2" class="h-28 rounded-xl col-span-12 md:col-span-6 bg-muted-foreground/10" />
         </div>
         <div v-else-if="isError" class="py-16">
@@ -127,7 +128,7 @@ const { data, refetch, isRefetching } = useQuery({
             </a>
           </NuxtLink>
         </div>
-        <div v-else-if="!data || !data.length" class="m-auto my-16 max-w-2xl">
+        <div v-else class="m-auto my-16 max-w-2xl">
           <div class="px-4 text-center flex flex-col justify-center items-center">
             <div
               class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-t from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
@@ -150,7 +151,9 @@ const { data, refetch, isRefetching } = useQuery({
             <h2 class="mb-2 text-xl font-bold dark:text-slate-100">No Insights Found</h2>
             <p class="mb-5 text-sm text-slate-400 dark:text-slate-500">Create your first insight now.</p>
             <div class="flex gap-2 mx-auto">
-              <Button> Create Insight </Button> <Button @click="refetch" variant="outline"> Refresh </Button>
+              <Button>
+                <Icon icon="ph:plus-light" class="w-5 h-5 mr-2" />
+                 Create Insight </Button> <Button @click="refetch" variant="outline"> Refresh </Button>
             </div>
           </div>
         </div>

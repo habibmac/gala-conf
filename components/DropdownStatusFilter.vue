@@ -67,7 +67,7 @@ function clearAllStatuses() {
 <template>
   <Popover>
     <PopoverTrigger as-child>
-      <Button variant="outline" class="h-10 relative bg-card">
+      <Button variant="outline" class="h-[42px] relative bg-card dark:bg-background">
         <span v-if="selectedStatuses.length > 0" class="text-xs text-slate-500 border-r pr-2"> Status </span>
         <span class="font-medium ml-2">
           {{ buttonLabel }}

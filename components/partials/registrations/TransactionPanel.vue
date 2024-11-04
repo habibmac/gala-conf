@@ -179,7 +179,7 @@ onUnmounted(async () => {
                   <ClientOnly>
                     <qr-code :value="data.reg_url_link"></qr-code>
                   </ClientOnly>
-                  <span class="number font-semibold tabular font-mono">{{ data.code }}</span>
+                  <span class="number font-semibold tabular-nums font-mono">{{ data.code }}</span>
                 </div>
                 <div class="flex justify-between space-x-1">
                   <span class="">Age/Gender</span>
