@@ -15,10 +15,10 @@ definePageMeta({
   showInMenu: true,
   order: 2,
   icon: 'solar:layers-bold-duotone',
+  requiresSelectedEvent: true,
   packages: ['smart', 'optima'],
   roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
   capabilities: ['ee_read_insights'],
-  permissions: ['ee_read_insights'],
   layout: 'dashboard-with-sidebar',
 });
 

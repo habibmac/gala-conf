@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { useLocalStorage } from '#imports';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import { Icon } from '@iconify/vue';
@@ -7,12 +8,15 @@ import { useMenu } from '@/composables/useMenu';
 import MenuIcon from '@/components/MenuIcon.vue';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo.vue';
-
 const props = defineProps(['sidebarOpen']);
 const emit = defineEmits(['close-sidebar']);
 
+const route = useRoute();
+const currentPath = computed(() => route.path);
+const currentEventId = computed(() => route.params.eventId as string);
+
 const { menuItems } = useMenu();
-const { isLoading: isFetchingEvent } = useEvent();
+const { isLoading, isRefetching, isError } = useEvent();
 
 const trigger = ref<HTMLElement | null>(null);
 const sidebar = ref<HTMLElement | null>(null);
@@ -57,15 +61,14 @@ const updateBodyClass = () => {
 
 const isMenuItemActive = (linkPath: string | undefined) => {
   if (!linkPath) return false;
-  const currentPath = useRoute().path;
 
   // For home/dashboard route, only match exact path
-  if (linkPath.endsWith('/event/' + useRoute().params.eventId)) {
-    return currentPath === linkPath;
+  if (linkPath.endsWith('/event/' + currentEventId.value)) {
+    return currentPath.value === linkPath;
   }
 
   // For other routes, use startsWith
-  return currentPath.startsWith(linkPath);
+  return currentPath.value.startsWith(linkPath);
 };
 
 watch(sidebarExpanded, () => {
@@ -128,50 +131,57 @@ onUnmounted(() => {
         </NuxtLink>
       </div>
       <!-- Links -->
-      <div v-if="isFetchingEvent" class="grid gap-4 p-4">
+      <div v-if="isLoading || isRefetching" class="grid gap-4 p-4">
         <Skeleton v-for="i in 3" class="h-8 bg-slate-200/20 p-4" />
       </div>
-      <div class="space-y-8 p-4" v-else-if="menuItems">
-        <!-- Pages group -->
-        <div v-for="group in menuItems" :key="group.id">
-          <h3 v-if="group.label" class="pl-3 text-xs uppercase tracking-wider text-slate-400">
-            <span class="lg:sidebar-expanded:hidden hidden w-6 text-center lg:block" aria-hidden="true">•••</span>
-            <span class="lg:sidebar-expanded:block lg:hidden">{{ group.label }}</span>
-          </h3>
-          <ul class="mt-2">
-            <NuxtLink
-              v-for="(linkItem, index) in group.menus"
-              :to="linkItem.generatedLink?.path"
-              custom
-              v-slot="{ href, navigate }"
-              :key="index"
-            >
-              <li class="mb-0.5 last:mb-0">
-                <a
-                  class="flex items-center truncate rounded-md text-slate-200 transition"
-                  :class="
-                    isMenuItemActive(linkItem.generatedLink?.path)
-                      ? 'bg-blue-950 hover:bg-blue-950 hover:text-slate-200'
-                      : 'hover:bg-blue-900/60 hover:text-white'
-                  "
-                  :href="href"
-                  @click="navigate"
-                >
-                  <MenuIcon
-                    v-if="linkItem.icon"
-                    :name="linkItem.icon"
-                    class="h-7 w-7 fill-current shrink-0 px-2.5 p-1.5 box-content"
-                  />
-                  <span class="lg:sidebar-expanded:opacity-100 text-sm font-medium lg:opacity-0 2xl:opacity-100">{{
-                    linkItem.name
-                  }}</span>
-                </a>
-              </li>
-            </NuxtLink>
-          </ul>
+      <div v-else-if="isError">Error loading menu items</div>
+      <template v-else>
+        <div class="space-y-8 p-4" v-if="menuItems">
+          <!-- Pages group -->
+          <div v-for="group in menuItems" :key="group.id">
+            <h3 v-if="group.label" class="pl-3 text-xs uppercase tracking-wider text-slate-400">
+              <span class="lg:sidebar-expanded:hidden hidden w-6 text-center lg:block" aria-hidden="true">•••</span>
+              <span class="lg:sidebar-expanded:block lg:hidden">{{ group.label }}</span>
+            </h3>
+            <ul class="mt-2">
+              <NuxtLink
+                v-for="(linkItem, index) in group.menus"
+                :to="linkItem.generatedLink?.path"
+                custom
+                v-slot="{ href, navigate }"
+                :key="index"
+              >
+                <li class="mb-0.5 last:mb-0">
+                  <a
+                    class="flex items-center truncate rounded-md text-slate-200 transition"
+                    :class="
+                      isMenuItemActive(linkItem.generatedLink?.path)
+                        ? 'bg-blue-950 hover:bg-blue-950 hover:text-slate-200'
+                        : 'hover:bg-blue-900/60 hover:text-white'
+                    "
+                    :href="href"
+                    @click="navigate"
+                  >
+                    <MenuIcon
+                      v-if="linkItem.icon"
+                      :name="linkItem.icon"
+                      class="h-7 w-7 fill-current shrink-0 px-2.5 p-1.5 box-content"
+                    />
+                    <span class="lg:sidebar-expanded:opacity-100 text-sm font-medium lg:opacity-0 2xl:opacity-100">{{
+                      linkItem.name
+                    }}</span>
+                  </a>
+                </li>
+              </NuxtLink>
+            </ul>
+          </div>
         </div>
-      </div>
-      <div v-else>Error loading menu items</div>
+        <div v-else>
+          <div class="grid gap-4 p-4">
+            <Skeleton v-for="i in 3" class="h-8 bg-slate-200/20 p-4" />
+          </div>
+        </div>
+      </template>
 
       <!-- Expand / collapse button -->
       <div class="mt-auto hidden justify-end lg:inline-flex p-4">

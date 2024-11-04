@@ -10,12 +10,11 @@ definePageMeta({
   title: 'Edit Insight',
   group: 'insights',
   showInMenu: true,
-  requiresSelectedEvent: true,
   icon: 'solar:widget-4-bold-duotone',
+  requiresSelectedEvent: true,
   packages: ['smart', 'optima'],
   roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
   capabilities: ['ee_edit_insights'],
-  permissions: ['ee_read_insights'],
   layout: 'dashboard-with-sidebar',
 });
 

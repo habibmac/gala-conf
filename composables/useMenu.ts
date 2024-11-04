@@ -37,31 +37,38 @@ export const useMenu = () => {
         const routeRoles = meta.roles as string[] | undefined;
         const routePackages = meta.packages as string[] | undefined;
         const routeCapabilities = meta.capabilities as string[] | undefined;
-        const routePermissions = meta.permissions as string[] | undefined;
 
-        const hasAccess = authStore.hasAccess(routeRoles, routePackages);
-        const hasCapabilitiesAndPermissions = authStore.canAccessRoute(routeCapabilities || [], routePermissions || []);
+        // Check if user has right role
+        const hasRole = routeRoles?.some(role =>
+          authStore.userInfo?.user_roles?.includes(role)
+        ) ?? true;
 
-        if (hasAccess && hasCapabilitiesAndPermissions) {
+        // Check if event has right package
+        const hasPackage = routePackages?.includes(
+          authStore.selectedEvent?.package ?? ''
+        ) ?? true;
+
+        // Check if user has required capabilities
+        const hasCapabilities = !routeCapabilities?.length ||
+          routeCapabilities.every(cap => authStore.hasEventPermission(cap));
+
+        if (hasRole && hasPackage && hasCapabilities) {
           const menuItem: MenuItem = {
             name: meta.title as string,
             to: route.path as string,
             roles: routeRoles,
             packages: routePackages,
             capabilities: routeCapabilities,
-            permissions: routePermissions,
             group: (meta.group as string) || '',
             icon: meta.icon as string | undefined,
             order: meta.order as number | undefined,
           };
 
-          // Generate the link for the menu item
           menuItem.generatedLink = generateLinkTo(menuItem);
-
           items.push(menuItem);
         }
       }
-      if (route.children && route.children.length > 0) {
+      if (route.children?.length > 0) {
         items = items.concat(processRoutes(route.children));
       }
     });

@@ -9,12 +9,11 @@ definePageMeta({
   title: 'Dashboard',
   group: 'dashboard',
   showInMenu: true,
-  requiresSelectedEvent: true,
   icon: 'solar:widget-4-bold-duotone',
+  requiresSelectedEvent: true,
   packages: ['starter', 'smart', 'optima'],
   roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
   capabilities: ['ee_read_registrations'],
-  permissions: ['ee_read_registrations'],
   layout: 'dashboard-with-sidebar',
 });
 </script>

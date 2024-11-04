@@ -10,7 +10,6 @@ export const useAuthStore = defineStore('auth', () => {
   const packages = ref<string[]>([]);
   const userInfo = ref<UserProfile | null>();
 
-  const config = useRuntimeConfig();
   const nuxtApp = useNuxtApp();
 
   const isAuthenticated = computed(() => !!accessToken.value);
@@ -70,33 +69,50 @@ export const useAuthStore = defineStore('auth', () => {
     userCapabilities.value = Object.keys(user?.capabilities || []);
   };
 
+  const isLoadingEvent = ref(false);
+
   const setSelectedEvent = async (event: Event) => {
-    selectedEvent.value = event;
-    eventId.value = event.id;
-    eventCapabilities.value = event.capabilities || [];
+    isLoadingEvent.value = true;
+
+    try {
+      selectedEvent.value = event;
+      eventId.value = event.id;
+      eventCapabilities.value = event.capabilities || [];
+    } finally {
+      isLoadingEvent.value = false;
+    }
   };
+
 
   const hasCapability = (capability: string) => {
     return userCapabilities.value.includes(capability);
   };
 
   const hasEventPermission = (permission: string) => {
-    return eventCapabilities.value.includes(permission);
+    // Check user global capabilities first (from WP roles)
+    if (hasCapability(permission)) {
+      return true;
+    }
+
+    // Check event-specific capabilities based on package
+    if (selectedEvent.value?.capabilities?.includes(permission)) {
+      return true;
+    }
+
+    return false;
   };
 
   const canAccessRoute = (requiredCapabilities: string[], requiredPermissions: string[]) => {
-    // If no capabilities or permissions are required, let the user through
-    if (!requiredCapabilities.length && !requiredPermissions.length) return true;
+    // First check roles
+    const hasRole = userInfo.value?.user_roles?.some(role =>
+      ['administrator', 'ee_event_organizer', 'ee_event_operator'].includes(role)
+    );
 
-    // Check if the user has all the required capabilities
-    const hasCapabilities = requiredCapabilities.every((cap) => hasCapability(cap));
+    if (!hasRole) return false;
 
-    // If no permissions are required, return the capabilities check only
-    if (!requiredPermissions.length) return hasCapabilities;
-
-    const hasPermissions = requiredPermissions.every((perm) => hasEventPermission(perm));
-
-    return hasCapabilities && hasPermissions;
+    // Check all required capabilities and permissions
+    const allPermissions = [...new Set([...requiredCapabilities, ...requiredPermissions])];
+    return allPermissions.every(perm => hasEventPermission(perm));
   };
 
   const hasAccess = (roles?: string[], pkgs?: string[]) => {
@@ -139,6 +155,7 @@ export const useAuthStore = defineStore('auth', () => {
     hasEventPermission,
     canAccessRoute,
     selectedEvent,
+    isLoadingEvent,
     setSelectedEvent,
     logout,
   };

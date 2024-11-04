@@ -43,16 +43,20 @@ interface Answer {
   ans: string;
 }
 
+useHead({
+  title: 'Insight',
+});
+
 definePageMeta({
   title: 'Insight',
   showInMenu: false,
   order: 1,
   icon: 'solar:users-group-two-rounded-bold-duotone',
   group: 'reports',
+  requiresSelectedEvent: true,
   packages: ['smart', 'optima'],
   roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
   capabilities: ['ee_read_insights'],
-  permissions: ['ee_read_insights'],
   layout: 'dashboard-with-sidebar',
 });
 

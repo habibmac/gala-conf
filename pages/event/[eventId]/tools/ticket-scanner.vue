@@ -8,10 +8,10 @@ definePageMeta({
   showInMenu: true,
   order: 1,
   icon: 'solar:qr-code-bold-duotone',
+  requiresSelectedEvent: true,
   packages: ['optima'],
   roles: ['administrator', 'ee_event_organizer'],
   capabilities: ['ee_read_checkins'],
-  permissions: ['ee_read_checkins'],
   layout: 'dashboard-with-sidebar',
 });
 

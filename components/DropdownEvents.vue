@@ -125,6 +125,7 @@ watch(search, (newValue) => {
                       <Icon v-else class="h-5 w-5 text-slate-400 dark:text-slate-500" icon="heroicons-outline:search" />
                     </div>
                     <Input
+                    v-if="events.length > 10"
                       type="search"
                       class="h-8 px-2 pl-10 border-b border-slate-200 dark:border-slate-700"
                       placeholder="Search events..."
