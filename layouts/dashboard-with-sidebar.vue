@@ -29,7 +29,7 @@ watch(() => route.fullPath, () => {
       <div class="relative h-full">
         <slot />
         <ModalAuth 
-            :open="!isModalOpen" 
+            :open="isModalOpen" 
             :reason="unauthorizedReason"
             @close="isModalOpen = false"
         />
