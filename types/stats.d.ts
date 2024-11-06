@@ -56,3 +56,8 @@ export interface CustomFieldChartItem {
   value: string;
   count: number;
 }
+
+interface customFieldChartType {
+  label: string;
+  values: customFieldItemType[];
+}

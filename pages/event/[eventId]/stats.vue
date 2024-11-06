@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { format } from 'date-fns';
-import { formatThousands, formatCurrency } from '@/utils';
+import { formatThousands } from '@/utils';
 import { useStats } from '~/composables/useStats';
-import type { StatsFilters } from '@/types/stats';
+import type { CustomFieldChartItem, StatsFilters } from '@/types/stats';
 import { useEvent } from '~/composables/useEvent';
 import { AreaChart } from '@/components/ui/chart-area';
 import { DonutChart } from '~/components/ui/chart-donut';
@@ -59,7 +59,7 @@ const registrationChartData = computed(() => {
   return transactionStats.value.daily_registrations.map((item) => ({
     name: item.date,
     Approved: item.approved,
-    Pending: item.pending
+    Pending: item.pending,
   }));
 });
 
@@ -133,24 +133,32 @@ const formatDate = (date: Date): string => {
             <CardContent>
               <div class="grid divide-x divide-card/40 grid-cols-2 gap-2">
                 <div class="col-span-2">
-                  <div class="text-3xl font-bold text-slate-100 tabular-nums">{{ formatThousands(attendeeStats.total_approved) }}</div>
+                  <div class="text-3xl font-bold text-slate-100 tabular-nums">
+                    {{ formatThousands(attendeeStats.total_approved) }}
+                  </div>
                   <div class="text-sm text-slate-300">Total</div>
                 </div>
-                
-                  <div class="pl-3">
-                    <div class="text-xl font-semibold text-slate-100 tabular-nums">{{ formatThousands(attendeeStats.total_pending) }}</div>
-                    <div class="text-sm text-slate-300">Pending</div>
+
+                <div class="pl-3">
+                  <div class="text-xl font-semibold text-slate-100 tabular-nums">
+                    {{ formatThousands(attendeeStats.total_pending) }}
                   </div>
-                  <div class="pl-3">
-                    <div class="text-xl font-semibold text-slate-100 tabular-nums">{{ formatThousands(totalAttendees) }}</div>
-                    <div class="text-sm text-slate-300">Registrations</div>
+                  <div class="text-sm text-slate-300">Pending</div>
+                </div>
+                <div class="pl-3">
+                  <div class="text-xl font-semibold text-slate-100 tabular-nums">
+                    {{ formatThousands(totalAttendees) }}
                   </div>
-                
+                  <div class="text-sm text-slate-300">Registrations</div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card v-if="transactionStats" class="bg-gradient-to-tr from-emerald-400 to-emerald-200 dark:from-emerald-400 dark:to-emerald-400/20">
+          <Card
+            v-if="transactionStats"
+            class="bg-gradient-to-tr from-emerald-400 to-emerald-200 dark:from-emerald-400 dark:to-emerald-400/20"
+          >
             <CardHeader>
               <CardTitle>Total Revenue</CardTitle>
             </CardHeader>
@@ -213,11 +221,11 @@ const formatDate = (date: Date): string => {
             <CardTitle>Daily Registrations</CardTitle>
           </CardHeader>
           <CardContent class="">
-           <AreaChart 
-              :data="registrationChartData" 
-              index="name" 
-              :categories="['Approved', 'Pending']" 
-              :colors="['blue', 'orange']" 
+            <AreaChart
+              :data="registrationChartData"
+              index="name"
+              :categories="['Approved', 'Pending']"
+              :colors="['blue', 'orange']"
             />
           </CardContent>
         </Card>
@@ -225,7 +233,8 @@ const formatDate = (date: Date): string => {
     </section>
 
     <!-- Custom Field Stats -->
-    <section class="mb-8" v-if="customFieldStats">
+    <section class="mb-8" v-if="customFieldStats && Array.isArray(customFieldStats) && customFieldStats.length > 0">
+      {{ customFieldStats }}
       <h2 class="text-xl font-semibold mb-4">Custom Field</h2>
       <div v-if="isCustomFieldLoading" class="grid gap-4 grid-cols-1 md:grid-cols-2">
         <Skeleton v-for="i in 2" :key="i" class="bg-muted-foreground/10 h-28 rounded-xl" />
@@ -238,7 +247,7 @@ const formatDate = (date: Date): string => {
           <CardContent class="">
             <DonutChart
               :data="
-                field.values.map((v) => ({
+                field.values.map((v: CustomFieldChartItem) => ({
                   name: v.value,
                   total: v.count,
                 }))
@@ -252,7 +261,9 @@ const formatDate = (date: Date): string => {
               <div v-for="(value, i) in field.values.slice(0, 8)" :key="i" class="flex items-start gap-2">
                 <Badge variant="outline">
                   <span>{{ value.value }}</span>
-                  <span class="rounded-full number tabular-nums bg-muted text-primary px-2 py-1 ml-2">{{ value.count }} </span>
+                  <span class="rounded-full number tabular-nums bg-muted text-primary px-2 py-1 ml-2"
+                    >{{ value.count }}
+                  </span>
                 </Badge>
               </div>
             </div>
