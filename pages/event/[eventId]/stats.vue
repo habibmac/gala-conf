@@ -233,8 +233,7 @@ const formatDate = (date: Date): string => {
     </section>
 
     <!-- Custom Field Stats -->
-    <section class="mb-8" v-if="customFieldStats && Array.isArray(customFieldStats) && customFieldStats.length > 0">
-      {{ customFieldStats }}
+    <section class="mb-8" v-if="customFieldStats">
       <h2 class="text-xl font-semibold mb-4">Custom Field</h2>
       <div v-if="isCustomFieldLoading" class="grid gap-4 grid-cols-1 md:grid-cols-2">
         <Skeleton v-for="i in 2" :key="i" class="bg-muted-foreground/10 h-28 rounded-xl" />
