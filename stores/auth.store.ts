@@ -12,6 +12,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   const nuxtApp = useNuxtApp();
 
+  const isLoadingUser = ref(false);
+
   const isAuthenticated = computed(() => !!accessToken.value);
   const userCapabilities = ref<string[]>([]);
 
@@ -63,6 +65,28 @@ export const useAuthStore = defineStore('auth', () => {
       throw error;
     }
   };
+
+  const fetchUserProfile = async () => {
+    if (!isAuthenticated.value) return null;
+
+    isLoadingUser.value = true;
+    try {
+      const { $oauthApi } = useNuxtApp();
+      const response = await $oauthApi.get('/me/', {
+        headers: {
+          Authorization: `Bearer ${accessToken.value}`,
+        },
+      });
+      setUser(response.data);
+      return response.data;
+    } catch (error) {
+      clearAuth();
+      throw error;
+    } finally {
+      isLoadingUser.value = false;
+    }
+  };
+
 
   const setUser = (user: UserProfile) => {
     userInfo.value = user;
@@ -144,6 +168,8 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     loggingOut,
     exchangeCodeForTokens,
+    isLoadingUser,
+    fetchUserProfile,
     setAuth,
     clearAuth,
     refreshTokens,

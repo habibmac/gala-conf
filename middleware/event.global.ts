@@ -2,6 +2,10 @@
 export default defineNuxtRouteMiddleware(async (to) => {
     const authStore = useAuthStore();
 
+    // Ensure user profile is loaded
+    if (authStore.isAuthenticated && !authStore.userInfo) {
+        await authStore.fetchUserProfile();
+    }
 
     // Skip for non-event routes
     if (!to.meta.requiresSelectedEvent) {
@@ -47,6 +51,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
             return navigateTo('/my-events');
         }
     } else {
+        console.error('No event loaded');
         return navigateTo('/my-events');
     }
 });
