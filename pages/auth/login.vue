@@ -2,29 +2,80 @@
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { Button } from '@/components/ui/button';
+import { FormVee, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useForm } from 'vee-validate';
+import * as z from 'zod';
+import { useToast } from '@/components/ui/toast/use-toast';
+
+interface authResponse {
+  access_token: string;
+  refresh_token: string;
+}
 
 useHead({
   title: 'Login',
-  meta: [
-    {
-      name: 'description',
-      content: 'Login to your Galanesia account',
-    },
-  ],
+  meta: [{ name: 'description', content: 'Login to your Galanesia account' }],
 });
 
 const config = useRuntimeConfig();
+const authStore = useAuthStore();
+const router = useRouter();
+const { toast } = useToast();
 
+// Form validation schema
+const formSchema = z.object({
+  username: z.string().email('Please enter a valid email'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+const {handleSubmit, values, errors, meta } = useForm({
+  validationSchema: toTypedSchema(formSchema),
+  initialValues: {
+    username: '',
+    password: '',
+  },
+});
+
+const isLoading = ref(false);
+
+// Password grant login
+const onSubmit = handleSubmit( async (values) => {
+  isLoading.value = true;
+  try {
+    const response: authResponse = await $fetch('/api/login', {
+      method: 'POST',
+      body: {
+        username: values.username,
+        password: values.password,
+      },
+    });
+
+    authStore.setAuth(response.access_token, response.refresh_token);
+    router.push('/my-events');
+  } catch (error: any) {
+    toast({
+      title: 'Error',
+      description: 'Invalid credentials. Please try again.',
+      variant: 'destructive',
+    });
+  } finally {
+    isLoading.value = false;
+  }
+});
+
+// OAuth authorization code login
 const loginWithOAuth = () => {
   const clientId = config.public.oauthClientId;
   const redirectUri = encodeURIComponent(config.public.oauthRedirectUri);
   return `${config.public.oauthUrl}/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`;
 };
 
-const login = () => {
+const handleOAuthLogin = () => {
   window.location.href = loginWithOAuth();
 };
 </script>
+
 <template>
   <div
     class="container relative flex flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0"
@@ -54,7 +105,45 @@ const login = () => {
           <h1 class="text-2xl font-semibold tracking-tight">Event Organizer's Dashboard</h1>
           <p class="text-sm text-muted-foreground">Sign in to continue</p>
         </div>
-        <Button @click="login">Login</Button>
+
+        <!-- Password Login Form -->
+        <form @submit.prevent="onSubmit" class="space-y-4">
+            <FormField v-slot="{ field }" :name="'username'">
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="name@example.com" v-bind="field" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <FormField v-slot="{ field }" :name="'password'">
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input type="password" placeholder="Enter your password" v-bind="field" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+
+            <Button type="submit" class="w-full" :disabled="isLoading">
+              {{ isLoading ? 'Signing in...' : 'Sign in with Password' }}
+            </Button>
+          </form>
+
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <span class="w-full border-t" />
+          </div>
+          <div class="relative flex justify-center text-xs uppercase">
+            <span class="bg-background px-2 text-muted-foreground">Or</span>
+          </div>
+        </div>
+
+        <!-- OAuth Login Button -->
+        <Button variant="outline" @click="handleOAuthLogin"> Continue with OAuth </Button>
 
         <p class="px-8 text-center text-sm text-muted-foreground">
           By signing in, you agree to our

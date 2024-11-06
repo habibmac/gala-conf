@@ -7,8 +7,16 @@ export default defineNuxtRouteMiddleware((to) => {
     return;
   }
 
-  // Protect routes that require authentication
-  if (!authStore.isAuthenticated && !['/', '/auth/login'].includes(to.path)) {
+  // Safe public routes that should always be accessible
+  const publicRoutes = ['/', '/auth/login'];
+
+  // If we're on a public route, allow access
+  if (publicRoutes.includes(to.path)) {
+    return;
+  }
+
+  // For all other routes, check authentication
+  if (!authStore.isAuthenticated) {
     return navigateTo('/auth/login');
   }
 
