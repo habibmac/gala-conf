@@ -116,51 +116,55 @@ const {
 } = useInsight(eventId, insightId, pagination, sorting, filters);
 
 // Table configuration
-const columnConfigs = ref<ColumnConfig[]>([
-  {
-    key: 'date',
-    header: 'Date',
-    isVisible: false,
-    isHideable: true,
-    width: 10,
-  },
-  {
-    key: 'code',
-    header: 'Reg Code',
-    isVisible: true,
-    isHideable: false,
-    width: 10,
-  },
-  {
-    key: 'fullname',
-    header: 'Full Name',
-    isVisible: true,
-    isHideable: false,
-    width: 20,
-  },
-  {
-    key: 'ticket_name',
-    header: 'Ticket',
-    isVisible: false,
-    isHideable: true,
-    width: 15,
-  },
-  {
-    key: 'email',
-    header: 'Email',
-    isVisible: true,
-    isHideable: true,
-    width: 15,
-  },
-  {
-    key: 'phone',
-    header: 'Phone',
-    isVisible: true,
-    isHideable: true,
-    width: 15,
-  },
-  ...getCustomFieldsColumns(insightData.value?.fields ?? []),
-]);
+const columnConfigs = computed<ColumnConfig[]>(() => {
+  const baseColumns = [
+    {
+      key: 'date',
+      header: 'Date',
+      isVisible: false,
+      isHideable: true,
+      width: 10,
+    },
+    {
+      key: 'code',
+      header: 'Reg Code',
+      isVisible: true,
+      isHideable: false,
+      width: 10,
+    },
+    {
+      key: 'fullname',
+      header: 'Full Name',
+      isVisible: true,
+      isHideable: false,
+      width: 20,
+    },
+    {
+      key: 'ticket_name',
+      header: 'Ticket',
+      isVisible: false,
+      isHideable: true,
+      width: 15,
+    },
+    {
+      key: 'email',
+      header: 'Email',
+      isVisible: true,
+      isHideable: true,
+      width: 15,
+    },
+    {
+      key: 'phone',
+      header: 'Phone',
+      isVisible: true,
+      isHideable: true,
+      width: 15,
+    }
+  ];
+
+  const customFields = getCustomFieldsColumns(insightData.value?.fields ?? []);
+  return [...baseColumns, ...customFields];
+});
 
 // Define columns
 const columnHelper = createColumnHelper<Reg>();
@@ -605,7 +609,7 @@ watch(
 
   <section class="relative" :class="{ 'overflow-x-auto scroll-area': !isDataLoading }">
     <div
-      class="w-full overflow-x-auto scroll-area scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700"
+      class="w-full"
     >
       <div :style="{ minWidth: `${calculateMinWidth()}px` }">
         <template v-if="isDataLoading">
