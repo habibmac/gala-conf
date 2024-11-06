@@ -61,7 +61,7 @@ export default {
         mono: ['JetBrains Mono', 'monospace'],
       },
       fontSize: {
-        tiny: ['0.625rem', { lineHeight: '1.5' }],
+        tiny: ['0.65rem', { lineHeight: '1.5' }],
       },
       keyframes: {
         'accordion-down': {

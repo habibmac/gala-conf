@@ -24,8 +24,6 @@ import TablePagination from '@/components/TablePagination.vue';
 import TableStatusTooltip from '@/components/TableStatusTooltip.vue';
 import TransactionPanel from '@/components/partials/registrations/TransactionPanel.vue';
 import TableResetBtn from '@/components/TableResetBtn.vue';
-import SpinnerRing from '@/components/SpinnerRing.vue';
-import NoData from '@/components/partials/registrations/NoData.vue';
 import Datepicker from '@/components/Datepicker.vue';
 
 useHead({
@@ -183,10 +181,10 @@ const columns = computed(() => {
               return h(
                 'div',
                 {
-                  class: 'text-right text-slate-900 dark:text-slate-300 text-xs',
+                  class: 'text-right text-slate-900 dark:text-slate-300 text-xs xl:text-sm',
                 },
                 [
-                  h('div', { class: '' }, format(date, 'd MMM yyyy')),
+                  h('div', { class: 'whitespace-nowrap' }, format(date, 'd MMM yyyy')),
                   h(
                     'div',
                     {
@@ -440,7 +438,13 @@ const handleResetFilters = () => {
 };
 
 const totalVisibleWidth = computed(() => {
-  return columnConfigs.value.filter((config) => config.isVisible).reduce((total, config) => total + config.width, 0);
+  const baseWidth = 100; // minimum width percentage
+  const visibleWidth = columnConfigs.value
+    .filter((config) => config.isVisible)
+    .reduce((total, config) => total + config.width, 0);
+
+  // Always return at least 100%, but expand if visible columns need more space
+  return Math.max(baseWidth, visibleWidth);
 });
 
 // Watch for changes in filters, pagination, and sorting, and update the route query
@@ -568,82 +572,84 @@ watch(
     </div>
   </section>
 
-  <section
-    class="relative"
-    :class="{ 'overflow-x-auto scroll-area': !isLoading }"
-    :style="{ width: `${Math.max(100, totalVisibleWidth)}%` }"
-  >
+  <section class="relative" :class="{ 'overflow-x-scroll': regData && regData.length > 0 }">
     <template v-if="isLoading">
       <div class="absolute z-10 h-full w-full ring-0"></div>
     </template>
-    <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90" v-else-if="regData">
-      <thead
-        class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
-      >
-        <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-          <th
-            v-for="header in headerGroup.headers"
-            :key="header.id"
-            :colSpan="header.colSpan"
-            :style="{
-              minWidth: `${header.column.columnDef.size ?? 20}px`,
-            }"
-            class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-200/20 dark:hover:bg-slate-900/50 first:pl-5 last:pr-5 text-xs"
-            :class="{
-              'bg-blue-200/20 text-blue-600 dark:bg-slate-800/50': header.column.getIsSorted(),
-              'cursor-pointer select-none': header.column.getCanSort(),
-            }"
-            @click="header.column.getCanSort() ? header.column.getToggleSortingHandler()?.($event) : null"
-          >
-            <template v-if="!header.isPlaceholder">
-              <div class="relative">
-                <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
-                <span class="absolute right-0 text-blue-500 dark:text-slate-300">
-                  <span>
-                    {{ { asc: '↑', desc: '↓' }[header.column.getIsSorted() as string] }}
-                  </span>
-                </span>
-              </div>
-            </template>
-          </th>
-        </tr>
-      </thead>
-      <tbody class="text-sm 2xl:text-sm border-b">
-        <template v-if="!table.getRowModel().rows.length">
-          <tr v-if="isLoading" v-for="index in 10" :key="index">
-            <td v-for="column in columns" :key="index" class="px-2 py-2">
-              <Skeleton class="w-full h-6 rounded" />
-            </td>
-          </tr>
-          <tr v-else>
-            <td colspan="10" class="py-10 text-center">
-              <EmptyState
-                title="No data found"
-                description="There are no registrations matching your criteria."
-                :img="{ src: '/images/empty-state/empty-c.svg' }"
-                :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
-              />
-            </td>
-          </tr>
-        </template>
-        <tr
-          v-for="row in table.getRowModel().rows"
-          :key="row.id"
-          class="divide-y divide-slate-200 dark:divide-slate-800 hover:bg-slate-50 dark:hover:bg-slate-950/20"
+    <div :style="{ width: regData && regData.length > 0 ? `${totalVisibleWidth}%` : `100%` }">
+      <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90">
+        <thead
+          class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
         >
-          <td
-            v-for="cell in row.getVisibleCells()"
-            :key="cell.id"
-            class="number px-2 py-3 text-center first:pl-5 last:pr-5"
-            :class="{
-              'text-slate-600 bg-blue-50/50 dark:bg-slate-600/20 dark:text-slate-300': cell.column.getIsSorted(),
-            }"
-          >
-            <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          <template v-if="isLoading || (regData && regData.length > 0)">
+            <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+              <th
+                v-for="header in headerGroup.headers"
+                :key="header.id"
+                :colSpan="header.colSpan"
+                :style="{
+                  minWidth: `${header.column.columnDef.size ?? 20}px`,
+                }"
+                class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-200/20 dark:hover:bg-slate-900/50 first:pl-5 last:pr-5 text-xs"
+                :class="{
+                  'bg-blue-200/20 text-blue-600 dark:bg-slate-800/50': header.column.getIsSorted(),
+                  'cursor-pointer select-none': header.column.getCanSort(),
+                }"
+                @click="header.column.getCanSort() ? header.column.getToggleSortingHandler()?.($event) : null"
+              >
+                <template v-if="!header.isPlaceholder">
+                  <div class="relative">
+                    <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+                    <span class="absolute right-0 text-blue-500 dark:text-slate-300">
+                      <span>
+                        {{ { asc: '↑', desc: '↓' }[header.column.getIsSorted() as string] }}
+                      </span>
+                    </span>
+                  </div>
+                </template>
+              </th>
+            </tr>
+          </template>
+        </thead>
+        <tbody class="text-sm 2xl:text-base border-b">
+          <template v-if="!table.getRowModel().rows.length">
+            <tr v-if="isLoading" v-for="index in 10" :key="index">
+              <td v-for="(column, index2) in columns" :key="index2" class="px-2 py-2">
+                <Skeleton class="w-full h-6 rounded" />
+              </td>
+            </tr>
+            <tr v-else>
+              <td colspan="10" class="py-10 text-center">
+                <EmptyState
+                  title="No data found"
+                  description="There are no registrations matching your criteria."
+                  :img="{ src: '/images/empty-state/empty-c.svg', class: 'w-28' }"
+                  :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
+                />
+              </td>
+            </tr>
+          </template>
+          <template v-else>
+            <tr
+              v-for="row in table.getRowModel().rows"
+              :key="row.id"
+              class="divide-y divide-slate-200 dark:divide-slate-800 hover:bg-slate-50 dark:hover:bg-slate-950/20"
+            >
+              <td
+                v-for="cell in row.getVisibleCells()"
+                :key="cell.id"
+                class="number px-2 py-3 text-center first:pl-5 last:pr-5"
+                :class="{
+                  'text-slate-600 bg-blue-50/50 dark:bg-slate-600/20 dark:text-slate-300': cell.column.getIsSorted(),
+                }"
+              >
+                <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
   </section>
   <TablePagination
     v-if="table.getRowModel().rows.length > 0"
@@ -655,6 +661,7 @@ watch(
     @update:pageSize="handlePageSizeChange"
     @update:currentPage="handleNavigation"
   />
+  <div v-else class="h-40"></div>
   <TransactionPanel
     :transactionPanelOpen="selectedRegId !== ''"
     @close-transactionpanel="handleCloseDetails"
