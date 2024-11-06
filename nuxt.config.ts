@@ -12,6 +12,7 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     '@vee-validate/nuxt',
     '@formkit/auto-animate/nuxt',
+    '@nuxt/image',
   ],
   app: {
     head: {

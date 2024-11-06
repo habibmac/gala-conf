@@ -159,7 +159,7 @@ const columnConfigs = computed<ColumnConfig[]>(() => {
       isVisible: true,
       isHideable: true,
       width: 15,
-    }
+    },
   ];
 
   const customFields = getCustomFieldsColumns(insightData.value?.fields ?? []);
@@ -608,9 +608,7 @@ watch(
   </section>
 
   <section class="relative" :class="{ 'overflow-x-auto scroll-area': !isDataLoading }">
-    <div
-      class="w-full"
-    >
+    <div class="w-full">
       <div :style="{ minWidth: `${calculateMinWidth()}px` }">
         <template v-if="isDataLoading">
           <div class="absolute z-10 h-full w-full bg-card/10 ring-0"></div>
@@ -655,8 +653,13 @@ watch(
                 </td>
               </tr>
               <tr v-else>
-                <td colspan="10" class="py-5 text-center">
-                  <NoData reset-filters="handleResetFilters" />
+                <td colspan="10" class="py-10 text-center">
+                  <EmptyState
+                    title="No data found"
+                    description="There are no registrations matching your criteria."
+                    :img="{ src: '/images/empty-state/empty-c.svg' }"
+                    :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
+                  />
                 </td>
               </tr>
             </template>

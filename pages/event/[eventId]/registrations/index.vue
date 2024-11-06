@@ -350,26 +350,22 @@ function handleSetDateRange(dateRange: [Date | null, Date | null] | null) {
 
 const dateRange = computed({
   get: () => {
-    if (filters.value.date_start === "" || filters.value.date_end === "") {
+    if (filters.value.date_start === '' || filters.value.date_end === '') {
       // Return null to signify "All Time" to VueDatePicker
       return null;
     }
-    return [
-      new Date(filters.value.date_start),
-      new Date(filters.value.date_end),
-    ];
+    return [new Date(filters.value.date_start), new Date(filters.value.date_end)];
   },
   set: (newValue) => {
     if (newValue === null) {
       // User clears the date range, set to "All Time"
-      filters.value.date_start = "";
-      filters.value.date_end = "";
+      filters.value.date_start = '';
+      filters.value.date_end = '';
     } else {
       // User selects a new date range
-      [filters.value.date_start, filters.value.date_end] = newValue.map(
-        (date) =>
-          // Format to yyyy-MM-dd hh:mm
-          format(date, "yyyy-MM-dd")
+      [filters.value.date_start, filters.value.date_end] = newValue.map((date) =>
+        // Format to yyyy-MM-dd hh:mm
+        format(date, 'yyyy-MM-dd')
       );
     }
   },
@@ -522,7 +518,7 @@ watch(
       <div class="flex shrink-0 space-x-2 justify-self-end">
         <div class="min-w-64 grow">
           <!-- Datepicker -->
-          <Datepicker @update:date-range="handleSetDateRange"             :date-range="dateRange" />
+          <Datepicker @update:date-range="handleSetDateRange" :date-range="dateRange" />
         </div>
       </div>
     </header>
@@ -580,7 +576,7 @@ watch(
     <template v-if="isLoading">
       <div class="absolute z-10 h-full w-full ring-0"></div>
     </template>
-    <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90">
+    <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90" v-else-if="regData">
       <thead
         class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
       >
@@ -620,8 +616,13 @@ watch(
             </td>
           </tr>
           <tr v-else>
-            <td colspan="10" class="py-5 text-center">
-              <NoData reset-filters="handleResetFilters" />
+            <td colspan="10" class="py-10 text-center">
+              <EmptyState
+                title="No data found"
+                description="There are no registrations matching your criteria."
+                :img="{ src: '/images/empty-state/empty-c.svg' }"
+                :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
+              />
             </td>
           </tr>
         </template>

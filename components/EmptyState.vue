@@ -1,50 +1,116 @@
 <script setup lang="ts">
-defineProps({
-  title: {
-    type: String,
-    default: 'No data found',
-  },
-  description: {
-    type: String,
-    required: false,
-  },
-  cta: {
-    type: Object,
-    default: () => ({
-      label: 'Reset Filters',
-      to: '',
-    }),
-  },
+import { Icon } from '@iconify/vue';
+import { cn } from '~/lib/utils';
+
+interface Image {
+  src: string; // required
+  alt?: string; // required
+  class?: string; // optional
+  loading?: 'lazy' | 'eager'; // optional
+}
+
+interface CtaButton {
+  label?: string;
+  to?: string;
+  icon?: string;
+  iconClass?: string;
+  action?: () => void;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  cta?: CtaButton;
+  cta2?: CtaButton;
+  iconClass?: string;
+  img?: Image;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  title: 'No data found',
+  img: () => ({
+    src: '/images/empty-state/no-data.svg',
+    alt: 'No data found',
+  }),
+  cta: () => ({
+    label: '',
+  }),
+  cta2: () => ({
+    label: '',
+  }),
 });
+
+const emit = defineEmits<{
+  (e: 'action', buttonType: 'primary' | 'secondary'): void;
+}>();
+
+const handleClick = (button: CtaButton, buttonType: 'primary' | 'secondary') => {
+  if (button.action) {
+    button.action();
+  } else {
+    emit('action', buttonType);
+  }
+};
+
+const hasActions = computed(() => Boolean(props.cta?.label || props.cta2?.label));
 </script>
+
 <template>
   <div class="m-auto my-4 max-w-2xl">
     <div class="px-4 text-center">
-      <div
-        class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-t from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
-      >
-        <svg class="h-6 w-5 fill-current" viewBox="0 0 20 24">
-          <path class="text-slate-500 dark:text-slate-600" d="M10 10.562l9-5-8.514-4.73a1 1 0 00-.972 0L1 5.562l9 5z" />
-          <path class="text-slate-300 dark:text-slate-400" d="M9 12.294l-9-5v10.412a1 1 0 00.514.874L9 23.294v-11z" />
-          <path
-            class="text-slate-400 dark:text-slate-500"
-            d="M11 12.294v11l8.486-4.714a1 1 0 00.514-.874V7.295l-9 4.999z"
-          />
-        </svg>
+      <!-- Icon Section -->
+      <div class="mb-4 inline-flex">
+        <NuxtImg
+          :src="props.img.src"
+          :alt="props.img.alt"
+          :class="cn('pointer-events-none select-none w-40', props.img.class)"
+        />
       </div>
-      <h2 class="mb-2 text-xl font-bold text-slate-500 dark:text-slate-100">
+
+      <!-- Content Section -->
+      <h2 class="mb-2 text-xl font-bold">
         {{ title }}
       </h2>
-      <p class="mb-5 text-sm" v-if="description">
+      <p v-if="description" class="mb-5 text-sm text-muted-foreground">
         {{ description }}
       </p>
 
-      <NuxtLink
-        class="btn bg-blue-500 text-slate-50 hover:bg-blue-600 dark:bg-blue-600 dark:text-slate-100 dark:hover:bg-blue-700"
-        :to="cta.to"
-      >
-        <span class="text-sm font-medium">{{ cta.label }}</span>
-      </NuxtLink>
+      <!-- Actions Section -->
+      <div v-if="hasActions" class="flex justify-center gap-2 max-w-sm mx-auto">
+        <template v-if="cta?.label">
+          <Button v-if="cta.to" as-child>
+            <NuxtLink to="/new-event">
+              <template v-if="cta.icon">
+                <Icon :icon="cta.icon" :class="cn('mr-2', cta.iconClass)" />
+              </template>
+              {{ cta.label }}</NuxtLink
+            >
+          </Button>
+          <Button v-else @click="() => handleClick(cta, 'primary')" type="button">
+            <template v-if="cta.icon">
+              <Icon :icon="cta.icon" :class="cn('mr-2', cta.iconClass)" />
+            </template>
+            {{ cta.label }}
+          </Button>
+        </template>
+
+        <template v-if="cta2?.label">
+          <Button v-if="cta2.to" as-child variant="outline">
+            <NuxtLink to="/new-event">
+              <template v-if="cta2.icon">
+                <Icon :icon="cta2.icon" :class="cn('mr-2', cta2.iconClass)" />
+              </template>
+              {{ cta2.label }}</NuxtLink
+            >
+          </Button>
+          <Button v-else @click="() => handleClick(cta2, 'secondary')" variant="outline" type="button">
+            <template v-if="cta2.icon">
+              <Icon :icon="cta2.icon" :class="cn('mr-2', cta2.iconClass)" />
+            </template>
+            {{ cta2.label }}
+          </Button>
+        </template>
+      </div>
     </div>
   </div>
 </template>

@@ -22,7 +22,7 @@ definePageMeta({
   layout: 'dashboard-with-sidebar',
 });
 
-const { event, isLoading: isEventLoading, isError } = useEvent();
+const { event, isLoading: isEventLoading } = useEvent();
 
 const eventId = computed(() => event.value?.id);
 
@@ -32,7 +32,13 @@ const getInsights = async (eventId: Ref<string>, signal: AbortSignal) => {
   return response.data?.data;
 };
 
-const { isLoading: isDataLoading, data, refetch, isRefetching } = useQuery({
+const {
+  isLoading: isDataLoading,
+  data,
+  refetch,
+  isRefetching,
+  error,
+} = useQuery({
   queryKey: ['eventInsights', eventId],
   queryFn: ({ signal }) => getInsights(eventId, signal),
   enabled: !!eventId,
@@ -50,113 +56,100 @@ const { isLoading: isDataLoading, data, refetch, isRefetching } = useQuery({
         <div v-if="isEventLoading || isDataLoading || isRefetching" class="grid gap-4 grid-cols-12">
           <Skeleton v-for="i in 2" class="h-28 rounded-xl col-span-12 md:col-span-6 bg-muted-foreground/10" />
         </div>
-        <div v-else-if="isError" class="py-16">
-          <div class="flex h-32 items-center justify-center">
-            Error fetching event insights. Please try again later.
-          </div>
-          <div class="flex h-32 items-center justify-center">
-            <Button @click="refetch" class="mt-5"> Try Again </Button>
-          </div>
-        </div>
-        <div class="grid gap-4 grid-cols-1 md:grid-cols-2 2xl:grid-cols-3" v-else-if="data">
-          <NuxtLink
-            v-for="item in data"
-            :key="item.id"
-            :to="`/event/${eventId}/insights/${item.id}`"
-            custom
-            v-slot="{ href, navigate }"
-          >
-            <a :href="href" @click="navigate" class="group">
-              <Card class="relative overflow-hidden group-hover:border-blue-600 transition-colors">
-                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle class="h4 text-sm font-medium tracking-normal">
-                    {{ item.title }}
-                  </CardTitle>
-
-                  <DropdownEditMenu :eventId="eventId" :itemId="item.id" />
-                </CardHeader>
-                <CardContent class="flex flex-col space-y-2 pt-0 pb-0">
-                  <div v-if="item.fields?.length" class="flex gap-2 flex-wrap">
-                    <Badge variant="outline" v-for="question in item.fields" :key="question.id">
-                      <div class="text-xs">
-                        {{ question.label }}
-                      </div>
-                    </Badge>
-                  </div>
-                  <div class="relative max-h-40 overflow-hidden">
-                    <Separator class="my-4" label="Ticket Groups" />
-                    <div v-if="item.groups?.length" class="grid rounded-lg gap-1">
-                      <div v-for="ticket in item.groups" :key="ticket.id" class="">
-                        <div class="text-sm border p-2 font-medium rounded-md">
-                          {{ ticket.name }}
-                          <template v-if="ticket.tickets?.length">
-                            <div v-for="subTicket in ticket.tickets" :key="subTicket.id">
-                              <div class="text-xs text-slate-500 dark:text-slate-400">
-                                {{ subTicket.name }}
+        <template v-else-if="data">
+          <div class="grid gap-4 grid-cols-1 md:grid-cols-2 2xl:grid-cols-3" v-if="data.length > 0">
+            <NuxtLink
+              v-for="item in data"
+              :key="item.id"
+              :to="`/event/${eventId}/insights/${item.id}`"
+              custom
+              v-slot="{ href, navigate }"
+            >
+              <a :href="href" @click="navigate" class="group">
+                <Card class="relative overflow-hidden group-hover:border-blue-600 transition-colors">
+                  <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle class="h4 text-sm font-medium tracking-normal">
+                      {{ item.title }}
+                    </CardTitle>
+                    <DropdownEditMenu :eventId="eventId" :itemId="item.id" />
+                  </CardHeader>
+                  <CardContent class="flex flex-col space-y-2 pt-0 pb-0">
+                    <div v-if="item.fields?.length" class="flex gap-2 flex-wrap">
+                      <Badge variant="outline" v-for="question in item.fields" :key="question.id">
+                        <div class="text-xs">
+                          {{ question.label }}
+                        </div>
+                      </Badge>
+                    </div>
+                    <div class="relative max-h-40 overflow-hidden">
+                      <Separator class="my-4" label="Ticket Groups" />
+                      <div v-if="item.groups?.length" class="grid rounded-lg gap-1">
+                        <div v-for="ticket in item.groups" :key="ticket.id" class="">
+                          <div class="text-sm border p-2 font-medium rounded-md">
+                            {{ ticket.name }}
+                            <template v-if="ticket.tickets?.length">
+                              <div v-for="subTicket in ticket.tickets" :key="subTicket.id">
+                                <div class="text-xs text-slate-500 dark:text-slate-400">
+                                  {{ subTicket.name }}
+                                </div>
                               </div>
-                            </div>
-                          </template>
+                            </template>
+                          </div>
                         </div>
                       </div>
+                      <div
+                        class="sticky pointer-events-none bottom-0 h-10 bg-gradient-to-t from-white inset-0 dark:from-slate-900"
+                      ></div>
                     </div>
-                    <div
-                      class="sticky pointer-events-none bottom-0 h-10 bg-gradient-to-t from-white inset-0 dark:from-slate-900"
-                    ></div>
-                  </div>
-                </CardContent>
-                <CardFooter class="flex text-xs justify-between text-slate-500">
-                  <div class="flex flex-col gap-1">
-                    <div>Created by</div>
-                    <div class="flex items-center space-x-1">
-                      <Avatar class="w-5 h-5">
-                        <AvatarImage :src="item.avatar" />
-                        <AvatarFallback>{{ getInitials(item.author) }}</AvatarFallback>
-                      </Avatar>
-                      <span class="text-slate-800 font-medium dark:text-slate-300">
-                        {{ item.author }}
-                      </span>
+                  </CardContent>
+                  <CardFooter class="flex text-xs justify-between text-slate-500">
+                    <div class="flex flex-col gap-1">
+                      <div>Created by</div>
+                      <div class="flex items-center space-x-1">
+                        <Avatar class="w-5 h-5">
+                          <AvatarImage :src="item.avatar" />
+                          <AvatarFallback>{{ getInitials(item.author) }}</AvatarFallback>
+                        </Avatar>
+                        <span class="text-slate-800 font-medium dark:text-slate-300">
+                          {{ item.author }}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div class="flex flex-col gap-1">
-                    <div>Last modified</div>
-                    <div class="text-slate-800 font-medium dark:text-slate-300">
-                      {{ formatTimeAgo(new Date(item.last_modified)) }}
+                    <div class="flex flex-col gap-1">
+                      <div>Last modified</div>
+                      <div class="text-slate-800 font-medium dark:text-slate-300">
+                        {{ formatTimeAgo(new Date(item.last_modified)) }}
+                      </div>
                     </div>
-                  </div>
-                </CardFooter>
-              </Card>
-            </a>
-          </NuxtLink>
-        </div>
-        <div v-else class="m-auto my-16 max-w-2xl">
-          <div class="px-4 text-center flex flex-col justify-center items-center">
-            <div
-              class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-t from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
-            >
-              <svg class="h-6 w-5 fill-current" viewBox="0 0 20 24">
-                <path
-                  class="text-slate-500 dark:text-slate-600"
-                  d="M10 10.562l9-5-8.514-4.73a1 1 0 00-.972 0L1 5.562l9 5z"
-                />
-                <path
-                  class="text-slate-300 dark:text-slate-400"
-                  d="M9 12.294l-9-5v10.412a1 1 0 00.514.874L9 23.294v-11z"
-                />
-                <path
-                  class="text-slate-400 dark:text-slate-500"
-                  d="M11 12.294v11l8.486-4.714a1 1 0 00.514-.874V7.295l-9 4.999z"
-                />
-              </svg>
-            </div>
-            <h2 class="mb-2 text-xl font-bold dark:text-slate-100">No Insights Found</h2>
-            <p class="mb-5 text-sm text-slate-400 dark:text-slate-500">Create your first insight now.</p>
-            <div class="flex gap-2 mx-auto">
-              <Button>
-                <Icon icon="ph:plus-light" class="w-5 h-5 mr-2" />
-                 Create Insight </Button> <Button @click="refetch" variant="outline"> Refresh </Button>
-            </div>
+                  </CardFooter>
+                </Card>
+              </a>
+            </NuxtLink>
           </div>
-        </div>
+          <div v-else class="m-auto my-16 max-w-md">
+            <EmptyState
+              title="No Insights Found"
+              description="Create your first insight to get started."
+              :img="{
+                src: '/images/empty-state/no-insight.svg',
+                alt: 'No Insights Found',
+                class: 'w-40',
+              }"
+              :cta="{ label: 'Create Insight', to: `/event/${eventId}/insights/create`, icon: 'heroicons-outline:plus' }"
+              :cta2="{ label: 'Refresh', action: refetch }"
+            />
+             
+          </div>
+        </template>
+        <template v-else>
+          <EmptyState
+            title="Something went wrong"
+            :description="
+              error?.message || 'We are unable to fetch the insights at the moment. Please try again later.'
+            "
+            :cta="{ label: 'Try Again', icon: 'heroicons-outline:refresh', action: refetch }"
+          />
+        </template>
       </div>
     </section>
   </div>

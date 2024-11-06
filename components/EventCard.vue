@@ -23,6 +23,9 @@ defineProps({
     :to="`/event/${event.id}`"
     class="relative mx-auto flex flex-col max-w-xs sm:max-w-none overflow-hidden rounded-lg border border-border bg-card dark:bg-slate-900 hover:border-primary transition w-full sm:flex-row group"
   >
+
+    <!-- <PulseDot v-if="!isPast" class="absolute top-2 right-2 rounded-full z-20" dot-class="size-2.5 bg-green-400" pulse-class="bg-green-300 size-4" /> -->
+
     <!-- Image -->
     <div class="relative flex items-center justify-center w-full sm:w-44 overflow-hidden md:shrink-0 mx-auto p-3">
       <EventCover

@@ -54,10 +54,19 @@ watch(
     <Skeleton class="h-80 bg-muted-foreground/10 w-full sm:h-32 max-w-xs sm:max-w-none mx-auto" />
   </div>
   <template v-else-if="isError">
-    <div class="flex h-32 items-center justify-center">Error fetching events. Please try again later.</div>
+    <EmptyState
+      title="An error occurred"
+      description="We couldn't load your events. Please try again later."
+      :img="{ src: '/images/empty-state/no-event.svg', alt: 'Error' }"
+      :cta2="{
+        icon: 'heroicons:arrow-path-solid',
+        label: 'Refresh',
+        action: refetch,
+      }"
+    />
   </template>
-  <template v-else>
-    <div class="flex flex-col gap-6" v-if="events && events.length > 0">
+  <template v-else-if="events">
+    <div class="flex flex-col gap-6" v-if="events.length > 0">
       <!-- Events -->
       <div v-for="event in events" :key="event.id" class="grid grid-cols-1">
         <EventCard :event="event" :isPast="evtStatus === 'inactive'" />
@@ -75,9 +84,20 @@ watch(
       v-else
       :title="evtStatus === 'active' ? 'No Active Events' : 'No Past Events'"
       :description="evtStatus === 'active' ? 'You have no active events. Create one now!' : 'You have no past events.'"
-      :cta="{
+      :cta2="{
+        icon: 'heroicons:plus',
+        iconClass: 'w-5 h-5',
         label: 'Create Event',
-        to: { name: 'new-event' },
+        to: '/new-event',
+      }"
+    />
+  </template>
+  <template v-else>
+    <EmptyState
+      title="No data found"
+      :img="{
+        src: '/images/empty-state/no-data.svg',
+        alt: 'No data found',
       }"
     />
   </template>

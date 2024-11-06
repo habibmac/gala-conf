@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Icon } from '@iconify/vue';
 
 useHead({
   title: 'My Events',
@@ -56,7 +57,10 @@ const translationClass = computed(() => {
           <h1 class="text-2xl font-semibold tracking-tight h2">My Events</h1>
           <div class="flex items-center space-x-2">
             <Button as-child>
-              <NuxtLink to="/new-event"> Create New Event ⚡️ </NuxtLink>
+              <NuxtLink to="/new-event">
+                <Icon icon="heroicons:plus" class="mr-2 w-5 h-5" />
+                Create New Event ⚡️
+              </NuxtLink>
             </Button>
           </div>
         </div>
