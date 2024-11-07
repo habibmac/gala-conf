@@ -19,9 +19,12 @@ export default defineEventHandler(async (event) => {
         return response;
     } catch (error: any) {
         console.error('Error fetching user profile:', error);
+        console.log('error.response', error.response);
+        console.log('authHeader', authHeader);
         throw createError({
             statusCode: error.response?.status || 500,
-            statusMessage: 'Failed to fetch user profile',
+            statusMessage: error.response?.statusText || 'Internal Server Error',
+            message: error.message,
         });
     }
 });
