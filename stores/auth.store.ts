@@ -5,8 +5,22 @@ const accessTokenField = 'gala_at';
 const refreshTokenField = 'gala_rt';
 
 export const useAuthStore = defineStore('auth', () => {
-  const accessToken = useCookie<string | null>(accessTokenField);
-  const refreshToken = useCookie<string | null>(refreshTokenField);
+  const accessToken = useCookie(accessTokenField, {
+    maxAge: 7200,
+    path: '/',
+    secure: true,
+    sameSite: 'lax',
+    domain: process.env.NODE_ENV === 'production' ? '.galanesia.com' : undefined
+  });
+
+  const refreshToken = useCookie(refreshTokenField, {
+    maxAge: 30 * 24 * 60 * 60,
+    path: '/',
+    secure: true,
+    sameSite: 'lax',
+    domain: process.env.NODE_ENV === 'production' ? '.galanesia.com' : undefined
+  });
+
   const packages = ref<string[]>([]);
   const userInfo = ref<UserProfile | null>();
 
