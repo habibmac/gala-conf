@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useLocalStorage } from '#imports';
+import Toaster from '@/components/ui/toast/Toaster.vue'
 
 useHead({
   titleTemplate: (titleChunk) => {
@@ -21,5 +22,6 @@ onMounted(() => {
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <Toaster />
   </div>
 </template>

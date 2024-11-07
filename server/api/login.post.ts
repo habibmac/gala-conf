@@ -18,12 +18,18 @@ export default defineEventHandler(async (event) => {
             }),
         });
         return response;
-    } catch (error) {
-        console.error('Login error:', error);
+    } catch (error: any) {
+        if (error.response?._data?.error_description) {
+            throw createError({
+                statusCode: error.response.status,
+                statusMessage: error.response._data.error_description,
+            });
+        }
+        console.error('Login error:', error.response?.error);
         throw createError({
             statusCode: 500,
             statusMessage: 'API: Failed to authenticate user',
-            cause: error,
+            message: error.response.message,
         });
     }
 });
