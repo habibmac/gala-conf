@@ -233,41 +233,43 @@ const formatDate = (date: Date): string => {
     </section>
 
     <!-- Custom Field Stats -->
-    <section class="mb-8" v-if="customFieldStats">
-      <h2 class="text-xl font-semibold mb-4">Custom Field</h2>
+    <section class="mb-8">
       <div v-if="isCustomFieldLoading" class="grid gap-4 grid-cols-1 md:grid-cols-2">
         <Skeleton v-for="i in 2" :key="i" class="bg-muted-foreground/10 h-28 rounded-xl" />
       </div>
-      <div v-else class="grid gap-4 grid-cols-1 md:grid-cols-2">
-        <Card v-for="(field, key) in customFieldStats" :key="key">
-          <CardHeader>
-            <CardTitle>{{ field.label }}</CardTitle>
-          </CardHeader>
-          <CardContent class="">
-            <DonutChart
-              :data="
-                field.values.map((v: CustomFieldChartItem) => ({
-                  name: v.value,
-                  total: v.count,
-                }))
-              "
-              index="name"
-              category="total"
-              :value-formatter="valueFormatter"
-            />
-            <!-- Legends, max 8 -->
-            <div class="flex flex-wrap justify-center gap-2 mt-4 text-xs">
-              <div v-for="(value, i) in field.values.slice(0, 8)" :key="i" class="flex items-start gap-2">
-                <Badge variant="outline">
-                  <span>{{ value.value }}</span>
-                  <span class="rounded-full number tabular-nums bg-muted text-primary px-2 py-1 ml-2"
-                    >{{ value.count }}
-                  </span>
-                </Badge>
+      <div v-else-if="customFieldStats" class="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <template v-if="customFieldStats.length > 0">
+          <h2 class="text-xl font-semibold mb-4">Custom Field</h2>
+          <Card v-for="(field, key) in customFieldStats" :key="key">
+            <CardHeader>
+              <CardTitle>{{ field.label }}</CardTitle>
+            </CardHeader>
+            <CardContent class="">
+              <DonutChart
+                :data="
+                  field.values.map((v: CustomFieldChartItem) => ({
+                    name: v.value,
+                    total: v.count,
+                  }))
+                "
+                index="name"
+                category="total"
+                :value-formatter="valueFormatter"
+              />
+              <!-- Legends, max 8 -->
+              <div class="flex flex-wrap justify-center gap-2 mt-4 text-xs">
+                <div v-for="(value, i) in field.values.slice(0, 8)" :key="i" class="flex items-start gap-2">
+                  <Badge variant="outline">
+                    <span>{{ value.value }}</span>
+                    <span class="rounded-full number tabular-nums bg-muted text-primary px-2 py-1 ml-2"
+                      >{{ value.count }}
+                    </span>
+                  </Badge>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </template>
       </div>
     </section>
 
