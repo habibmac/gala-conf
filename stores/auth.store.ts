@@ -85,15 +85,16 @@ export const useAuthStore = defineStore('auth', () => {
 
     isLoadingUser.value = true;
     try {
-      const { $oauthApi } = useNuxtApp();
-      const response = await $oauthApi.get('/me/', {
+      // Use the proxied endpoint instead
+      const response: UserProfile = await $fetch('/api/me', {
         headers: {
           Authorization: `Bearer ${accessToken.value}`,
         },
       });
-      setUser(response.data);
-      return response.data;
+      setUser(response);
+      return response;
     } catch (error) {
+      console.error('Error fetching user profile:', error);
       clearAuth();
       throw error;
     } finally {
