@@ -1,9 +1,5 @@
 // middleware/auth.global.ts
 export default defineNuxtRouteMiddleware((to) => {
-  // Ensure store is available
-  if (import.meta.server) {
-    return;
-  }
 
   const authStore = useAuthStore();
 

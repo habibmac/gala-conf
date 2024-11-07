@@ -1,10 +1,5 @@
 // plugins/auth.ts
 export default defineNuxtPlugin(async (nuxtApp) => {
-    // Only run on client-side
-    if (import.meta.server) {
-        return;
-    }
-
     const authStore = useAuthStore();
 
     // Add try-catch for safer initialization
