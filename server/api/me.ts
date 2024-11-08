@@ -12,6 +12,8 @@ export default defineEventHandler(async (event) => {
         });
     }
 
+    console.log('config', config);
+
     try {
         const response = await $fetch(config.public.oauthUrl + '/me', {
             headers: {

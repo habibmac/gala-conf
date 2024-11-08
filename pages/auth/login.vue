@@ -8,6 +8,8 @@ import { useForm } from 'vee-validate';
 import * as z from 'zod';
 import { useToast } from '@/components/ui/toast/use-toast';
 
+import packageJson from '../../package.json';
+
 interface authResponse {
   access_token: string;
   refresh_token: string;
@@ -74,6 +76,8 @@ const loginWithOAuth = () => {
 const handleOAuthLogin = () => {
   window.location.href = loginWithOAuth();
 };
+
+const $version = packageJson.version;
 </script>
 
 <template>
@@ -154,7 +158,11 @@ const handleOAuthLogin = () => {
           <a href="https://galanesia.com/privacy" class="underline underline-offset-4 hover:text-primary">
             Privacy Policy
           </a>
-          .
+          . 
+        </p>
+
+        <p class="text-center">
+          <span class="text-xs text-muted-foreground">Version: {{ $version }}</span>
         </p>
       </div>
     </div>
