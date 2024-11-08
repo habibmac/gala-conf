@@ -233,12 +233,12 @@ const formatDate = (date: Date): string => {
     </section>
 
     <!-- Custom Field Stats -->
-    <section class="mb-8">
+    <section class="mb-8" v-if="customFieldStats">
+      <h2 class="text-xl font-semibold mb-4">Custom Field</h2>
       <div v-if="isCustomFieldLoading" class="grid gap-4 grid-cols-1 md:grid-cols-2">
         <Skeleton v-for="i in 2" :key="i" class="bg-muted-foreground/10 h-28 rounded-xl" />
       </div>
-      <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
-        <h2 class="text-xl font-semibold mb-4">Custom Fields</h2>
+      <div v-else class="grid gap-4 grid-cols-1 md:grid-cols-2">
         <Card v-for="(field, key) in customFieldStats" :key="key">
           <CardHeader>
             <CardTitle>{{ field.label }}</CardTitle>
