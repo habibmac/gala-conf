@@ -1,12 +1,9 @@
-import { useRequestEvent, useRequestHeaders } from "nuxt/app";
-
 // server/api/me.ts
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig();
-    const authHeader = event.headers.get('Authorization');
 
     // include cookies in the request
-    const headers = event?.node.req?.headers.cookie;
+    const authHeader = event.headers.get('Authorization');
 
     if (!authHeader) {
         throw createError({
@@ -18,15 +15,15 @@ export default defineEventHandler(async (event) => {
     try {
         const response = await $fetch(config.public.oauthUrl + '/me', {
             headers: {
-                credentials: 'include',
                 Authorization: authHeader,
-                ...(headers && { cookie: headers }),
             },
+            credentials: 'include',
         });
         return response;
     } catch (error: any) {
-        console.error('Error fetching user profile:', error);
-        console.log('error.response', error.response);
+        console.log('Request URL:', config.public.oauthUrl + '/me');
+        console.error('Full error:', error);
+        console.error('Error response data:', error.response?._data);
         console.log('authHeader', authHeader);
         throw createError({
             statusCode: error.response?.status || 500,
