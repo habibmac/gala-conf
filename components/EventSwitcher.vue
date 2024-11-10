@@ -63,7 +63,6 @@ const { events, page, maxPage, prevPage, nextPage } = useEvents();
 
 // User action to select an event
 const handleselectEvent = (newEventId: string) => {
-  console.log('Selected event:', newEventId);
   selectedEventId.value = newEventId;
   router.push(`/event/${newEventId}`);
 };

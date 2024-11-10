@@ -270,11 +270,5 @@ const formatDate = (date: Date): string => {
         </Card>
       </div>
     </section>
-
-    <!-- Error States -->
-    <!-- <Alert v-if="attendeeError || transactionError || customFieldError" variant="destructive">
-      <AlertTitle>Error</AlertTitle>
-      <AlertDescription> There was an error loading the statistics. Please try again later. </AlertDescription>
-    </Alert> -->
   </div>
 </template>

@@ -8,6 +8,7 @@ import { useMenu } from '@/composables/useMenu';
 import MenuIcon from '@/components/MenuIcon.vue';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo.vue';
+
 const props = defineProps(['sidebarOpen']);
 const emit = defineEmits(['close-sidebar']);
 
@@ -25,7 +26,8 @@ const breakpoints = useBreakpoints(breakpointsTailwind);
 const lgAndSmaller = breakpoints.smallerOrEqual('lg');
 const isLargeScreen = breakpoints.greater('lg');
 
-const sidebarExpanded = useLocalStorage('sidebar-expanded', false);
+const uiStore = useUIStore();
+const isExpanded = computed(() => uiStore.preferences.sidebarExpanded);
 
 const clickHandler = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
@@ -49,16 +51,6 @@ const keyHandler = (event: KeyboardEvent) => {
   emit('close-sidebar');
 };
 
-const updateBodyClass = () => {
-  if (import.meta.client) {
-    if (sidebarExpanded.value) {
-      document.body.classList.add('sidebar-expanded');
-    } else {
-      document.body.classList.remove('sidebar-expanded');
-    }
-  }
-};
-
 const isMenuItemActive = (linkPath: string | undefined) => {
   if (!linkPath) return false;
 
@@ -71,9 +63,9 @@ const isMenuItemActive = (linkPath: string | undefined) => {
   return currentPath.value.startsWith(linkPath);
 };
 
-watch(sidebarExpanded, () => {
-  updateBodyClass();
-});
+const handleToggleSidebar = () => {
+  uiStore.toggleSidebar();
+};
 
 watch(isLargeScreen, (isLarge) => {
   if (isLarge && props.sidebarOpen) {
@@ -185,7 +177,7 @@ onUnmounted(() => {
 
       <!-- Expand / collapse button -->
       <div class="mt-auto hidden justify-end lg:inline-flex p-4">
-        <Button @click="sidebarExpanded = !sidebarExpanded" variant="ghost" size="icon" class="text-slate-200">
+        <Button @click="handleToggleSidebar" variant="ghost" size="icon" class="text-slate-200">
           <span class="sr-only">Expand / collapse sidebar</span>
           <Icon icon="radix-icons:pin-right" class="h-6 w-6 sidebar-expanded:rotate-180" />
         </Button>

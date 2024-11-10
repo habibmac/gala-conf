@@ -12,8 +12,6 @@ export default defineEventHandler(async (event) => {
         });
     }
 
-    console.log('config', config);
-
     try {
         const response = await $fetch(config.public.oauthUrl + '/me', {
             headers: {
@@ -23,10 +21,6 @@ export default defineEventHandler(async (event) => {
         });
         return response;
     } catch (error: any) {
-        console.log('Request URL:', config.public.oauthUrl + '/me');
-        console.error('Full error:', error);
-        console.error('Error response data:', error.response?._data);
-        console.log('authHeader', authHeader);
         throw createError({
             statusCode: error.response?.status || 500,
             statusMessage: error.response?.statusText || 'Internal Server Error',
