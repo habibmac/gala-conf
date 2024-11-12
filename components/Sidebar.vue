@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useLocalStorage } from '#imports';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import { Icon } from '@iconify/vue';
 import { useMenu } from '@/composables/useMenu';
@@ -27,7 +26,6 @@ const lgAndSmaller = breakpoints.smallerOrEqual('lg');
 const isLargeScreen = breakpoints.greater('lg');
 
 const uiStore = useUIStore();
-const isExpanded = computed(() => uiStore.preferences.sidebarExpanded);
 
 const clickHandler = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
@@ -90,6 +88,7 @@ onUnmounted(() => {
     <div
       class="fixed inset-0 z-20 bg-slate-900 bg-opacity-30 transition-opacity duration-200 lg:z-auto lg:hidden"
       :class="sidebarOpen ? 'opacity-100' : 'pointer-events-none opacity-0'"
+      @click="$emit('close-sidebar')"
       aria-hidden="true"
     ></div>
 

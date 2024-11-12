@@ -79,7 +79,7 @@ const translationClass = computed(() => {
               </span>
               <template v-for="tab in tabsMeta" :key="tab.value">
                 <button
-                  class="relative flex-1 justify-center items-center z-20 flex text-sm font-medium p-1 duration-150 ease-in-out"
+                  class="relative flex-1 justify-center items-center z-10 flex text-sm font-medium p-1 duration-150 ease-in-out"
                   @click.prevent="handleTabChange(tab.value)"
                 >
                   {{ tab.label }}

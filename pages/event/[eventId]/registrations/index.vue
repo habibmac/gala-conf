@@ -534,7 +534,7 @@ watch(
     <div class="container 2xl:mx-0 py-4">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <!-- Left: Avatars -->
-        <div class="sm:gap-2 sm:grid sm:grid-flow-col sm:space-y-0">
+        <div class="flex flex-col space-y-2 sm:gap-2 sm:grid sm:grid-flow-col sm:space-y-0">
           <TableSearchForm v-model="filters.search" placeholder="Search Registrant..." />
           <DropdownTicketFilter v-model="filters.ticket_name" />
           <DropdownStatusFilter v-model="filters.status" />
@@ -573,7 +573,7 @@ watch(
   </section>
 
   <section class="relative" :class="{ 'overflow-x-scroll': regData && regData.length > 0 }">
-    <template v-if="isLoading">
+    <template v-if="isLoading && !regData">
       <div class="absolute z-10 h-full w-full ring-0"></div>
     </template>
     <div :style="{ width: regData && regData.length > 0 ? `${totalVisibleWidth}%` : `100%` }">

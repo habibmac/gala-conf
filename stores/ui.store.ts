@@ -39,13 +39,18 @@ export const useUIStore = defineStore('ui', () => {
 
     // Apply preferences to the application
     function applyPreferences(prefs: Partial<UserPreferences>) {
+        // Only apply theme if it was changed
         if (prefs.theme !== undefined) {
             colorMode.preference = prefs.theme;
         }
-        // Remove the class first, then add it if needed
-        document.documentElement.classList.remove('sidebar-expanded');
-        if (prefs.sidebarExpanded) {
-            document.documentElement.classList.add('sidebar-expanded');
+
+        // Only handle sidebar if it was changed
+        if (prefs.sidebarExpanded !== undefined) {
+            // Remove the class first, then add it if needed
+            document.documentElement.classList.remove('sidebar-expanded');
+            if (prefs.sidebarExpanded) {
+                document.documentElement.classList.add('sidebar-expanded');
+            }
         }
     }
 
