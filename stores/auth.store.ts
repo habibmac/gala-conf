@@ -66,7 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
     packages.value = [];
   };
 
-  const refreshTokens = async () => {
+  const refreshingTokens = async () => {
     try {
       const response: AuthResponse = await $fetch('/api/refresh-token', {
         method: 'POST',
@@ -187,7 +187,7 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUserProfile,
     setAuth,
     clearAuth,
-    refreshTokens,
+    refreshingTokens,
     setUser,
     hasAccess,
     userCapabilities,

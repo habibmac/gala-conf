@@ -49,6 +49,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       const originalRequest = error.config;
       if (error.response?.status === 401 && !originalRequest._retry) {
         if (isRefreshing) {
+          // If a refresh is already in progress, add this request to the queue
           return new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject });
           })
@@ -65,9 +66,12 @@ export default defineNuxtPlugin((nuxtApp) => {
         isRefreshing = true;
 
         try {
-          await authStore.refreshTokens();
+          await authStore.refreshingTokens();
           processQueue(null, authStore.accessToken);
+          originalRequest.headers['Authorization'] = `Bearer ${authStore.accessToken}`;
+
           return galantisApi(originalRequest);
+
         } catch (refreshError) {
           processQueue(refreshError, null);
           authStore.clearAuth();

@@ -2,9 +2,23 @@
 export default defineNuxtRouteMiddleware(async (to) => {
     const authStore = useAuthStore();
 
-    // Ensure user profile is loaded
+    // Define public routes that don't need auth
+    const publicRoutes = ['/auth/login', '/auth/logout', '/authorize'];
+
+    // Skip auth check for public routes
+    if (publicRoutes.includes(to.path)) {
+        return;
+    }
+
+    // Ensure user profile is loaded only if authenticated
     if (authStore.isAuthenticated && !authStore.userInfo) {
-        await authStore.fetchUserProfile();
+        try {
+            await authStore.fetchUserProfile();
+        } catch (error) {
+            // If profile fetch fails, clear auth and redirect to login
+            authStore.clearAuth();
+            return navigateTo('/auth/login');
+        }
     }
 
     // Skip for non-event routes
