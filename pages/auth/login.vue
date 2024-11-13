@@ -2,7 +2,7 @@
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { Button } from '@/components/ui/button';
-import { FormVee, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useForm } from 'vee-validate';
 import * as z from 'zod';
@@ -153,7 +153,8 @@ onMounted(() => {
           </FormField>
 
           <Button type="submit" class="w-full" :disabled="isLoading">
-            {{ isLoading ? 'Signing in...' : 'Sign in with Password' }}
+            <SpinnerDots v-if="isLoading" class="mr-2 size-5" />
+            {{ isLoading ? 'Logging in...' : 'Log in with Password' }}
           </Button>
         </form>
 
