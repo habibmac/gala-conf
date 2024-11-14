@@ -6,7 +6,7 @@ export interface Billing {
   amount: number;
   status: 'pending' | 'paid' | 'cancelled';
   reference: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface BillingSummary {

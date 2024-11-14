@@ -12,7 +12,7 @@ const statuses = ['Booting up...', 'Loading components...', 'Painting the walls.
 const currentStatus = ref(statuses[0]);
 const loadingShown = useLocalStorage('loadingShown', false);
 
-let timeouts: NodeJS.Timeout[] = [];
+const timeouts: NodeJS.Timeout[] = [];
 
 const showStatuses = () => {
   statuses.forEach((status, index) => {
@@ -67,11 +67,6 @@ watch(
   },
   { immediate: true }
 );
-
-// Function to reset loading (for testing purposes)
-const resetLoading = () => {
-  loadingShown.value = false;
-};
 </script>
 
 <template>

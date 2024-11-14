@@ -33,7 +33,7 @@ const { values, handleSubmit, errors, meta, setFieldValue } = useForm({
   keepValuesOnUnmount: true,
 });
 
-function updateFormField(field: string, value: any) {
+function updateFormField(field: string, value: unknown) {
   setFieldValue(field, value);
 }
 
@@ -86,7 +86,7 @@ onBeforeRouteLeave((to, from, next) => {
 });
 </script>
 <template>
-  <form @submit="onSubmit" class="grow flex flex-col">
+  <form class="grow flex flex-col" @submit="onSubmit">
     <header class="bg-muted/30 sticky backdrop-blur-sm w-full px-4 py-5 border-b">
       <div class="relative flex justify-between items-center gap-2">
         <div class="absolute top-1/2 -translate-y-1/2 hidden lg:block lg:left-5 z-10">
@@ -99,21 +99,21 @@ onBeforeRouteLeave((to, from, next) => {
         </div>
 
         <slot name="form-steps">
-          <div></div>
+          <div />
         </slot>
 
         <div class="absolute w-full lg:w-auto lg:right-0 top-1/2 -translate-y-1/2 flex justify-center">
           <div class="flex w-full justify-between gap-3">
             <Button
               v-if="hasPrevious"
-              @click.prevent="goToPrev"
               variant="outline"
               class="flex items-center justify-center gap-1"
+              @click.prevent="goToPrev"
             >
               <Icon icon="heroicons:chevron-left" class="size-4 sm:hidden" />
               <span class="hidden sm:inline-block">Previous</span>
             </Button>
-            <div v-else></div>
+            <div v-else />
             <Button type="submit" class="flex left-auto items-center justify-center gap-1">
               <span class="hidden sm:inline-block">{{ isLastStep ? 'Save draft' : 'Next' }}</span>
               <Icon icon="heroicons:chevron-right" class="size-4 sm:hidden" />

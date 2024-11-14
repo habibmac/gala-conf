@@ -1,23 +1,16 @@
 <script setup lang="ts">
-import { ref, toRef, computed } from 'vue';
-import { addDays, endOfDay, endOfMonth, startOfDay, startOfMonth, startOfYear, subMonths } from 'date-fns';
+import { ref } from 'vue';
+import { endOfMonth, startOfMonth, startOfYear, subMonths } from 'date-fns';
 import { id } from 'date-fns/locale';
 import VueDatePicker from '@vuepic/vue-datepicker';
 
-const props = defineProps<{
+defineProps<{
   dateRange?: Date[] | null;
   enableTimePicker?: boolean | false;
   format?: string | 'd LLL yyyy';
   maxDate?: Date | null;
   minDate?: Date | null;
 }>();
-
-const defaultDateRange = computed(() => {
-  if (props.dateRange && Array.isArray(props.dateRange) && props.dateRange.length === 2) {
-    return props.dateRange;
-  }
-  return [startOfDay(new Date()), endOfDay(addDays(new Date(), 1))];
-});
 
 const emits = defineEmits(['update:dateRange']);
 const colorMode = useColorMode();
@@ -46,13 +39,13 @@ const presetDates = ref([
         multi-calendars
         :enable-time-picker="enableTimePicker"
         :format-locale="id"
-        @update:model-value="updateDateRange"
         placeholder="All Time"
         :preset-dates="presetDates"
         :max-date="maxDate || undefined"
         :min-date="minDate || undefined"
         :format="format"
         :dark="colorMode.value === 'dark'"
+        @update:model-value="updateDateRange"
       >
         <template #preset-date-range-button="{ label, value, presetDate }">
           <span
@@ -68,6 +61,6 @@ const presetDates = ref([
         </template>
       </VueDatePicker>
     </ClientOnly>
-    <span v-if="dateRange" class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500"></span>
+    <span v-if="dateRange" class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500" />
   </div>
 </template>

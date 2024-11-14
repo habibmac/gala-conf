@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Field, ErrorMessage } from 'vee-validate';
+import { Field } from 'vee-validate';
 import { Icon } from '@iconify/vue';
 import { cn } from '@/lib/utils';
 
@@ -65,7 +65,7 @@ const icon = Icon;
             <div
               class="absolute inset-0 border border-transparent peer-checked:border-primary rounded-lg pointer-events-none"
               aria-hidden="true"
-            ></div>
+            />
           </label>
         </div>
       </Field>

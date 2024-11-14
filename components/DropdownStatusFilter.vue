@@ -5,8 +5,6 @@ import { allRegStatuses } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 const props = defineProps<{
@@ -73,10 +71,7 @@ function clearAllStatuses() {
           {{ buttonLabel }}
         </span>
         <Icon icon="heroicons:chevron-down" class="w-3.5 h-3.5 ml-2 text-slate-600 dark:text-slate-400" />
-        <span
-          v-if="selectedStatuses.length > 0"
-          class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500"
-        ></span>
+        <span v-if="selectedStatuses.length > 0" class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500" />
       </Button>
     </PopoverTrigger>
     <PopoverContent class="w-[200px] p-0" align="start">
@@ -117,7 +112,7 @@ function clearAllStatuses() {
               >
                 <Icon icon="radix-icons:check" class="h-4 w-4" />
               </div>
-              <span :class="`dot ${item.color} h-2 w-2 rounded-full inline-block mr-2`"></span>
+              <span :class="`dot ${item.color} h-2 w-2 rounded-full inline-block mr-2`" />
               <span>{{ item.label }}</span>
             </CommandItem>
           </CommandGroup>

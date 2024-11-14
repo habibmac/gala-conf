@@ -75,7 +75,7 @@ const translationClass = computed(() => {
                 <span
                   class="absolute inset-0 w-1/2 bg-card rounded-md transition-transform duration-150 ease-in-out"
                   :class="translationClass"
-                ></span>
+                />
               </span>
               <template v-for="tab in tabsMeta" :key="tab.value">
                 <button

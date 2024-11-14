@@ -9,6 +9,7 @@ import FilePondPluginImageCrop from 'filepond-plugin-image-crop';
 import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import FilePondPluginFilePoster from 'filepond-plugin-file-poster';
+import type { AxiosProgressEvent } from 'axios';
 import { cn } from '~/lib/utils';
 
 const FilePond = createVueFilePond(
@@ -40,8 +41,23 @@ const {
 
 const error = useFieldError(props.name);
 
-const files = ref<any[]>([]);
-const uploadedFile = ref<any>(null);
+interface FilePondFile {
+  source: string;
+  options: {
+    type: string;
+    file: {
+      name: string;
+      size: number;
+      type: string;
+    };
+    metadata: {
+      poster: string;
+    };
+  };
+}
+
+const files = ref<FilePondFile[]>([]);
+const uploadedFile = ref<string | null>(null);
 const subLabel = computed(() => {
   return props.type === 'logo' ? '500x500' : '851x315';
 });
@@ -113,8 +129,8 @@ const loadExistingFile = async (fileId: string) => {
 const server = {
   process: (
     fieldName: string,
-    file: any,
-    metadata: any,
+    file: File | Blob,
+    metadata: Record<string, unknown>,
     load: (uniqueFileId: string) => void,
     error: (errorText: string) => void,
     progress: (isDone: boolean, bytesWritten: number, bytesTotal: number) => void,
@@ -140,7 +156,7 @@ const server = {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        onUploadProgress: (progressEvent: any) => {
+        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
           if (progressEvent.total) {
             progress(false, progressEvent.loaded, progressEvent.total);
           }
@@ -204,8 +220,8 @@ const handleRemoveCover = () => {
   resetField();
 };
 
-const handleUpdateFiles = (fileItems: any[]) => {
-  files.value = fileItems.map((fileItem) => fileItem.file);
+const handleUpdateFiles = (fileItems: FilePondFile[]) => {
+  files.value = fileItems.map((fileItem) => fileItem);
 };
 
 onMounted(() => {
@@ -227,15 +243,14 @@ watch(fieldValue, (newValue) => {
         <ClientOnly>
           <template v-if="props.type === 'logo'">
             <FilePond
-              :name="props.name"
               :id="id"
+              :name="props.name"
               :value="fieldValue"
               :label-idle="labelIdle"
               :files="files"
               :accepted-file-types="['image/*']"
               :server="server"
               :max-file-size="'1MB'"
-              @updatefiles="handleUpdateFiles"
               v-bind="filePondOptions"
               :class="
                 cn('filepond-custom', {
@@ -244,6 +259,7 @@ watch(fieldValue, (newValue) => {
                 })
               "
               :credits="[]"
+              @updatefiles="handleUpdateFiles"
             />
           </template>
           <template v-else-if="props.type === 'cover'">
@@ -253,27 +269,26 @@ watch(fieldValue, (newValue) => {
                   'pattern-bg inset-0 absolute dark:opacity-25': props.type === 'cover',
                 })
               "
-            ></div>
+            />
             <div
               v-if="uploadedFile"
               class="absolute inset-0 flex h-full w-full items-center justify-center aspect-[851/315]"
             >
               <img :src="uploadedFile" alt="Cover image" class="object-cover w-full h-full pointer-events-none" />
-              <Button variant="outline" class="absolute top-4 right-4" @click.prevent="handleRemoveCover" size="sm">
+              <Button variant="outline" class="absolute top-4 right-4" size="sm" @click.prevent="handleRemoveCover">
                 Remove
               </Button>
             </div>
             <FilePond
               v-else
-              :name="props.name"
               :id="id"
+              :name="props.name"
               :value="fieldValue"
               :label-idle="labelIdle"
               :files="files"
               :accepted-file-types="['image/*']"
               :server="server"
               :max-file-size="'1MB'"
-              @updatefiles="handleUpdateFiles"
               v-bind="filePondOptions"
               :class="
                 cn('filepond-custom', {
@@ -282,6 +297,7 @@ watch(fieldValue, (newValue) => {
                 })
               "
               :credits="[]"
+              @updatefiles="handleUpdateFiles"
             />
           </template>
         </ClientOnly>

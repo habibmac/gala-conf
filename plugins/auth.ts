@@ -1,5 +1,5 @@
 // plugins/auth.ts
-export default defineNuxtPlugin(async (nuxtApp) => {
+export default defineNuxtPlugin(async () => {
   const authStore = useAuthStore();
 
   // Add try-catch for safer initialization

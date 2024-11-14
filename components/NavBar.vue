@@ -7,9 +7,8 @@ defineProps<{
 }>();
 
 defineEmits<{
-  (e: 'toggle-sidebar'): void
+  (e: 'toggle-sidebar'): void;
 }>();
-
 </script>
 
 <template>
@@ -59,7 +58,7 @@ defineEmits<{
           <!-- <Notifications align="right" /> -->
           <ThemeToggle />
           <!-- Divider -->
-          <hr class="h-6 w-px border-none" >
+          <hr class="h-6 w-px border-none" />
           <div class="flex h-full shrink-0 items-center">
             <UserMenu />
           </div>

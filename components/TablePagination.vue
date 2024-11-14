@@ -3,11 +3,11 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 const props = defineProps({
-  currentPage: Number,
-  pageCount: Number,
-  pageSizes: Array,
-  pageSize: Number,
-  totalData: Number,
+  currentPage: { type: Number, default: 1 },
+  pageCount: { type: Number, default: 1 },
+  pageSizes: { type: Array, default: () => [10, 20, 50, 100] },
+  pageSize: { type: Number, default: 10 },
+  totalData: { type: Number, default: 0 },
 });
 
 const emits = defineEmits(['update:pageSize', 'update:currentPage']);
@@ -54,7 +54,7 @@ const shouldShowPage = (page: number) => {
 <template>
   <div class="mb-20 mt-5 p-4 pt-0 sm:items-center sm:justify-between sm:p-6 sm:pt-0 grid grid-cols-2 sm:grid-cols-3">
     <div class="order-2 sm:order-1">
-      <select @change="handlePageSizeChange" :value="pageSize" class="form-select">
+      <select :value="pageSize" class="form-select" @change="handlePageSizeChange">
         <option v-for="(size, index) in pageSizes" :key="index" :value="size">Show {{ size }}</option>
       </select>
     </div>
@@ -63,9 +63,9 @@ const shouldShowPage = (page: number) => {
         <li>
           <RouterLink
             :to="createLink(1)"
-            @click.prevent="currentPage > 1 && navigateToPage(1)"
             class="page-link"
             :class="{ disabled: currentPage <= 1 }"
+            @click.prevent="currentPage > 1 && navigateToPage(1)"
           >
             <svg class="h-6 w-6" viewBox="0 0 24 24">
               <path
@@ -78,9 +78,9 @@ const shouldShowPage = (page: number) => {
         <li>
           <RouterLink
             :to="createLink(currentPage - 1)"
-            @click.prevent="currentPage > 1 && navigateToPage(currentPage - 1)"
             class="page-link"
             :class="{ disabled: currentPage <= 1 }"
+            @click.prevent="currentPage > 1 && navigateToPage(currentPage - 1)"
           >
             <svg class="h-6 w-6" viewBox="0 0 24 24">
               <path
@@ -94,9 +94,9 @@ const shouldShowPage = (page: number) => {
           <li v-if="shouldShowPage(page)">
             <RouterLink
               :to="createLink(page)"
-              @click.native="navigateToPage(page)"
               class="page-link"
               :class="{ active: currentPage === page }"
+              @click="navigateToPage(page)"
             >
               {{ page }}
             </RouterLink>
@@ -105,9 +105,9 @@ const shouldShowPage = (page: number) => {
         <li>
           <RouterLink
             :to="createLink(currentPage + 1)"
-            @click.prevent="currentPage < pageCount && navigateToPage(currentPage + 1)"
             class="page-link"
             :class="{ disabled: currentPage >= pageCount }"
+            @click.prevent="currentPage < pageCount && navigateToPage(currentPage + 1)"
           >
             <svg class="h-6 w-6" viewBox="0 0 24 24">
               <path
@@ -120,9 +120,9 @@ const shouldShowPage = (page: number) => {
         <li>
           <RouterLink
             :to="createLink(pageCount)"
-            @click.prevent="currentPage < pageCount && navigateToPage(pageCount)"
             class="page-link"
             :class="{ disabled: currentPage >= pageCount }"
+            @click.prevent="currentPage < pageCount && navigateToPage(pageCount)"
           >
             <svg class="h-6 w-6" viewBox="0 0 24 24">
               <path

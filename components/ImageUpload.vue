@@ -19,6 +19,14 @@ const handleDrop = (e: DragEvent) => {
   }
 };
 
+// Change this function to accept Event type
+const handleChange = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  if (target.files) {
+    handleFiles(target.files);
+  }
+};
+
 const handleFiles = (files: FileList | null) => {
   if (files && files.length > 0) {
     const file = files[0];
@@ -34,16 +42,17 @@ const handleFiles = (files: FileList | null) => {
   }
 };
 </script>
+
 <template>
   <div class="w-full max-w-md">
     <div
       id="dropzone"
+      :class="{ 'border-blue-500 bg-blue-100': isHighlighted }"
+      class="flex items-center justify-center w-full"
       @dragenter.prevent="highlight"
       @dragover.prevent="highlight"
       @dragleave.prevent="unhighlight"
       @drop.prevent="handleDrop"
-      :class="{ 'border-blue-500 bg-blue-100': isHighlighted }"
-      class="flex items-center justify-center w-full"
     >
       <label
         for="dropzone-file"
@@ -70,7 +79,7 @@ const handleFiles = (files: FileList | null) => {
           </p>
           <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
         </div>
-        <input id="dropzone-file" type="file" class="hidden" accept="image/*" @change="handleFiles" />
+        <input id="dropzone-file" type="file" class="hidden" accept="image/*" @change="handleChange" />
       </label>
     </div>
     <div v-if="previewUrl" class="mt-4">

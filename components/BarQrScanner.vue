@@ -6,7 +6,7 @@ import { useVibrate } from '@vueuse/core';
 
 const emit = defineEmits(['paused']);
 
-const { vibrate, stop, isSupported } = useVibrate({ pattern: [300, 100, 300] });
+const { vibrate, isSupported } = useVibrate({ pattern: [300, 100, 300] });
 
 const videoElement = ref<HTMLVideoElement>(),
   canvasElement = ref<HTMLCanvasElement>(),
@@ -25,7 +25,7 @@ watch(activeCamId, (id) => qrScanner.setCamera(id));
 
 watch(text, () => {
   if (text.value) {
-    isSupported.value && vibrate();
+    if (isSupported.value) vibrate();
     beep(660, 90, 50);
     pauseScanner();
   }
@@ -45,8 +45,8 @@ onMounted(async () => {
       await qrScanner.start();
       hasFlash.value = await qrScanner.hasFlash();
       activeCamId.value = cams.value[cams.value.length - 1].id;
-    } catch (error: any) {
-      decodeError(error instanceof Error ? error : error);
+    } catch (error) {
+      decodeError(error instanceof Error ? error : (error as unknown as string));
     }
   } else {
     decodeError('No camera found');
@@ -58,11 +58,16 @@ function decodeError(error: Error | string) {
 }
 
 function toggleFlash(state: boolean) {
-  state ? qrScanner.turnFlashOn() : qrScanner.turnFlashOff();
+  if (state) {
+    qrScanner.turnFlashOn();
+  } else {
+    qrScanner.turnFlashOff();
+  }
 }
 
 const beep = (freq: number, duration: number, vol: number) => {
   if (!audioContext) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
   }
   const oscillator = audioContext.createOscillator();
@@ -124,23 +129,23 @@ onUnmounted(() => {
       <div v-if="cams && cams.length > 1" class="flex place-content-center items-center p-2 text-sm">
         <label for="cams" class="text-gray-500">Camera:</label>
         <select
-          class="ml-2 mr-6 p-2 rounded bg-transparent hover:bg-gray-100 hover:shadow transition"
-          v-model="activeCamId"
-          name="cams"
           id="cams"
+          v-model="activeCamId"
+          class="ml-2 mr-6 p-2 rounded bg-transparent hover:bg-gray-100 hover:shadow transition"
+          name="cams"
         >
-          <option v-for="c in cams" :value="c.id">{{ c.label }}</option>
+          <option v-for="c in cams" :key="c.id" :value="c.id">{{ c.label }}</option>
         </select>
         <Button v-if="hasFlash" @click="toggleFlash(!hasFlash)">
           <Icon :icon="hasFlash ? 'solar:flashlight-off' : 'solar:flashlight-on'" />
         </Button>
       </div>
-      <video v-if="hasCamera" ref="videoElement" class="w-full rounded-lg"></video>
-      <canvas ref="canvasElement" class="w-full rounded-lg" style="display: none"></canvas>
+      <video v-if="hasCamera" ref="videoElement" class="w-full rounded-lg" />
+      <canvas ref="canvasElement" class="w-full rounded-lg" style="display: none" />
     </div>
     <!-- <p v-if="errorText && !text" class="mt-4 text-sm text-red-500">
       {{ errorText }}
     </p> -->
-    <Button v-if="isPaused" @click="resumeScanner" class="mt-4"> Continue Scanning </Button>
+    <Button v-if="isPaused" class="mt-4" @click="resumeScanner"> Continue Scanning </Button>
   </div>
 </template>

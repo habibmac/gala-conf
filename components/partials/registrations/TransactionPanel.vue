@@ -10,8 +10,14 @@ import { getStatusInfo } from '@/utils/status-map';
 
 const props = defineProps({
   transactionPanelOpen: Boolean,
-  evtId: String,
-  regId: String,
+  evtId: {
+    type: String,
+    default: '',
+  },
+  regId: {
+    type: String,
+    default: '',
+  },
 });
 
 const emit = defineEmits(['close-transactionpanel']);
@@ -108,14 +114,14 @@ onUnmounted(async () => {
     leave-from-class="translate-x-0 "
     leave-to-class="translate-x-[20%] opacity-0"
   >
-    <div ref="panelContent" class="absolute inset-0 z-30 sm:block sm:left-auto" v-show="transactionPanelOpen">
+    <div v-show="transactionPanelOpen" ref="panelContent" class="absolute inset-0 z-30 sm:block sm:left-auto">
       <div
         class="no-scrollbar sticky top-16 h-[calc(100dvh-64px)] w-full shrink-0 overflow-y-auto overflow-x-hidden border-l border-border bg-muted sm:w-[390px]"
       >
         <button
           ref="closeBtn"
-          @click.stop="$emit('close-transactionpanel')"
           class="group absolute right-0 top-0 mr-6 mt-6 p-2"
+          @click.stop="$emit('close-transactionpanel')"
         >
           <Icon icon="iconamoon:close-thin" class="w-6 h-6" />
         </button>
@@ -135,8 +141,8 @@ onUnmounted(async () => {
           <div v-else-if="isError">
             {{ error ? error.message : 'Error' }}
           </div>
-          <div class="mx-auto max-w-sm lg:max-w-none" v-else-if="data">
-            <div class="mb-1 text-center font-semibold text-slate-800 dark:text-slate-100"></div>
+          <div v-else-if="data" class="mx-auto max-w-sm lg:max-w-none">
+            <div class="mb-1 text-center font-semibold text-slate-800 dark:text-slate-100" />
             <div class="text-center text-xs">
               {{ data.date ? formatDate(data.date, 'd MMM yyyy hh:mm') : '-' }}
             </div>
@@ -165,7 +171,7 @@ onUnmounted(async () => {
                   <path d="M0 20c5.523 0 10-4.477 10-10S5.523 0 0 0h20v20H0Z" />
                 </svg>
                 <div class="flex h-5 w-full grow flex-col justify-center bg-white dark:bg-slate-700">
-                  <div class="h-px w-full border-t border-dashed border-slate-200 dark:border-slate-600"></div>
+                  <div class="h-px w-full border-t border-dashed border-slate-200 dark:border-slate-600" />
                 </div>
                 <svg class="h-5 w-5 rotate-180 fill-white dark:fill-slate-700" xmlns="http://www.w3.org/2000/svg">
                   <path d="M0 20c5.523 0 10-4.477 10-10S5.523 0 0 0h20v20H0Z" />
@@ -175,9 +181,9 @@ onUnmounted(async () => {
               <div
                 class="space-y-3 rounded-b-xl bg-white p-5 pt-2.5 text-sm dark:bg-slate-800 dark:bg-gradient-to-b dark:from-slate-700 dark:to-slate-700/70"
               >
-                <div class="flex flex-col items-center justify-center space-y-2" v-if="data.code">
+                <div v-if="data.code" class="flex flex-col items-center justify-center space-y-2">
                   <ClientOnly>
-                    <qr-code :value="data.reg_url_link"></qr-code>
+                    <qr-code :value="data.reg_url_link" />
                   </ClientOnly>
                   <span class="number font-semibold tabular-nums font-mono">{{ data.code }}</span>
                 </div>
@@ -237,10 +243,10 @@ onUnmounted(async () => {
                     {{ data.paid ? formatCurrency(data.paid) : 0 }}
                   </div>
                 </div>
-                <div class="mt-2 grid grid-cols-12 items-center gap-x-2" v-if="data.txn?.pay_method">
+                <div v-if="data.txn?.pay_method" class="mt-2 grid grid-cols-12 items-center gap-x-2">
                   <!-- Card -->
                   <div class="col-span-8 flex items-center space-x-2">
-                    <PayMethodLogo :payMethod="data.txn?.pay_method" />
+                    <PayMethodLogo :pay-method="data.txn?.pay_method" />
                     <div>
                       <div class="text-sm font-medium text-slate-800 dark:text-slate-100">
                         {{ data.txn?.pay_method || 'Other' }}
@@ -281,7 +287,7 @@ onUnmounted(async () => {
                   <span class="ml-2">Invoice</span>
                 </a>
               </div>
-              <div class="w-1/2" v-if="data.stt_id === 'RAP'">
+              <div v-if="data.stt_id === 'RAP'" class="w-1/2">
                 <a
                   :href="data.ticket_url"
                   target="_blank"
@@ -300,7 +306,7 @@ onUnmounted(async () => {
                   <span class="ml-2">Ticket</span>
                 </a>
               </div>
-              <div class="w-1/2" v-else>
+              <div v-else class="w-1/2">
                 <a
                   :href="data.reg_url"
                   target="_blank"
@@ -350,7 +356,7 @@ onUnmounted(async () => {
                   class="form-textarea w-full focus:border-slate-300"
                   rows="4"
                   placeholder="Write a note…"
-                ></textarea>
+                />
               </form>
             </div>
           </div>

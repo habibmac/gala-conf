@@ -13,7 +13,7 @@ import {
   TransitionRoot,
 } from '@headlessui/vue';
 import { useCitySearch } from '~/composables/useCitySearch';
-import type { CityOption } from '~/types/city';
+import type { CityOption } from '~/types';
 import { cn } from '@/lib/utils';
 
 const props = defineProps<{
@@ -78,14 +78,13 @@ const updateQuery = (event: Event) => {
   searchCities(query);
 };
 
-const displayValue = (item: unknown): any => {
+const displayValue = (item: unknown): string => {
   if (typeof item === 'object' && item !== null && 'city' in item) {
     return (item as CityOption).city;
-  } else {
-    if (value) {
-      return value.value;
-    }
+  } else if (value.value) {
+    return value.value;
   }
+  return ''; // Add default return value
 };
 
 watch(value, (newValue) => {
@@ -100,7 +99,7 @@ watch(value, (newValue) => {
 <template>
   <FormField :name="name">
     <FormItem :class="cn('relative', wrapperClass)">
-      <Combobox v-model="value" @update:modelValue="selectCity">
+      <Combobox v-model="value" @update:model-value="selectCity">
         <div class="group relative transition-all duration-200">
           <FormLabel
             :for="props.name"
@@ -125,11 +124,8 @@ watch(value, (newValue) => {
             >
               <ComboboxInput
                 id="city-search"
-                :displayValue="displayValue"
                 v-model="value"
-                @change="updateQuery"
-                @focus="handleFocus"
-                @blur="handleBlur"
+                :display-value="displayValue"
                 :placeholder="label"
                 autocomplete="password"
                 :class="
@@ -138,6 +134,9 @@ watch(value, (newValue) => {
                     showLabel ? 'pt-4 pb-1 placeholder:opacity-0' : 'placeholder:opacity-100'
                   )
                 "
+                @change="updateQuery"
+                @focus="handleFocus"
+                @blur="handleBlur"
               />
               <ClientOnly>
                 <ComboboxButton class="absolute inset-y-0 right-0 flex items-center pr-2">
@@ -145,9 +144,9 @@ watch(value, (newValue) => {
                   <Icon
                     v-else-if="selectedCity"
                     icon="heroicons:x-mark"
-                    @click.stop="clearSelection"
                     class="h-5 w-5 cursor-pointer"
                     aria-hidden="true"
+                    @click.stop="clearSelection"
                   />
                   <Icon v-else icon="heroicons:chevron-down" class="h-4 w-4" aria-hidden="true" />
                 </ComboboxButton>
@@ -155,7 +154,7 @@ watch(value, (newValue) => {
             </div>
           </FormControl>
         </div>
-        <TransitionRoot leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+        <TransitionRoot leave="transition ease-in duration-100" leave-from="opacity-100" leave-to="opacity-0">
           <ComboboxOptions
             class="absolute z-20 max-h-60 max-w-sm w-full overflow-auto rounded-md bg-card py-1 shadow-lg focus:outline-none text-sm"
           >
@@ -165,8 +164,8 @@ watch(value, (newValue) => {
             <ComboboxOption
               v-for="city in cityOptions"
               :key="city.city + city.state + city.country"
-              :value="city"
               v-slot="{ selected, active }"
+              :value="city"
             >
               <li
                 class="relative cursor-default select-none p-2"

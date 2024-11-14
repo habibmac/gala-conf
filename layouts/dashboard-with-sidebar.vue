@@ -16,9 +16,12 @@ watch(
 );
 
 // Add this to verify the value changes
-watch(() => uiStore.isSidebarOpen, (val) => {
-  console.log('uiStore.isSidebarOpen changed:', val);
-});
+watch(
+  () => uiStore.isSidebarOpen,
+  (val) => {
+    console.log('uiStore.isSidebarOpen changed:', val);
+  }
+);
 </script>
 <template>
   <Sidebar

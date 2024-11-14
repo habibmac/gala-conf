@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import { cn } from '@/lib/utils';
 
@@ -44,8 +43,8 @@ function toggleColumnVisibility(column: ColumnConfig) {
                 v-for="column in modelValue"
                 :key="column.key"
                 :value="column.key"
-                @select="() => toggleColumnVisibility(column)"
                 :disabled="!column.isHideable"
+                @select="() => toggleColumnVisibility(column)"
               >
                 <div
                   :class="

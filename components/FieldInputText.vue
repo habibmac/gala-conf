@@ -15,7 +15,7 @@ const props = defineProps<{
   disabled?: boolean;
 }>();
 
-const emits = defineEmits<{
+defineEmits<{
   (e: 'update:modelValue', payload: string | number): void;
 }>();
 
@@ -37,7 +37,7 @@ const focusInput = () => {
 
 const handleInput = () => {
   isInteracting.value = true;
-  handleChange;
+  handleChange(inputRef.value?.value);
 };
 
 const handleFocus = () => {
@@ -94,10 +94,10 @@ watch(value, (newValue) => {
                   props.class
                 )
               "
+              :disabled="props.disabled"
               @input="handleInput"
               @focus="handleFocus"
               @blur="handleBlur"
-              :disabled="props.disabled"
             />
           </div>
         </FormControl>

@@ -1,5 +1,5 @@
 // composables/useStats.ts
-import { type Ref } from 'vue';
+import type { Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { AttendeeStats, TransactionStats, CustomFieldStats, StatsFilters } from '@/types/stats';
 

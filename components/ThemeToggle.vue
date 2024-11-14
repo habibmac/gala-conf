@@ -31,7 +31,7 @@ const currentThemeIcon = computed(() => {
 <template>
   <ClientOnly>
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger as-child>
         <Button variant="ghost" size="icon">
           <Icon :icon="currentThemeIcon" class="h-5 w-5" />
           <span class="sr-only">Toggle theme</span>
@@ -41,8 +41,8 @@ const currentThemeIcon = computed(() => {
         <DropdownMenuItem
           v-for="theme in themes"
           :key="theme.value"
-          @click="uiStore.setTheme(theme.value)"
           :disabled="theme.value === uiStore.preferences.theme"
+          @click="uiStore.setTheme(theme.value)"
         >
           <Icon v-if="theme.value !== 'system'" :icon="theme.icon" class="mr-2 h-4 w-4" />
           <Icon v-else :icon="colorMode.value === 'dark' ? 'heroicons:moon' : 'heroicons:sun'" class="mr-2 h-4 w-4" />

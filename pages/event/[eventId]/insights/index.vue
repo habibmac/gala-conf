@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
-import { Icon } from '@iconify/vue';
 import { Separator } from '@/components/ui/separator';
 import { getInitials } from '@/utils';
 import { formatTimeAgo } from '@vueuse/core';
@@ -41,7 +40,7 @@ const {
 } = useQuery({
   queryKey: ['eventInsights', eventId],
   queryFn: ({ signal }) => getInsights(eventId, signal),
-  enabled: !!eventId,
+  enabled: !!eventId.value,
   staleTime: 1000 * 60 * 5, // 5 minutes
 });
 </script>
@@ -54,28 +53,28 @@ const {
     <section>
       <div>
         <div v-if="isEventLoading || isDataLoading || isRefetching" class="grid gap-4 grid-cols-12">
-          <Skeleton v-for="i in 2" class="h-28 rounded-xl col-span-12 md:col-span-6 bg-muted-foreground/10" />
+          <Skeleton v-for="i in 2" :key="i" class="h-28 rounded-xl col-span-12 md:col-span-6 bg-muted-foreground/10" />
         </div>
         <template v-else-if="data">
-          <div class="grid gap-4 grid-cols-1 md:grid-cols-2 2xl:grid-cols-3" v-if="data.length > 0">
+          <div v-if="data.length > 0" class="grid gap-4 grid-cols-1 md:grid-cols-2 2xl:grid-cols-3">
             <NuxtLink
               v-for="item in data"
               :key="item.id"
+              v-slot="{ href, navigate }"
               :to="`/event/${eventId}/insights/${item.id}`"
               custom
-              v-slot="{ href, navigate }"
             >
-              <a :href="href" @click="navigate" class="group">
+              <a :href="href" class="group" @click="navigate">
                 <Card class="relative overflow-hidden group-hover:border-blue-600 transition-colors">
                   <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle class="h4 text-sm font-medium tracking-normal">
                       {{ item.title }}
                     </CardTitle>
-                    <DropdownEditMenu :eventId="eventId" :itemId="item.id" />
+                    <DropdownEditMenu :event-id="eventId" :item-id="item.id" />
                   </CardHeader>
                   <CardContent class="flex flex-col space-y-2 pt-0 pb-0">
                     <div v-if="item.fields?.length" class="flex gap-2 flex-wrap">
-                      <Badge variant="outline" v-for="question in item.fields" :key="question.id">
+                      <Badge v-for="question in item.fields" :key="question.id" variant="outline">
                         <div class="text-xs">
                           {{ question.label }}
                         </div>
@@ -99,7 +98,7 @@ const {
                       </div>
                       <div
                         class="sticky pointer-events-none bottom-0 h-10 bg-gradient-to-t from-white inset-0 dark:from-slate-900"
-                      ></div>
+                      />
                     </div>
                   </CardContent>
                   <CardFooter class="flex text-xs justify-between text-slate-500">

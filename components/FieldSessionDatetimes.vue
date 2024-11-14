@@ -14,17 +14,23 @@ import {
 import FieldInput from './FieldInput.vue';
 import { useColorMode } from '@vueuse/core';
 
+interface EventDatetime {
+  name: string;
+  rangeDate: string[];
+  quota: number;
+}
+
 const colorMode = useColorMode();
 
 const props = defineProps<{
-  modelValue: any[];
+  modelValue: EventDatetime[];
   minDate: Date;
   newDateStart: string;
   newDateEnd: string;
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: any[]): void;
+  (e: 'update:modelValue', value: EventDatetime[]): void;
 }>();
 
 const eventDatetimesRef = ref(props.modelValue);
@@ -61,17 +67,18 @@ watch(
   <div>
     <label class="text-sm font-semibold">Sessions & Datetimes</label>
     <div class="flex flex-col gap-2 md:gap-4 mt-2">
-      <FieldArray name="eventDatetimes" v-slot="{ fields, push, remove }">
+      <FieldArray v-slot="{ push, remove }" name="eventDatetimes">
         <VueDraggable
           v-model="eventDatetimesRef"
           :animation="150"
           handle=".handle"
-          ghostClass="is-ghost"
-          dragClass="is-dragging"
+          ghost-class="is-ghost"
+          drag-class="is-dragging"
           @end="onSort($event)"
         >
           <div
-            v-for="(field, index) in eventDatetimesRef"
+            v-for="(inputField, index) in eventDatetimesRef"
+            :key="index"
             class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5 py-2"
           >
             <Icon icon="mdi:drag-vertical" class="handle size-6 absolute -left-6 cursor-move text-muted-foreground" />
@@ -80,7 +87,7 @@ watch(
               label="Session Name"
               type="text"
               :placeholder="`Day ${index + 1}`"
-              wrapperClass="w-full sm:w-1/3 md:w-1/3"
+              wrapper-class="w-full sm:w-1/3 md:w-1/3"
             />
             <FormField v-slot="{ field, value, handleChange, errors }" :name="`eventDatetimes[${index}].rangeDate`">
               <FormItem v-auto-animate class="flex-1 w-full">
@@ -88,7 +95,7 @@ watch(
                 <FormControl>
                   <VueDatePicker
                     v-bind="field"
-                    :modelValue="value"
+                    :model-value="value"
                     range
                     multi-calendars
                     :dark="colorMode === 'dark'"
@@ -96,15 +103,15 @@ watch(
                     model-type="yyyy-MM-dd HH:mm"
                     format="d LLL yyyy HH:mm"
                     :min-date="minDate"
-                    @update:modelValue="handleChange"
+                    @update:model-value="handleChange"
                   >
-                    <template #dp-input="{ value }">
+                    <template #dp-input="{ value: inputValue }">
                       <input
                         type="text"
                         class="form-input w-full"
                         :class="{ 'is-invalid': !!errors.length }"
                         placeholder="Start - End Date & Time"
-                        :value="value"
+                        :value="inputValue"
                         autocomplete="off"
                       />
                     </template>
@@ -129,7 +136,7 @@ watch(
               </FormItem>
             </FormField>
             <div class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8">
-              <Button @click.prevent="remove(index)" size="icon" class="text-red-500" variant="ghost">
+              <Button size="icon" class="text-red-500" variant="ghost" @click.prevent="remove(index)">
                 <Icon icon="material-symbols-light:close-rounded" class="size-6" />
               </Button>
             </div>
@@ -137,6 +144,8 @@ watch(
         </VueDraggable>
         <Button
           type="button"
+          variant="ghost"
+          class="mt-2 flex gap-1"
           @click.prevent="
             push({
               name: '',
@@ -144,8 +153,6 @@ watch(
               quota: 0,
             })
           "
-          variant="ghost"
-          class="mt-2 flex gap-1"
         >
           <Icon icon="heroicons:plus-circle-16-solid" class="size-4" />
           <span>Add Datetime</span>

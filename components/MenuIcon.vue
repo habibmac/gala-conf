@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
 
-const props = defineProps<{
+defineProps<{
   name: string;
   width?: string | number;
   height?: string | number;

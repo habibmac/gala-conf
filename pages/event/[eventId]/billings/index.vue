@@ -207,13 +207,13 @@ const handleNavigation = (pageNumber: number) => {
 
     <TablePagination
       v-if="table.getRowModel().rows.length > 0"
-      :currentPage="table.getState().pagination.pageIndex + 1"
-      :pageCount="Math.ceil(billingData.length / pagination.pageSize)"
-      :pageSizes="pageSizes"
-      :pageSize="table.getState().pagination.pageSize"
-      :totalData="billingData.length"
-      @update:pageSize="handlePageSizeChange"
-      @update:currentPage="handleNavigation"
+      :current-page="table.getState().pagination.pageIndex + 1"
+      :page-count="Math.ceil(billingData.length / pagination.pageSize)"
+      :page-sizes="pageSizes"
+      :page-size="table.getState().pagination.pageSize"
+      :total-data="billingData.length"
+      @update:page-size="handlePageSizeChange"
+      @update:current-page="handleNavigation"
     />
   </div>
 </template>

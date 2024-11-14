@@ -51,23 +51,21 @@ export default defineEventHandler(async (event) => {
 
     const searchResults = await typesense.collections('cities').documents().search(searchParameters);
 
-    return (
-      (searchResults.hits as any[])?.map(
-        (hit) =>
-          ({
-            city: hit.document.name,
-            state: hit.document.state_name,
-            country: hit.document.country_name,
-            country_code: hit.document.country_code,
-            id: hit.document.id,
-          }) as CityOption
-      ) || []
-    );
-  } catch (error) {
-    console.error('Error searching cities:', error);
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Error searching cities',
+    if (!searchResults || !searchResults.hits) {
+      return [];
+    }
+
+    const cities: CityOption[] = searchResults.hits.map((hit) => {
+      const city = hit.document as CityDocument;
+      return {
+        city: city.name,
+        state: city.state_name,
+        country: city.country_name,
+        id: city.id,
+      };
     });
+    return cities;
+  } catch (error) {
+    return error;
   }
 });

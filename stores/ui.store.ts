@@ -2,9 +2,8 @@
 import { useLocalStorage } from '#imports';
 import { defineStore } from 'pinia';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
-import { useDebounceFn } from '@vueuse/core';
-import type { UserPreferences, PreferencesResponse } from '~/types/preferences';
+import { breakpointsTailwind, useBreakpoints, useDebounceFn } from '@vueuse/core';
+import type { UserPreferences, PreferencesResponse } from '~/types';
 
 export const useUIStore = defineStore('ui', () => {
   const queryClient = useQueryClient();
@@ -16,13 +15,13 @@ export const useUIStore = defineStore('ui', () => {
   const isLargeScreen = breakpoints.greater('lg');
 
   // Local state with localStorage
-  const isSidebarOpenMobile = useLocalStorage('sidebarOpenMobile', false)
-  const sidebarExpanded = useLocalStorage('sidebarExpanded', false)
+  const isSidebarOpenMobile = useLocalStorage('sidebarOpenMobile', false);
+  const sidebarExpanded = useLocalStorage('sidebarExpanded', false);
 
   const preferences = ref<UserPreferences>({
     theme: 'system',
     locale: 'en',
-    itemsPerPage: 10
+    itemsPerPage: 10,
   });
 
   // Mobile sidebar state
@@ -63,10 +62,7 @@ export const useUIStore = defineStore('ui', () => {
 
     try {
       isUpdating.value = true;
-      const response = await $galantisApi.post<PreferencesResponse>(
-        '/user/preferences',
-        prefsToSave
-      );
+      const response = await $galantisApi.post<PreferencesResponse>('/user/preferences', prefsToSave);
       queryClient.setQueryData(['user-preferences'], response.data.data);
     } catch (error) {
       console.error('Failed to save preferences:', error);
@@ -86,22 +82,20 @@ export const useUIStore = defineStore('ui', () => {
     // Update local state immediately
     preferences.value = {
       ...preferences.value,
-      ...newPrefs
+      ...newPrefs,
     };
 
     // Apply changes immediately
     applyPreferences(newPrefs);
 
     // Prepare API preferences
-    const prefsToSave = shouldUpdateSidebar ? newPrefs :
-      'sidebarExpanded' in newPrefs ?
-        { ...newPrefs} :
-        newPrefs;
+    const prefsToSave = shouldUpdateSidebar ? newPrefs : 'sidebarExpanded' in newPrefs ? { ...newPrefs } : newPrefs;
 
     try {
       // Use debounced API call
       await savePreferencesToAPI(prefsToSave);
     } catch (error) {
+      console.error('Failed to save preferences:', error);
       // Revert on error
       preferences.value = previousState;
       applyPreferences(previousState);
@@ -158,6 +152,6 @@ export const useUIStore = defineStore('ui', () => {
     setSidebarExpanded,
     setTheme,
     setItemsPerPage,
-    updatePreferences
+    updatePreferences,
   };
 });

@@ -140,9 +140,9 @@ onUnmounted(() => {
             variant="ghost"
             size="icon"
             class="text-slate-300 hover:text-slate-100 lg:hidden hover:bg-transparent absolute top-4 right-4"
-            @click="handleCloseSidebar"
             aria-controls="sidebar"
             :aria-expanded="sidebarOpen"
+            @click="handleCloseSidebar"
           >
             <span class="sr-only">Close sidebar</span>
             <Icon icon="material-symbols-light:close-rounded" class="h-7 w-7" />
@@ -207,7 +207,7 @@ onUnmounted(() => {
         </template>
         <!-- Expand / collapse button -->
         <div class="mt-auto hidden justify-end lg:inline-flex p-4">
-          <Button @click="handleToggleSidebar" variant="ghost" size="icon" class="text-slate-200">
+          <Button variant="ghost" size="icon" class="text-slate-200" @click="handleToggleSidebar">
             <span class="sr-only">Expand / collapse sidebar</span>
             <Icon icon="radix-icons:pin-right" class="h-6 w-6 sidebar-expanded:rotate-180" />
           </Button>

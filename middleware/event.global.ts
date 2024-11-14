@@ -15,6 +15,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     try {
       await authStore.fetchUserProfile();
     } catch (error) {
+      console.error('Error fetching user profile:', error);
       // If profile fetch fails, clear auth and redirect to login
       authStore.clearAuth();
       return navigateTo('/auth/login');

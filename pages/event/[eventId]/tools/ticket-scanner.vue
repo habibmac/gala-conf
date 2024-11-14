@@ -35,18 +35,18 @@ function toggleModal() {
 
       <div class="w-full sm:w-auto flex flex-col sm:items-end gap-4 sm:shrink-0">
         <div class="border rounded-lg sm:hidden py-4 text-center">
-          <Button @click="toggleModal" variant="outline" :class="['mx-auto']">
-            <Icon icon="heroicons:camera" class="w-5 h-5"></Icon>
+          <Button variant="outline" :class="['mx-auto']" @click="toggleModal">
+            <Icon icon="heroicons:camera" class="w-5 h-5" />
             <span class="ml-2">Use camera as scanner</span>
           </Button>
         </div>
         <div class="hidden sm:block">
-          <Button @click="toggleModal" variant="outline">
-            <Icon :icon="isOpen ? 'ei:close' : 'heroicons:camera'" class="w-5 h-5"></Icon>
+          <Button variant="outline" @click="toggleModal">
+            <Icon :icon="isOpen ? 'ei:close' : 'heroicons:camera'" class="w-5 h-5" />
             <span class="ml-2">{{ isOpen ? 'Close' : 'Use camera' }}</span>
           </Button>
         </div>
-        <div class="relative mx-auto max-h-80 max-w-60 object-center object-cover" v-if="isOpen">
+        <div v-if="isOpen" class="relative mx-auto max-h-80 max-w-60 object-center object-cover">
           <BarQrScanner @paused="handlePaused" />
         </div>
       </div>

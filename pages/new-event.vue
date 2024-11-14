@@ -4,6 +4,7 @@ import { z } from 'zod';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import { VueDraggable, type SortableEvent } from 'vue-draggable-plus';
 import { Icon } from '@iconify/vue';
+import { startOfDay, format, endOfDay } from 'date-fns';
 import {
   NumberField,
   NumberFieldContent,
@@ -11,12 +12,8 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from '@/components/ui/number-field';
-
 import FormWizard from '@/components/FormWizard.vue';
 import FormStep from '@/components/FormStep.vue';
-import { startOfDay, format, endOfDay } from 'date-fns';
-
-import FieldInput from '@/components/FieldInput.vue';
 import FieldTextarea from '@/components/FieldTextarea.vue';
 import FieldComboFilter from '@/components/FieldComboFilter.vue';
 import FieldInputText from '~/components/FieldInputText.vue';
@@ -28,7 +25,7 @@ interface FormValues {
 const formValues = ref<FormValues>({});
 
 interface FormWizardExpose {
-  updateFormField: (field: any, value: any) => void;
+  updateFormField: (field: unknown, value: unknown) => void;
   errorMessages: (field: string) => string;
 }
 
@@ -63,8 +60,8 @@ const steps = [
 ];
 
 const formWizardRef = ref<FormWizardExpose | null>(null);
-const eventDatetimesRef = ref<Array<any>>([]);
-const eventTicketsRef = ref<Array<any>>([]);
+const eventDatetimesRef = ref<Array<unknown>>([]);
+const eventTicketsRef = ref<Array<unknown>>([]);
 const currentStep = ref(0);
 
 const eventScaleOptions = ref([
@@ -296,14 +293,14 @@ function onSubmit(formData: FormData) {
   <section class="relative flex h-full">
     <div class="grow flex flex-col md:translate-x-0 transition-transform duration-300 ease-in-out translate-x-0">
       <FormWizard
-        ref="formWizardRef"
         id="new-event-form"
-        @submit="onSubmit"
+        ref="formWizardRef"
         :validation-schema="validationSchema"
-        @update:currentStep="handleStepChange"
-        @formValuesUpdate="updateFormValues"
+        @submit="onSubmit"
+        @update:current-step="handleStepChange"
+        @form-values-update="updateFormValues"
       >
-        <template v-slot:form-steps>
+        <template #form-steps>
           <div class="flex-1 relative w-full overflow-auto">
             <div
               class="flex py-3 sm:py-6 px-4 sm:px-0 space-x-0 sm:space-x-6 sm:max-w-5xl justify-center items-center mx-auto"
@@ -342,11 +339,11 @@ function onSubmit(formData: FormData) {
           </div>
         </template>
 
-        <template v-slot:form-content>
+        <template #form-content>
           <FormStep>
             <div class="relative w-full h-80 overflow-hidden">
               <div class="absolute top-0 w-full h-full">
-                <FieldImageUpload name="coverImg" label="Cover Image" id="cover-img-upload" type="cover" />
+                <FieldImageUpload id="cover-img-upload" name="coverImg" label="Cover Image" type="cover" />
               </div>
             </div>
 
@@ -354,7 +351,7 @@ function onSubmit(formData: FormData) {
             <div class="container pb-10">
               <div class="mx-auto max-w-3xl py-10">
                 <div class="-mt-40 mx-auto sm:-mt-40 mb-6 text-center">
-                  <FieldImageUpload name="logo" label="Logo" id="logo-upload" type="logo" />
+                  <FieldImageUpload id="logo-upload" name="logo" label="Logo" type="logo" />
                 </div>
 
                 <div class="space-y-5">
@@ -365,21 +362,21 @@ function onSubmit(formData: FormData) {
                     label="Event Scale"
                     :options="eventScaleOptions"
                     layout="horizontal"
-                    wrapperClass="grid grid-cols-2 gap-2"
+                    wrapper-class="grid grid-cols-2 gap-2"
                   />
                   <FieldRadioGroup
                     name="eventCategory"
                     label="Event Category"
                     :options="eventCategories"
                     layout="vertical"
-                    wrapperClass="grid grid-cols-2 gap-2 mt-2 sm:grid-cols-3"
+                    wrapper-class="grid grid-cols-2 gap-2 mt-2 sm:grid-cols-3"
                   />
                   <FieldInputText name="website" label="Website" />
 
                   <div class="grid sm:grid-cols-3 gap-4">
                     <label class="font-semibold text-sm">Venue</label>
-                    <FieldInputText name="venueName" label="Venue Name" wrapperClass="sm:col-span-3" />
-                    <FieldInputText name="venueAddress" label="Venue Address" wrapperClass="sm:col-span-3" />
+                    <FieldInputText name="venueName" label="Venue Name" wrapper-class="sm:col-span-3" />
+                    <FieldInputText name="venueAddress" label="Venue Address" wrapper-class="sm:col-span-3" />
                     <FieldComboFilter name="venueCity" label="Venue City" @select="selectCity" />
                     <FieldInputText name="venueState" label="Venue State" disabled />
                     <FieldInputText name="venueCountry" label="Venue Country" disabled />
@@ -413,17 +410,18 @@ function onSubmit(formData: FormData) {
                   <div class="">
                     <label class="text-sm font-semibold">Sessions & Datetimes</label>
                     <div class="flex flex-col gap-2 md:gap-4 mt-2">
-                      <FieldArray name="eventDatetimes" v-slot="{ fields, push, remove }">
+                      <FieldArray v-slot="{ fields, push, remove }" name="eventDatetimes">
                         <VueDraggable
                           v-model="eventDatetimesRef"
                           :animation="150"
                           handle=".handle"
-                          ghostClass="is-ghost"
-                          dragClass="is-dragging"
+                          ghost-class="is-ghost"
+                          drag-class="is-dragging"
                           @end="onSort($event, 'eventDatetimes')"
                         >
                           <div
                             v-for="(field, index) in eventDatetimesRef"
+                            :key="field.key"
                             class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5 py-2"
                           >
                             <Icon
@@ -448,7 +446,7 @@ function onSubmit(formData: FormData) {
                                 <FormControl>
                                   <VueDatePicker
                                     v-bind="field"
-                                    :modelValue="value"
+                                    :model-value="value"
                                     range
                                     multi-calendars
                                     :dark="colorMode.value === 'dark'"
@@ -456,7 +454,7 @@ function onSubmit(formData: FormData) {
                                     model-type="yyyy-MM-dd HH:mm"
                                     format="d LLL yyyy HH:mm"
                                     :min-date="minDate"
-                                    @update:modelValue="handleChange"
+                                    @update:model-value="handleChange"
                                   >
                                     <template #dp-input="{ value }">
                                       <input
@@ -496,13 +494,14 @@ function onSubmit(formData: FormData) {
                               </FormItem>
                             </FormField>
                             <div class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8">
-                              <Button @click.prevent="remove(index)" size="icon" class="text-red-500" variant="ghost">
+                              <Button size="icon" class="text-red-500" variant="ghost" @click.prevent="remove(index)">
                                 <Icon icon="material-symbols-light:close-rounded" class="size-6" />
                               </Button>
                             </div>
                           </div>
                         </VueDraggable>
                         <Button
+                          class="mt-2 flex gap-1"
                           @click.prevent="
                             push({
                               name: '',
@@ -510,7 +509,6 @@ function onSubmit(formData: FormData) {
                               quota: 0,
                             })
                           "
-                          class="mt-2 flex gap-1"
                         >
                           <Icon icon="heroicons:plus-circle-16-solid" class="size-4" />
                           <span>Add Datetime</span>
@@ -522,13 +520,13 @@ function onSubmit(formData: FormData) {
                   <div>
                     <label class="text-sm font-semibold">Tickets</label>
                     <div v-if="isAnySessionExists" class="flex flex-col gap-2 mt-2">
-                      <FieldArray name="tickets" v-slot="{ fields, push, remove }">
+                      <FieldArray v-slot="{ fields, push, remove }" name="tickets">
                         <VueDraggable
                           v-model="eventTicketsRef"
                           :animation="150"
                           handle=".handle"
-                          ghostClass="is-ghost"
-                          dragClass="is-dragging"
+                          ghost-class="is-ghost"
+                          drag-class="is-dragging"
                           @end="onSort($event, 'tickets')"
                         >
                           <div
@@ -559,7 +557,7 @@ function onSubmit(formData: FormData) {
                                   <FormControl>
                                     <VueDatePicker
                                       v-bind="field"
-                                      :modelValue="value"
+                                      :model-value="value"
                                       range
                                       multi-calendars
                                       :dark="colorMode.value === 'dark'"
@@ -567,7 +565,7 @@ function onSubmit(formData: FormData) {
                                       model-type="yyyy-MM-dd HH:mm"
                                       format="d LLL yyyy HH:mm"
                                       :min-date="minDate"
-                                      @update:modelValue="handleChange"
+                                      @update:model-value="handleChange"
                                     >
                                       <template #dp-input="{ value }">
                                         <input
@@ -638,10 +636,10 @@ function onSubmit(formData: FormData) {
                               <div class="col-span-9 py-2 flex flex-col gap-2">
                                 <label class="text-sm font-semibold w-full">Sessions scope of this ticket</label>
                                 <FormField
-                                  v-slot="{ value, handleChange }"
-                                  :name="`tickets[${index}].sessions`"
                                   v-for="datetime in formValues.eventDatetimes"
+                                  v-slot="{ value, handleChange }"
                                   :key="datetime.name"
+                                  :name="`tickets[${index}].sessions`"
                                   type="checkbox"
                                   :value="datetime.name"
                                 >
@@ -663,7 +661,7 @@ function onSubmit(formData: FormData) {
                               </div>
                             </div>
                             <div class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8">
-                              <Button @click.prevent="remove(index)" size="icon" class="text-red-500" variant="ghost">
+                              <Button size="icon" class="text-red-500" variant="ghost" @click.prevent="remove(index)">
                                 <Icon icon="material-symbols-light:close-rounded" class="size-6" />
                               </Button>
                             </div>
@@ -671,6 +669,7 @@ function onSubmit(formData: FormData) {
                         </VueDraggable>
                         <Button
                           type="button"
+                          class="mt-2 flex gap-1"
                           @click.prevent="
                             push({
                               name: '',
@@ -680,7 +679,6 @@ function onSubmit(formData: FormData) {
                               sessions: [],
                             })
                           "
-                          class="mt-2 flex gap-1"
                         >
                           <Icon icon="heroicons:plus-circle-16-solid" class="size-4" />
                           <span>Add Ticket</span>

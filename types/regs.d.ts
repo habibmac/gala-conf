@@ -25,7 +25,8 @@ export interface Reg {
   paid: string;
   status: string;
   stt_id: string;
-  [key: string]: any;
+  ans?: Answer[];
+  [key: string]: string;
 }
 
 export interface ColumnConfig {
@@ -37,10 +38,34 @@ export interface ColumnConfig {
   accessor?: (row: Reg) => string;
 }
 
-interface Filter {
+export interface Filter {
   search: string;
   ticket_name: string[];
   status: string[];
   date_start: string; // Allow undefined
   date_end: string; // Allow undefined
+}
+
+export interface TicketGroup {
+  id: string;
+  name: string;
+  tickets: TicketList[];
+  count: number;
+}
+
+export interface TicketList {
+  id: string;
+  name: string;
+}
+
+export interface CustomField {
+  key: string;
+  label: string;
+  slug: string;
+}
+
+export interface Answer {
+  qst_id: number;
+  qst: string;
+  ans: string;
 }

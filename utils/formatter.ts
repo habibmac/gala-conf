@@ -36,6 +36,7 @@ export const formatDate = (
     const date = inputFormat === 'unix' ? fromUnixTime(value as number) : (value as Date);
     return format(date, dateFormat, { locale: id });
   } catch (error) {
+    console.error('Error formatting date', error);
     return errorReturnValue;
   }
 };

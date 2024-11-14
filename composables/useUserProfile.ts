@@ -5,10 +5,8 @@ export const useUserProfile = () => {
 
   // Only handle displaying user data, fetch is handled by auth store
   const user = computed(() => authStore.userInfo);
-  const isLoading = computed(() => authStore.isLoadingUser);
 
   return {
     user,
-    isLoading,
   };
 };

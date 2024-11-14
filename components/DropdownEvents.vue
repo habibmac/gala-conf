@@ -53,7 +53,7 @@ watch(search, (newValue) => {
 <template>
   <div class="py-1.5 sm:min-w-80 md:w-96 group">
     <ClientOnly>
-      <Listbox v-model="selectedEventId" v-slot="{ open }">
+      <Listbox v-slot="{ open }" v-model="selectedEventId">
         <div class="relative h-full w-full max-w-full">
           <ListboxButton
             class="relative rounded-lg group-focus-within:bg-white dark:group-focus-within:bg-slate-700/40 flex h-11 w-full cursor-default items-center space-x-2 border bg-white text-left text-sm text-slate-900 transition-colors duration-200 hover:border-blue-600 2xl:text-sm dark:border-slate-800 dark:bg-transparent dark:text-slate-300 dark:hover:border-blue-600 dark:group-focus-within:border-slate-700 dark:focus:bg-slate-800 dark:focus:bg-slate-700/30 dark:focus:ring-offset-slate-800"
@@ -125,44 +125,41 @@ watch(search, (newValue) => {
                       <Icon v-else class="h-5 w-5 text-slate-400 dark:text-slate-500" icon="heroicons-outline:search" />
                     </div>
                     <Input
+                      v-model="search"
                       type="search"
                       class="h-8 px-2 pl-10 border-b border-slate-200 dark:border-slate-700"
                       placeholder="Search events..."
-                      v-model="search"
                     />
                   </div>
-                  <div class="h-3 bg-gradient-to-b from-white dark:from-slate-950"></div>
+                  <div class="h-3 bg-gradient-to-b from-white dark:from-slate-950" />
                 </div>
 
-                <ul class="-mt-4 flex flex-col px-2 gap-1" v-if="events.length > 0">
+                <ul v-if="events.length > 0" class="-mt-4 flex flex-col px-2 gap-1">
                   <ListboxOption
-                    :key="event.id"
-                    :value="event"
-                    v-for="event in events"
+                    v-for="evt in events"
+                    :key="evt.id"
+                    :value="evt"
                     as="li"
                     :class="[
-                      isSelected(event.id)
+                      isSelected(evt.id)
                         ? 'bg-emerald-100 dark:bg-emerald-900/40'
                         : 'hover:bg-slate-100 dark:hover:bg-slate-900/80',
                       'rounded-md flex w-full cursor-default select-none items-center space-x-2 px-3 py-2 text-slate-700 dark:text-slate-300',
                     ]"
-                    @click="handleselectEvent(event.id)"
+                    @click="handleselectEvent(evt.id)"
                   >
                     <template v-if="isLoading">
                       <SpinnerDots class="mx-auto h-10 w-10 text-blue-50" />
                     </template>
-                    <template v-else-if="event">
-                      <EventCover :src="event?.logo" :title="event.title" />
-                      <p
-                        :class="[isSelected(event.id) ? 'font-bold' : 'font-medium', 'line-clamp-2 pr-5 leading-tight']"
-                      >
-                        {{ event.title }}
+                    <template v-else-if="evt">
+                      <EventCover :src="evt?.logo" :title="evt.title" />
+                      <p :class="[isSelected(evt.id) ? 'font-bold' : 'font-medium', 'line-clamp-2 pr-5 leading-tight']">
+                        {{ evt.title }}
                       </p>
                       <span
-                        v-if="isSelected(event.id)"
+                        v-if="isSelected(evt.id)"
                         class="absolute right-5 flex h-2.5 w-2.5 items-center rounded-full bg-emerald-400"
-                      >
-                      </span>
+                      />
                     </template>
                   </ListboxOption>
                 </ul>
@@ -171,26 +168,26 @@ watch(search, (newValue) => {
               <template v-if="events.length > 0">
                 <div
                   class="pointer-events-none absolute bottom-12 z-20 h-20 w-full bg-gradient-to-t from-white sm:hidden dark:from-slate-950"
-                ></div>
+                />
                 <div
                   class="flex h-12 w-full shrink-0 items-center justify-end border-t border-slate-200 p-3 sm:col-span-2 dark:border-slate-800"
                 >
                   <div class="flex space-x-px">
                     <Button
+                      v-if="page > 1"
                       variant="ghost"
                       size="icon"
-                      v-if="page > 1"
-                      @click="prevPage"
                       :class="cn('rounded-l-md', { 'text-slate-500': page === 1 })"
+                      @click="prevPage"
                     >
                       <Icon class="h-4 w-4" icon="heroicons-outline:chevron-left" />
                     </Button>
                     <Button
+                      v-if="page < maxPage"
                       variant="ghost"
                       size="icon"
-                      v-if="page < maxPage"
-                      @click="nextPage"
                       :class="cn('rounded-l-md', { 'text-slate-500': page === 1 })"
+                      @click="nextPage"
                     >
                       <Icon class="h-4 w-4" icon="heroicons-outline:chevron-right" />
                     </Button>

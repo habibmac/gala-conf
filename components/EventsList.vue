@@ -66,10 +66,10 @@ watch(
     />
   </template>
   <template v-else-if="events">
-    <div class="flex flex-col gap-6" v-if="events.length > 0">
+    <div v-if="events.length > 0" class="flex flex-col gap-6">
       <!-- Events -->
       <div v-for="event in events" :key="event.id" class="grid grid-cols-1">
-        <EventCard :event="event" :isPast="evtStatus === 'inactive'" />
+        <EventCard :event="event" :is-past="evtStatus === 'inactive'" />
       </div>
 
       <!-- Pagination -->

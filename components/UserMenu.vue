@@ -44,8 +44,8 @@ onUnmounted(() => {
       ref="trigger"
       class="group icon-btn round"
       aria-haspopup="true"
-      @click.prevent="dropdownOpen = !dropdownOpen"
       :aria-expanded="dropdownOpen"
+      @click.prevent="dropdownOpen = !dropdownOpen"
     >
       <img
         v-if="user"
@@ -55,7 +55,7 @@ onUnmounted(() => {
         height="32"
         alt="User"
       />
-      <div v-else class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-700"></div>
+      <div v-else class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-700" />
     </button>
     <Transition
       enter-active-class="transition ease-out duration-200 transform"
@@ -80,7 +80,7 @@ onUnmounted(() => {
               </div>
             </li>
             <template v-if="user.user_roles.includes('administrator')">
-              <NuxtLink :to="backendUrl" custom v-slot="{ href, navigate }">
+              <NuxtLink v-slot="{ href, navigate }" :to="backendUrl" custom>
                 <li>
                   <a :href="href" class="dropdown-item" @click="navigate">🚨 Backend</a>
                 </li>
@@ -88,18 +88,18 @@ onUnmounted(() => {
               <hr class="h-1 dark:border-slate-900" />
             </template>
 
-            <NuxtLink to="/my-events" custom v-slot="{ href, navigate }">
+            <NuxtLink v-slot="{ href, navigate }" to="/my-events" custom>
               <li>
                 <a :href="href" class="dropdown-item" @click="navigate">My Events</a>
               </li>
             </NuxtLink>
-            <NuxtLink to="/my-events" custom v-slot="{ href, navigate }">
+            <NuxtLink v-slot="{ href, navigate }" to="/my-events" custom>
               <li>
                 <a :href="href" class="dropdown-item" @click="navigate">Settings</a>
               </li>
             </NuxtLink>
             <hr class="h-1 dark:border-slate-900" />
-            <NuxtLink to="/auth/logout" custom v-slot="{ href, navigate }">
+            <NuxtLink v-slot="{ href, navigate }" to="/auth/logout" custom>
               <li>
                 <a :href="href" class="dropdown-item" @click="navigate">Logout</a>
               </li>

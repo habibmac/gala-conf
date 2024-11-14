@@ -14,7 +14,7 @@ const props = defineProps<{
   wrapperClass?: string;
 }>();
 
-const emits = defineEmits<{
+defineEmits<{
   (e: 'update:modelValue', payload: string): void;
 }>();
 
@@ -36,7 +36,7 @@ const focusInput = () => {
 
 const handleInput = () => {
   isInteracting.value = true;
-  handleChange;
+  handleChange(inputRef.value?.value);
 };
 
 const handleFocus = () => {
@@ -85,9 +85,6 @@ watch(value, (newValue) => {
               v-model="value"
               :name="props.name"
               :placeholder="showPlaceholder ? placeholder : ''"
-              @input="handleInput"
-              @focus="handleFocus"
-              @blur="handleBlur"
               :class="
                 cn(
                   'text-sm w-full bg-background appearance-none transition-all duration-200 ease-in-out rounded-md p-3 border-none outline-none focus:outline-none focus:ring-2 ring-primary focus:border-none text-ellipsis placeholder:text-muted-foreground shadow-sm',
@@ -95,7 +92,10 @@ watch(value, (newValue) => {
                   props.class
                 )
               "
-            ></textarea>
+              @input="handleInput"
+              @focus="handleFocus"
+              @blur="handleBlur"
+            />
           </div>
         </FormControl>
       </div>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import EventCover from '@/components/EventCover.vue';
-import { devImgPath } from '~/utils';
 import { cn } from '~/lib/utils';
 
 defineProps({
@@ -60,7 +59,7 @@ defineProps({
         <div
           class="hidden items-center rounded-full px-2.5 py-1 text-center text-xs font-medium sm:inline-flex bg-accent text-accent-foreground/70"
         >
-          <span class="line-clamp-1" v-if="event.location">{{ event.location }}</span>
+          <span v-if="event.location" class="line-clamp-1">{{ event.location }}</span>
           <span v-else>---</span>
         </div>
       </div>
