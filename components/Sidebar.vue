@@ -92,9 +92,12 @@ watch(isLargeScreen, (isLarge) => {
   }
 });
 
-watch(() => props.sidebarOpen, (newVal) => {
-  console.log('Sidebar sidebarOpen prop:', newVal);
-});
+watch(
+  () => props.sidebarOpen,
+  (newVal) => {
+    console.log('Sidebar sidebarOpen prop:', newVal);
+  }
+);
 
 onMounted(() => {
   document.addEventListener('click', clickHandler);
@@ -115,14 +118,17 @@ onUnmounted(() => {
         class="fixed inset-0 z-20 bg-slate-900 bg-opacity-30 transition-opacity duration-200 lg:z-auto lg:hidden"
         :class="sidebarOpen ? 'opacity-100' : 'pointer-events-none opacity-0'"
         aria-hidden="true"
-       @click="handleCloseSidebar"
+        @click="handleCloseSidebar"
       />
       <!-- Sidebar -->
       <div
         id="sidebar"
         ref="sidebar"
         class="no-scrollbar lg:sidebar-expanded:!w-64 z-30 absolute left-0 top-0 flex h-[100dvh] w-64 shrink-0 flex-col overflow-y-scroll bg-gradient-to-t from-blue-700 to-blue-700 transition-all duration-200 ease-in-out lg:static lg:left-auto lg:top-auto lg:w-20 lg:translate-x-0 lg:overflow-y-auto"
-        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+        :class="[
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          { 'sidebar-expanded': sidebarOpen && isLargeScreen },
+        ]"
       >
         <!-- Sidebar header -->
         <div
@@ -134,7 +140,7 @@ onUnmounted(() => {
             variant="ghost"
             size="icon"
             class="text-slate-300 hover:text-slate-100 lg:hidden hover:bg-transparent absolute top-4 right-4"
-           @click="handleCloseSidebar"
+            @click="handleCloseSidebar"
             aria-controls="sidebar"
             :aria-expanded="sidebarOpen"
           >

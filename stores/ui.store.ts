@@ -1,4 +1,5 @@
 // stores/ui.store.ts
+import { useLocalStorage } from '#imports';
 import { defineStore } from 'pinia';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
@@ -14,16 +15,17 @@ export const useUIStore = defineStore('ui', () => {
   const breakpoints = useBreakpoints(breakpointsTailwind);
   const isLargeScreen = breakpoints.greater('lg');
 
-  // Local state
+  // Local state with localStorage
+  const isSidebarOpenMobile = useLocalStorage('sidebarOpenMobile', false)
+  const sidebarExpanded = useLocalStorage('sidebarExpanded', false)
+
   const preferences = ref<UserPreferences>({
-    sidebarExpanded: false,
     theme: 'system',
     locale: 'en',
     itemsPerPage: 10
   });
 
   // Mobile sidebar state
-  const isSidebarOpenMobile = ref(false);
   const isUpdating = ref(false);
 
   // Query setup
@@ -53,10 +55,6 @@ export const useUIStore = defineStore('ui', () => {
     if (prefs.theme !== undefined) {
       colorMode.preference = prefs.theme;
     }
-
-    if (prefs.sidebarExpanded !== undefined && isLargeScreen.value) {
-      document.documentElement.classList.toggle('sidebar-expanded', prefs.sidebarExpanded);
-    }
   }
 
   // Debounced API call function
@@ -79,7 +77,7 @@ export const useUIStore = defineStore('ui', () => {
   }, 300); // 300ms debounce
 
   // Update preferences with debounce
-  const updatePreferencesOptimistic = async (newPrefs: Partial<UserPreferences>) => {
+  const updatePreferences = async (newPrefs: Partial<UserPreferences>) => {
     const previousState = { ...preferences.value };
 
     // Only update sidebar preference if on large screen
@@ -97,7 +95,7 @@ export const useUIStore = defineStore('ui', () => {
     // Prepare API preferences
     const prefsToSave = shouldUpdateSidebar ? newPrefs :
       'sidebarExpanded' in newPrefs ?
-        { ...newPrefs, sidebarExpanded: previousState.sidebarExpanded } :
+        { ...newPrefs} :
         newPrefs;
 
     try {
@@ -112,29 +110,16 @@ export const useUIStore = defineStore('ui', () => {
 
   // Sidebar specific functions
   const toggleSidebar = () => {
-
-    console.log('toggleSidebar called', {
-      isLargeScreen: isLargeScreen.value,
-      currentMobileState: isSidebarOpenMobile.value
-    });
-
     if (isLargeScreen.value) {
-      if (!isUpdating.value) {
-        updatePreferencesOptimistic({
-          sidebarExpanded: !preferences.value.sidebarExpanded
-        });
-      }
+      sidebarExpanded.value = !sidebarExpanded.value;
     } else {
       isSidebarOpenMobile.value = !isSidebarOpenMobile.value;
-      console.log('after toggle mobile:', isSidebarOpenMobile.value);
     }
   };
 
   const setSidebarExpanded = (expanded: boolean) => {
     if (isLargeScreen.value) {
-      if (preferences.value.sidebarExpanded !== expanded && !isUpdating.value) {
-        updatePreferencesOptimistic({ sidebarExpanded: expanded });
-      }
+      sidebarExpanded.value = expanded;
     } else {
       isSidebarOpenMobile.value = expanded;
     }
@@ -142,21 +127,27 @@ export const useUIStore = defineStore('ui', () => {
 
   // Computed for current sidebar state
   const isSidebarOpen = computed(() => {
-    return isLargeScreen.value ? preferences.value.sidebarExpanded : isSidebarOpenMobile.value;
+    return isLargeScreen.value ? sidebarExpanded.value : isSidebarOpenMobile.value;
   });
 
   // Other preference functions with update check
   const setTheme = (theme: 'dark' | 'light' | 'system') => {
     if (preferences.value.theme !== theme && !isUpdating.value) {
-      updatePreferencesOptimistic({ theme });
+      updatePreferences({ theme });
     }
   };
 
   const setItemsPerPage = (count: number) => {
     if (!isUpdating.value) {
-      updatePreferencesOptimistic({ itemsPerPage: count });
+      updatePreferences({ itemsPerPage: count });
     }
   };
+
+  watch(sidebarExpanded, (expanded) => {
+    if (isLargeScreen.value) {
+      document.documentElement.classList.toggle('sidebar-expanded', expanded);
+    }
+  });
 
   return {
     preferences,
@@ -167,6 +158,6 @@ export const useUIStore = defineStore('ui', () => {
     setSidebarExpanded,
     setTheme,
     setItemsPerPage,
-    updatePreferences: updatePreferencesOptimistic
+    updatePreferences
   };
 });
