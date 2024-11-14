@@ -1,12 +1,11 @@
-export interface Billing {
+interface Billing {
   id: string;
-  date: string;
-  description: string;
-  type: 'fee' | 'payment' | 'refund';
   amount: number;
-  status: 'pending' | 'paid' | 'cancelled';
-  reference: string;
-  metadata?: Record<string, unknown>;
+  status: string;
+  request_date: number; // Changed to number for timestamp
+  event_id: string;
+  transferred_date: number | null; // Changed to number | null for timestamp
+  proof?: string;
 }
 
 export interface BillingSummary {
@@ -16,8 +15,15 @@ export interface BillingSummary {
 
 export interface BillingFilters {
   search?: string;
-  type?: string;
   status?: string;
   date_start?: string;
   date_end?: string;
+}
+
+interface StatusConfig {
+  [key: string]: {
+    icon: string;
+    color: string;
+    bgColor: string;
+  }
 }

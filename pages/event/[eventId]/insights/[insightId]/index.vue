@@ -13,7 +13,7 @@ import { fromUnixTime, format } from 'date-fns';
 import { formatThousands } from '@/utils';
 import { Icon } from '@iconify/vue';
 
-import type { Reg, ColumnConfig, CustomField, Answer } from '@/types';
+import type { Reg, TicketGroup, ColumnConfig, CustomField, Answer } from '@/types';
 import TablePagination from '@/components/TablePagination.vue';
 import { Badge } from '@/components/ui/badge';
 import { exportToCSV, exportToXLSX } from '@/lib/export-data';
