@@ -164,7 +164,7 @@ const formatDate = (date: Date): string => {
             </CardHeader>
             <CardContent>
               <div class="text-3xl font-bold tabular-nums">
-                {{ formatThousands(transactionStats.total_revenue) }} <sup class="font-normal text-sm">IDR</sup>
+                {{ formatThousands(transactionStats.total_revenue.gross_sales) }} <sup class="font-normal text-sm">IDR</sup>
               </div>
             </CardContent>
           </Card>
