@@ -7,7 +7,7 @@ export const useEvent = (initialEventId?: string) => {
   const route = useRoute();
   const authStore = useAuthStore();
 
-  const eventId = ref(initialEventId || route.params.eventId as string || '');
+  const eventId = ref(initialEventId || (route.params.eventId as string) || '');
 
   const getData = async (eventId: Ref<string>, signal: AbortSignal) => {
     if (!eventId.value) return null;

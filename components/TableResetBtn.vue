@@ -9,9 +9,9 @@ const handleResetFilters = () => {
 </script>
 <template>
   <button
-    @click="handleResetFilters"
     type="button"
     class="flex items-center space-x-1 text-xs px-3 py-2 h-10 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors dark:hover:text-slate-200"
+    @click="handleResetFilters"
   >
     <span>Reset</span>
     <Icon icon="iconamoon:close-thin" class="w-6 h-6 dark:text-slate-600" />

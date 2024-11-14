@@ -23,7 +23,7 @@ const tooltipOpen = ref(false);
       tabindex="-1"
       :aria-expanded="tooltipOpen"
       @click.prevent
-    ></button>
+    />
     <div class="absolute bottom-full left-1/2 z-10 -translate-x-1/2">
       <transition
         enter-active-class="transition ease-out duration-200 transform -translate-y-2"

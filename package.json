@@ -11,6 +11,7 @@
     "postinstall": "nuxt prepare",
     "lint": "bun lint:eslint && bun lint:prettier",
     "lint:eslint": "eslint .",
+    "fix:eslint": "eslint . --fix",
     "lint:prettier": "prettier . --check",
     "fix:prettier": "prettier --write ."
   },

@@ -2,7 +2,7 @@
 import { Icon } from '@iconify/vue';
 import { devImgPath } from '~/utils';
 
-const props = defineProps({
+defineProps({
   src: {
     type: String,
     required: true,
@@ -25,15 +25,12 @@ const props = defineProps({
   },
   wrapperClass: {
     type: String,
+    default: '',
   },
   imgClass: {
     type: String,
     default: 'w-full h-full',
   },
-});
-
-const imgTitle = computed(() => {
-  return props.title || 'Event Logo';
 });
 </script>
 <template>

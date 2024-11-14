@@ -60,7 +60,7 @@ const handleAction = (item: { id: string; action: string }) => {
               <Icon :icon="item.icon" class="mr-2 h-4 w-4 text-slate-400" />
               {{ item.label }}
             </NuxtLink>
-            <button v-else @click.prevent="handleAction(item)" class="flex items-center w-full cursor-default">
+            <button v-else class="flex items-center w-full cursor-default" @click.prevent="handleAction(item)">
               <Icon :icon="item.icon" class="mr-2 h-4 w-4 text-slate-400" />
               {{ item.label }}
             </button>

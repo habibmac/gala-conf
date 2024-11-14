@@ -1,6 +1,6 @@
 import { computed, ref, type Ref } from 'vue';
 import { useQuery, keepPreviousData } from '@tanstack/vue-query';
-import { type EvtRequestParams } from '~/types';
+import type { EvtRequestParams } from '~/types';
 
 export const useEvents = ({
   search = ref(''),
@@ -17,7 +17,6 @@ export const useEvents = ({
           page: page.value,
           per_page: perPage.value,
           evt_status: evtStatus.value,
-          nocache: 1,
         },
         signal,
       })

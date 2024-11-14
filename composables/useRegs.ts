@@ -1,6 +1,6 @@
 import { computed, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import { type PaginationState, type SortingState } from '@tanstack/vue-table';
+import type { PaginationState, SortingState } from '@tanstack/vue-table';
 import type { RegRequestParams } from '@/types';
 
 const DEFAULT_PAGE_COUNT = -1;

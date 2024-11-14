@@ -3,7 +3,7 @@ import axios from 'axios';
 import { defineNuxtPlugin } from '#app';
 import { useAuthStore } from '@/stores';
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
   const authStore = useAuthStore();
 
@@ -19,10 +19,10 @@ export default defineNuxtPlugin((nuxtApp) => {
   let isRefreshing = false;
   let failedQueue: Array<{
     resolve: (value?: unknown) => void;
-    reject: (reason?: any) => void;
+    reject: (reason?: unknown) => void;
   }> = [];
 
-  const processQueue = (error: any, token: string | null = null) => {
+  const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue.forEach((prom) => {
       if (error) {
         prom.reject(error);
@@ -49,6 +49,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       const originalRequest = error.config;
       if (error.response?.status === 401 && !originalRequest._retry) {
         if (isRefreshing) {
+          // If a refresh is already in progress, add this request to the queue
           return new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject });
           })
@@ -65,8 +66,10 @@ export default defineNuxtPlugin((nuxtApp) => {
         isRefreshing = true;
 
         try {
-          await authStore.refreshTokens();
+          await authStore.refreshingTokens();
           processQueue(null, authStore.accessToken);
+          originalRequest.headers['Authorization'] = `Bearer ${authStore.accessToken}`;
+
           return galantisApi(originalRequest);
         } catch (refreshError) {
           processQueue(refreshError, null);

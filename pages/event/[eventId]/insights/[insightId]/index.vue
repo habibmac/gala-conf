@@ -13,35 +13,10 @@ import { fromUnixTime, format } from 'date-fns';
 import { formatThousands } from '@/utils';
 import { Icon } from '@iconify/vue';
 
-import type { Reg, ColumnConfig } from '@/types';
+import type { Reg, TicketGroup, ColumnConfig, CustomField, Answer } from '@/types';
 import TablePagination from '@/components/TablePagination.vue';
 import { Badge } from '@/components/ui/badge';
-import NoData from '@/components/partials/registrations/NoData.vue';
 import { exportToCSV, exportToXLSX } from '@/lib/export-data';
-
-interface TicketGroup {
-  id: string;
-  name: string;
-  tickets: TicketList[];
-  count: number;
-}
-
-interface TicketList {
-  id: string;
-  name: string;
-}
-
-interface CustomField {
-  key: string;
-  label: string;
-  slug: string;
-}
-
-interface Answer {
-  qst_id: number;
-  qst: string;
-  ans: string;
-}
 
 useHead({
   title: 'Insight',
@@ -102,18 +77,8 @@ const sorting = ref<SortingState>([
   },
 ]);
 
-const {
-  insightData,
-  regData,
-  ticketGroups,
-  fetchAllData,
-  totalData,
-  totalPages,
-  isMetaLoading,
-  isDataLoading,
-  metaError,
-  dataError,
-} = useInsight(eventId, insightId, pagination, sorting, filters);
+const { insightData, regData, ticketGroups, fetchAllData, totalData, totalPages, isMetaLoading, isDataLoading } =
+  useInsight(eventId, insightId, pagination, sorting, filters);
 
 // Table configuration
 const columnConfigs = computed<ColumnConfig[]>(() => {
@@ -185,10 +150,10 @@ const columns = computed(() => {
           id: config.key,
           header: config.header,
           size: config.width * 10,
-          cell: (cellProps: any) => {
+          cell: (cellProps) => {
             // Here you can add specific cell rendering logic based on the column key
             switch (config.key) {
-              case 'date':
+              case 'date': {
                 const date = fromUnixTime(Number(cellProps.getValue()));
                 return h(
                   'div',
@@ -206,7 +171,8 @@ const columns = computed(() => {
                     ),
                   ]
                 );
-              case 'code':
+              }
+              case 'code': {
                 const stt_id = cellProps.row.original.stt_id;
                 return h(
                   'span',
@@ -215,6 +181,7 @@ const columns = computed(() => {
                   },
                   cellProps.getValue()
                 );
+              }
               case 'fullname':
                 return h(
                   'div',
@@ -291,7 +258,6 @@ function getCustomFieldsColumns(fields: CustomField[]): ColumnConfig[] {
     isVisible: true,
     isHideable: true,
     width: 10,
-    // Add accessor function to get the answer value
     accessor: (row: Reg) => {
       const answer = row.ans?.find((a: Answer) => a.qst === field.label);
       return answer?.ans || '';
@@ -402,19 +368,21 @@ const tabIndicatorWidth = computed(() => {
 
 function formatExportData(data: Reg[]) {
   return data.map((row) => {
-    const formattedRow: { [key: string]: any } = {
+    const formattedRow: { [key: string]: string | number } = {
       Date: format(fromUnixTime(Number(row.date)), 'dd MMM yyyy HH:mm'),
-      'Reg Code': row.code,
-      'Full Name': row.fullname,
-      Ticket: row.ticket_name,
-      Email: row.email,
-      Phone: row.phone,
+      'Reg Code': row.code || '',
+      'Full Name': row.fullname || '',
+      Ticket: row.ticket_name || '',
+      Email: row.email || '',
+      Phone: row.phone || '',
     };
 
     // Add custom fields
-    row.ans?.forEach((answer: Answer) => {
-      formattedRow[answer.qst] = answer.ans;
-    });
+    if (Array.isArray(row.ans)) {
+      row.ans.forEach((answer: Answer) => {
+        formattedRow[answer.qst] = answer.ans || '';
+      });
+    }
 
     return formattedRow;
   });
@@ -510,17 +478,17 @@ watch(
   <section>
     <div class="container mx-auto 2xl:mx-0 relative">
       <div v-if="isMetaLoading" class="grid gap-4 grid-cols-12">
-        <Skeleton v-for="i in 2" class="h-28 rounded-xl col-span-12 md:col-span-6 bg-muted-foreground/10" />
+        <Skeleton v-for="i in 2" :key="i" class="h-28 rounded-xl col-span-12 md:col-span-6 bg-muted-foreground/10" />
       </div>
       <div
-        class="relative flex w-full max-w-sm p-1 bg-slate-200 dark:bg-slate-700/40 rounded-md mx-auto sm:mx-0"
         v-else-if="ticketGroups"
+        class="relative flex w-full max-w-sm p-1 bg-slate-200 dark:bg-slate-700/40 rounded-md mx-auto sm:mx-0"
       >
         <span class="absolute inset-0 m-1 pointer-events-none" aria-hidden="true">
           <span
             class="absolute inset-0 bg-white dark:bg-slate-950/70 rounded-md transition-transform duration-150 ease-in-out"
             :style="{ width: tabIndicatorWidth, transform: tabIndicatorClass }"
-          ></span>
+          />
         </span>
         <button
           v-for="(tab, index) in ticketGroups"
@@ -552,7 +520,7 @@ watch(
           </span>
         </h3>
 
-        <ul class="flex flex-wrap gap-2 items-start" v-if="ticketGroups">
+        <ul v-if="ticketGroups" class="flex flex-wrap gap-2 items-start">
           <li>Tickets:</li>
           <li
             v-for="ticket in ticketGroups.find((group: TicketGroup) => group.name === activeTab)?.tickets"
@@ -575,11 +543,11 @@ watch(
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem @click="handleExport('csv')" :disabled="isExporting">
+          <DropdownMenuItem :disabled="isExporting" @click="handleExport('csv')">
             <Icon icon="ph:file-csv" class="text-muted-foreground w-5 h-5 mr-2" />
             Export to CSV
           </DropdownMenuItem>
-          <DropdownMenuItem @click="handleExport('xlsx')" :disabled="isExporting">
+          <DropdownMenuItem :disabled="isExporting" @click="handleExport('xlsx')">
             <Icon icon="ph:file-xls" class="text-muted-foreground w-5 h-5 mr-2" />
             Export to XLSX
           </DropdownMenuItem>
@@ -611,7 +579,7 @@ watch(
     <div class="w-full">
       <div :style="{ minWidth: `${calculateMinWidth()}px` }">
         <template v-if="isDataLoading">
-          <div class="absolute z-10 h-full w-full bg-card/10 ring-0"></div>
+          <div class="absolute z-10 h-full w-full bg-card/10 ring-0" />
         </template>
         <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90">
           <thead
@@ -647,11 +615,13 @@ watch(
           </thead>
           <tbody class="divide-y divide-slate-200 text-sm 2xl:text-sm dark:divide-slate-800 border-b">
             <template v-if="!table.getRowModel().rows.length">
-              <tr v-if="isDataLoading" v-for="index in 10" :key="index">
-                <td v-for="column in columns" :key="index" class="px-2 py-2">
-                  <Skeleton class="w-full h-6 rounded" />
-                </td>
-              </tr>
+              <template v-if="isDataLoading">
+                <tr v-for="index in 10" :key="index">
+                  <td v-for="(column, index2) in columns" :key="index2" class="px-2 py-2">
+                    <Skeleton class="w-full h-6 rounded" />
+                  </td>
+                </tr>
+              </template>
               <tr v-else>
                 <td colspan="10" class="py-10 text-center">
                   <EmptyState
@@ -686,12 +656,12 @@ watch(
   </section>
   <TablePagination
     v-if="table.getRowModel().rows.length > 0"
-    :currentPage="table.getState().pagination.pageIndex + 1"
-    :pageCount="table.getPageCount()"
-    :pageSizes="pageSizes"
-    :pageSize="table.getState().pagination.pageSize"
-    :totalData="totalData"
-    @update:pageSize="handlePageSizeChange"
-    @update:currentPage="handleNavigation"
+    :current-page="table.getState().pagination.pageIndex + 1"
+    :page-count="table.getPageCount()"
+    :page-sizes="pageSizes"
+    :page-size="table.getState().pagination.pageSize"
+    :total-data="totalData"
+    @update:page-size="handlePageSizeChange"
+    @update:current-page="handleNavigation"
   />
 </template>

@@ -45,7 +45,7 @@ definePageMeta({
 
 const props = defineProps<{
   search?: string;
-  ticket_name?: string;
+  ticketName?: string;
   status?: string;
   dateStart?: string;
   dateEnd?: string;
@@ -56,7 +56,7 @@ const props = defineProps<{
   detail?: string;
 }>();
 
-const { search, ticket_name, status, dateStart, dateEnd, page, perPage, sortBy, order, detail } = toRefs(props);
+const { search, ticketName, status, dateStart, dateEnd, page, perPage, sortBy, order, detail } = toRefs(props);
 
 const { event } = useEvent();
 const eventId = computed(() => event.value?.id);
@@ -149,7 +149,7 @@ const pagination = ref<PaginationState>({
 
 const filters = ref<Filter>({
   search: search.value ? String(search.value) : '',
-  ticket_name: ticket_name.value ? [String(ticket_name.value)] : [],
+  ticket_name: ticketName.value ? [String(ticketName.value)] : [],
   status: status.value ? [String(status.value)] : [], // Initialize as an array
   date_start: dateStart.value ? String(dateStart.value) : '',
   date_end: dateEnd.value ? String(dateEnd.value) : '',
@@ -173,10 +173,10 @@ const columns = computed(() => {
       return columnHelper.accessor(config.key, {
         header: config.header,
         size: config.width * 10,
-        cell: (cellProps: any) => {
+        cell: (cellProps) => {
           // Here you can add specific cell rendering logic based on the column key
           switch (config.key) {
-            case 'date':
+            case 'date': {
               const date = fromUnixTime(Number(cellProps.getValue()));
               return h(
                 'div',
@@ -194,7 +194,8 @@ const columns = computed(() => {
                   ),
                 ]
               );
-            case 'code':
+            }
+            case 'code': {
               const stt_id = cellProps.row.original.stt_id;
               // Add new query parameters to the existing query
               const newParams = {
@@ -220,6 +221,7 @@ const columns = computed(() => {
                   cellProps.getValue()
                 )
               );
+            }
             case 'fullname':
               return h(
                 'div',
@@ -244,7 +246,7 @@ const columns = computed(() => {
                 {
                   class: 'text-right pr-4',
                 },
-                formatThousands(cellProps.getValue())
+                formatThousands(Number(cellProps.getValue()))
               );
             case 'status':
               return h(
@@ -522,7 +524,7 @@ watch(
       <div class="flex shrink-0 space-x-2 justify-self-end">
         <div class="min-w-64 grow">
           <!-- Datepicker -->
-          <Datepicker @update:date-range="handleSetDateRange" :date-range="dateRange" />
+          <Datepicker :date-range="dateRange" @update:date-range="handleSetDateRange" />
         </div>
       </div>
     </header>
@@ -534,11 +536,11 @@ watch(
     <div class="container 2xl:mx-0 py-4">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <!-- Left: Avatars -->
-        <div class="sm:gap-2 sm:grid sm:grid-flow-col sm:space-y-0">
+        <div class="flex flex-col space-y-2 sm:gap-2 sm:grid sm:grid-flow-col sm:space-y-0">
           <TableSearchForm v-model="filters.search" placeholder="Search Registrant..." />
           <DropdownTicketFilter v-model="filters.ticket_name" />
           <DropdownStatusFilter v-model="filters.status" />
-          <TableResetBtn @click.prevent="handleResetFilters" v-if="isAnyFilterActive" />
+          <TableResetBtn v-if="isAnyFilterActive" @click.prevent="handleResetFilters" />
         </div>
         <!-- Right: Actions -->
         <div class="flex shrink-0 space-x-2 justify-self-end">
@@ -560,7 +562,7 @@ watch(
           </span>
           <span v-else class="font-semibold text-slate-950 dark:text-slate-200">All Registrations</span>
         </h3>
-        <div class="number shrink-0 text-slate-500 text-sm" v-if="!isLoading">
+        <div v-if="!isLoading" class="number shrink-0 text-slate-500 text-sm">
           <template v-if="totalData"
             >Found
             <span class="font-semibold text-slate-900 dark:text-slate-300">{{ formatThousands(totalData) }}</span>
@@ -573,8 +575,8 @@ watch(
   </section>
 
   <section class="relative" :class="{ 'overflow-x-scroll': regData && regData.length > 0 }">
-    <template v-if="isLoading">
-      <div class="absolute z-10 h-full w-full ring-0"></div>
+    <template v-if="isLoading && !regData">
+      <div class="absolute z-10 h-full w-full ring-0" />
     </template>
     <div :style="{ width: regData && regData.length > 0 ? `${totalVisibleWidth}%` : `100%` }">
       <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90">
@@ -613,11 +615,13 @@ watch(
         </thead>
         <tbody class="text-sm 2xl:text-base border-b">
           <template v-if="!table.getRowModel().rows.length">
-            <tr v-if="isLoading" v-for="index in 10" :key="index">
-              <td v-for="(column, index2) in columns" :key="index2" class="px-2 py-2">
-                <Skeleton class="w-full h-6 rounded" />
-              </td>
-            </tr>
+            <template v-if="isLoading">
+              <tr v-for="index in 10" :key="index">
+                <td v-for="(column, index2) in columns" :key="index2" class="px-2 py-2">
+                  <Skeleton class="w-full h-6 rounded" />
+                </td>
+              </tr>
+            </template>
             <tr v-else>
               <td colspan="10" class="py-10 text-center">
                 <EmptyState
@@ -653,19 +657,19 @@ watch(
   </section>
   <TablePagination
     v-if="table.getRowModel().rows.length > 0"
-    :currentPage="table.getState().pagination.pageIndex + 1"
-    :pageCount="table.getPageCount()"
-    :pageSizes="pageSizes"
-    :pageSize="table.getState().pagination.pageSize"
-    :totalData="totalData"
-    @update:pageSize="handlePageSizeChange"
-    @update:currentPage="handleNavigation"
+    :current-page="table.getState().pagination.pageIndex + 1"
+    :page-count="table.getPageCount()"
+    :page-sizes="pageSizes"
+    :page-size="table.getState().pagination.pageSize"
+    :total-data="totalData"
+    @update:page-size="handlePageSizeChange"
+    @update:current-page="handleNavigation"
   />
-  <div v-else class="h-40"></div>
+  <div v-else class="h-40" />
   <TransactionPanel
-    :transactionPanelOpen="selectedRegId !== ''"
-    @close-transactionpanel="handleCloseDetails"
+    :transaction-panel-open="selectedRegId !== ''"
     :evt-id="eventId"
     :reg-id="selectedRegId ? selectedRegId : undefined"
+    @close-transactionpanel="handleCloseDetails"
   />
 </template>

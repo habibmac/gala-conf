@@ -1,7 +1,7 @@
 import { utils, write } from 'xlsx';
 
 interface ExportData {
-  [key: string]: any;
+  [key: string]: string | number | boolean | Date;
 }
 
 export function exportToCSV(data: ExportData[], filename: string) {

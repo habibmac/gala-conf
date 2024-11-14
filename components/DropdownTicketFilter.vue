@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import type { TicketList } from '@/types';
 
 const props = defineProps<{
   modelValue: string[];
@@ -39,12 +40,7 @@ const getData = async (eventId: Ref<string>, signal: AbortSignal) => {
     });
 };
 
-const {
-  isLoading,
-  isError,
-  error,
-  data: tickets,
-} = useQuery({
+const { data: tickets } = useQuery({
   queryKey: ['tickets', eventId],
   queryFn: ({ signal }) => getData(eventId, signal),
   enabled: true,
@@ -81,9 +77,11 @@ function clearAllTickets() {
 const searchTerm = ref('');
 
 const filterFunction = computed(() => {
-  return (list: any[], term: string) => {
+  return (list: TicketList[], term: string): TicketList[] => {
     if (!list) return [];
-    return list.filter((item) => item.name && item.name.toLowerCase().includes(term.toLowerCase()));
+    return list.filter(
+      (item) => item.name && typeof item.name === 'string' && item.name.toLowerCase().includes(term.toLowerCase())
+    );
   };
 });
 
@@ -110,10 +108,7 @@ const filteredTickets = computed(() => {
           {{ buttonLabel }}
         </span>
         <Icon icon="heroicons:chevron-down" class="w-3.5 h-3.5 ml-2 text-slate-600 dark:text-slate-400" />
-        <span
-          v-if="selectedTickets.length > 0"
-          class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500"
-        ></span>
+        <span v-if="selectedTickets.length > 0" class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500" />
       </Button>
     </PopoverTrigger>
     <PopoverContent class="p-0" align="start">

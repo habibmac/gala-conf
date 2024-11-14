@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
-import { Button } from '@/components/ui/button';
-import { FormVee, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useForm } from 'vee-validate';
 import * as z from 'zod';
@@ -31,7 +30,7 @@ const formSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-const {handleSubmit, values, errors, meta } = useForm({
+const { handleSubmit } = useForm({
   validationSchema: toTypedSchema(formSchema),
   initialValues: {
     username: '',
@@ -39,11 +38,13 @@ const {handleSubmit, values, errors, meta } = useForm({
   },
 });
 
-const isLoading = ref(false);
+const isSubmitting = ref(false);
 
 // Password grant login
-const onSubmit = handleSubmit( async (values) => {
-  isLoading.value = true;
+const onSubmit = handleSubmit(async (values) => {
+  if (isSubmitting.value) return; // Prevent multiple submissions
+
+  isSubmitting.value = true;
   try {
     const response: authResponse = await $fetch('/api/login', {
       method: 'POST',
@@ -55,14 +56,14 @@ const onSubmit = handleSubmit( async (values) => {
 
     authStore.setAuth(response.access_token, response.refresh_token);
     router.push('/my-events');
-  } catch (error: any) {
+  } catch (error) {
+    console.error(error);
+    isSubmitting.value = false;
     toast({
       title: 'Error',
       description: 'Invalid credentials. Please try again.',
       variant: 'destructive',
     });
-  } finally {
-    isLoading.value = false;
   }
 });
 
@@ -74,10 +75,30 @@ const loginWithOAuth = () => {
 };
 
 const handleOAuthLogin = () => {
-  window.location.href = loginWithOAuth();
+  if (isSubmitting.value) return; // Prevent multiple clicks
+
+  isSubmitting.value = true;
+  try {
+    window.location.href = loginWithOAuth();
+  } catch (error) {
+    console.error(error);
+    isSubmitting.value = false; // Reset loading only on error
+    toast({
+      title: 'Error',
+      description: 'OAuth login failed. Please try again.',
+      variant: 'destructive',
+    });
+  }
 };
 
 const $version = packageJson.version;
+
+// Redirect if already authenticated
+onMounted(() => {
+  if (authStore.isAuthenticated) {
+    router.replace('/my-events');
+  }
+});
 </script>
 
 <template>
@@ -111,31 +132,32 @@ const $version = packageJson.version;
         </div>
 
         <!-- Password Login Form -->
-        <form @submit.prevent="onSubmit" class="space-y-4">
-            <FormField v-slot="{ field }" :name="'username'">
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="name@example.com" v-bind="field" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
+        <form class="space-y-4" @submit.prevent="onSubmit">
+          <FormField v-slot="{ field }" :name="'username'">
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="name@example.com" v-bind="field" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-            <FormField v-slot="{ field }" :name="'password'">
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="Enter your password" v-bind="field" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
+          <FormField v-slot="{ field }" :name="'password'">
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Enter your password" v-bind="field" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
 
-            <Button type="submit" class="w-full" :disabled="isLoading">
-              {{ isLoading ? 'Signing in...' : 'Sign in with Password' }}
-            </Button>
-          </form>
+          <Button type="submit" class="w-full" :disabled="isSubmitting">
+            <SpinnerDots v-if="isSubmitting" class="mr-2 size-5" />
+            {{ isSubmitting ? 'Logging in...' : 'Log in with Password' }}
+          </Button>
+        </form>
 
         <div class="relative">
           <div class="absolute inset-0 flex items-center">
@@ -158,7 +180,7 @@ const $version = packageJson.version;
           <a href="https://galanesia.com/privacy" class="underline underline-offset-4 hover:text-primary">
             Privacy Policy
           </a>
-          . 
+          .
         </p>
 
         <p class="text-center">

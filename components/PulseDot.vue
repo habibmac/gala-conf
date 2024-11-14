@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { createFilterWrapper } from '@vueuse/core';
-import { twMerge } from 'tailwind-merge';
 import { cn } from '~/lib/utils';
 
 const props = defineProps({
@@ -21,8 +19,8 @@ const props = defineProps({
 <template>
   <div class="flex items-center">
     <div :class="cn('relative flex items-center justify-center', wrapperClass)">
-      <div :class="cn('absolute inline-flex h-full w-full animate-ping rounded-full', props.pulseClass)"></div>
-      <div :class="cn('relative inline-flex rounded-full', dotClass)"></div>
+      <div :class="cn('absolute inline-flex h-full w-full animate-ping rounded-full', props.pulseClass)" />
+      <div :class="cn('relative inline-flex rounded-full', dotClass)" />
     </div>
   </div>
 </template>

@@ -12,20 +12,15 @@ export interface TransactionStats {
     approved: number;
     pending: number;
   }[];
-  total_revenue: number;
+  total_revenue: {
+    gross_sales: number;
+    nett_sales: number;
+  };
 }
 
 interface RegistrationChartData {
   date: string;
   Registrations: number;
-}
-
-export interface TransactionStats {
-  total_revenue: number;
-  daily_registrations: {
-    date: string;
-    count: number;
-  }[];
 }
 
 export interface CustomFieldValue {

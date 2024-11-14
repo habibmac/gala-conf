@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
-import type { CityOption } from '~/types/city';
+import type { CityOption } from '~/types';
 
 export function useCitySearch(venueCity: Ref<string>) {
   const minCityLength = 3;

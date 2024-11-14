@@ -17,7 +17,6 @@ export default defineEventHandler(async (event) => {
     });
     return response;
   } catch (error) {
-    console.error('Detailed error:', error);
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to refresh token',

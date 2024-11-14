@@ -2,20 +2,21 @@ import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores';
 import { menuGroups } from '@/config/menuGroups';
-import type { MenuGroup, MenuItem } from '~/types/menu';
+import type { RouteRecordRaw } from 'vue-router';
+import type { MenuGroup, MenuItem } from '~/types';
 
 export const useMenu = () => {
   const router = useRouter();
   const authStore = useAuthStore();
 
   const allMenuItems = ref<MenuItem[]>([]);
-  const isLoading = ref(false);
+  const isMenuLoading = ref(false);
 
   const loadMenuItems = () => {
-    isLoading.value = true;
+    isMenuLoading.value = true;
     const routes = router.getRoutes();
     allMenuItems.value = processRoutes(routes);
-    isLoading.value = false;
+    isMenuLoading.value = false;
   };
 
   const generateLinkTo = (linkItem: MenuItem) => {
@@ -29,7 +30,7 @@ export const useMenu = () => {
     return { path: linkItem.to };
   };
 
-  const processRoutes = (routes: any[]): MenuItem[] => {
+  const processRoutes = (routes: RouteRecordRaw[]): MenuItem[] => {
     let items: MenuItem[] = [];
     routes.forEach((route) => {
       const meta = route.meta || {};
@@ -39,18 +40,12 @@ export const useMenu = () => {
         const routeCapabilities = meta.capabilities as string[] | undefined;
 
         // Check if user has right role
-        const hasRole = routeRoles?.some(role =>
-          authStore.userInfo?.user_roles?.includes(role)
-        ) ?? true;
-
+        const hasRole = routeRoles?.some((role) => authStore.userInfo?.user_roles?.includes(role)) ?? true;
         // Check if event has right package
-        const hasPackage = routePackages?.includes(
-          authStore.selectedEvent?.package ?? ''
-        ) ?? true;
-
+        const hasPackage = routePackages?.includes(authStore.selectedEvent?.package ?? '') ?? true;
         // Check if user has required capabilities
-        const hasCapabilities = !routeCapabilities?.length ||
-          routeCapabilities.every(cap => authStore.hasEventPermission(cap));
+        const hasCapabilities =
+          !routeCapabilities?.length || routeCapabilities.every((cap) => authStore.hasEventPermission(cap));
 
         if (hasRole && hasPackage && hasCapabilities) {
           const menuItem: MenuItem = {
@@ -63,18 +58,16 @@ export const useMenu = () => {
             icon: meta.icon as string | undefined,
             order: meta.order as number | undefined,
           };
-
           menuItem.generatedLink = generateLinkTo(menuItem);
           items.push(menuItem);
         }
       }
-      if (route.children?.length > 0) {
+      if (route.children && route.children.length > 0) {
         items = items.concat(processRoutes(route.children));
       }
     });
     return items;
   };
-
   const menuItems = computed(() => {
     const groupedItems: MenuGroup[] = menuGroups.map((group) => ({
       ...group,
@@ -106,7 +99,7 @@ export const useMenu = () => {
 
   return {
     menuItems,
-    isLoading,
+    isMenuLoading,
     loadMenuItems,
   };
 };

@@ -16,7 +16,7 @@
 @layer base {
   :root {
     /* font-family: 'Inter Variable', sans-serif; */
-      font-family: 'Geist Sans', sans-serif;
+    font-family: 'Geist Sans', sans-serif;
 
     --background: 220, 14%, 96%;
     --foreground: 222.2 84% 4.9%;
@@ -105,38 +105,37 @@
 }
 
 @layer utilities {
+  .scroll-area {
+    /* For Webkit browsers (Chrome, Safari) */
+    &::-webkit-scrollbar {
+      width: 0.5rem;
+      height: 0.5rem;
+    }
 
-    .scroll-area {  
-      /* For Webkit browsers (Chrome, Safari) */
-      &::-webkit-scrollbar {
-        width: 0.5rem;
-        height: 0.5rem;
-      }
-  
-      &::-webkit-scrollbar-track {
-        background-color: hsl(var(--muted)) !important;
-      }
-  
-      &::-webkit-scrollbar-thumb {
-        border-radius: calc(var(--radius) - 4px);
-        background-color: hsl(var(--muted-foreground) / 0.3) !important;
-      }
-  
-      /* For Firefox */
-      scrollbar-color: hsl(var(--muted-foreground) / 0.3) hsl(var(--muted));
-      scrollbar-width: thin;
+    &::-webkit-scrollbar-track {
+      background-color: hsl(var(--muted)) !important;
     }
-  
-    /* Dark mode */
-    .dark .scroll-area {
-      &::-webkit-scrollbar-track {
-        background-color: hsl(var(--muted) / 0.3) !important;
-      }
-  
-      &::-webkit-scrollbar-thumb {
-        background-color: hsl(var(--muted-foreground) / 0.2) !important;
-      }
-  
-      scrollbar-color: hsl(var(--muted-foreground) / 0.2) hsl(var(--muted) / 0.3);
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: calc(var(--radius) - 4px);
+      background-color: hsl(var(--muted-foreground) / 0.3) !important;
     }
+
+    /* For Firefox */
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) hsl(var(--muted));
+    scrollbar-width: thin;
+  }
+
+  /* Dark mode */
+  .dark .scroll-area {
+    &::-webkit-scrollbar-track {
+      background-color: hsl(var(--muted) / 0.3) !important;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: hsl(var(--muted-foreground) / 0.2) !important;
+    }
+
+    scrollbar-color: hsl(var(--muted-foreground) / 0.2) hsl(var(--muted) / 0.3);
+  }
 }

@@ -28,6 +28,8 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   title: 'No data found',
+  description: '',
+  iconClass: '',
   img: () => ({
     src: '/images/empty-state/no-data.svg',
     alt: 'No data found',
@@ -86,7 +88,7 @@ const hasActions = computed(() => Boolean(props.cta?.label || props.cta2?.label)
               {{ cta.label }}</NuxtLink
             >
           </Button>
-          <Button v-else @click="() => handleClick(cta, 'primary')" type="button">
+          <Button v-else type="button" @click="() => handleClick(cta, 'primary')">
             <template v-if="cta.icon">
               <Icon :icon="cta.icon" :class="cn('mr-2', cta.iconClass)" />
             </template>
@@ -103,7 +105,7 @@ const hasActions = computed(() => Boolean(props.cta?.label || props.cta2?.label)
               {{ cta2.label }}</NuxtLink
             >
           </Button>
-          <Button v-else @click="() => handleClick(cta2, 'secondary')" variant="outline" type="button">
+          <Button v-else variant="outline" type="button" @click="() => handleClick(cta2, 'secondary')">
             <template v-if="cta2.icon">
               <Icon :icon="cta2.icon" :class="cn('mr-2', cta2.iconClass)" />
             </template>

@@ -1,6 +1,6 @@
 import { computed, type Ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import { type PaginationState, type SortingState } from '@tanstack/vue-table';
+import type { PaginationState, SortingState } from '@tanstack/vue-table';
 import type { RegRequestParams } from '@/types';
 
 interface InsightFilters {
@@ -9,7 +9,7 @@ interface InsightFilters {
   date_end?: string;
   group?: string;
   nocache?: string;
-  [key: string]: any; // for any additional filters
+  [key: string]: string | string[] | undefined;
 }
 
 export const useInsight = (

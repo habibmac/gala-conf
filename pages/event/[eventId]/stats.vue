@@ -116,7 +116,7 @@ const formatDate = (date: Date): string => {
     <header class="pt-10 flex justify-between items-center">
       <h1 class="h2 mb-5">Stats</h1>
       <!-- Date Range Filter -->
-      <div class="flex items-center gap-4"></div>
+      <div class="flex items-center gap-4" />
     </header>
 
     <!-- Attendee Stats -->
@@ -164,7 +164,8 @@ const formatDate = (date: Date): string => {
             </CardHeader>
             <CardContent>
               <div class="text-3xl font-bold tabular-nums">
-                {{ formatThousands(transactionStats.total_revenue) }} <sup class="font-normal text-sm">IDR</sup>
+                {{ formatThousands(transactionStats.total_revenue.gross_sales) }}
+                <sup class="font-normal text-sm">IDR</sup>
               </div>
             </CardContent>
           </Card>
@@ -233,7 +234,7 @@ const formatDate = (date: Date): string => {
     </section>
 
     <!-- Custom Field Stats -->
-    <section class="mb-8" v-if="customFieldStats">
+    <section v-if="customFieldStats" class="mb-8">
       <h2 class="text-xl font-semibold mb-4">Custom Field</h2>
       <div v-if="isCustomFieldLoading" class="grid gap-4 grid-cols-1 md:grid-cols-2">
         <Skeleton v-for="i in 2" :key="i" class="bg-muted-foreground/10 h-28 rounded-xl" />

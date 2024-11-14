@@ -20,25 +20,27 @@ const { data, isLoading, isError, refetch, isRefetching } = useQuery({
   queryFn: () => getEventSummary(eventId),
   enabled: !!eventId,
 });
-
-const summaryData = computed(() => data?.value);
 </script>
 
 <template>
   <div v-if="isLoading || isRefetching" class="grid gap-4 grid-cols-12">
-    <Skeleton v-for="i in 4" class="h-28 rounded-xl col-span-12 sm:col-span-6 md:col-span-3 bg-muted-foreground/10" />
+    <Skeleton
+      v-for="i in 4"
+      :key="i"
+      class="h-28 rounded-xl col-span-12 sm:col-span-6 md:col-span-3 bg-muted-foreground/10"
+    />
   </div>
   <div v-else-if="isError" class="py-16">
     <div class="flex h-32 items-center justify-center">Error fetching event summary. Please try again later.</div>
   </div>
   <template v-else-if="data">
-    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" v-if="data.length > 0">
+    <div v-if="data.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card v-for="item in data" :key="item.title" class="relative overflow-hidden">
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle class="text-sm font-medium tracking-normal">
             {{ item.title }}
           </CardTitle>
-          <Button @click="refetch" variant="ghost" size="icon" class="group absolute top-3 right-3">
+          <Button variant="ghost" size="icon" class="group absolute top-3 right-3" @click="refetch">
             <Icon
               icon="ri:refresh-line"
               class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-800 group-hover:rotate-180 transition-transform dark:group-hover:text-slate-100"
@@ -49,13 +51,13 @@ const summaryData = computed(() => data?.value);
         <CardContent class="relative">
           <div :class="cn('text-2xl font-semibold tabular-nums')">
             {{ formatThousands(item.value) }}
-            <span class="text-xs font-medium text-muted-foreground" v-if="item.is_currency"> IDR </span>
+            <span v-if="item.is_currency" class="text-xs font-medium text-muted-foreground"> IDR </span>
           </div>
-          <p class="text-xs text-muted-foreground" v-if="item.change">{{ item.change }}% change</p>
+          <p v-if="item.change" class="text-xs text-muted-foreground">{{ item.change }}% change</p>
         </CardContent>
       </Card>
     </div>
-    <div class="mx-auto w-full" v-else>
+    <div v-else class="mx-auto w-full">
       <EmptyState
         title="No data available"
         description="There is no data available for this event."

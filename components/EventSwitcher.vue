@@ -2,22 +2,11 @@
 import { ref } from 'vue';
 
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
   Command,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
@@ -27,48 +16,17 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Badge from './ui/badge/Badge.vue';
 
-const groups = [
-  {
-    label: 'Personal Account',
-    teams: [
-      {
-        label: 'Alicia Koch',
-        value: 'personal',
-      },
-    ],
-  },
-  {
-    label: 'Teams',
-    teams: [
-      {
-        label: 'Acme Inc.',
-        value: 'acme-inc',
-      },
-      {
-        label: 'Monsters Inc.',
-        value: 'monsters',
-      },
-    ],
-  },
-];
-
-type Team = (typeof groups)[number]['teams'][number];
-
 const router = useRouter();
 const selectedEventId = ref<string | null>(null);
 
 // Fetch events
-const { event, isLoading, isError, error } = useEvent();
-const { events, page, maxPage, prevPage, nextPage } = useEvents();
+const { event, isLoading } = useEvent();
+const { events } = useEvents();
 
 // User action to select an event
 const handleselectEvent = (newEventId: string) => {
   selectedEventId.value = newEventId;
   router.push(`/event/${newEventId}`);
-};
-
-const isSelected = (eventId: string) => {
-  return event?.value.id === eventId;
 };
 
 const open = ref(false);
@@ -83,9 +41,7 @@ const open = ref(false);
           role="combobox"
           aria-expanded="open"
           aria-label="Select an event"
-          :class="
-            cn('w-full relative h-12 text-left font-normal', !event && 'text-muted-foreground')
-          "
+          :class="cn('w-full relative h-12 text-left font-normal', !event && 'text-muted-foreground')"
         >
           <div v-if="isLoading" class="flex w-full justify-center px-5">
             <SpinnerDots class="h-10 w-10 text-blue-700" />

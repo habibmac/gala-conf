@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import EventCover from '@/components/EventCover.vue';
-import { devImgPath } from '~/utils';
 import { cn } from '~/lib/utils';
 
 defineProps({
@@ -23,7 +22,6 @@ defineProps({
     :to="`/event/${event.id}`"
     class="relative mx-auto flex flex-col max-w-xs sm:max-w-none overflow-hidden rounded-lg border border-border bg-card dark:bg-slate-900 hover:border-primary transition w-full sm:flex-row group"
   >
-
     <!-- <PulseDot v-if="!isPast" class="absolute top-2 right-2 rounded-full z-20" dot-class="size-2.5 bg-green-400" pulse-class="bg-green-300 size-4" /> -->
 
     <!-- Image -->
@@ -61,7 +59,7 @@ defineProps({
         <div
           class="hidden items-center rounded-full px-2.5 py-1 text-center text-xs font-medium sm:inline-flex bg-accent text-accent-foreground/70"
         >
-          <span class="line-clamp-1" v-if="event.location">{{ event.location }}</span>
+          <span v-if="event.location" class="line-clamp-1">{{ event.location }}</span>
           <span v-else>---</span>
         </div>
       </div>

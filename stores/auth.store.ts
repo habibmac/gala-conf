@@ -10,7 +10,7 @@ export const useAuthStore = defineStore('auth', () => {
     path: '/',
     secure: true,
     sameSite: 'lax',
-    domain: process.env.NODE_ENV === 'production' ? '.galanesia.com' : undefined
+    domain: process.env.NODE_ENV === 'production' ? '.galanesia.com' : undefined,
   });
 
   const refreshToken = useCookie(refreshTokenField, {
@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
     path: '/',
     secure: true,
     sameSite: 'lax',
-    domain: process.env.NODE_ENV === 'production' ? '.galanesia.com' : undefined
+    domain: process.env.NODE_ENV === 'production' ? '.galanesia.com' : undefined,
   });
 
   const packages = ref<string[]>([]);
@@ -66,7 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
     packages.value = [];
   };
 
-  const refreshTokens = async () => {
+  const refreshingTokens = async () => {
     try {
       const response: AuthResponse = await $fetch('/api/refresh-token', {
         method: 'POST',
@@ -102,7 +102,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
-
   const setUser = (user: UserProfile) => {
     userInfo.value = user;
     userCapabilities.value = Object.keys(user?.capabilities || []);
@@ -121,7 +120,6 @@ export const useAuthStore = defineStore('auth', () => {
       isLoadingEvent.value = false;
     }
   };
-
 
   const hasCapability = (capability: string) => {
     return userCapabilities.value.includes(capability);
@@ -143,7 +141,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const canAccessRoute = (requiredCapabilities: string[], requiredPermissions: string[]) => {
     // First check roles
-    const hasRole = userInfo.value?.user_roles?.some(role =>
+    const hasRole = userInfo.value?.user_roles?.some((role) =>
       ['administrator', 'ee_event_organizer', 'ee_event_operator'].includes(role)
     );
 
@@ -151,7 +149,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Check all required capabilities and permissions
     const allPermissions = [...new Set([...requiredCapabilities, ...requiredPermissions])];
-    return allPermissions.every(perm => hasEventPermission(perm));
+    return allPermissions.every((perm) => hasEventPermission(perm));
   };
 
   const hasAccess = (roles?: string[], pkgs?: string[]) => {
@@ -187,7 +185,7 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUserProfile,
     setAuth,
     clearAuth,
-    refreshTokens,
+    refreshingTokens,
     setUser,
     hasAccess,
     userCapabilities,

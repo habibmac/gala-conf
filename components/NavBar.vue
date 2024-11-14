@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
 
-defineProps(['sidebarOpen', 'showEvents']);
+defineProps<{
+  sidebarOpen?: boolean;
+  showEvents?: boolean;
+}>();
 
-const route = useRoute();
-
-const navTitle = computed(() => {
-  return route.meta.navTitle;
-});
+defineEmits<{
+  (e: 'toggle-sidebar'): void;
+}>();
 </script>
 
 <template>
@@ -19,11 +20,12 @@ const navTitle = computed(() => {
           <!-- Hamburger button -->
           <button
             v-if="showEvents"
-            class="icon-btn lg:!hidden mr-3"
-            @click.stop="$emit('toggle-sidebar')"
+            id="sidebar-trigger"
+            class="icon-btn mr-3 lg:!hidden"
             aria-controls="sidebar"
             :aria-expanded="sidebarOpen"
             size="icon"
+            @click="$emit('toggle-sidebar')"
           >
             <span class="sr-only">Open sidebar</span>
             <Icon icon="material-symbols-light:menu" class="h-8 w-8 fill-current" />
@@ -38,11 +40,6 @@ const navTitle = computed(() => {
           </NuxtLink>
           <!-- <EventSwitcher v-if="showEvents" /> -->
           <DropdownEvents v-if="showEvents" />
-
-          <div v-if="navTitle" class="border-l pl-3 ml-3">
-            <!-- if has page meta navTitle -->
-            <h1 class="text-sm font-semibold tracking-tight text-foreground">{{ navTitle }}</h1>
-          </div>
         </div>
 
         <!-- Header: Right side -->

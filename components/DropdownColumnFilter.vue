@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import { cn } from '@/lib/utils';
 
@@ -20,10 +19,10 @@ function toggleColumnVisibility(column: ColumnConfig) {
   // Only proceed if the column is hideable
   if (!column.isHideable) return;
 
-  const updatedColumns = props.modelValue.map(col => 
+  const updatedColumns = props.modelValue.map((col) =>
     col.key === column.key ? { ...col, isVisible: !col.isVisible } : col
   );
-  
+
   emit('update:modelValue', updatedColumns);
 }
 </script>
@@ -44,14 +43,16 @@ function toggleColumnVisibility(column: ColumnConfig) {
                 v-for="column in modelValue"
                 :key="column.key"
                 :value="column.key"
-                @select="() => toggleColumnVisibility(column)"
                 :disabled="!column.isHideable"
+                @select="() => toggleColumnVisibility(column)"
               >
                 <div
-                  :class="cn(
-                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                    column.isVisible ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
-                  )"
+                  :class="
+                    cn(
+                      'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                      column.isVisible ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
+                    )
+                  "
                 >
                   <Icon icon="radix-icons:check" class="h-4 w-4" />
                 </div>
