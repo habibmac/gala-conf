@@ -1,6 +1,8 @@
 // stores/ui.store.ts
 import { defineStore } from 'pinia';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
+import { useDebounceFn } from '@vueuse/core';
 import type { UserPreferences, PreferencesResponse } from '~/types/preferences';
 
 export const useUIStore = defineStore('ui', () => {
@@ -8,16 +10,24 @@ export const useUIStore = defineStore('ui', () => {
   const { $galantisApi } = useNuxtApp();
   const colorMode = useColorMode();
 
-  // Local state with default values
+  // Setup breakpoints
+  const breakpoints = useBreakpoints(breakpointsTailwind);
+  const isLargeScreen = breakpoints.greater('lg');
+
+  // Local state
   const preferences = ref<UserPreferences>({
     sidebarExpanded: false,
     theme: 'system',
     locale: 'en',
-    itemsPerPage: 10,
+    itemsPerPage: 10
   });
 
-  // Query for fetching preferences
-  const { data, isLoading } = useQuery({
+  // Mobile sidebar state
+  const isSidebarOpenMobile = ref(false);
+  const isUpdating = ref(false);
+
+  // Query setup
+  const query = useQuery({
     queryKey: ['user-preferences'],
     queryFn: async () => {
       const response = await $galantisApi.get<PreferencesResponse>('/user/preferences');
@@ -25,9 +35,11 @@ export const useUIStore = defineStore('ui', () => {
     },
   });
 
-  // Watch for changes in the query data
+  const data = computed(() => query.data.value);
+  const isLoading = computed(() => query.isLoading.value);
+
   watch(
-    () => data.value,
+    data,
     (newData) => {
       if (newData) {
         preferences.value = newData;
@@ -37,88 +49,124 @@ export const useUIStore = defineStore('ui', () => {
     { immediate: true }
   );
 
-  // Apply preferences to the application
   function applyPreferences(prefs: Partial<UserPreferences>) {
-    // Only apply theme if it was changed
     if (prefs.theme !== undefined) {
       colorMode.preference = prefs.theme;
     }
 
-    // Only handle sidebar if it was changed
-    if (prefs.sidebarExpanded !== undefined) {
-      // Remove the class first, then add it if needed
-      document.documentElement.classList.remove('sidebar-expanded');
-      if (prefs.sidebarExpanded) {
-        document.documentElement.classList.add('sidebar-expanded');
-      }
+    if (prefs.sidebarExpanded !== undefined && isLargeScreen.value) {
+      document.documentElement.classList.toggle('sidebar-expanded', prefs.sidebarExpanded);
     }
   }
 
-  // Update local state and UI immediately, then sync with backend
-  // ui.store.ts
+  // Debounced API call function
+  const savePreferencesToAPI = useDebounceFn(async (prefsToSave: Partial<UserPreferences>) => {
+    if (isUpdating.value) return;
+
+    try {
+      isUpdating.value = true;
+      const response = await $galantisApi.post<PreferencesResponse>(
+        '/user/preferences',
+        prefsToSave
+      );
+      queryClient.setQueryData(['user-preferences'], response.data.data);
+    } catch (error) {
+      console.error('Failed to save preferences:', error);
+      throw error;
+    } finally {
+      isUpdating.value = false;
+    }
+  }, 300); // 300ms debounce
+
+  // Update preferences with debounce
   const updatePreferencesOptimistic = async (newPrefs: Partial<UserPreferences>) => {
     const previousState = { ...preferences.value };
 
-    // Immediately update local state
-    preferences.value = { ...preferences.value, ...newPrefs };
+    // Only update sidebar preference if on large screen
+    const shouldUpdateSidebar = isLargeScreen.value && 'sidebarExpanded' in newPrefs;
+
+    // Update local state immediately
+    preferences.value = {
+      ...preferences.value,
+      ...newPrefs
+    };
+
+    // Apply changes immediately
     applyPreferences(newPrefs);
 
-    // Add retry logic
-    const maxRetries = 3;
-    let retryCount = 0;
+    // Prepare API preferences
+    const prefsToSave = shouldUpdateSidebar ? newPrefs :
+      'sidebarExpanded' in newPrefs ?
+        { ...newPrefs, sidebarExpanded: previousState.sidebarExpanded } :
+        newPrefs;
 
-    while (retryCount < maxRetries) {
-      try {
-        const response = await $galantisApi.post<PreferencesResponse>('/user/preferences', newPrefs);
-        queryClient.setQueryData(['user-preferences'], response.data.data);
-        return;
-      } catch (error) {
-        retryCount++;
-        if (retryCount === maxRetries) {
-          // Only revert on final failure
-          preferences.value = previousState;
-          applyPreferences(previousState);
-          console.error('Failed to save preferences after multiple attempts:', error);
-          // Optionally show error notification to user
-        } else {
-          // Wait before retrying (exponential backoff)
-          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
-        }
-      }
+    try {
+      // Use debounced API call
+      await savePreferencesToAPI(prefsToSave);
+    } catch (error) {
+      // Revert on error
+      preferences.value = previousState;
+      applyPreferences(previousState);
     }
   };
 
-  // Convenience methods for common actions
+  // Sidebar specific functions
   const toggleSidebar = () => {
-    updatePreferencesOptimistic({
-      sidebarExpanded: !preferences.value.sidebarExpanded,
+
+    console.log('toggleSidebar called', {
+      isLargeScreen: isLargeScreen.value,
+      currentMobileState: isSidebarOpenMobile.value
     });
+
+    if (isLargeScreen.value) {
+      if (!isUpdating.value) {
+        updatePreferencesOptimistic({
+          sidebarExpanded: !preferences.value.sidebarExpanded
+        });
+      }
+    } else {
+      isSidebarOpenMobile.value = !isSidebarOpenMobile.value;
+      console.log('after toggle mobile:', isSidebarOpenMobile.value);
+    }
   };
 
   const setSidebarExpanded = (expanded: boolean) => {
-    if (preferences.value.sidebarExpanded !== expanded) {
-      updatePreferencesOptimistic({ sidebarExpanded: expanded });
+    if (isLargeScreen.value) {
+      if (preferences.value.sidebarExpanded !== expanded && !isUpdating.value) {
+        updatePreferencesOptimistic({ sidebarExpanded: expanded });
+      }
+    } else {
+      isSidebarOpenMobile.value = expanded;
     }
   };
 
+  // Computed for current sidebar state
+  const isSidebarOpen = computed(() => {
+    return isLargeScreen.value ? preferences.value.sidebarExpanded : isSidebarOpenMobile.value;
+  });
+
+  // Other preference functions with update check
   const setTheme = (theme: 'dark' | 'light' | 'system') => {
-    // Only update if the theme is different
-    if (preferences.value.theme !== theme) {
+    if (preferences.value.theme !== theme && !isUpdating.value) {
       updatePreferencesOptimistic({ theme });
     }
   };
 
   const setItemsPerPage = (count: number) => {
-    updatePreferencesOptimistic({ itemsPerPage: count });
+    if (!isUpdating.value) {
+      updatePreferencesOptimistic({ itemsPerPage: count });
+    }
   };
 
   return {
     preferences,
     isLoading,
+    isUpdating,
+    isSidebarOpen,
     toggleSidebar,
     setSidebarExpanded,
     setTheme,
     setItemsPerPage,
-    updatePreferences: updatePreferencesOptimistic,
+    updatePreferences: updatePreferencesOptimistic
   };
 });
