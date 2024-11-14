@@ -110,7 +110,7 @@ const columns = computed(() => {
         size: config.width * 10,
         cell: (info) => {
           const value = info.getValue();
-          
+
           switch (config.key) {
             case 'date':
               return format(new Date(value), 'dd MMM yyyy');
@@ -127,13 +127,7 @@ const columns = computed(() => {
 });
 
 // Get billing data using composable
-const { 
-  billingData,
-  totalData,
-  totalPages,
-  summary,
-  isLoading 
-} = useBillings(eventId, pagination, sorting, filters);
+const { billingData, totalData, totalPages, summary, isLoading } = useBillings(eventId, pagination, sorting, filters);
 
 // Create table instance
 const table = useVueTable({
@@ -169,18 +163,22 @@ const handleNavigation = (pageNumber: number) => {
     </header>
 
     <section>
-      <div class="flex flex-col justify-between items-center min-h-12 w-full gap-2 bg-slate-50 px-4 py-2 sm:flex-row sm:px-6 sm:py-2 dark:bg-slate-950">
+      <div
+        class="flex flex-col justify-between items-center min-h-12 w-full gap-2 bg-slate-50 px-4 py-2 sm:flex-row sm:px-6 sm:py-2 dark:bg-slate-950"
+      >
         <div>
           <TableSearchForm v-model="filters.search" placeholder="Search billings..." />
         </div>
       </div>
     </section>
 
-    {{billingData}}
+    {{ billingData }}
 
     <section class="relative overflow-x-auto">
       <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
-        <thead class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400">
+        <thead
+          class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
+        >
           <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
             <th
               v-for="header in headerGroup.headers"
@@ -199,11 +197,7 @@ const handleNavigation = (pageNumber: number) => {
             :key="row.id"
             class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
           >
-            <td
-              v-for="cell in row.getVisibleCells()"
-              :key="cell.id"
-              class="px-2 py-3 first:pl-5 last:pr-5"
-            >
+            <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="px-2 py-3 first:pl-5 last:pr-5">
               <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
             </td>
           </tr>

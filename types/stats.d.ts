@@ -15,7 +15,7 @@ export interface TransactionStats {
   total_revenue: {
     gross_sales: number;
     nett_sales: number;
-  }
+  };
 }
 
 interface RegistrationChartData {

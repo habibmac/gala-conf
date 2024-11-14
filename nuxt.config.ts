@@ -1,4 +1,4 @@
-import pkg from './package.json'
+import pkg from './package.json';
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',

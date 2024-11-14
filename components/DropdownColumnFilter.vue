@@ -20,10 +20,10 @@ function toggleColumnVisibility(column: ColumnConfig) {
   // Only proceed if the column is hideable
   if (!column.isHideable) return;
 
-  const updatedColumns = props.modelValue.map(col => 
+  const updatedColumns = props.modelValue.map((col) =>
     col.key === column.key ? { ...col, isVisible: !col.isVisible } : col
   );
-  
+
   emit('update:modelValue', updatedColumns);
 }
 </script>
@@ -48,10 +48,12 @@ function toggleColumnVisibility(column: ColumnConfig) {
                 :disabled="!column.isHideable"
               >
                 <div
-                  :class="cn(
-                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                    column.isVisible ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
-                  )"
+                  :class="
+                    cn(
+                      'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                      column.isVisible ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
+                    )
+                  "
                 >
                   <Icon icon="radix-icons:check" class="h-4 w-4" />
                 </div>

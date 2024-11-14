@@ -83,9 +83,7 @@ const open = ref(false);
           role="combobox"
           aria-expanded="open"
           aria-label="Select an event"
-          :class="
-            cn('w-full relative h-12 text-left font-normal', !event && 'text-muted-foreground')
-          "
+          :class="cn('w-full relative h-12 text-left font-normal', !event && 'text-muted-foreground')"
         >
           <div v-if="isLoading" class="flex w-full justify-center px-5">
             <SpinnerDots class="h-10 w-10 text-blue-700" />

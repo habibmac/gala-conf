@@ -6,7 +6,6 @@ useHead({
     return titleChunk ? `${titleChunk} | Galanesia ID` : 'Galanesia ID';
   },
 });
-
 </script>
 <template>
   <div class="flex h-[100dvh] bg-background">

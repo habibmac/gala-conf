@@ -71,7 +71,6 @@ export default defineNuxtPlugin((nuxtApp) => {
           originalRequest.headers['Authorization'] = `Bearer ${authStore.accessToken}`;
 
           return galantisApi(originalRequest);
-
         } catch (refreshError) {
           processQueue(refreshError, null);
           authStore.clearAuth();

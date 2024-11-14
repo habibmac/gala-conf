@@ -68,9 +68,6 @@ const presetDates = ref([
         </template>
       </VueDatePicker>
     </ClientOnly>
-          <span
-          v-if="dateRange"
-          class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500"
-        ></span>
+    <span v-if="dateRange" class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500"></span>
   </div>
 </template>

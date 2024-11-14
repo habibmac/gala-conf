@@ -1,35 +1,35 @@
 // server/api/login.post.ts
 export default defineEventHandler(async (event) => {
-    const config = useRuntimeConfig();
-    const body = await readBody(event);
+  const config = useRuntimeConfig();
+  const body = await readBody(event);
 
-    try {
-        const response = await $fetch(config.public.oauthUrl + '/token', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                grant_type: 'password',
-                client_id: config.public.oauthClientId,
-                client_secret: config.oauthClientSecret,
-                username: body.username,
-                password: body.password,
-            }),
-        });
-        return response;
-    } catch (error: any) {
-        if (error.response?._data?.error_description) {
-            throw createError({
-                statusCode: error.response.status,
-                statusMessage: error.response._data.error_description,
-            });
-        }
-        console.error('Login error:', error.response?.error);
-        throw createError({
-            statusCode: 500,
-            statusMessage: 'API: Failed to authenticate user',
-            message: error.response.message,
-        });
+  try {
+    const response = await $fetch(config.public.oauthUrl + '/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'password',
+        client_id: config.public.oauthClientId,
+        client_secret: config.oauthClientSecret,
+        username: body.username,
+        password: body.password,
+      }),
+    });
+    return response;
+  } catch (error: any) {
+    if (error.response?._data?.error_description) {
+      throw createError({
+        statusCode: error.response.status,
+        statusMessage: error.response._data.error_description,
+      });
     }
+    console.error('Login error:', error.response?.error);
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'API: Failed to authenticate user',
+      message: error.response.message,
+    });
+  }
 });

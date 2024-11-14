@@ -1,6 +1,5 @@
 // middleware/auth.global.ts
 export default defineNuxtRouteMiddleware((to) => {
-
   const authStore = useAuthStore();
 
   // Handle public routes

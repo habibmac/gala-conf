@@ -135,10 +135,13 @@ const {
                 alt: 'No Insights Found',
                 class: 'w-40',
               }"
-              :cta="{ label: 'Create Insight', to: `/event/${eventId}/insights/create`, icon: 'heroicons-outline:plus' }"
+              :cta="{
+                label: 'Create Insight',
+                to: `/event/${eventId}/insights/create`,
+                icon: 'heroicons-outline:plus',
+              }"
               :cta2="{ label: 'Refresh', action: refetch }"
             />
-             
           </div>
         </template>
         <template v-else>
