@@ -1,6 +1,5 @@
 <!-- components/checkins/CheckinDistribution.vue -->
 <script setup lang="ts">
-import { computed } from 'vue';
 import type { TicketCheckinStats, TshirtCheckinStats } from '~/types';
 
 defineProps<{
@@ -25,7 +24,7 @@ defineProps<{
             </div>
             <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1">
               <div
-                class="bg-primary h-1 rounded-full transition-all"
+                class="bg-emerald-400 h-1 rounded-full transition-all"
                 :style="{ width: `${ticket.checkin_percentage}%` }"
               />
             </div>

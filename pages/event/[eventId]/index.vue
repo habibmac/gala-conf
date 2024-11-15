@@ -24,7 +24,7 @@ definePageMeta({
     <header class="pt-10 mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
       <h1 class="h2 mb">Dashboard</h1>
     </header>
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4 mb-40">
       <RegCards />
       <CheckinStats />
     </div>
