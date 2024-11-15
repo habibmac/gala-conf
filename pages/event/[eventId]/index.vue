@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
 import RegCards from '~/components/partials/registrations/RegCards.vue';
 
 useHead({
@@ -23,6 +24,9 @@ definePageMeta({
     <header class="pt-10 mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
       <h1 class="h2 mb">Dashboard</h1>
     </header>
-    <RegCards />
+    <div class="flex flex-col gap-4">
+      <RegCards />
+      <CheckinStats />
+    </div>
   </div>
 </template>
