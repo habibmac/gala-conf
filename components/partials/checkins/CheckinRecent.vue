@@ -15,6 +15,7 @@ interface RecentCheckin {
 
 const route = useRoute();
 const eventId = ref(route.params.eventId as string);
+const { hasEventEnded } = useEventStatus();
 const { $galantisApi } = useNuxtApp();
 
 const getRecentCheckins = async () => {
@@ -25,7 +26,7 @@ const getRecentCheckins = async () => {
 const { data: recentCheckins, isLoading } = useQuery<RecentCheckin[]>({
   queryKey: ['recent-checkins', eventId],
   queryFn: getRecentCheckins,
-  refetchInterval: 30000, // Refetch every 10 seconds
+  refetchInterval: hasEventEnded.value ? false : 30000,
 });
 
 const getRegDetailsUrl = (regId: string) => {
