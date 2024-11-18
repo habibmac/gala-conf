@@ -49,7 +49,7 @@ export const useBillings = (
       });
   };
 
-  const { data, error, isLoading } = useQuery({
+  const { data, error, isLoading, isRefetching } = useQuery({
     queryKey: ['billings', requestParams, eventId],
     queryFn: ({ signal }) => getData(signal),
     // Optional: Add stale time if needed
@@ -62,6 +62,7 @@ export const useBillings = (
     totalPages: computed(() => data.value?.pagination.total_pages || 1),
     summary: computed(() => data.value?.summary || null),
     isLoading,
+    isRefetching,
     error,
   };
 };
