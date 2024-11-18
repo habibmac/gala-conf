@@ -129,6 +129,13 @@ const columnConfigs = ref<ColumnConfig[]>([
     isHideable: true,
     width: 15,
   },
+   {
+    key: 'notes',
+    header: 'Notes',
+    isVisible: true,
+    isHideable: true,
+    width: 15,
+  },
 ]);
 
 // Add status config
@@ -186,6 +193,8 @@ const columns = computed(() => {
                 ]
               );
             }
+            case 'notes':
+              return value || '-';
             default:
               return value;
           }

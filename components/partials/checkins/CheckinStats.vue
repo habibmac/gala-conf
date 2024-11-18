@@ -4,12 +4,22 @@ import { computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import type { CheckinStats } from '~/types';
 import { formatThousands } from '@/utils';
+import CheckinRecent from './CheckinRecent.vue';
 import CheckinDistributions from './CheckinDistributions.vue';
 import Card from '~/components/ui/card/Card.vue';
 
-const props = defineProps<{
-  showTotalRegs?: boolean;
-}>();
+withDefaults(
+  defineProps<{
+    showTotalRegs?: boolean;
+    showDetailedStats?: boolean;
+    showRecentCheckins?: boolean;
+  }>(),
+  {
+    showTotalRegs: true,
+    showDetailedStats: true,
+    showRecentCheckins: false,
+  }
+);
 
 const route = useRoute();
 const eventId = ref(route.params.eventId as string) || ref('');
@@ -22,10 +32,13 @@ const getStats = async (evtId: Ref) => {
   return response.data;
 };
 
-const { data: stats, isLoading } = useQuery<CheckinStats>({
+const {
+  data: stats,
+  isLoading,
+  isRefetching,
+} = useQuery<CheckinStats>({
   queryKey: ['checkin-stats', eventId],
   queryFn: () => getStats(eventId),
-  retry: 1,
   refetchInterval: 30000, // Refetch every 30 seconds
 });
 
@@ -87,7 +100,7 @@ const statsCards = computed(() => [
       <div class="flex items-end justify-between">
         <div>
           <div class="text-2xl font-bold text-slate-800 dark:text-white">
-            <template v-if="isLoading">
+            <template v-if="isLoading || isRefetching">
               <Skeleton class="h-8 w-16" />
             </template>
             <template v-else>
@@ -103,8 +116,12 @@ const statsCards = computed(() => [
       </div>
     </Card>
 
-    <div v-if="stats" class="col-span-2 lg:col-span-4">
-      <CheckinDistributions :tickets="stats.tickets" :tshirts="stats.tshirts" />
+    <div v-if="stats && showRecentCheckins" class="col-span-2 lg:col-span-4">
+      <CheckinRecent />
+    </div>
+
+    <div v-if="stats && showDetailedStats" class="col-span-2 lg:col-span-4">
+      <CheckinDistributions :tickets="stats.tickets" :custom="stats.custom" />
     </div>
   </div>
 </template>

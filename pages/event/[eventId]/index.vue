@@ -26,7 +26,7 @@ definePageMeta({
     </header>
     <div class="flex flex-col gap-4 mb-40">
       <RegCards />
-      <CheckinStats />
+      <CheckinStats :show-detailed-stats="false" :show-recent-checkins="true" />
     </div>
   </div>
 </template>

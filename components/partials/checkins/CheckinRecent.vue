@@ -1,0 +1,89 @@
+<!-- components/checkins/CheckinRecent.vue -->
+<script setup lang="ts">
+import { useQuery } from '@tanstack/vue-query';
+import { formatToUTC7 } from '@/utils';
+
+interface RecentCheckin {
+  REG_ID: string;
+  REG_code: string;
+  name: string;
+  address: string;
+  city: string;
+  ticket: string;
+  check_time: string;
+}
+
+const route = useRoute();
+const eventId = ref(route.params.eventId as string);
+const { $galantisApi } = useNuxtApp();
+
+const getRecentCheckins = async () => {
+  const response = await $galantisApi.get(`/event/${eventId.value}/checkins/recent`);
+  return response.data;
+};
+
+const { data: recentCheckins, isLoading } = useQuery<RecentCheckin[]>({
+  queryKey: ['recent-checkins', eventId],
+  queryFn: getRecentCheckins,
+  refetchInterval: 30000, // Refetch every 10 seconds
+});
+
+const getRegDetailsUrl = (regId: string) => {
+  return `/event/${eventId.value}/registrations?details=${regId}`;
+};
+</script>
+
+<template>
+  <Card class="relative rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <CardHeader>
+      <CardTitle class="text-base font-medium">Recent Check-ins</CardTitle>
+    </CardHeader>
+
+    <CardContent>
+      <div class="relative max-h-[300px] overflow-auto">
+        <table class="w-full">
+          <thead class="sticky top-0 bg-white dark:bg-slate-900">
+            <tr class="border-b border-slate-200 text-xs uppercase dark:border-slate-700">
+              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">Time</th>
+              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">Name</th>
+              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">Reg Code</th>
+              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">Ticket</th>
+              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">City</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+            <template v-if="isLoading">
+              <tr v-for="i in 5" :key="i">
+                <td class="px-4 py-2" colspan="5">
+                  <Skeleton class="h-4 w-full" />
+                </td>
+              </tr>
+            </template>
+            <template v-else-if="recentCheckins && recentCheckins.length > 0">
+              <tr
+                v-for="checkin in recentCheckins"
+                :key="checkin.REG_ID"
+                class="text-sm hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              >
+                <td class="whitespace-nowrap px-4 py-2 font-medium text-slate-900 dark:text-slate-300">
+                  {{ formatToUTC7(checkin.check_time) }}
+                </td>
+                <td class="px-4 py-2">{{ checkin.name }}</td>
+                <td class="px-4 py-2 font-mono text-xs">
+                    <NuxtLink :to="getRegDetailsUrl(checkin.REG_ID)" class="text-emerald-500 hover:underline">
+                      {{ checkin.REG_code }}
+                    </NuxtLink>
+                </td>
+                <td class="px-4 py-2">{{ checkin.ticket }}</td>
+                <td class="px-4 py-2">{{ checkin.city }}</td>
+              </tr>
+            </template>
+            <tr v-else>
+              <td class="px-4 py-8 text-center text-sm text-slate-500" colspan="5">No recent check-ins</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </CardContent>
+  </Card>
+</template>
