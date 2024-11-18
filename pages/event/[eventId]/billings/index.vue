@@ -168,7 +168,7 @@ const columns = computed(() => {
             case 'request_date':
             case 'transferred_date': {
               if (!value) return '-';
-              return format(new Date(value), 'dd MMM yyyy');
+              return format(new Date(value), 'dd MMM yyyy HH:mm');
             }
             case 'amount':
               return formatThousands(Number(value));

@@ -56,15 +56,16 @@ const percentageCheckins = computed(
 );
 
 const totalRemaining = computed(() =>
-  stats.value?.global.total_registrations ? formatThousands(stats.value.global.total_registrations) : 0
+  stats.value?.global.total_registrations
+    ? formatThousands(
+        parseInt((stats.value?.global.total_registrations ?? 0).toString()) -
+          parseInt((stats.value?.global.total_checkins ?? 0).toString())
+      )
+    : 0
 );
 
 const percentageRemaining = computed(
-  () =>
-    ((parseInt((stats.value?.global.total_registrations ?? 0).toString()) -
-      parseInt((stats.value?.global.total_checkins ?? 0).toString())) /
-      (stats.value?.global.total_registrations ?? 1)) *
-    100
+  () => parseInt(totalRemaining.value.toString()) / (stats.value?.global.total_registrations ?? 1) * 100
 );
 
 const totalCheckouts = computed(() =>
