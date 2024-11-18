@@ -67,7 +67,7 @@ const router = useRouter();
 const endpoint = 'registrations';
 
 // Selected registration ID and details panel state
-const selectedRegId = ref<string>(detail.value || '');
+const selectedRegId = ref<string>((route.query.details as string) || '');
 
 // Pagination configs
 const INITIAL_PAGE_SIZE = 10;
@@ -205,7 +205,7 @@ const columns = computed(() => {
               return h(
                 'a',
                 {
-                  href: `/dashboard/${eventId.value}/${endpoint}?${new URLSearchParams(newParams).toString()}`,
+                  href: `/event/${eventId.value}/${endpoint}?${new URLSearchParams(newParams).toString()}`,
                   class: 'number text-center group inline-block whitespace-nowrap',
                   onClick: (e: Event) => {
                     e.preventDefault();
@@ -479,6 +479,15 @@ watch(selectedRegId, () => {
   }
   router.push({ query: newQuery });
 });
+
+// Open the details panel when the route query changes
+watch(
+  () => route.query.details,
+  (newDetails) => {
+    selectedRegId.value = (newDetails as string) || '';
+  },
+  { immediate: true }  // This ensures it runs on component mount
+);
 
 // Watch for changes in the route query and update the filters ref
 watch(
