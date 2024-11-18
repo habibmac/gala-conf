@@ -92,13 +92,6 @@ watch(isLargeScreen, (isLarge) => {
   }
 });
 
-watch(
-  () => props.sidebarOpen,
-  (newVal) => {
-    console.log('Sidebar sidebarOpen prop:', newVal);
-  }
-);
-
 onMounted(() => {
   document.addEventListener('click', clickHandler);
   document.addEventListener('keydown', keyHandler);
@@ -149,7 +142,7 @@ onUnmounted(() => {
           </Button>
           <!-- Logo -->
           <NuxtLink to="/my-events" class="mx-auto">
-            <Logo class="h-12 w-12 fill-white" />
+            <Logo svg-class="h-12 w-12 fill-white" />
           </NuxtLink>
         </div>
         <!-- Links -->
