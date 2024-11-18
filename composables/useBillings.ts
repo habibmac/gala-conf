@@ -19,6 +19,7 @@ export const useBillings = (
     page: String(pagination.value.pageIndex + 1),
     sort_by: sorting.value.length > 0 ? sorting.value[0].id : '',
     order: sorting.value.length > 0 && sorting.value[0].desc ? 'desc' : 'asc',
+    nocache: 1,
     ...filters.value,
   }));
 
