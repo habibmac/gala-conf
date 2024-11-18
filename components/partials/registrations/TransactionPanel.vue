@@ -127,16 +127,12 @@ onUnmounted(async () => {
         </button>
 
         <div class="px-4 py-8 lg:px-8">
-          <div v-if="isRefetching" class="grid gap-4">
+          <div v-if="loading || isRefetching" class="grid gap-4">
             <div>
               <Skeleton class="h-8 w-40 mx-auto p-4 bg-muted-foreground/10" />
             </div>
             <Skeleton class="h-96 p-4 bg-muted-foreground/10" />
             <Skeleton class="h-20 p-4 bg-muted-foreground/10" />
-          </div>
-
-          <div v-if="loading" class="absolute left-0 top-0 z-10 w-full">
-            <SpinnerRing size="25" class="relative left-6 top-6" />
           </div>
           <div v-else-if="isError">
             {{ error ? error.message : 'Error' }}
