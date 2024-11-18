@@ -65,7 +65,7 @@ const hasActions = computed(() => Boolean(props.cta?.label || props.cta2?.label)
         <NuxtImg
           :src="props.img.src"
           :alt="props.img.alt"
-          :class="cn('pointer-events-none select-none w-40', props.img.class)"
+          :class="cn('pointer-events-none select-none w-32', props.img.class)"
         />
       </div>
 

@@ -97,6 +97,7 @@ watch(
       title="No data found"
       :img="{
         src: '/images/empty-state/no-data.svg',
+        class: 'w-32',
         alt: 'No data found',
       }"
     />
