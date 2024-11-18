@@ -168,9 +168,9 @@ const columns = computed(() => {
               const regId = info.getValue();
               return h(
                 resolveComponent('NuxtLink'),
-                { 
+                {
                   to: getRegistrationUrl(regId),
-                  class: 'text-emerald-500 hover:underline'
+                  class: 'text-emerald-500 hover:underline',
                 },
                 () => regId
               );

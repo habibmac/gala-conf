@@ -71,9 +71,9 @@ const getRegDetailsUrl = (regId: string) => {
                 </td>
                 <td class="px-4 py-2">{{ checkin.name }}</td>
                 <td class="px-4 py-2 font-mono text-xs">
-                    <NuxtLink :to="getRegDetailsUrl(checkin.REG_ID)" class="text-emerald-500 hover:underline">
-                      {{ checkin.REG_code }}
-                    </NuxtLink>
+                  <NuxtLink :to="getRegDetailsUrl(checkin.REG_ID)" class="text-emerald-500 hover:underline">
+                    {{ checkin.REG_code }}
+                  </NuxtLink>
                 </td>
                 <td class="px-4 py-2">{{ checkin.ticket }}</td>
                 <td class="px-4 py-2">{{ checkin.city }}</td>

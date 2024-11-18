@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatDate } from '@/utils'
+import { formatDate } from '@/utils';
 import { cn } from '~/lib/utils';
 import EventCover from '@/components/EventCover.vue';
 
@@ -43,7 +43,9 @@ defineProps({
     <!-- Content -->
     <div class="flex grow flex-col p-5 text-center sm:text-left">
       <div class="grow">
-        <div class="text-xs text-muted-foreground">{{ formatDate(event.start, 'd MMM yyy HH:mm') }} - {{ formatDate(event.end, 'd MMM yyy HH:mm') }}</div>
+        <div class="text-xs text-muted-foreground">
+          {{ formatDate(event.start, 'd MMM yyy HH:mm') }} - {{ formatDate(event.end, 'd MMM yyy HH:mm') }}
+        </div>
         <h3
           class="font-semibold leading-snug tracking-tight"
           :class="[isPast ? 'line-clamp-2 text-lg' : 'line-clamp-3 text-2xl']"
