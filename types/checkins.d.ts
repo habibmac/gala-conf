@@ -36,8 +36,8 @@ export interface TicketCheckinStats {
     checkout_percentage: string;
 }
 
-interface TshirtCheckinStats {
-    tshirt_size: string;
+interface CustomItemCheckinStats {
+    option: string;
     total_registered: number;
     picked_up: number;
     checked_out: number;
@@ -53,5 +53,5 @@ interface CheckinStats {
         total_remaining: number;
     };
     tickets: TicketCheckinStats[];
-    tshirts?: TshirtCheckinStats[];
+    items?: CustomItemCheckinStats[];
 }

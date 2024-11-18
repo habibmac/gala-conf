@@ -52,7 +52,44 @@ export interface CustomFieldChartItem {
   count: number;
 }
 
-interface customFieldChartType {
+export interface customFieldChartType {
   label: string;
   values: customFieldItemType[];
+}
+
+// For the question info
+interface QuestionInfo {
+  QST_ID: string;
+  QST_display_text: string;
+  QST_type: string;
+}
+
+// For each option's stats
+interface OptionStats {
+  answer: string;
+  total_registered: string | number;
+  picked_up: string | number;
+  checked_out: string | number;
+  currently_out: string | number;
+  pickup_percentage: string | number;
+}
+
+// For each question's full data
+interface QuestionStats {
+  info: QuestionInfo;
+  options: OptionStats[];
+}
+
+// Main CheckinStats interface
+export interface CheckinStats {
+  global: {
+    total_registrations: number;
+    total_checkins: number;
+    total_checkouts: number;
+    currently_checked_in: number;
+  };
+  tickets: TicketCheckinStats[];
+  custom: {
+    questions: QuestionStats[];
+  };
 }
