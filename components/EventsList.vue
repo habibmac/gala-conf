@@ -65,7 +65,7 @@ watch(
       }"
     />
   </template>
-  <template v-else-if="events">
+  <div v-else-if="events" class="mb-20">
     <div v-if="events.length > 0" class="flex flex-col gap-6">
       <!-- Events -->
       <div v-for="event in events" :key="event.id" class="grid grid-cols-1">
@@ -91,7 +91,7 @@ watch(
         to: '/new-event',
       }"
     />
-  </template>
+  </div>
   <template v-else>
     <EmptyState
       title="No data found"

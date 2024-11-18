@@ -23,6 +23,7 @@ withDefaults(
 
 const route = useRoute();
 const eventId = ref(route.params.eventId as string) || ref('');
+const { hasEventEnded } = useEventStatus();
 
 // Fetch stats
 const { $galantisApi } = useNuxtApp();
@@ -39,46 +40,71 @@ const {
 } = useQuery<CheckinStats>({
   queryKey: ['checkin-stats', eventId],
   queryFn: () => getStats(eventId),
-  refetchInterval: 30000, // Refetch every 30 seconds
+  refetchInterval: hasEventEnded.value ? false : 30000,
+  staleTime: hasEventEnded.value ? Infinity : 30000,
 });
+
+const totalRegs = computed(() =>
+  stats.value?.global.total_registrations ? formatThousands(stats.value.global.total_registrations) : 0
+);
+
+const totalCheckins = computed(() =>
+  stats.value?.global.total_checkins ? formatThousands(stats.value.global.total_checkins) : 0
+);
+const percentageCheckins = computed(
+  () => ((stats.value?.global.total_checkins ?? 0) / (stats.value?.global.total_registrations ?? 1)) * 100
+);
+
+const totalRemaining = computed(() =>
+  stats.value?.global.total_registrations ? formatThousands(stats.value.global.total_registrations) : 0
+);
+
+const percentageRemaining = computed(
+  () =>
+    ((parseInt((stats.value?.global.total_registrations ?? 0).toString()) -
+      parseInt((stats.value?.global.total_checkins ?? 0).toString())) /
+      (stats.value?.global.total_registrations ?? 1)) *
+    100
+);
+
+const totalCheckouts = computed(() =>
+  stats.value?.global.total_checkouts ? formatThousands(stats.value.global.total_checkouts) : 0
+);
+const percentageCheckouts = computed(
+  () => ((stats.value?.global.total_checkouts ?? 0) / (stats.value?.global.total_registrations ?? 1)) * 100
+);
 
 const statsCards = computed(() => [
   // if showTotalRegs
   {
     title: 'Total Registrations',
-    value: stats.value?.global.total_registrations ? formatThousands(stats.value.global.total_registrations) : 0,
+    value: totalRegs.value,
     icon: 'solar:users-group-rounded-linear',
     color: 'text-blue-500',
     bgColor: 'bg-blue-50',
   },
   {
     title: 'Total Check-ins',
-    value: stats.value?.global.total_checkins ? formatThousands(stats.value.global.total_checkins) : 0,
+    value: totalCheckins.value,
     icon: 'solar:login-2-linear',
     color: 'text-green-500',
-    percentage: ((stats.value?.global.total_checkins ?? 0) / (stats.value?.global.total_registrations ?? 1)) * 100,
+    percentage: percentageCheckins.value.toFixed(0),
     bgColor: 'bg-green-50',
   },
   {
     title: 'Remaining',
-    value:
-      parseInt((stats.value?.global.total_registrations ?? 0).toString()) -
-      parseInt((stats.value?.global.total_checkins ?? 0).toString()),
+    value: totalRemaining.value,
     icon: 'solar:users-group-rounded-linear',
     color: 'text-red-500',
-    percentage:
-      ((parseInt((stats.value?.global.total_registrations ?? 0).toString()) -
-        parseInt((stats.value?.global.total_checkins ?? 0).toString())) /
-        (stats.value?.global.total_registrations ?? 1)) *
-      100,
+    percentage: percentageRemaining.value.toFixed(0),
     bgColor: 'bg-red-50',
   },
   {
     title: 'Total Check-outs',
-    value: stats.value?.global.total_checkouts ? formatThousands(stats.value.global.total_checkouts) : 0,
+    value: totalCheckouts.value,
     icon: 'solar:logout-2-linear',
     color: 'text-orange-500',
-    percentage: ((stats.value?.global.total_checkouts ?? 0) / (stats.value?.global.total_registrations ?? 1)) * 100,
+    percentage: percentageCheckouts.value.toFixed(0),
     bgColor: 'bg-orange-50',
   },
 ]);
@@ -112,7 +138,7 @@ const statsCards = computed(() => [
 
       <!-- Trend Indicator -->
       <div v-if="card.percentage" class="flex items-center text-sm font-medium" :class="card.color">
-        <span class="mr-1">{{ card.percentage.toFixed(2) }}%</span>
+        <span class="mr-1">{{ card.percentage }}%</span>
       </div>
     </Card>
 

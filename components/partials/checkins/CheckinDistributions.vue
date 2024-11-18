@@ -22,7 +22,7 @@ defineProps<{
           <div v-for="ticket in tickets" :key="ticket.TKT_ID" class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
             <div class="flex justify-between items-center mb-2">
               <span class="font-medium">{{ ticket.TKT_name }}</span>
-              <Badge> {{ ticket.checkin_percentage }}% </Badge>
+              <Badge> {{ parseInt(ticket.checkin_percentage).toFixed(0) }}% </Badge>
             </div>
             <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1">
               <div
@@ -41,7 +41,7 @@ defineProps<{
       </CardContent>
     </Card>
     <!-- Custom Questions Stats -->
-    <div v-if="custom?.questions.length">
+    <div v-if="custom && custom?.questions?.length">
       <Card v-for="question in custom.questions" :key="question.info.QST_ID" class="mb-4">
         <CardHeader>
           <CardTitle>Check-in Status by {{ question.info.QST_display_text }}</CardTitle>
@@ -55,7 +55,7 @@ defineProps<{
             >
               <div class="flex justify-between items-center mb-2">
                 <span class="font-medium">{{ option.answer }}</span>
-                <Badge> {{ option.pickup_percentage }}% </Badge>
+                <Badge> {{ parseInt(option.pickup_percentage.toString()).toFixed(0) }}% </Badge>
               </div>
               <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1">
                 <div

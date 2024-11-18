@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
 import RegCards from '~/components/partials/registrations/RegCards.vue';
+import CongratulationsBanner from '~/components/CongratulationsBanner.vue';
+import confetti from 'canvas-confetti';
 
 useHead({
   title: 'Dashboard',
@@ -17,6 +19,26 @@ definePageMeta({
   capabilities: ['ee_read_registrations'],
   layout: 'dashboard-with-sidebar',
 });
+
+const { hasEventEnded } = useEventStatus();
+
+// Function to trigger confetti
+const triggerConfetti = () => {
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 }
+  });
+};
+
+onMounted(() => {
+  if (hasEventEnded.value) {
+    //wait for 1 second before triggering confetti
+    setTimeout(() => {
+      triggerConfetti();
+    }, 1000);
+  }
+});
 </script>
 
 <template>
@@ -25,7 +47,8 @@ definePageMeta({
       <h1 class="h2 mb">Dashboard</h1>
     </header>
     <div class="flex flex-col gap-4 mb-40">
-      <RegCards />
+      <CongratulationsBanner v-if="hasEventEnded" />
+      <RegCards v-else />
       <CheckinStats :show-detailed-stats="false" :show-recent-checkins="true" />
     </div>
   </div>

@@ -19,7 +19,7 @@ const router = useRouter();
 const { $galantisApi, $router } = useNuxtApp();
 const { data: evtCount } = useQuery({
   queryKey: ['events-count'],
-  queryFn: () => $galantisApi.get('/events/count').then((res) => res.data),
+  queryFn: () => $galantisApi.get('/events/count?nocache=1').then((res) => res.data),
   staleTime: 1000 * 60 * 60, // 1 hour
 });
 

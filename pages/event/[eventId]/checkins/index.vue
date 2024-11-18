@@ -160,6 +160,22 @@ const columns = computed(() => {
                 .map((item) => `${formatToUTC7(item.time)} ${item.type}`)
                 .join(', '),
           });
+        case 'REG_code':
+          return columnHelper.accessor('REG_code', {
+            header: config.header,
+            size: config.width * 10,
+            cell: (info) => {
+              const regId = info.getValue();
+              return h(
+                resolveComponent('NuxtLink'),
+                { 
+                  to: getRegistrationUrl(regId),
+                  class: 'text-emerald-500 hover:underline'
+                },
+                () => regId
+              );
+            },
+          });
         default:
           return columnHelper.accessor(config.key as keyof CheckinItem, {
             header: config.header,
@@ -286,7 +302,7 @@ const getRegistrationUrl = (regId: string) => {
     </div>
   </section>
 
-  <section class="relative" :class="{ 'overflow-x-auto scroll-area': !isDataLoading }">
+  <section class="relative mb-20" :class="{ 'overflow-x-auto scroll-area': !isDataLoading }">
     <div class="w-full">
       <div :style="{ minWidth: `${calculateMinWidth()}px` }">
         <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
@@ -346,16 +362,15 @@ const getRegistrationUrl = (regId: string) => {
         </table>
       </div>
     </div>
+    <TablePagination
+      v-if="table.getRowModel().rows.length > 0"
+      :current-page="pagination.pageIndex + 1"
+      :page-count="totalPages"
+      :page-sizes="pageSizes"
+      :page-size="pagination.pageSize"
+      :total-data="totalData"
+      @update:page-size="handlePageSizeChange"
+      @update:current-page="handleNavigation"
+    />
   </section>
-
-  <TablePagination
-    v-if="table.getRowModel().rows.length > 0"
-    :current-page="pagination.pageIndex + 1"
-    :page-count="totalPages"
-    :page-sizes="pageSizes"
-    :page-size="pagination.pageSize"
-    :total-data="totalData"
-    @update:page-size="handlePageSizeChange"
-    @update:current-page="handleNavigation"
-  />
 </template>
