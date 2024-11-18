@@ -1,4 +1,4 @@
-import { format, fromUnixTime, formatDistanceToNow } from 'date-fns';
+import { addHours, format, fromUnixTime, formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale/id';
 
 export const formatValue = (value: number) =>
@@ -53,4 +53,10 @@ export const formatThousandsToK = (number: number) => {
 
 export const formatTimeAgo = (date: Date): string => {
   return formatDistanceToNow(date, { addSuffix: true });
+};
+
+export const formatToUTC7 = (dateString: string) => {
+  const utcDate = new Date(dateString);
+  const utc7Date = addHours(utcDate, 7);
+  return format(utc7Date, 'dd MMM yyyy HH:mm');
 };

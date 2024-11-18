@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
 import type { CheckinItem, CheckinColumnConfig } from '@/types';
 import { useCheckins } from '~/composables/useCheckins';
+import { formatToUTC7 } from '@/utils';
 
 useHead({
   title: 'Check-ins',
@@ -147,7 +148,7 @@ const columns = computed(() => {
           return columnHelper.accessor('first_check_time', {
             header: config.header,
             size: config.width * 10,
-            cell: (info) => format(new Date(info.getValue()), 'dd MMM yyyy HH:mm'),
+            cell: (info) => formatToUTC7(info.getValue()),
           });
         case 'data':
           return columnHelper.accessor('data', {
@@ -156,7 +157,7 @@ const columns = computed(() => {
             cell: (info) =>
               info
                 .getValue()
-                .map((item) => `${format(new Date(item.time), 'HH:mm')} ${item.type}`)
+                .map((item) => `${formatToUTC7(item.time)} ${item.type}`)
                 .join(', '),
           });
         default:
@@ -256,6 +257,10 @@ function calculateMinWidth(): number {
   // Return the greater of the calculated width or minimum width (e.g., 1000px)
   return Math.max(totalWidth, 1000);
 }
+
+const getRegistrationUrl = (regId: string) => {
+  return `/event/${eventId.value}/registrations?page=1&perPage=10&sortBy=reg_date&order=desc&details=${regId}`;
+};
 </script>
 
 <!-- Add the template section from the next message due to length -->
@@ -265,9 +270,7 @@ function calculateMinWidth(): number {
       <header class="pt-10 mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <h1 class="h2">Check-ins</h1>
       </header>
-
       <CheckinStats />
-
     </div>
   </div>
 
