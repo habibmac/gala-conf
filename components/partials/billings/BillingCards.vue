@@ -77,9 +77,7 @@ const cards = computed(() => {
     />
   </div>
   <div v-else-if="isError" class="py-16">
-    <div class="flex h-32 items-center justify-center">
-      Error fetching billing summary. Please try again later.
-    </div>
+    <div class="flex h-32 items-center justify-center">Error fetching billing summary. Please try again later.</div>
   </div>
   <template v-else-if="data?.success">
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -88,24 +86,17 @@ const cards = computed(() => {
           <CardTitle class="text-sm font-medium tracking-normal">
             {{ item.title }}
           </CardTitle>
-          <Icon
-            :icon="item.icon"
-            class="size-7"
-            :class="item.color"
-          />
+          <Icon :icon="item.icon" class="size-7" :class="item.color" />
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-semibold tabular-nums">
             {{ formatThousands(item.value) }}
-            <span v-if="item.is_currency" class="text-xs font-medium text-muted-foreground">
-              IDR
-            </span>
+            <span v-if="item.is_currency" class="text-xs font-medium text-muted-foreground"> IDR </span>
           </div>
           <p v-if="item.subtitle" class="text-xs text-muted-foreground mt-1">
             {{ item.subtitle }}
           </p>
         </CardContent>
-        
       </Card>
     </div>
   </template>

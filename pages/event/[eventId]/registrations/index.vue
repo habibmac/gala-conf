@@ -486,7 +486,7 @@ watch(
   (newDetails) => {
     selectedRegId.value = (newDetails as string) || '';
   },
-  { immediate: true }  // This ensures it runs on component mount
+  { immediate: true } // This ensures it runs on component mount
 );
 
 // Watch for changes in the route query and update the filters ref

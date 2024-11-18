@@ -2,7 +2,6 @@
 import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
 import RegCards from '~/components/partials/registrations/RegCards.vue';
 import CongratulationsBanner from '~/components/CongratulationsBanner.vue';
-import confetti from 'canvas-confetti';
 
 useHead({
   title: 'Dashboard',
@@ -24,10 +23,10 @@ const { hasEventEnded } = useEventStatus();
 
 // Function to trigger confetti
 const triggerConfetti = () => {
-  confetti({
+  useConfetti({
     particleCount: 100,
     spread: 70,
-    origin: { y: 0.6 }
+    origin: { y: 0.6 },
   });
 };
 
@@ -47,9 +46,11 @@ onMounted(() => {
       <h1 class="h2 mb">Dashboard</h1>
     </header>
     <div class="flex flex-col gap-4 mb-40">
-      <CongratulationsBanner v-if="hasEventEnded" />
-      <RegCards v-else />
-      <CheckinStats :show-detailed-stats="false" :show-recent-checkins="true" />
+      <ClientOnly>
+        <CongratulationsBanner v-if="hasEventEnded" />
+        <RegCards v-else />
+        <CheckinStats :show-detailed-stats="false" :show-recent-checkins="true" />
+      </ClientOnly>
     </div>
   </div>
 </template>

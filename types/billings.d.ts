@@ -25,5 +25,5 @@ interface StatusConfig {
     icon: string;
     color: string;
     bgColor: string;
-  }
+  };
 }

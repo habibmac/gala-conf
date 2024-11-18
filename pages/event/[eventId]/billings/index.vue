@@ -129,7 +129,7 @@ const columnConfigs = ref<ColumnConfig[]>([
     isHideable: true,
     width: 15,
   },
-   {
+  {
     key: 'notes',
     header: 'Notes',
     isVisible: true,
@@ -403,9 +403,7 @@ watch(
                   <EmptyState
                     title="No data found"
                     description="There are no data matching your criteria."
-                    :img="{ src: '/images/empty-state/empty-c.svg', 
-                      alt: 'No data found', 
-                      class: 'w-20' }"
+                    :img="{ src: '/images/empty-state/empty-c.svg', alt: 'No data found', class: 'w-20' }"
                     :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
                   />
                 </td>

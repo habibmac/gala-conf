@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { Icon } from '@iconify/vue';
 
 import { formatDate, formatCurrency, getCountryFlagWithName } from '@/utils';
-import SpinnerRing from '@/components/SpinnerRing.vue';
 import PayMethodLogo from '@/components/partials/registrations/PayMethodLogo.vue';
 import { getStatusInfo } from '@/utils/status-map';
 

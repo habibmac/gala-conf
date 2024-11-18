@@ -8,4 +8,4 @@ export * from './events';
 export * from './regs';
 export * from './stats';
 export * from './billings';
-export * from './checkins'
+export * from './checkins';
