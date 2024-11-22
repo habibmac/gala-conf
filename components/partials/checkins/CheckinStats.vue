@@ -112,7 +112,7 @@ const statsCards = computed(() => [
 </script>
 
 <template>
-  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
     <Card
       v-for="(card, index) in statsCards"
       :key="index"

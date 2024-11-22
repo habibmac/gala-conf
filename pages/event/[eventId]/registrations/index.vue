@@ -583,16 +583,16 @@ watch(
     </div>
   </section>
 
-  <section class="relative" :class="{ 'overflow-x-scroll': regData && regData.length > 0 }">
-    <template v-if="isLoading && !regData">
-      <div class="absolute z-10 h-full w-full ring-0" />
-    </template>
-    <div :style="{ width: regData && regData.length > 0 ? `${totalVisibleWidth}%` : `100%` }">
-      <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90">
-        <thead
-          class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
-        >
-          <template v-if="isLoading || (regData && regData.length > 0)">
+  <section class="relative" :class="{ 'overflow-x-auto scroll-area': !isLoading }">
+    <div class="w-full">
+      <div :style="{ minWidth: `${calculateMinWidth(columnConfigs)}px` }">
+        <template v-if="isLoading">
+          <div class="absolute z-10 h-full w-full ring-0" />
+        </template>
+        <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90">
+          <thead
+            class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
+          >
             <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
               <th
                 v-for="header in headerGroup.headers"
@@ -620,33 +620,31 @@ watch(
                 </template>
               </th>
             </tr>
-          </template>
-        </thead>
-        <tbody class="text-sm 2xl:text-base border-b">
-          <template v-if="!table.getRowModel().rows.length">
-            <template v-if="isLoading">
-              <tr v-for="index in 10" :key="index">
-                <td v-for="(column, index2) in columns" :key="index2" class="px-2 py-2">
-                  <Skeleton class="w-full h-6 rounded" />
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-sm 2xl:text-sm dark:divide-slate-800 border-b">
+            <template v-if="!table.getRowModel().rows.length">
+              <template v-if="isLoading">
+                <tr v-for="index in 10" :key="index">
+                  <td v-for="(column, index2) in columns" :key="index2" class="px-2 py-2">
+                    <Skeleton class="w-full h-6 rounded" />
+                  </td>
+                </tr>
+              </template>
+              <tr v-else>
+                <td colspan="10" class="py-10 text-center">
+                  <EmptyState
+                    title="No data found"
+                    description="There are no registrations matching your criteria."
+                    :img="{ src: '/images/empty-state/empty-c.svg' }"
+                    :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
+                  />
                 </td>
               </tr>
             </template>
-            <tr v-else>
-              <td colspan="10" class="py-10 text-center">
-                <EmptyState
-                  title="No data found"
-                  description="There are no registrations matching your criteria."
-                  :img="{ src: '/images/empty-state/empty-c.svg', class: 'w-28' }"
-                  :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
-                />
-              </td>
-            </tr>
-          </template>
-          <template v-else>
             <tr
               v-for="row in table.getRowModel().rows"
               :key="row.id"
-              class="divide-y divide-slate-200 dark:divide-slate-800 hover:bg-slate-50 dark:hover:bg-slate-950/20"
+              class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
             >
               <td
                 v-for="cell in row.getVisibleCells()"
@@ -659,9 +657,9 @@ watch(
                 <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
               </td>
             </tr>
-          </template>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
   <TablePagination

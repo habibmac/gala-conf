@@ -132,7 +132,7 @@ const {
               :img="{
                 src: '/images/empty-state/no-insight.svg',
                 alt: 'No Insights Found',
-                class: 'w-40',
+                class: 'w-28',
               }"
               :cta="{
                 label: 'Create Insight',

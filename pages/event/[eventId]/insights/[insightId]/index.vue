@@ -276,15 +276,6 @@ function setSorting(state: SortingState) {
   sorting.value = state;
 }
 
-function calculateMinWidth(): number {
-  const totalWidth = columnConfigs.value
-    .filter((config) => config.isVisible)
-    .reduce((total, config) => total + config.width * 15, 0); // Multiply by a factor to get reasonable width
-
-  // Return the greater of the calculated width or minimum width (e.g., 1000px)
-  return Math.max(totalWidth, 1000);
-}
-
 function handlePageSizeChange(newSize: number) {
   pagination.value.pageSize = newSize;
 }
@@ -577,7 +568,7 @@ watch(
 
   <section class="relative" :class="{ 'overflow-x-auto scroll-area': !isDataLoading }">
     <div class="w-full">
-      <div :style="{ minWidth: `${calculateMinWidth()}px` }">
+      <div :style="{ minWidth: `${calculateMinWidth(columnConfigs)}px` }">
         <template v-if="isDataLoading">
           <div class="absolute z-10 h-full w-full bg-card/10 ring-0" />
         </template>
