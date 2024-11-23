@@ -147,8 +147,7 @@ onUnmounted(() => {
         </div>
         <!-- Links -->
         <div v-if="isEventLoading || isEventRefetching" class="grid gap-4 p-4">
-          <!-- <Skeleton v-for="i in 3" :key="i" class="h-8 bg-slate-200/20 p-4" /> -->
-          Loading.. {{ event }}
+          <Skeleton v-for="i in 3" :key="i" class="h-8 bg-slate-200/20 p-4" />
         </div>
         <div v-else-if="isEventError">Error loading menu items</div>
         <template v-else>

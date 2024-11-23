@@ -1,8 +1,3 @@
-@import '@fontsource/geist-sans/400.css';
-@import '@fontsource/geist-sans/500.css';
-@import '@fontsource/geist-sans/600.css';
-@import '@fontsource/geist-sans/700.css';
-
 @import 'additional-styles/forms.scss';
 @import 'additional-styles/vue-datepicker.scss';
 @import 'additional-styles/toast.scss';
@@ -52,7 +47,7 @@ html.dark {
     background-color: hsl(var(--muted-foreground) / 0.2) !important;
   }
 
-  scrollbar-color: hsl(var(--muted-foreground) / 0.2) hsl(var(--muted) / 0.3);
+  // scrollbar-color: hsl(var(--muted-foreground) / 0.2) hsl(var(--muted) / 0.3);
 }
 
 /* Custom styles */

@@ -37,7 +37,7 @@ const getRegDetailsUrl = (regId: string) => {
 <template>
   <Card class="relative rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
     <CardHeader>
-      <CardTitle class="text-base font-medium">Recent Check-ins</CardTitle>
+      <CardTitle class="text-base font-semibold">Recent Check-ins</CardTitle>
     </CardHeader>
 
     <CardContent>

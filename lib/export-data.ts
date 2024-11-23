@@ -1,4 +1,4 @@
-import { utils, write } from 'xlsx';
+import { utils, write } from '@e965/xlsx';
 
 interface ExportData {
   [key: string]: string | number | boolean | Date;

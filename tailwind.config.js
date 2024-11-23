@@ -56,9 +56,8 @@ export default {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        inter: ['Inter Variable', 'sans-serif', { fontFeatureSettings: '"cv11", "ss01"' }, 'system-ui'],
-        geist: ['Geist', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        // inter: ['Inter Variable', 'sans-serif',  'system-ui'],
+        geist: ['Geist Sans', 'sans-serif', 'system-ui'],
       },
       fontSize: {
         tiny: ['0.65rem', { lineHeight: '1.5' }],
