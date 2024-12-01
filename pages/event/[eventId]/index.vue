@@ -2,6 +2,7 @@
 import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
 import RegCards from '~/components/partials/registrations/RegCards.vue';
 import CongratulationsBanner from '~/components/CongratulationsBanner.vue';
+import VenueBookings from '~/components/partials/registrations/VenueBookings.vue';
 
 useHead({
   title: 'Dashboard',
@@ -50,6 +51,8 @@ onMounted(() => {
         <CongratulationsBanner v-if="hasEventEnded" />
         <RegCards v-else />
         <CheckinStats :show-detailed-stats="false" :show-recent-checkins="true" />
+
+        <VenueBookings />
       </ClientOnly>
     </div>
   </div>
