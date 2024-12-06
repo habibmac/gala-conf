@@ -26,6 +26,38 @@ export interface SeatBooking {
     current_status: string;
 }
 
+
+export interface Booking {
+    count: number
+    data: Array<{ name: string }>
+}
+
+export interface Seat {
+    code: string
+    row: number
+    col: number
+    type: 'vip' | 'premium'
+    bookings: Booking | null
+}
+
+export interface VenueLayout {
+    layout: {
+        width: number;
+        height: number;
+        stage: {
+            width: number;
+            startRow: number;
+            rows: number;
+        };
+        aisles: Array<{
+            afterCol: number;
+            width: number;
+        }>;
+    };
+    seats: Seat[];
+}
+
+
 export interface VenueConfig {
     duration_days: number;
     ticket_day_scope: Array<{
@@ -34,29 +66,6 @@ export interface VenueConfig {
     }>;
     seat_reset: string;
     pricing_type: string;
-}
-
-// types/venue.ts
-interface VenueLayout {
-    layout: {
-        width: number;
-        height: number;
-        stage: {
-            width: number;
-            rows: number;
-            startRow: number;
-        };
-        aisles: Array<{
-            afterCol: number;
-            width: number;
-        }>;
-    };
-    seats: Array<{
-        code: string;
-        row: number;
-        col: number;
-        type: 'vip' | 'premium';
-    }>;
 }
 
 interface VenueData {

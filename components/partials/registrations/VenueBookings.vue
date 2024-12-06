@@ -3,60 +3,25 @@
 // Script section
 import { computed, ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-
-// Types
-interface SeatBooking {
-  count: number;
-  data: Array<{ name: string }>;
-}
-
-interface Seat {
-  code: string;
-  row: number;
-  col: number;
-  type: 'vip' | 'premium';
-  bookings?: Record<number, SeatBooking>;
-}
-
-interface VenueLayout {
-  layout: {
-    width: number;
-    height: number;
-    stage: {
-      width: number;
-      startRow: number;
-      rows: number;
-    };
-    aisles: Array<{
-      afterCol: number;
-      width: number;
-    }>;
-  };
-  seats: Seat[];
-}
-
-
-interface VenueData {
-  has_seating: boolean;
-  layout?: VenueLayout;
-  qst_id?: string;
-}
+import BookingPopover from './BookingPopover.vue';
+import type { VenueLayout, VenueData, Seat } from '@/types';
 
 // State
 const selectedSeat = ref<string | null>(null);
 
-const authStore = useAuthStore();
 const route = useRoute();
 const eventId = ref(route.params.eventId as string) || ref('');
 const { $galantisApi } = useNuxtApp();
 
 // Query to fetch venue data
-const { data: venueData, error, isLoading } = useQuery<VenueData>({
+const {
+  data: venueData,
+  error,
+  isLoading,
+} = useQuery<VenueData>({
   queryKey: ['venue-data', eventId],
   queryFn: ({ signal }) =>
-    $galantisApi
-      .get(`/event/${eventId.value}/venue/layout`, { signal })
-      .then((response) => response.data),
+    $galantisApi.get(`/event/${eventId.value}/venue/layout`, { signal }).then((response) => response.data),
 });
 
 // Computed
@@ -98,20 +63,6 @@ function isAisle(col: number): boolean {
   return venueData.value?.layout?.layout.aisles.some((aisle) => aisle.afterCol === col) ?? false;
 }
 
-function getSeatClass(row: number, col: number) {
-  const seat = getSeatAtPosition(row, col);
-
-  return {
-    'venue-seat': !!seat,
-    'venue-space': !seat && !isStagePosition(row, col),
-    'venue-stage': isStagePosition(row, col),
-    vip: seat?.type === 'vip',
-    premium: seat?.type === 'premium',
-    selected: seat?.code === selectedSeat.value,
-    'venue-aisle': isAisle(col),
-  };
-}
-
 function handleSeatClick(seat: ReturnType<typeof getSeatAtPosition>) {
   if (!seat) return;
   selectedSeat.value = selectedSeat.value === seat.code ? null : seat.code;
@@ -134,53 +85,49 @@ function handleSeatClick(seat: ReturnType<typeof getSeatAtPosition>) {
 
         <div v-else-if="venueData?.layout" class="overflow-x-auto">
           <div class="ee-seat-booking-wrapper">
+            <div
+              v-if="venueData?.layout"
+              class="venue-grid"
+              :style="{
+                'grid-template-columns': `repeat(${venueData.layout.layout.width}, 1fr)`,
+                width: '100%',
+                'max-width': '1200px',
+              }"
+            >
+              <!-- Stage -->
               <div
-                v-if="venueData?.layout"
-                class="venue-grid"
+                class="venue-stage"
                 :style="{
-                  'grid-template-columns': `repeat(${venueData.layout.layout.width}, 1fr)`,
-                  width: '100%',
-                  'max-width': '1200px',
+                  'grid-column': `${getStageStart(venueData.layout) + 1} / span ${venueData.layout.layout.stage.width}`,
+                  'grid-row': `1 / span ${venueData.layout.layout.stage.rows}`,
                 }"
               >
-                <!-- Stage -->
-                <div
-                  class="venue-stage"
-                  :style="{
-                    'grid-column': `${getStageStart(venueData.layout) + 1} / span ${venueData.layout.layout.stage.width}`,
-                    'grid-row': `1 / span ${venueData.layout.layout.stage.rows}`,
-                  }"
-                >
-                  STAGE
-                </div>
-
-                <!-- Seats Grid -->
-                <template v-for="row in venueData.layout.layout.height" :key="row">
-                  <template v-for="col in venueData.layout.layout.width" :key="`${row}-${col}`">
-                    <div
-                      v-if="!isStagePosition(row - 1, col - 1)"
-                      :class="[
-                        'grid-cell',
-                        {
-                          'venue-seat': getSeatAtPosition(row - 1, col - 1),
-                          'venue-space': !getSeatAtPosition(row - 1, col - 1),
-                          'venue-aisle': isAisle(col - 1),
-                          vip: getSeatAtPosition(row - 1, col - 1)?.type === 'vip',
-                          premium: getSeatAtPosition(row - 1, col - 1)?.type === 'premium',
-                          selected: selectedSeat === getSeatAtPosition(row - 1, col - 1)?.code,
-                                      'booked': !!getSeatAtPosition(row - 1, col - 1)?.bookings
-                        },
-                      ]"
-                      @click="handleSeatClick(getSeatAtPosition(row - 1, col - 1))"
-                    >
-                      {{ getSeatAtPosition(row - 1, col - 1)?.code || '' }}
-                      
-                      <ul></ul>
-                    </div>
-                  </template>
-                </template>
+                STAGE
               </div>
+
+              <!-- Seats Grid -->
+               <template v-for="row in venueData.layout.layout.height" :key="row">
+                <template v-for="col in venueData.layout.layout.width" :key="`${row}-${col}`">
+                  <div
+                    v-if="!isStagePosition(row - 1, col - 1)"
+                    :class="[
+                      'grid-cell',
+                      { 'venue-aisle': isAisle(col - 1) }
+                    ]"
+                  >
+                    <template v-if="getSeatAtPosition(row - 1, col - 1)">
+                      <BookingPopover 
+                        :seat="getSeatAtPosition(row - 1, col - 1)"
+                        :selected="selectedSeat === getSeatAtPosition(row - 1, col - 1)?.code"
+                        @select="handleSeatClick"
+                      />
+                    </template>
+                    <div v-else class="w-full h-full" />
+                  </div>
+                </template>
+              </template>
             </div>
+          </div>
           <!-- Legend -->
           <div class="flex gap-4 justify-center mt-4 text-xs">
             <div class="flex items-center gap-2">
@@ -218,7 +165,6 @@ function handleSeatClick(seat: ReturnType<typeof getSeatAtPosition>) {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
 }
 
 .venue-seat {
