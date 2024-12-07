@@ -168,7 +168,7 @@ const columns = computed(() => {
             case 'request_date':
             case 'transferred_date': {
               if (!value) return '-';
-              return format(new Date(value), 'dd MMM yyyy');
+              return format(new Date(value), 'dd MMM yyyy HH:mm');
             }
             case 'amount':
               return formatThousands(Number(value));
@@ -209,6 +209,7 @@ const {
   totalData,
   totalPages,
   isLoading: isDataLoading,
+  isRefetching,
 } = useBillings(eventId, pagination, sorting, filters);
 
 // Create table instance
@@ -390,7 +391,7 @@ watch(
           </thead>
           <tbody class="divide-y divide-slate-200 text-sm dark:divide-slate-800">
             <template v-if="!table.getRowModel().rows.length">
-              <template v-if="isDataLoading">
+              <template v-if="isDataLoading || isRefetching">
                 <tr v-for="index in 10" :key="index">
                   <td v-for="(column, index2) in columns" :key="index2" class="px-2 py-2">
                     <Skeleton class="w-full h-6 rounded" />

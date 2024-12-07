@@ -49,7 +49,7 @@ const { data, isLoading, isError, refetch, isRefetching } = useQuery({
           </Button>
         </CardHeader>
         <CardContent class="relative">
-          <div :class="cn('text-2xl font-semibold tabular-nums')">
+          <div :class="cn('text-2xl font-semibold ordinal slashed-zero tabular-nums')">
             {{ formatThousands(item.value) }}
             <span v-if="item.is_currency" class="text-xs font-medium text-muted-foreground"> IDR </span>
           </div>

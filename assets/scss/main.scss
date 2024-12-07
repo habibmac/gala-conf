@@ -1,8 +1,3 @@
-@import '@fontsource/geist-sans/400.css';
-@import '@fontsource/geist-sans/500.css';
-@import '@fontsource/geist-sans/600.css';
-@import '@fontsource/geist-sans/700.css';
-
 @import 'additional-styles/forms.scss';
 @import 'additional-styles/vue-datepicker.scss';
 @import 'additional-styles/toast.scss';
@@ -38,26 +33,36 @@ html.light {
 
 html {
   scrollbar-color: hsl(215.4 16.3% 46.9% / 0.3);
-}
 
-html.dark {
-  scrollbar-color: hsl(215.4 16.3% 56.9% / 0.3);
-}
-
-/* Custom styles */
-.scroll-area {
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) hsl(var(--muted));
   scrollbar-width: thin;
 }
 
+html.dark {
+  &::-webkit-scrollbar-track {
+    background-color: hsl(var(--muted) / 0.3) !important;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.2) !important;
+  }
+
+  // scrollbar-color: hsl(var(--muted-foreground) / 0.2) hsl(var(--muted) / 0.3);
+}
+
+/* Custom styles */
 .dropdown-item {
   @apply text-sm flex items-center space-x-1 px-3 py-1.5 m-1 rounded dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-default select-none relative;
-  > a {
+
+  >a {
     @apply flex items-center space-x-1 cursor-default;
   }
+
   &.selected {
     @apply bg-slate-100 hover:bg-slate-100 dark:bg-slate-800;
   }
-  > .check {
+
+  >.check {
     @apply w-4 h-4;
   }
 }

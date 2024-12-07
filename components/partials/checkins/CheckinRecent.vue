@@ -37,11 +37,11 @@ const getRegDetailsUrl = (regId: string) => {
 <template>
   <Card class="relative rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
     <CardHeader>
-      <CardTitle class="text-base font-medium">Recent Check-ins</CardTitle>
+      <CardTitle class="text-base font-semibold">Recent Check-ins</CardTitle>
     </CardHeader>
 
     <CardContent>
-      <div class="relative max-h-[300px] overflow-auto">
+      <div class="relative max-h-[300px] overflow-auto scroll-area">
         <table class="w-full">
           <thead class="sticky top-0 bg-white dark:bg-slate-900">
             <tr class="border-b border-slate-200 text-xs uppercase dark:border-slate-700">

@@ -335,7 +335,7 @@ watch(fieldValue, (newValue) => {
   }
 
   .filepond--root {
-    @apply font-inter rounded-lg opacity-100;
+    @apply rounded-lg opacity-100;
 
     .filepond--drip {
       @apply bg-muted-foreground border border-dashed border-muted-foreground;

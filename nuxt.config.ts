@@ -25,7 +25,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       bodyAttrs: {
-        class: 'font-inter',
+        class: 'font-geist',
       },
     },
   },
@@ -35,16 +35,6 @@ export default defineNuxtConfig({
   css: ['~/assets/scss/main.scss'],
   colorMode: {
     classSuffix: '',
-  },
-  fonts: {
-    google: {
-      families: [
-        {
-          name: 'Inter',
-          styles: ['400', '500', '600', '700'],
-        },
-      ],
-    },
   },
   runtimeConfig: {
     oauthClientSecret: '',

@@ -19,6 +19,7 @@ export const useBillings = (
     page: String(pagination.value.pageIndex + 1),
     sort_by: sorting.value.length > 0 ? sorting.value[0].id : '',
     order: sorting.value.length > 0 && sorting.value[0].desc ? 'desc' : 'asc',
+    nocache: 1,
     ...filters.value,
   }));
 
@@ -48,7 +49,7 @@ export const useBillings = (
       });
   };
 
-  const { data, error, isLoading } = useQuery({
+  const { data, error, isLoading, isRefetching } = useQuery({
     queryKey: ['billings', requestParams, eventId],
     queryFn: ({ signal }) => getData(signal),
     // Optional: Add stale time if needed
@@ -61,6 +62,7 @@ export const useBillings = (
     totalPages: computed(() => data.value?.pagination.total_pages || 1),
     summary: computed(() => data.value?.summary || null),
     isLoading,
+    isRefetching,
     error,
   };
 };
