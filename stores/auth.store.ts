@@ -163,7 +163,7 @@ export const useAuthStore = defineStore('auth', () => {
     loggingOut.value = true;
     try {
       await nuxtApp.$oauthApi.post('/destroy/', {
-        token: accessToken.value,
+        access_token: accessToken.value,
       });
     } catch (error) {
       console.error('Error during logout', error);
