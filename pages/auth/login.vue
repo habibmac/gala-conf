@@ -153,7 +153,7 @@ onMounted(() => {
             </FormItem>
           </FormField>
 
-          <Button type="submit" class="w-full" :disabled="isSubmitting">
+          <Button type="submit" class="w-full py-6" :disabled="isSubmitting">
             <SpinnerDots v-if="isSubmitting" class="mr-2 size-5" />
             {{ isSubmitting ? 'Logging in...' : 'Log in with Password' }}
           </Button>

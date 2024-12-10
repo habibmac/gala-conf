@@ -2,7 +2,7 @@
 import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
 import RegCards from '~/components/partials/registrations/RegCards.vue';
 import CongratulationsBanner from '~/components/CongratulationsBanner.vue';
-import VenueBookings from '~/components/partials/registrations/VenueBookings.vue';
+import SeatBookings from '~/components/partials/registrations/SeatBookings.vue';
 
 useHead({
   title: 'Dashboard',
@@ -52,7 +52,7 @@ onMounted(() => {
         <RegCards v-else />
         <CheckinStats :show-detailed-stats="false" :show-recent-checkins="true" />
 
-        <VenueBookings />
+        <SeatBookings />
       </ClientOnly>
     </div>
   </div>

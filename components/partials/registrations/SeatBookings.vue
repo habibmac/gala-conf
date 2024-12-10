@@ -3,33 +3,34 @@
 // Script section
 import { computed, ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import BookingPopover from './BookingPopover.vue';
-import type { VenueLayout, VenueData, Seat } from '@/types';
+import SeatPopover from './SeatPopover.vue';
+import type { SeatLayout, SeatData, Seat } from '@/types';
 
 // State
 const selectedSeat = ref<string | null>(null);
+const openPopoverSeat = ref<string | null>(null);
 
 const route = useRoute();
 const eventId = ref(route.params.eventId as string) || ref('');
 const { $galantisApi } = useNuxtApp();
 
-// Query to fetch venue data
+// Query to fetch seat data
 const {
-  data: venueData,
+  data: seatData,
   error,
   isLoading,
-} = useQuery<VenueData>({
-  queryKey: ['venue-data', eventId],
+} = useQuery<SeatData>({
+  queryKey: ['seat-data', eventId],
   queryFn: ({ signal }) =>
-    $galantisApi.get(`/event/${eventId.value}/venue/layout`, { signal }).then((response) => response.data),
+    $galantisApi.get(`/event/${eventId.value}/seat-bookings/layout`, { signal }).then((response) => response.data),
 });
 
 // Computed
 const gridElements = computed(() => {
-  if (!venueData.value?.layout) return [];
+  if (!seatData.value?.layout) return [];
 
   const elements = [];
-  const { width, height } = venueData.value.layout.layout;
+  const { width, height } = seatData.value.layout;
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
@@ -42,84 +43,103 @@ const gridElements = computed(() => {
 
 // Helper functions
 // Then in your isStagePosition function:
-function getStageStart(layout: VenueLayout): number {
-  return Math.floor((layout.layout.width - layout.layout.stage.width) / 2);
+function getStageStart(layout: SeatLayout): number {
+  return Math.floor((layout.width - layout.stage.width) / 2);
 }
 
 function isStagePosition(row: number, col: number): boolean {
-  if (!venueData.value?.layout) return false;
+  if (!seatData.value?.layout) return false;
 
-  const stage = venueData.value.layout.layout.stage;
-  const stageStart = getStageStart(venueData.value.layout);
+  const stage = seatData.value.layout.stage;
+  const stageStart = getStageStart(seatData.value.layout);
 
   return row < stage.rows && col >= stageStart && col < stageStart + stage.width;
 }
 
 function getSeatAtPosition(row: number, col: number) {
-  return venueData.value?.layout?.seats.find((seat) => seat.row === row && seat.col === col);
+  return seatData.value?.seats.find((seat) => seat.row === row && seat.col === col);
 }
 
 function isAisle(col: number): boolean {
-  return venueData.value?.layout?.layout.aisles.some((aisle) => aisle.afterCol === col) ?? false;
+  return seatData.value?.layout.aisles.some((aisle) => aisle.afterCol === col) ?? false;
 }
 
-function handleSeatClick(seat: ReturnType<typeof getSeatAtPosition>) {
+function handleSeatClick(seat: Seat | null) {
   if (!seat) return;
-  selectedSeat.value = selectedSeat.value === seat.code ? null : seat.code;
+
+  if (selectedSeat.value === seat.code) {
+    // If clicking the same seat, close everything
+    selectedSeat.value = null;
+    openPopoverSeat.value = null;
+  } else {
+    // If clicking a new seat, select it and open its popover
+    selectedSeat.value = seat.code;
+    openPopoverSeat.value = seat.code;
+  }
+}
+
+function handlePopoverClose() {
+  openPopoverSeat.value = null;
 }
 </script>
 
 <template>
   <ClientOnly>
-    <Card v-if="venueData?.has_seating">
+    <Card v-if="seatData?.has_seating">
       <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle class="text-base font-semibold">Venue Layout</CardTitle>
+        <CardTitle class="text-lg font-semibold">Venue Layout</CardTitle>
       </CardHeader>
-
       <CardContent>
         <div v-if="isLoading" class="flex justify-center items-center min-h-[200px]">
           <SpinnerRing />
         </div>
 
-        <div v-else-if="error" class="text-destructive text-sm">Failed to load venue layout</div>
+        <div v-else-if="error" class="text-destructive text-sm">Failed to load seats layout</div>
 
-        <div v-else-if="venueData?.layout" class="overflow-x-auto">
-          <div class="ee-seat-booking-wrapper">
+        <div v-else-if="seatData?.layout" class="overflow-x-auto">
+          <div class="bg-background/5 rounded-lg">
             <div
-              v-if="venueData?.layout"
-              class="venue-grid"
+              v-if="seatData?.layout"
+              class="grid gap-2 min-w-full"
               :style="{
-                'grid-template-columns': `repeat(${venueData.layout.layout.width}, 1fr)`,
+                'grid-template-columns': `repeat(${seatData.layout.width}, minmax(40px, 1fr))`,
                 width: '100%',
                 'max-width': '1200px',
               }"
             >
               <!-- Stage -->
               <div
-                class="venue-stage"
+                class="flex items-center justify-center bg-accent rounded-lg text-muted-foreground tracking-wider"
                 :style="{
-                  'grid-column': `${getStageStart(venueData.layout) + 1} / span ${venueData.layout.layout.stage.width}`,
-                  'grid-row': `1 / span ${venueData.layout.layout.stage.rows}`,
+                  'grid-column': `${getStageStart(seatData.layout) + 1} / span ${seatData.layout.stage.width}`,
+                  'grid-row': `1 / span ${seatData.layout.stage.rows}`,
                 }"
               >
                 STAGE
               </div>
 
               <!-- Seats Grid -->
-               <template v-for="row in venueData.layout.layout.height" :key="row">
-                <template v-for="col in venueData.layout.layout.width" :key="`${row}-${col}`">
+              <template v-for="row in seatData.layout.height" :key="row">
+                <template v-for="col in seatData.layout.width" :key="`${row}-${col}`">
                   <div
                     v-if="!isStagePosition(row - 1, col - 1)"
-                    :class="[
-                      'grid-cell',
-                      { 'venue-aisle': isAisle(col - 1) }
-                    ]"
+                    :class="['aspect-square', { 'seat-aisle': isAisle(col - 1) }]"
                   >
                     <template v-if="getSeatAtPosition(row - 1, col - 1)">
-                      <BookingPopover 
+                      <!-- if not for sale -->
+                      <!-- <div v-if="!getSeatAtPosition(row - 1, col - 1)?.is_for_sale" class="seat">
+                        {{ getSeatAtPosition(row - 1, col - 1)?.code }}
+                      </div> -->
+
+                      <SeatInactive v-if="!getSeatAtPosition(row - 1, col - 1)?.is_for_sale" />
+
+                      <SeatPopover
+                        v-else
                         :seat="getSeatAtPosition(row - 1, col - 1)"
                         :selected="selectedSeat === getSeatAtPosition(row - 1, col - 1)?.code"
+                        :is-open="openPopoverSeat === getSeatAtPosition(row - 1, col - 1)?.code"
                         @select="handleSeatClick"
+                        @close="handlePopoverClose"
                       />
                     </template>
                     <div v-else class="w-full h-full" />
@@ -145,46 +165,8 @@ function handleSeatClick(seat: ReturnType<typeof getSeatAtPosition>) {
   </ClientOnly>
 </template>
 
-<style scoped>
-.venue-grid {
-  display: grid;
-  gap: 5px;
-  padding: 20px;
-}
-
-.venue-stage {
-  background: #9dacbc;
-  color: white;
-  padding: 15px;
-  text-align: center;
-  border-radius: 4px;
-}
-
-.grid-cell {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.venue-seat {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.venue-seat.vip {
-  background: #f0f8ff;
-  border-color: #4a90e2;
-}
-
-.venue-seat.selected {
-  background: #00d35b;
-  color: white;
-}
-
-.venue-aisle {
-  margin-right: 20px;
+<style lang="scss">
+.seat {
+  @apply select-none border text-sm h-full w-full flex items-center justify-center rounded-xl transition-colors duration-200 border-border;
 }
 </style>

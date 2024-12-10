@@ -27,34 +27,33 @@ export interface SeatBooking {
 }
 
 
-export interface Booking {
-    count: number
-    data: Array<{ name: string }>
+export interface BookingData {
+    day: number;
+    name: string;
+    status: string;
 }
 
 export interface Seat {
     code: string
     row: number
     col: number
+    is_for_sale: boolean
     type: 'vip' | 'premium'
-    bookings: Booking | null
+    bookings: BookingData[] | null
 }
 
-export interface VenueLayout {
-    layout: {
+export interface SeatLayout {
+    width: number;
+    height: number;
+    stage: {
         width: number;
-        height: number;
-        stage: {
-            width: number;
-            startRow: number;
-            rows: number;
-        };
-        aisles: Array<{
-            afterCol: number;
-            width: number;
-        }>;
+        startRow: number;
+        rows: number;
     };
-    seats: Seat[];
+    aisles: Array<{
+        afterCol: number;
+        width: number;
+    }>;
 }
 
 
@@ -68,8 +67,9 @@ export interface VenueConfig {
     pricing_type: string;
 }
 
-interface VenueData {
+interface SeatData {
     has_seating: boolean;
-    layout?: VenueLayout;
+    layout: SeatLayout;
+    seats: Seat[];
     qst_id?: string;
 }

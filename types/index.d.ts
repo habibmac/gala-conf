@@ -9,4 +9,4 @@ export * from './regs';
 export * from './stats';
 export * from './billings';
 export * from './checkins';
-export * from './venue';
+export * from './seat-bookings';
