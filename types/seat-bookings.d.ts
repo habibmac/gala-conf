@@ -1,45 +1,32 @@
-// types/venue.ts
-export interface SeatHistory {
-    action: string;
-    notes: string;
-    updated_at: string;
-}
-
-export interface Registration {
-    reg_code: string;
-    reg_date: string;
-    reg_status: string;
-    trx_status: string;
-    trx_date: string;
-    trx_steps: string;
-    payment_status: string;
-    payment_response: string;
-}
-
-export interface SeatBooking {
-    attendee: string;
-    status: string;
-    phone: string;
-    reg_code: string;
-    history: SeatHistory[];
-    registrations: Registration[];
-    current_status: string;
-}
-
-
+// types/seat-bookings.ts
 export interface BookingData {
+    name: string;
+    status: 'RPP' | 'RAP' | 'RCN'; // Explicit status types
+    reg_code: string;
+}
+
+export interface LegendItem {
+    name: string;
+    display_name: string;
+    class: string;
+}
+
+export interface TicketScope {
     day: number;
     name: string;
-    status: string;
+    id: number;
+    start: string;
+    end: string;
 }
 
-export interface Seat {
-    code: string
-    row: number
-    col: number
-    is_for_sale: boolean
-    type: 'vip' | 'premium'
-    bookings: BookingData[] | null
+export interface SeatItem {
+    code: string;
+    row: number;
+    col: number;
+    class: number;
+    type: string;
+    status: 'active' | 'inactive' | 'pending';
+    bookings: BookingData[] | null;
 }
 
 export interface SeatLayout {
@@ -56,20 +43,9 @@ export interface SeatLayout {
     }>;
 }
 
-
-export interface VenueConfig {
-    duration_days: number;
-    ticket_day_scope: Array<{
-        ticket_id: number;
-        days: number[];
-    }>;
-    seat_reset: string;
-    pricing_type: string;
-}
-
-interface SeatData {
-    has_seating: boolean;
+export interface SeatData {
     layout: SeatLayout;
-    seats: Seat[];
-    qst_id?: string;
+    legend: LegendItem[];
+    ticket_scopes: TicketScope[];
+    seats: SeatItem[];
 }

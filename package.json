@@ -19,6 +19,7 @@
     "@chenfengyuan/vue-barcode": "^2.0.2",
     "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@e965/xlsx": "^0.20.3",
+    "@floating-ui/vue": "^1.1.5",
     "@formkit/auto-animate": "^0.8.2",
     "@nuxt/eslint": "^0.5.1",
     "@nuxt/fonts": "^0.7.2",

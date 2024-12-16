@@ -1,10 +1,19 @@
-<!-- components/VenueBookings.vue -->
+<!-- components/SeatBookings.vue -->
 <script setup lang="ts">
 // Script section
 import { computed, ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import SeatPopover from './SeatPopover.vue';
-import type { SeatLayout, SeatData, Seat } from '@/types';
+import type { SeatLayout, SeatData, SeatItem } from '@/types';
 
 // State
 const selectedSeat = ref<string | null>(null);
@@ -13,6 +22,7 @@ const openPopoverSeat = ref<string | null>(null);
 const route = useRoute();
 const eventId = ref(route.params.eventId as string) || ref('');
 const { $galantisApi } = useNuxtApp();
+const selectedDay = ref<string | null>('1'); // Initialize with '1' instead of 1
 
 // Query to fetch seat data
 const {
@@ -20,10 +30,22 @@ const {
   error,
   isLoading,
 } = useQuery<SeatData>({
-  queryKey: ['seat-data', eventId],
+  queryKey: ['seat-data', eventId, selectedDay],
   queryFn: ({ signal }) =>
-    $galantisApi.get(`/event/${eventId.value}/seat-bookings/layout`, { signal }).then((response) => response.data),
+    $galantisApi
+      .get(`/event/${eventId.value}/seat-bookings/layout`, {
+        signal,
+        params: {
+          day: parseInt(selectedDay.value || '1', 10),
+        },
+      })
+      .then((response) => response.data?.data),
 });
+
+// Add a handler for day changes
+function handleDayChange(value: string) {
+  selectedDay.value = value;
+}
 
 // Computed
 const gridElements = computed(() => {
@@ -42,7 +64,6 @@ const gridElements = computed(() => {
 });
 
 // Helper functions
-// Then in your isStagePosition function:
 function getStageStart(layout: SeatLayout): number {
   return Math.floor((layout.width - layout.stage.width) / 2);
 }
@@ -53,7 +74,9 @@ function isStagePosition(row: number, col: number): boolean {
   const stage = seatData.value.layout.stage;
   const stageStart = getStageStart(seatData.value.layout);
 
-  return row < stage.rows && col >= stageStart && col < stageStart + stage.width;
+  return (
+    row < stage.startRow + stage.rows && row >= stage.startRow && col >= stageStart && col < stageStart + stage.width
+  );
 }
 
 function getSeatAtPosition(row: number, col: number) {
@@ -85,9 +108,22 @@ function handlePopoverClose() {
 
 <template>
   <ClientOnly>
-    <Card v-if="seatData?.has_seating">
+    <Card v-if="seatData">
       <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle class="text-lg font-semibold">Venue Layout</CardTitle>
+        <Select v-model="selectedDay">
+          <SelectTrigger class="w-auto">
+            <SelectValue placeholder="Select day" />
+          </SelectTrigger>
+          <SelectContent align="end">
+            <SelectGroup>
+              <SelectLabel>Event Days</SelectLabel>
+              <SelectItem v-for="scope in seatData?.ticket_scopes" :key="scope.id" :value="scope.day.toString()">
+                {{ scope.name }} ({{ scope.start }})
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </CardHeader>
       <CardContent>
         <div v-if="isLoading" class="flex justify-center items-center min-h-[200px]">
@@ -96,11 +132,11 @@ function handlePopoverClose() {
 
         <div v-else-if="error" class="text-destructive text-sm">Failed to load seats layout</div>
 
-        <div v-else-if="seatData?.layout" class="overflow-x-auto">
+        <div v-else class="overflow-x-auto">
           <div class="bg-background/5 rounded-lg">
             <div
               v-if="seatData?.layout"
-              class="grid gap-2 min-w-full"
+              class="grid gap-2 min-w-full p-4"
               :style="{
                 'grid-template-columns': `repeat(${seatData.layout.width}, minmax(40px, 1fr))`,
                 width: '100%',
@@ -121,23 +157,12 @@ function handlePopoverClose() {
               <!-- Seats Grid -->
               <template v-for="row in seatData.layout.height" :key="row">
                 <template v-for="col in seatData.layout.width" :key="`${row}-${col}`">
-                  <div
-                    v-if="!isStagePosition(row - 1, col - 1)"
-                    :class="['aspect-square', { 'seat-aisle': isAisle(col - 1) }]"
-                  >
-                    <template v-if="getSeatAtPosition(row - 1, col - 1)">
-                      <!-- if not for sale -->
-                      <!-- <div v-if="!getSeatAtPosition(row - 1, col - 1)?.is_for_sale" class="seat">
-                        {{ getSeatAtPosition(row - 1, col - 1)?.code }}
-                      </div> -->
-
-                      <SeatInactive v-if="!getSeatAtPosition(row - 1, col - 1)?.is_for_sale" />
-
+                  <div v-if="!isStagePosition(row, col)" :class="['aspect-square', { 'seat-aisle': isAisle(col) }]">
+                    <template v-if="getSeatAtPosition(row, col)">
                       <SeatPopover
-                        v-else
-                        :seat="getSeatAtPosition(row - 1, col - 1)"
-                        :selected="selectedSeat === getSeatAtPosition(row - 1, col - 1)?.code"
-                        :is-open="openPopoverSeat === getSeatAtPosition(row - 1, col - 1)?.code"
+                        :seat="getSeatAtPosition(row, col)"
+                        :selected="selectedSeat === getSeatAtPosition(row, col)?.code"
+                        :is-open="openPopoverSeat === getSeatAtPosition(row, col)?.code"
                         @select="handleSeatClick"
                         @close="handlePopoverClose"
                       />
@@ -150,13 +175,15 @@ function handlePopoverClose() {
           </div>
           <!-- Legend -->
           <div class="flex gap-4 justify-center mt-4 text-xs">
-            <div class="flex items-center gap-2">
-              <div class="w-4 h-4 bg-primary/10 border border-primary rounded-sm" />
-              <span>VIP</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="w-4 h-4 bg-background border border-border rounded-sm" />
-              <span>Premium</span>
+            <div v-for="item in seatData?.legend" :key="item.name" class="flex items-center gap-2">
+              <div
+                class="w-4 h-4 rounded-sm"
+                :class="{
+                  'bg-primary/10 border border-primary': item.class === '1',
+                  'bg-background border border-border': item.class === '2',
+                }"
+              />
+              <span>{{ item.display_name }}</span>
             </div>
           </div>
         </div>
@@ -167,6 +194,11 @@ function handlePopoverClose() {
 
 <style lang="scss">
 .seat {
-  @apply select-none border text-sm h-full w-full flex items-center justify-center rounded-xl transition-colors duration-200 border-border;
+  contain: layout style paint;
+}
+
+.venue-grid {
+  contain: strict;
+  will-change: transform;
 }
 </style>
