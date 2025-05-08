@@ -13,26 +13,34 @@ const loading = ref(false);
 const data = ref<any>(null);
 const error = ref<any>(null);
 
-// Get the runtime config
+// Get the runtime config - now using public variables
 const runtimeConfig = useRuntimeConfig();
-// Access the test token from private runtime config
-const testToken = runtimeConfig.oauthAccessTokenTest || '';
+const testToken = runtimeConfig.public.oauthAccessTokenTest || '';
 
-// Test 1: Direct request with hardcoded token
-const testWithHardcodedToken = async () => {
+// Debug information
+const configDebug = {
+  hasToken: !!testToken,
+  tokenPrefix: testToken ? testToken.substring(0, 3) + '...' : 'NONE',
+  runtimeConfigPublicKeys: Object.keys(runtimeConfig.public),
+  apiUrl: runtimeConfig.public.apiUrl,
+  oauthUrl: runtimeConfig.public.oauthUrl,
+};
+
+// Test 1: Direct request to WordPress
+const testDirectRequest = async () => {
   loading.value = true;
   error.value = null;
   data.value = null;
   
   if (!testToken) {
-    error.value = "No test token configured in runtime config";
+    error.value = "No test token configured in public environment variables";
     loading.value = false;
     return;
   }
   
   try {
     // Direct fetch to WordPress using $fetch
-    const response = await $fetch('https://galanesia.com/oauth/me', {
+    const response = await $fetch(`${runtimeConfig.public.oauthUrl}/me`, {
       headers: {
         'Authorization': `Bearer ${testToken}`
       }
@@ -47,20 +55,20 @@ const testWithHardcodedToken = async () => {
   }
 };
 
-// Test 2: Test with direct token via server API
-const testWithServerApi = async () => {
+// Test 2: Via API proxy route
+const testServerProxy = async () => {
   loading.value = true;
   error.value = null;
   data.value = null;
   
   if (!testToken) {
-    error.value = "No test token configured in runtime config";
+    error.value = "No test token configured in public environment variables";
     loading.value = false;
     return;
   }
   
   try {
-    // Request through server API using the test token
+    // Request through your Nuxt server API
     const response = await $fetch('/api/me', {
       headers: {
         'Authorization': `Bearer ${testToken}`
@@ -76,20 +84,14 @@ const testWithServerApi = async () => {
   }
 };
 
-// Test 3: Direct request with debugging info
-const testWithDebugInfo = async () => {
+// Test 3: Debug headers and request info
+const testDebugRequest = async () => {
   loading.value = true;
   error.value = null;
   data.value = null;
   
-  if (!testToken) {
-    error.value = "No test token configured in runtime config";
-    loading.value = false;
-    return;
-  }
-  
   try {
-    // Use a server endpoint that will log and return request details
+    // Use debug endpoint to see what happens with the request
     const response = await $fetch('/api/debug-request', {
       headers: {
         'Authorization': `Bearer ${testToken}`
@@ -110,6 +112,11 @@ const testWithDebugInfo = async () => {
   <div class="p-8">
     <h2 class="text-2xl font-semibold mb-4">Authentication Test Page</h2>
     
+    <div class="mt-4 p-4 border border-gray-500 rounded-md mb-4">
+      <h3 class="font-medium mb-2">Runtime Config Debug:</h3>
+      <pre class="text-sm overflow-auto">{{ JSON.stringify(configDebug, null, 2) }}</pre>
+    </div>
+    
     <div v-if="loading" class="my-4">
       <p>Loading...</p>
     </div>
@@ -126,14 +133,14 @@ const testWithDebugInfo = async () => {
     
     <div v-if="!testToken" class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded my-4">
       <p class="font-bold">Warning</p>
-      <p>No test token configured in server environment. Set NUXT_OAUTH_ACCESS_TOKEN_TEST in Vercel environment variables.</p>
+      <p>No test token configured in public environment variables. Set NUXT_PUBLIC_OAUTH_ACCESS_TOKEN_TEST in your environment.</p>
     </div>
     
     <div class="space-y-4">
       <div>
         <h3 class="font-medium mb-2">1. Direct WordPress Request</h3>
         <button 
-          @click="testWithHardcodedToken" 
+          @click="testDirectRequest" 
           class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           :disabled="!testToken"
         >
@@ -142,20 +149,20 @@ const testWithDebugInfo = async () => {
       </div>
       
       <div>
-        <h3 class="font-medium mb-2">2. Via Server API</h3>
+        <h3 class="font-medium mb-2">2. Via Server API Proxy</h3>
         <button 
-          @click="testWithServerApi" 
+          @click="testServerProxy" 
           class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
           :disabled="!testToken"
         >
-          Test Server API
+          Test Server API Proxy
         </button>
       </div>
       
       <div>
         <h3 class="font-medium mb-2">3. Debug Request Headers</h3>
         <button 
-          @click="testWithDebugInfo" 
+          @click="testDebugRequest" 
           class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           :disabled="!testToken"
         >
