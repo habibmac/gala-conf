@@ -8,7 +8,7 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   // Safe public routes that should always be accessible
-  const publicRoutes = ['/', '/auth/login'];
+  const publicRoutes = ['/', '/auth/login', '/auth/test'];
 
   // If we're on a public route, allow access
   if (publicRoutes.includes(to.path)) {

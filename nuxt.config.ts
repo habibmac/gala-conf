@@ -42,6 +42,7 @@ export default defineNuxtConfig({
     typesenseHost: '',
     typesensePort: '',
     typesenseProtocol: '',
+    oauthAccessTokenTest: '',
     public: {
       apiUrl: '',
       oauthUrl: '',
