@@ -20,7 +20,7 @@ const testToken = runtimeConfig.public.oauthAccessTokenTest || '';
 // Debug information
 const configDebug = {
   hasToken: !!testToken,
-  tokenPrefix: testToken ? testToken.substring(0, 3) + '...' : 'NONE',
+  tokenPrefix: testToken ? testToken.slice(0, 4) : 'No token',
   runtimeConfigPublicKeys: Object.keys(runtimeConfig.public),
   apiUrl: runtimeConfig.public.apiUrl,
   oauthUrl: runtimeConfig.public.oauthUrl,
