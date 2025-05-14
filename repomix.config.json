@@ -1,0 +1,19 @@
+{
+    "output": {
+        "style": "markdown",
+        "removeComments": true,
+        "showLineNumbers": false,
+        "topFilesLength": 30
+    },
+    "include": [
+        "**/*.vue",
+        "**/*.js",
+        "**/*.ts"
+    ],
+    "ignore": {
+        "customPatterns": [
+            "utils/country-codes.ts",
+            "components/**"
+        ]
+    }
+}
