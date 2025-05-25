@@ -38,6 +38,7 @@ const { handleSubmit } = useForm({
   },
 });
 
+const isShowPassword = ref(false);
 const isSubmitting = ref(false);
 
 // Password grant login
@@ -147,7 +148,18 @@ onMounted(() => {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Enter your password" v-bind="field" />
+                <div class="relative">
+                  <Input
+                    :type="isShowPassword ? 'text' : 'password'"
+                    placeholder="Enter your password"
+                    v-bind="field"
+                  />
+                  <ShowPasswordToggle
+                    class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                    :model-value="isShowPassword"
+                    @update:model-value="isShowPassword = $event"
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
