@@ -7,7 +7,8 @@ export default defineNuxtPlugin(async () => {
     if (authStore.accessToken && authStore.refreshToken) {
       authStore.setAuth(authStore.accessToken, authStore.refreshToken);
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error initializing auth:', error);
     authStore.clearAuth();
   }

@@ -1,7 +1,9 @@
 // composables/useStats.ts
 import type { Ref } from 'vue';
+
 import { useQuery } from '@tanstack/vue-query';
-import type { AttendeeStats, TransactionStats, CustomFieldStats, StatsFilters } from '@/types/stats';
+
+import type { AttendeeStats, CustomFieldStats, StatsFilters, TransactionStats } from '@/types/stats';
 
 export const useStats = (eventId: Ref<string>, filters?: Ref<StatsFilters>) => {
   const nuxtApp = useNuxtApp();
@@ -12,15 +14,15 @@ export const useStats = (eventId: Ref<string>, filters?: Ref<StatsFilters>) => {
     error: attendeeError,
     isLoading: isAttendeeLoading,
   } = useQuery({
-    queryKey: ['attendee-stats', eventId, filters],
+    enabled: !!eventId.value,
     queryFn: ({ signal }) =>
       nuxtApp.$galantisApi
         .get(`/event/${eventId.value}/stats/attendee`, {
           params: filters?.value,
           signal,
         })
-        .then((response) => response.data.data as AttendeeStats),
-    enabled: !!eventId.value,
+        .then(response => response.data.data as AttendeeStats),
+    queryKey: ['attendee-stats', eventId, filters],
   });
 
   // Transaction Stats Query
@@ -29,15 +31,15 @@ export const useStats = (eventId: Ref<string>, filters?: Ref<StatsFilters>) => {
     error: transactionError,
     isLoading: isTransactionLoading,
   } = useQuery({
-    queryKey: ['transaction-stats', eventId, filters],
+    enabled: !!eventId.value,
     queryFn: ({ signal }) =>
       nuxtApp.$galantisApi
         .get(`/event/${eventId.value}/stats/transaction`, {
           params: filters?.value,
           signal,
         })
-        .then((response) => response.data.data as TransactionStats),
-    enabled: !!eventId.value,
+        .then(response => response.data.data as TransactionStats),
+    queryKey: ['transaction-stats', eventId, filters],
   });
 
   // Custom Field Stats Query
@@ -46,29 +48,29 @@ export const useStats = (eventId: Ref<string>, filters?: Ref<StatsFilters>) => {
     error: customFieldError,
     isLoading: isCustomFieldLoading,
   } = useQuery({
-    queryKey: ['custom-field-stats', eventId, filters],
+    enabled: !!eventId.value,
     queryFn: ({ signal }) =>
       nuxtApp.$galantisApi
         .get(`/event/${eventId.value}/stats/custom-fields`, {
           params: filters?.value,
           signal,
         })
-        .then((response) => response.data.data as CustomFieldStats),
-    enabled: !!eventId.value,
+        .then(response => response.data.data as CustomFieldStats),
+    queryKey: ['custom-field-stats', eventId, filters],
   });
 
   return {
+    // Errors
+    attendeeError,
     // Stats data
     attendeeStats,
-    transactionStats,
+    customFieldError,
     customFieldStats,
     // Loading states
     isAttendeeLoading,
-    isTransactionLoading,
     isCustomFieldLoading,
-    // Errors
-    attendeeError,
+    isTransactionLoading,
     transactionError,
-    customFieldError,
+    transactionStats,
   };
 };

@@ -14,7 +14,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (authStore.isAuthenticated && !authStore.userInfo) {
     try {
       await authStore.fetchUserProfile();
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error fetching user profile:', error);
       // If profile fetch fails, clear auth and redirect to login
       authStore.clearAuth();
@@ -39,7 +40,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     try {
       const response = await useNuxtApp().$galantisApi.get(`/event/${eventId}`);
       await authStore.setSelectedEvent(response.data);
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error loading event:', error);
       return navigateTo('/my-events');
     }
@@ -49,7 +51,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (authStore.selectedEvent) {
     // Check user roles
     const routeRoles = to.meta.roles as string[] | undefined;
-    const hasRole = !routeRoles?.length || routeRoles.some((role) => authStore.userInfo?.user_roles?.includes(role));
+    const hasRole = !routeRoles?.length || routeRoles.some(role => authStore.userInfo?.user_roles?.includes(role));
 
     // Check event package
     const routePackages = to.meta.packages as string[] | undefined;
@@ -57,13 +59,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     // Check capabilities
     const routeCapabilities = to.meta.capabilities as string[] | undefined;
-    const hasCapabilities =
-      !routeCapabilities?.length || routeCapabilities.every((cap) => authStore.hasEventPermission(cap));
+    const hasCapabilities
+      = !routeCapabilities?.length || routeCapabilities.every(cap => authStore.hasEventPermission(cap));
 
     if (!hasRole || !hasPackage || !hasCapabilities) {
       return navigateTo('/my-events');
     }
-  } else {
+  }
+  else {
     console.error('No event loaded');
     return navigateTo('/my-events');
   }

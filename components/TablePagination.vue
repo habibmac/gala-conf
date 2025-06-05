@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 
 const props = defineProps({
-  currentPage: { type: Number, default: 1 },
-  pageCount: { type: Number, default: 1 },
-  pageSizes: { type: Array, default: () => [10, 20, 50, 100] },
-  pageSize: { type: Number, default: 10 },
-  totalData: { type: Number, default: 0 },
+  currentPage: { default: 1, type: Number },
+  pageCount: { default: 1, type: Number },
+  pageSize: { default: 10, type: Number },
+  pageSizes: { default: () => [10, 20, 50, 100], type: Array },
+  totalData: { default: 0, type: Number },
 });
 
 const emits = defineEmits(['update:pageSize', 'update:currentPage']);
@@ -18,6 +19,8 @@ const route = useRoute();
 const handlePageSizeChange = (value: string) => {
   emits('update:pageSize', Number(value));
 };
+
+const pageCount = computed(() => props.pageCount ?? 1);
 
 const navigateToPage = (page: number) => {
   if (page >= 1 && page <= pageCount.value) {
@@ -35,9 +38,8 @@ const createLink = (page: number) => {
   };
 };
 
-const pageCount = computed(() => props.pageCount ?? 1);
 const currentPage = computed(() =>
-  props.currentPage ? (props.currentPage > pageCount.value ? pageCount.value : props.currentPage) : 1
+  props.currentPage ? (props.currentPage > pageCount.value ? pageCount.value : props.currentPage) : 1,
 );
 
 const shouldShowPage = (page: number) => {
@@ -53,9 +55,9 @@ const shouldShowPage = (page: number) => {
 </script>
 
 <template>
-  <div class="mb-20 mt-5 p-4 pt-0 sm:items-center sm:justify-between sm:p-6 sm:pt-0 grid grid-cols-2 sm:grid-cols-3">
+  <div class="mb-20 mt-5 grid grid-cols-2 p-4 pt-0 sm:grid-cols-3 sm:items-center sm:justify-between sm:p-6 sm:pt-0">
     <div class="order-2 sm:order-1">
-      <Select 
+      <Select
         :options="pageSizes.map(size => ({ label: `Show ${size}`, value: size }))"
         @update:model-value="handlePageSizeChange"
       >
@@ -69,8 +71,8 @@ const shouldShowPage = (page: number) => {
         </SelectContent>
       </Select>
     </div>
-    <nav role="navigation" aria-label="Pagination" class="order-3 sm:order-2 col-span-2 sm:col-span-1">
-      <ul class="flex justify-center items-center space-x-1">
+    <nav role="navigation" aria-label="Pagination" class="order-3 col-span-2 sm:order-2 sm:col-span-1">
+      <ul class="flex items-center justify-center space-x-1">
         <li>
           <RouterLink
             :to="createLink(1)"
@@ -78,7 +80,7 @@ const shouldShowPage = (page: number) => {
             :class="{ disabled: currentPage <= 1 }"
             @click.prevent="currentPage > 1 && navigateToPage(1)"
           >
-            <svg class="h-6 w-6" viewBox="0 0 24 24">
+            <svg class="size-6" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M16 17a.997.997 0 0 1-.707-.293l-4-4a1 1 0 0 1 0-1.414l4-4a1 1 0 0 1 1.414 1.414L13.414 12l3.293 3.293A1 1 0 0 1 16 17m-8 0a1 1 0 0 1-1-1V8a1 1 0 0 1 2 0v8a1 1 0 0 1-1 1"
@@ -93,7 +95,7 @@ const shouldShowPage = (page: number) => {
             :class="{ disabled: currentPage <= 1 }"
             @click.prevent="currentPage > 1 && navigateToPage(currentPage - 1)"
           >
-            <svg class="h-6 w-6" viewBox="0 0 24 24">
+            <svg class="size-6" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M14.121 17.243a.997.997 0 0 1-.707-.293l-4.242-4.243a1 1 0 0 1 0-1.414l4.242-4.243a1 1 0 0 1 1.414 1.414L11.293 12l3.535 3.536a1 1 0 0 1-.707 1.707"
@@ -120,7 +122,7 @@ const shouldShowPage = (page: number) => {
             :class="{ disabled: currentPage >= pageCount }"
             @click.prevent="currentPage < pageCount && navigateToPage(currentPage + 1)"
           >
-            <svg class="h-6 w-6" viewBox="0 0 24 24">
+            <svg class="size-6" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M9.879 17.243a1 1 0 0 1-.707-1.707L12.707 12L9.172 8.464a1 1 0 0 1 1.414-1.414l4.242 4.243a1 1 0 0 1 0 1.414l-4.242 4.243a.997.997 0 0 1-.707.293"
@@ -135,7 +137,7 @@ const shouldShowPage = (page: number) => {
             :class="{ disabled: currentPage >= pageCount }"
             @click.prevent="currentPage < pageCount && navigateToPage(pageCount)"
           >
-            <svg class="h-6 w-6" viewBox="0 0 24 24">
+            <svg class="size-6" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M8 17a1 1 0 0 1-.707-1.707L10.586 12L7.293 8.707a1 1 0 0 1 1.414-1.414l4 4a1 1 0 0 1 0 1.414l-4 4A.997.997 0 0 1 8 17m8 0a1 1 0 0 1-1-1V8a1 1 0 0 1 2 0v8a1 1 0 0 1-1 1"
@@ -145,7 +147,7 @@ const shouldShowPage = (page: number) => {
         </li>
       </ul>
     </nav>
-    <div class="text-right text-sm text-slate-500 dark:text-slate-400 whitespace order-2 sm:order-3">
+    <div class="whitespace order-2 text-right text-sm text-slate-500 dark:text-slate-400 sm:order-3">
       Page
       <span class="font-medium text-slate-900 dark:text-slate-300">{{ currentPage }}</span>
       of
@@ -153,6 +155,7 @@ const shouldShowPage = (page: number) => {
     </div>
   </div>
 </template>
+
 <style lang="scss">
 .page-link {
   @apply flex transition-colors items-center justify-center leading-5 hover:shadow-sm dark:text-slate-300 text-sm w-6 h-6 hover:bg-slate-200/50 dark:hover:bg-slate-700 dark:hover:text-slate-100 rounded-full p-5 relative;

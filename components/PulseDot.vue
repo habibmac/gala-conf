@@ -2,20 +2,21 @@
 import { cn } from '~/lib/utils';
 
 const props = defineProps({
-  wrapperClass: {
+  dotClass: {
+    default: 'w-2 h-2 bg-green-500',
     type: String,
-    default: '',
   },
   pulseClass: {
-    type: String,
     default: 'w-3 h-3 bg-green-300',
-  },
-  dotClass: {
     type: String,
-    default: 'w-2 h-2 bg-green-500',
+  },
+  wrapperClass: {
+    default: '',
+    type: String,
   },
 });
 </script>
+
 <template>
   <div class="flex items-center">
     <div :class="cn('relative flex items-center justify-center', wrapperClass)">

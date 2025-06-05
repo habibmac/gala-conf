@@ -5,21 +5,22 @@ export default defineEventHandler(async (event) => {
 
   if (!authHeader) {
     throw createError({
+      message: 'Authentication required',
       statusCode: 401,
       statusMessage: 'Unauthorized',
-      message: 'Authentication required',
     });
   }
 
   try {
-    const response = await $fetch(config.public.oauthUrl + '/me', {
+    const response = await $fetch(`${config.public.oauthUrl}/me`, {
+      credentials: 'include',
       headers: {
         Authorization: authHeader,
       },
-      credentials: 'include',
     });
     return response;
-  } catch (error) {
+  }
+  catch (error) {
     return error;
   }
 });

@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import type { SortableEvent } from 'vue-draggable-plus';
+
 import { Icon } from '@iconify/vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
-import { VueDraggable, type SortableEvent } from 'vue-draggable-plus';
+import { useColorMode } from '@vueuse/core';
+import { ref, watch } from 'vue';
+import { VueDraggable } from 'vue-draggable-plus';
+
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   NumberField,
   NumberFieldContent,
@@ -11,43 +16,41 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from '@/components/ui/number-field';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import FieldInput from './FieldInput.vue';
 
-import { useColorMode } from '@vueuse/core';
+const props = defineProps<{
+  modelValue: Ticket[]
+  minDate: Date
+  newDateStart: string
+  newDateEnd: string
+  eventDatetimes: EventDatetime[]
+}>();
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: Ticket[]): void
+}>();
 
 const colorMode = useColorMode();
 
 interface EventDatetime {
-  name: string;
-  rangeDate: string[];
-  quota: number;
+  name: string
+  rangeDate: string[]
+  quota: number
 }
 
 interface Ticket {
-  name: string;
-  rangeDate: string[];
-  price: number;
-  quota: number;
-  sessions: string[];
+  name: string
+  rangeDate: string[]
+  price: number
+  quota: number
+  sessions: string[]
 }
-
-const props = defineProps<{
-  modelValue: Ticket[];
-  minDate: Date;
-  newDateStart: string;
-  newDateEnd: string;
-  eventDatetimes: EventDatetime[];
-}>();
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: Ticket[]): void;
-}>();
 
 const ticketsRef = ref(props.modelValue);
 
 const onSort = (e: SortableEvent) => {
-  const { oldIndex, newIndex } = e;
+  const { newIndex, oldIndex } = e;
 
   if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
     return;
@@ -71,13 +74,14 @@ watch(
   (newValue) => {
     emit('update:modelValue', newValue);
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
+
 <template>
   <div>
     <label class="text-sm font-semibold">Tickets</label>
-    <div class="flex flex-col gap-2 mt-2">
+    <div class="mt-2 flex flex-col gap-2">
       <FieldArray v-slot="{ fields, push, remove }" name="tickets">
         <VueDraggable
           v-model="ticketsRef"
@@ -90,10 +94,10 @@ watch(
           <div
             v-for="(inputField, index) in fields"
             :key="index"
-            class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5"
+            class="relative ml-5 flex flex-col items-start gap-2 border-l pl-3 sm:flex-row sm:flex-wrap"
           >
-            <Icon icon="mdi:drag-vertical" class="handle size-6 absolute -left-6 cursor-move text-muted-foreground" />
-            <div class="flex-1 grid grid-cols-12 gap-2">
+            <Icon icon="mdi:drag-vertical" class="handle absolute -left-6 size-6 cursor-move text-muted-foreground" />
+            <div class="grid flex-1 grid-cols-12 gap-2">
               <FieldInput
                 :name="`tickets[${index}].name`"
                 label="Ticket Name"
@@ -127,7 +131,7 @@ watch(
                           placeholder="Start - End Date & Time"
                           :value="inputValue"
                           autocomplete="off"
-                        />
+                        >
                       </template>
                     </VueDatePicker>
                   </FormControl>
@@ -178,8 +182,8 @@ watch(
                   <FormMessage />
                 </FormItem>
               </FormField>
-              <div class="col-span-9 py-2 flex flex-col gap-2">
-                <label class="text-sm font-semibold w-full"> Sessions scope of this ticket </label>
+              <div class="col-span-9 flex flex-col gap-2 py-2">
+                <label class="w-full text-sm font-semibold"> Sessions scope of this ticket </label>
                 <FormField
                   v-for="datetime in eventDatetimes"
                   :key="datetime.name"
@@ -201,7 +205,7 @@ watch(
                 </FormField>
               </div>
             </div>
-            <div class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8">
+            <div class="absolute bottom-0 right-0 sm:static sm:bottom-auto sm:right-auto sm:pt-8">
               <Button size="icon" class="text-red-500" variant="ghost" @click.prevent="remove(index)">
                 <Icon icon="material-symbols-light:close-rounded" class="size-6" />
               </Button>
@@ -229,6 +233,7 @@ watch(
     </div>
   </div>
 </template>
+
 <style scoped>
 .is-ghost {
   @apply opacity-40 bg-muted;

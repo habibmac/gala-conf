@@ -1,43 +1,45 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
+
 import { devImgPath } from '~/utils';
 
 defineProps({
-  src: {
+  imgClass: {
+    default: 'w-full h-full',
     type: String,
-    required: true,
-  },
-  title: {
-    type: String,
-    default: '',
-  },
-  size: {
-    type: Number,
-    default: 8,
   },
   online: {
-    type: Number,
     default: 3,
+    type: Number,
   },
   right: {
-    type: Number,
     default: 0.5,
+    type: Number,
+  },
+  size: {
+    default: 8,
+    type: Number,
+  },
+  src: {
+    required: true,
+    type: String,
+  },
+  title: {
+    default: '',
+    type: String,
   },
   wrapperClass: {
-    type: String,
     default: '',
-  },
-  imgClass: {
     type: String,
-    default: 'w-full h-full',
   },
 });
 </script>
+
 <template>
   <Avatar :class="wrapperClass" shape="eventLogo">
     <AvatarImage :src="devImgPath(src)" :alt="title" loading="lazy" />
-    <AvatarFallback class="bg-muted h-full w-full p-1 flex items-center justify-center">
-      <Icon icon="heroicons-solid:photograph" class="text-muted-foreground w-10 h-10" />
+    <AvatarFallback class="flex size-full items-center justify-center bg-muted p-1">
+      <Icon icon="heroicons-solid:photograph" class="size-10 text-muted-foreground" />
     </AvatarFallback>
   </Avatar>
 </template>

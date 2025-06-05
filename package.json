@@ -1,19 +1,17 @@
 {
   "name": "gala-eo",
-  "private": true,
-  "version": "2.2.0",
   "type": "module",
+  "version": "2.3.0",
+  "private": true,
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint": "bun lint:eslint && bun lint:prettier",
+    "lint": "bun lint:eslint",
     "lint:eslint": "eslint .",
-    "fix:eslint": "eslint . --fix",
-    "lint:prettier": "prettier . --check",
-    "fix:prettier": "prettier --write ."
+    "fix:eslint": "eslint . --fix"
   },
   "dependencies": {
     "@e965/xlsx": "^0.20.3",
@@ -64,14 +62,18 @@
     "zod": "^3.25.28"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^4.13.3",
     "@iconify-json/radix-icons": "^1.2.2",
     "@iconify/vue": "^4.3.0",
     "@nuxtjs/color-mode": "^3.5.2",
     "@types/canvas-confetti": "^1.9.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.4.0",
+    "@types/eslint-plugin-tailwindcss": "^3.17.0",
+    "eslint": "^9.28.0",
+    "eslint-plugin-format": "^1.0.1",
+    "eslint-plugin-perfectionist": "^4.14.0",
+    "eslint-plugin-tailwindcss": "^3.18.0",
+    "eslint-plugin-unicorn": "^59.0.1",
     "nuxt-headlessui": "^1.2.0",
-    "prettier": "^3.5.3",
     "sass": "^1.89.0",
     "typescript": "^5.8.3"
   }

@@ -1,24 +1,26 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
 import type { HTMLAttributes } from 'vue';
+
 import { useField, useFieldError } from 'vee-validate';
-import { cn } from '@/lib/utils';
+import { computed, ref, watch } from 'vue';
+
 import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { cn } from '@/lib/utils';
 
 const props = defineProps<{
-  name: string;
-  defaultValue?: string;
-  class?: HTMLAttributes['class'];
-  label?: string;
-  placeholder?: string;
-  wrapperClass?: string;
+  name: string
+  defaultValue?: string
+  class?: HTMLAttributes['class']
+  label?: string
+  placeholder?: string
+  wrapperClass?: string
 }>();
 
 defineEmits<{
-  (e: 'update:modelValue', payload: string): void;
+  (e: 'update:modelValue', payload: string): void
 }>();
 
-const { value, validate, resetField, handleChange } = useField(props.name, undefined, {
+const { handleChange, resetField, validate, value } = useField(props.name, undefined, {
   initialValue: props.defaultValue,
 });
 
@@ -64,7 +66,7 @@ watch(value, (newValue) => {
           :class="
             cn(
               'pointer-events-none absolute z-10 px-3 font-medium text-xs text-muted-foreground transition-all duration-200',
-              showLabel ? 'opacity-100 -translate-y-4 top-5' : 'opacity-0 top-5'
+              showLabel ? 'opacity-100 -translate-y-4 top-5' : 'opacity-0 top-5',
             )
           "
         >
@@ -76,7 +78,7 @@ watch(value, (newValue) => {
               cn(
                 'z-1 grid cursor-text rounded-md border min-h-[50px] transition-all duration-200 ease-in-out border-input shadow-sm',
                 { 'border-destructive': error },
-                { 'border-primary': isInteracting }
+                { 'border-primary': isInteracting },
               )
             "
           >
@@ -89,7 +91,7 @@ watch(value, (newValue) => {
                 cn(
                   'text-sm w-full bg-background appearance-none transition-all duration-200 ease-in-out rounded-md p-3 border-none outline-none focus:outline-none focus:ring-2 ring-primary focus:border-none text-ellipsis placeholder:text-muted-foreground shadow-sm',
                   showLabel ? 'pt-5 pb-1 placeholder:opacity-0' : 'placeholder:opacity-100',
-                  props.class
+                  props.class,
                 )
               "
               @input="handleInput"

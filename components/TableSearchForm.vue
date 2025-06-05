@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useDebounceFn } from '@vueuse/core';
 import { Icon } from '@iconify/vue';
+import { useDebounceFn } from '@vueuse/core';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
   modelValue: {
-    type: String,
     default: '',
+    type: String,
   },
   placeholder: {
-    type: String,
     default: 'Search…',
+    type: String,
   },
 });
 
@@ -35,7 +35,7 @@ watch(
   () => props.modelValue,
   (newVal) => {
     inputQuery.value = newVal;
-  }
+  },
 );
 </script>
 
@@ -48,8 +48,8 @@ watch(
       type="search"
       :placeholder="props.placeholder"
       @input="updateQuery"
-    />
-    <button class="absolute top-1/2 -translate-y-1/2 left-3" @click="searchImmediately">
+    >
+    <button class="absolute left-3 top-1/2 -translate-y-1/2" @click="searchImmediately">
       <Icon icon="ion:search-outline" class="size-4" />
     </button>
     <button v-if="inputQuery" class="absolute right-2 top-1/2 -translate-y-1/2" @click="clearSearch">

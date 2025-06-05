@@ -1,6 +1,7 @@
+import { defineNuxtPlugin } from '#app';
 // plugins/api.ts
 import axios from 'axios';
-import { defineNuxtPlugin } from '#app';
+
 import { useAuthStore } from '@/stores';
 
 export default defineNuxtPlugin(() => {
@@ -18,15 +19,16 @@ export default defineNuxtPlugin(() => {
 
   let isRefreshing = false;
   let failedQueue: Array<{
-    resolve: (value?: unknown) => void;
-    reject: (reason?: unknown) => void;
+    resolve: (value?: unknown) => void
+    reject: (reason?: unknown) => void
   }> = [];
 
   const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue.forEach((prom) => {
       if (error) {
         prom.reject(error);
-      } else {
+      }
+      else {
         prom.resolve(token);
       }
     });
@@ -36,25 +38,25 @@ export default defineNuxtPlugin(() => {
   galantisApi.interceptors.request.use(
     (config) => {
       if (authStore.accessToken) {
-        config.headers['Authorization'] = `Bearer ${authStore.accessToken}`;
+        config.headers.Authorization = `Bearer ${authStore.accessToken}`;
       }
       return config;
     },
-    (error) => Promise.reject(error)
+    error => Promise.reject(error),
   );
 
   galantisApi.interceptors.response.use(
-    (response) => response,
+    response => response,
     async (error) => {
       const originalRequest = error.config;
       if (error.response?.status === 401 && !originalRequest._retry) {
         if (isRefreshing) {
           // If a refresh is already in progress, add this request to the queue
           return new Promise((resolve, reject) => {
-            failedQueue.push({ resolve, reject });
+            failedQueue.push({ reject, resolve });
           })
             .then((token) => {
-              originalRequest.headers['Authorization'] = `Bearer ${token}`;
+              originalRequest.headers.Authorization = `Bearer ${token}`;
               return galantisApi(originalRequest);
             })
             .catch((err) => {
@@ -68,27 +70,29 @@ export default defineNuxtPlugin(() => {
         try {
           await authStore.refreshingTokens();
           processQueue(null, authStore.accessToken);
-          originalRequest.headers['Authorization'] = `Bearer ${authStore.accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${authStore.accessToken}`;
 
           return galantisApi(originalRequest);
-        } catch (refreshError) {
+        }
+        catch (refreshError) {
           processQueue(refreshError, null);
           authStore.clearAuth();
           navigateTo('/auth/login');
 
           return Promise.reject(refreshError);
-        } finally {
+        }
+        finally {
           isRefreshing = false;
         }
       }
       return Promise.reject(error);
-    }
+    },
   );
 
   return {
     provide: {
-      oauthApi,
       galantisApi,
+      oauthApi,
     },
   };
 });

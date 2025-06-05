@@ -1,32 +1,36 @@
 <script setup lang="ts">
-import { Field } from 'vee-validate';
 import { Icon } from '@iconify/vue';
+import { Field } from 'vee-validate';
+
 import { cn } from '@/lib/utils';
 
 interface RadioOption {
-  value?: string;
-  label: string;
-  id?: string;
-  icon?: string;
+  value?: string
+  label: string
+  id?: string
+  icon?: string
 }
 
 const props = defineProps<{
-  name: string;
-  label: string;
-  options: RadioOption[];
-  layout: 'horizontal' | 'vertical';
-  wrapperClass?: string;
+  name: string
+  label: string
+  options: RadioOption[]
+  layout: 'horizontal' | 'vertical'
+  wrapperClass?: string
 }>();
 
 const error = useFieldError(props.name);
 const icon = Icon;
 </script>
+
 <template>
   <FormField :name="name">
-    <FormItem class="space-y-3 mb-8">
-      <FormLabel :class="cn({ 'mb-2': layout === 'vertical' }, error ? 'text-destructive' : 'text-body')">{{
-        label
-      }}</FormLabel>
+    <FormItem class="mb-8 space-y-3">
+      <FormLabel :class="cn({ 'mb-2': layout === 'vertical' }, error ? 'text-destructive' : 'text-body')">
+        {{
+          label
+        }}
+      </FormLabel>
       <Field v-slot="{ field }" :name="name" as="div" :class="wrapperClass">
         <div v-for="option in options" :key="option.value || option.id">
           <label class="relative block cursor-pointer">
@@ -37,13 +41,12 @@ const icon = Icon;
               :checked="field.value === (option.value || option.label)"
               :value="option.value || option.label"
               @change="field.onChange"
-            />
+            >
             <div
-              :class="[
+              class="rounded-lg border bg-background text-sm font-medium shadow-sm outline-none duration-100 ease-in-out" :class="[
                 layout === 'horizontal'
                   ? 'flex items-center px-2 py-2.5'
                   : 'flex flex-col items-center justify-center p-4',
-                'bg-background text-sm font-medium rounded-lg border shadow-sm duration-100 ease-in-out outline-none',
                 field.value === (option.value || option.label) ? 'text-primary peer-checked:border-primary' : '',
               ]"
             >
@@ -52,18 +55,18 @@ const icon = Icon;
                   :is="icon"
                   v-if="field.value === (option.value || option.label)"
                   icon="heroicons:check-circle-20-solid"
-                  class="w-5 h-5 mr-2"
+                  class="mr-2 size-5"
                 />
               </template>
               <template v-else>
-                <component :is="icon" v-if="option.icon" :icon="option.icon" class="size-7 mb-2" />
+                <component :is="icon" v-if="option.icon" :icon="option.icon" class="mb-2 size-7" />
               </template>
               <span :class="[field.value === (option.value || option.label) ? 'text-primary' : '']">
                 {{ option.label }}
               </span>
             </div>
             <div
-              class="absolute inset-0 border border-transparent peer-checked:border-primary rounded-lg pointer-events-none"
+              class="pointer-events-none absolute inset-0 rounded-lg border border-transparent peer-checked:border-primary"
               aria-hidden="true"
             />
           </label>

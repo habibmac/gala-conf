@@ -1,8 +1,9 @@
 <script setup lang="ts">
 defineProps<{
-  payMethod: string;
+  payMethod: string
 }>();
 </script>
+
 <template>
   <svg v-if="payMethod === 'Credit Card'" class="shrink-0" width="32" height="24" xmlns="http://www.w3.org/2000/svg">
     <defs>

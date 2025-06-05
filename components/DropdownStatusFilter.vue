@@ -1,38 +1,39 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
-import { allRegStatuses } from '@/utils';
+import { computed, ref, watch } from 'vue';
+
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { allRegStatuses } from '@/utils';
 
 const props = defineProps<{
-  modelValue: string[];
+  modelValue: string[]
 }>();
 
+const emits = defineEmits(['update:modelValue']);
+
 const statuses = computed(() =>
-  allRegStatuses.map((status) => ({
+  allRegStatuses.map(status => ({
+    color: status.color,
     label: status.label,
     value: status.label,
-    color: status.color,
-  }))
+  })),
 );
 
 const selectedStatuses = ref<string[]>(props.modelValue);
-
-const emits = defineEmits(['update:modelValue']);
 
 watch(
   () => props.modelValue,
   (newValue) => {
     selectedStatuses.value = newValue;
-  }
+  },
 );
 
 function updateValue(value: string) {
   const updatedStatuses = selectedStatuses.value.includes(value)
-    ? selectedStatuses.value.filter((status) => status !== value)
+    ? selectedStatuses.value.filter(status => status !== value)
     : [...selectedStatuses.value, value];
 
   emits('update:modelValue', updatedStatuses);
@@ -42,7 +43,7 @@ function updateValue(value: string) {
 const selectedStatusLabels = computed(() => {
   return selectedStatuses.value.length
     ? selectedStatuses.value.map((value) => {
-        const status = statuses.value.find((s) => s.value === value);
+        const status = statuses.value.find(s => s.value === value);
         return status ? status.label : '';
       })
     : ['All Status'];
@@ -51,8 +52,10 @@ const selectedStatusLabels = computed(() => {
 const selectedValues = computed(() => new Set(selectedStatuses.value));
 
 const buttonLabel = computed(() => {
-  if (selectedStatusLabels.value.length === 0) return 'All Status';
-  if (selectedStatusLabels.value.length === 1) return selectedStatusLabels.value[0];
+  if (selectedStatusLabels.value.length === 0)
+    return 'All Status';
+  if (selectedStatusLabels.value.length === 1)
+    return selectedStatusLabels.value[0];
   return `${selectedStatusLabels.value.length} selected`;
 });
 
@@ -65,13 +68,13 @@ function clearAllStatuses() {
 <template>
   <Popover>
     <PopoverTrigger as-child>
-      <Button variant="outline" class="h-[42px] relative bg-card dark:bg-background">
-        <span v-if="selectedStatuses.length > 0" class="text-xs text-slate-500 border-r pr-2"> Status </span>
-        <span class="font-medium ml-2">
+      <Button variant="outline" class="relative h-[42px] bg-card dark:bg-background">
+        <span v-if="selectedStatuses.length > 0" class="border-r pr-2 text-xs text-slate-500"> Status </span>
+        <span class="ml-2 font-medium">
           {{ buttonLabel }}
         </span>
-        <Icon icon="heroicons:chevron-down" class="w-3.5 h-3.5 ml-2 text-slate-600 dark:text-slate-400" />
-        <span v-if="selectedStatuses.length > 0" class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500" />
+        <Icon icon="heroicons:chevron-down" class="ml-2 size-3.5 text-slate-600 dark:text-slate-400" />
+        <span v-if="selectedStatuses.length > 0" class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500" />
       </Button>
     </PopoverTrigger>
     <PopoverContent class="w-[200px] p-0" align="start">
@@ -86,11 +89,11 @@ function clearAllStatuses() {
                     'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
                     selectedStatuses.length === 0
                       ? 'bg-primary text-primary-foreground'
-                      : 'opacity-50 [&_svg]:invisible'
+                      : 'opacity-50 [&_svg]:invisible',
                   )
                 "
               >
-                <Icon icon="radix-icons:check" class="h-4 w-4" />
+                <Icon icon="radix-icons:check" class="size-4" />
               </div>
               <span>All Status</span>
             </CommandItem>
@@ -106,11 +109,11 @@ function clearAllStatuses() {
                     'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
                     selectedValues.has(item.value)
                       ? 'bg-primary text-primary-foreground'
-                      : 'opacity-50 [&_svg]:invisible'
+                      : 'opacity-50 [&_svg]:invisible',
                   )
                 "
               >
-                <Icon icon="radix-icons:check" class="h-4 w-4" />
+                <Icon icon="radix-icons:check" class="size-4" />
               </div>
               <span :class="`dot ${item.color} h-2 w-2 rounded-full inline-block mr-2`" />
               <span>{{ item.label }}</span>

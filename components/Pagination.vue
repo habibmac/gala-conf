@@ -1,16 +1,17 @@
 <!-- components/Pagination.vue -->
 <script setup lang="ts">
-import { Button } from '@/components/ui/button';
 import { Icon } from '@iconify/vue';
 
+import { Button } from '@/components/ui/button';
+
 const props = defineProps({
-  totalPages: {
-    type: Number,
-    required: true,
-  },
   currentPage: {
-    type: Number,
     required: true,
+    type: Number,
+  },
+  totalPages: {
+    required: true,
+    type: Number,
   },
 });
 
@@ -25,8 +26,8 @@ const pageNumbers = Array.from({ length: props.totalPages }, (_, i) => i + 1);
 </script>
 
 <template>
-  <div class="flex items-center justify-center space-x-2 mt-10 mb-20">
-    <Button variant="outline" class="w-10 h-10 p-0" :disabled="currentPage === 1" @click="updatePage(currentPage - 1)">
+  <div class="mb-20 mt-10 flex items-center justify-center space-x-2">
+    <Button variant="outline" class="size-10 p-0" :disabled="currentPage === 1" @click="updatePage(currentPage - 1)">
       <Icon icon="heroicons:chevron-left" />
     </Button>
 
@@ -34,7 +35,7 @@ const pageNumbers = Array.from({ length: props.totalPages }, (_, i) => i + 1);
       v-for="page in pageNumbers"
       :key="page"
       :variant="page === currentPage ? 'default' : 'outline'"
-      class="w-10 h-10 p-0"
+      class="size-10 p-0"
       @click="updatePage(page)"
     >
       {{ page }}
@@ -42,7 +43,7 @@ const pageNumbers = Array.from({ length: props.totalPages }, (_, i) => i + 1);
 
     <Button
       variant="outline"
-      class="w-10 h-10 p-0"
+      class="size-10 p-0"
       :disabled="currentPage === totalPages"
       @click="updatePage(currentPage + 1)"
     >

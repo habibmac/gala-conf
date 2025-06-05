@@ -1,13 +1,14 @@
 <!-- components/EventsList.vue -->
 <script setup lang="ts">
 import { computed, watch } from 'vue';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useRoute, useRouter } from 'vue-router';
+
+import { Skeleton } from '@/components/ui/skeleton';
 
 const props = defineProps({
   status: {
-    type: String,
     required: true,
+    type: String,
     validator: (value: string) => ['active', 'past'].includes(value),
   },
 });
@@ -18,7 +19,7 @@ const router = useRouter();
 const currentPage = computed(() => Number(route.query.page) || 1);
 const evtStatus = computed(() => (props.status === 'past' ? 'inactive' : 'active'));
 
-const { events, isLoading, isError, pagination, refetch, isRefetching } = useEvents({
+const { events, isError, isLoading, isRefetching, pagination, refetch } = useEvents({
   evtStatus,
   page: currentPage,
 });
@@ -28,7 +29,7 @@ watch(
   () => {
     refetch();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const updatePage = (page: number) => {
@@ -45,13 +46,13 @@ watch(
   () => props.status,
   () => {
     updatePage(1);
-  }
+  },
 );
 </script>
 
 <template>
   <div v-if="isLoading || isRefetching" class="grid h-full grid-cols-1 gap-6">
-    <Skeleton class="h-80 bg-muted-foreground/10 w-full sm:h-32 max-w-xs sm:max-w-none mx-auto" />
+    <Skeleton class="mx-auto h-80 w-full max-w-xs bg-muted-foreground/10 sm:h-32 sm:max-w-none" />
   </div>
   <template v-else-if="isError">
     <EmptyState

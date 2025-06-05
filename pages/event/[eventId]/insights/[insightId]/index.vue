@@ -1,50 +1,52 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import type { PaginationState, SortingState } from '@tanstack/vue-table';
+
+import { Icon } from '@iconify/vue';
 import {
+  createColumnHelper,
   FlexRender,
   getCoreRowModel,
-  useVueTable,
-  createColumnHelper,
-  type SortingState,
-  type PaginationState,
-} from '@tanstack/vue-table';
-import { useInsight } from '@/composables/useInsight';
-import { fromUnixTime, format } from 'date-fns';
-import { formatThousands } from '@/utils';
-import { Icon } from '@iconify/vue';
 
-import type { Reg, TicketGroup, ColumnConfig, CustomField, Answer } from '@/types';
+  useVueTable,
+} from '@tanstack/vue-table';
+import { format, fromUnixTime } from 'date-fns';
+import { computed, ref } from 'vue';
+
+import type { Answer, ColumnConfig, CustomField, Reg, TicketGroup } from '@/types';
+
 import TablePagination from '@/components/TablePagination.vue';
 import { Badge } from '@/components/ui/badge';
+import { useInsight } from '@/composables/useInsight';
 import { exportToCSV, exportToXLSX } from '@/lib/export-data';
+import { formatThousands } from '@/utils';
+
+const props = defineProps<{
+  search?: string
+  group?: string
+  page?: string
+  perPage?: string
+  sortBy?: string
+  order?: string
+}>();
 
 useHead({
   title: 'Insight',
 });
 
 definePageMeta({
-  title: 'Insight',
-  showInMenu: false,
-  order: 1,
-  icon: 'solar:users-group-two-rounded-bold-duotone',
-  group: 'reports',
-  requiresSelectedEvent: true,
-  packages: ['smart', 'optima'],
-  roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
   capabilities: ['ee_read_insights'],
+  group: 'reports',
+  icon: 'solar:users-group-two-rounded-bold-duotone',
   layout: 'dashboard-with-sidebar',
+  order: 1,
+  packages: ['smart', 'optima'],
+  requiresSelectedEvent: true,
+  roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
+  showInMenu: false,
+  title: 'Insight',
 });
 
-const props = defineProps<{
-  search?: string;
-  group?: string;
-  page?: string;
-  perPage?: string;
-  sortBy?: string;
-  order?: string;
-}>();
-
-const { search, group, page, perPage, sortBy, order } = toRefs(props);
+const { group, order, page, perPage, search, sortBy } = toRefs(props);
 
 const route = useRoute();
 const router = useRouter();
@@ -64,65 +66,65 @@ const pagination = ref<PaginationState>({
 });
 
 const filters = ref({
-  search: search.value || '',
   group: group.value || '',
+  search: search.value || '',
 });
 
 // Define parseDesc to accept a string and return a boolean
 const parseDesc = (order: string): boolean => order.toLowerCase() === 'desc';
 const sorting = ref<SortingState>([
   {
-    id: sortBy.value || 'code',
     desc: parseDesc(order.value || 'asc'),
+    id: sortBy.value || 'code',
   },
 ]);
 
-const { insightData, regData, ticketGroups, fetchAllData, totalData, totalPages, isMetaLoading, isDataLoading } =
-  useInsight(eventId, insightId, pagination, sorting, filters);
+const { fetchAllData, insightData, isDataLoading, isMetaLoading, regData, ticketGroups, totalData, totalPages }
+  = useInsight(eventId, insightId, pagination, sorting, filters);
 
 // Table configuration
 const columnConfigs = computed<ColumnConfig[]>(() => {
   const baseColumns = [
     {
-      key: 'date',
       header: 'Date',
-      isVisible: false,
       isHideable: true,
+      isVisible: false,
+      key: 'date',
       width: 10,
     },
     {
-      key: 'code',
       header: 'Reg Code',
-      isVisible: true,
       isHideable: false,
+      isVisible: true,
+      key: 'code',
       width: 10,
     },
     {
-      key: 'fullname',
       header: 'Full Name',
-      isVisible: true,
       isHideable: false,
+      isVisible: true,
+      key: 'fullname',
       width: 20,
     },
     {
-      key: 'ticket_name',
       header: 'Ticket',
+      isHideable: true,
       isVisible: false,
-      isHideable: true,
+      key: 'ticket_name',
       width: 15,
     },
     {
-      key: 'email',
       header: 'Email',
-      isVisible: true,
       isHideable: true,
+      isVisible: true,
+      key: 'email',
       width: 15,
     },
     {
-      key: 'phone',
       header: 'Phone',
-      isVisible: true,
       isHideable: true,
+      isVisible: true,
+      key: 'phone',
       width: 15,
     },
   ];
@@ -135,7 +137,7 @@ const columnConfigs = computed<ColumnConfig[]>(() => {
 const columnHelper = createColumnHelper<Reg>();
 const columns = computed(() => {
   return columnConfigs.value
-    .filter((config) => config.isVisible)
+    .filter(config => config.isVisible)
     .map((config) => {
       return columnHelper.accessor(
         (row: Reg) => {
@@ -147,9 +149,6 @@ const columns = computed(() => {
           return row[config.key as keyof Reg];
         },
         {
-          id: config.key,
-          header: config.header,
-          size: config.width * 10,
           cell: (cellProps) => {
             // Here you can add specific cell rendering logic based on the column key
             switch (config.key) {
@@ -167,9 +166,9 @@ const columns = computed(() => {
                       {
                         class: 'text-xs text-slate-400 dark:text-slate-600',
                       },
-                      format(date, 'hh:mm')
+                      format(date, 'hh:mm'),
                     ),
-                  ]
+                  ],
                 );
               }
               case 'code': {
@@ -179,7 +178,7 @@ const columns = computed(() => {
                   {
                     class: `text-status ${getStatusInfo(stt_id).color}`,
                   },
-                  cellProps.getValue()
+                  cellProps.getValue(),
                 );
               }
               case 'fullname':
@@ -188,13 +187,16 @@ const columns = computed(() => {
                   {
                     class: 'font-semibold text-left text-slate-700 dark:text-slate-300 w-full',
                   },
-                  cellProps.getValue()
+                  cellProps.getValue(),
                 );
               default:
                 return h('div', { class: 'text-left' }, cellProps.getValue());
             }
           },
-        }
+          header: config.header,
+          id: config.key,
+          size: config.width * 10,
+        },
       );
     });
 });
@@ -207,6 +209,32 @@ const table = useVueTable({
   get data() {
     return regData.value ?? [];
   },
+  enableMultiSort: false,
+  getCoreRowModel: getCoreRowModel(),
+  manualFiltering: true,
+  manualPagination: true,
+  manualSorting: true,
+  onPaginationChange: (updater) => {
+    if (typeof updater === 'function') {
+      setPagination(
+        updater({
+          pageIndex: pagination.value.pageIndex,
+          pageSize: pagination.value.pageSize,
+        }),
+      );
+    }
+    else {
+      setPagination(updater);
+    }
+  },
+  onSortingChange: (updater) => {
+    if (typeof updater === 'function') {
+      setSorting(updater(sorting.value));
+    }
+    else {
+      setSorting(updater);
+    }
+  },
   get pageCount() {
     return totalPages.value ?? -1;
   },
@@ -216,30 +244,6 @@ const table = useVueTable({
       return sorting.value;
     },
   },
-  manualPagination: true,
-  manualSorting: true,
-  manualFiltering: true,
-  enableMultiSort: false,
-  onPaginationChange: (updater) => {
-    if (typeof updater === 'function') {
-      setPagination(
-        updater({
-          pageIndex: pagination.value.pageIndex,
-          pageSize: pagination.value.pageSize,
-        })
-      );
-    } else {
-      setPagination(updater);
-    }
-  },
-  onSortingChange: (updater) => {
-    if (typeof updater === 'function') {
-      setSorting(updater(sorting.value));
-    } else {
-      setSorting(updater);
-    }
-  },
-  getCoreRowModel: getCoreRowModel(),
 });
 
 const activeTab = computed({
@@ -252,16 +256,16 @@ const activeTab = computed({
 });
 
 function getCustomFieldsColumns(fields: CustomField[]): ColumnConfig[] {
-  return fields.map((field) => ({
-    key: field.slug,
-    header: field.label,
-    isVisible: true,
-    isHideable: true,
-    width: 10,
+  return fields.map(field => ({
     accessor: (row: Reg) => {
       const answer = row.ans?.find((a: Answer) => a.qst === field.label);
       return answer?.ans || '';
     },
+    header: field.label,
+    isHideable: true,
+    isVisible: true,
+    key: field.slug,
+    width: 10,
   }));
 }
 
@@ -307,8 +311,8 @@ const handleNavigation = (pageNumber: number) => {
 // Reset filters, sorting, and pagination to their initial state
 const handleResetFilters = () => {
   filters.value = {
-    search: '',
     group: ticketGroups.value?.[0]?.name || '', // Reset to first group
+    search: '',
   };
 
   pagination.value = {
@@ -318,8 +322,8 @@ const handleResetFilters = () => {
 
   sorting.value = [
     {
-      id: 'date',
       desc: true,
+      id: 'date',
     },
   ];
 };
@@ -360,12 +364,12 @@ const tabIndicatorWidth = computed(() => {
 function formatExportData(data: Reg[]) {
   return data.map((row) => {
     const formattedRow: { [key: string]: string | number } = {
-      Date: format(fromUnixTime(Number(row.date)), 'dd MMM yyyy HH:mm'),
-      'Reg Code': row.code || '',
+      'Date': format(fromUnixTime(Number(row.date)), 'dd MMM yyyy HH:mm'),
+      'Email': row.email || '',
       'Full Name': row.fullname || '',
-      Ticket: row.ticket_name || '',
-      Email: row.email || '',
-      Phone: row.phone || '',
+      'Phone': row.phone || '',
+      'Reg Code': row.code || '',
+      'Ticket': row.ticket_name || '',
     };
 
     // Add custom fields
@@ -382,7 +386,8 @@ function formatExportData(data: Reg[]) {
 const isExporting = ref(false);
 
 async function handleExport(type: 'csv' | 'xlsx') {
-  if (!insightData.value) return;
+  if (!insightData.value)
+    return;
 
   try {
     isExporting.value = true;
@@ -396,13 +401,16 @@ async function handleExport(type: 'csv' | 'xlsx') {
 
     if (type === 'csv') {
       exportToCSV(formattedData, filename);
-    } else {
+    }
+    else {
       exportToXLSX(formattedData, filename);
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Export failed:', error);
     // You might want to show an error message to the user
-  } finally {
+  }
+  finally {
     isExporting.value = false;
   }
 }
@@ -412,16 +420,16 @@ watch(
   [filters, pagination, sorting],
   ([newFilters, newPagination, newSorting]) => {
     const query = {
-      search: newFilters.search || undefined,
       group: newFilters.group.length > 0 ? newFilters.group : undefined,
+      order: newSorting[0]?.desc ? 'desc' : 'asc',
       page: newPagination.pageIndex + 1 || undefined,
       perPage: newPagination.pageSize || undefined,
+      search: newFilters.search || undefined,
       sortBy: newSorting[0]?.id || undefined,
-      order: newSorting[0]?.desc ? 'desc' : 'asc',
     };
     router.push({ query });
   },
-  { deep: true }
+  { deep: true },
 );
 
 // Watch for route query changes to update filters
@@ -430,8 +438,8 @@ watch(
   (newQuery) => {
     filters.value = {
       ...filters.value,
-      search: (newQuery.search as string) || '',
       group: (newQuery.group as string) || '',
+      search: (newQuery.search as string) || '',
     };
     table.getState().pagination.pageIndex = pagination.value.pageIndex;
     table.getState().pagination.pageSize = pagination.value.pageSize;
@@ -441,12 +449,12 @@ watch(
     };
     sorting.value = [
       {
-        id: (newQuery.sortBy as string) || 'reg_date',
         desc: parseDesc((newQuery.order as string) || 'desc'),
+        id: (newQuery.sortBy as string) || 'reg_date',
       },
     ];
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
 
@@ -455,36 +463,40 @@ watch(
     <header class="pt-5">
       <NuxtLink
         :to="`/event/${eventId}/insights`"
-        class="pb-5 inline-flex hover:underline text-xs items-center space-x-1 text-slate-500"
+        class="inline-flex items-center space-x-1 pb-5 text-xs text-slate-500 hover:underline"
       >
-        <Icon icon="heroicons-outline:arrow-left" class="w-3 h-3" />
+        <Icon icon="heroicons-outline:arrow-left" class="size-3" />
         <span>Back to All Insights</span>
       </NuxtLink>
       <!-- subtitle -->
-      <h2 class="text-slate-500 font-medium">Insight</h2>
-      <h1 class="h2 mb-5">{{ insightData?.title }}</h1>
+      <h2 class="font-medium text-slate-500">
+        Insight
+      </h2>
+      <h1 class="h2 mb-5">
+        {{ insightData?.title }}
+      </h1>
     </header>
   </div>
 
   <section>
-    <div class="container mx-auto 2xl:mx-0 relative">
-      <div v-if="isMetaLoading" class="grid gap-4 grid-cols-12">
-        <Skeleton v-for="i in 2" :key="i" class="h-28 rounded-xl col-span-12 md:col-span-6 bg-muted-foreground/10" />
+    <div class="container relative mx-auto 2xl:mx-0">
+      <div v-if="isMetaLoading" class="grid grid-cols-12 gap-4">
+        <Skeleton v-for="i in 2" :key="i" class="col-span-12 h-28 rounded-xl bg-muted-foreground/10 md:col-span-6" />
       </div>
       <div
         v-else-if="ticketGroups"
-        class="relative flex w-full max-w-sm p-1 bg-slate-200 dark:bg-slate-700/40 rounded-md mx-auto sm:mx-0"
+        class="relative mx-auto flex w-full max-w-sm rounded-md bg-slate-200 p-1 dark:bg-slate-700/40 sm:mx-0"
       >
-        <span class="absolute inset-0 m-1 pointer-events-none" aria-hidden="true">
+        <span class="pointer-events-none absolute inset-0 m-1" aria-hidden="true">
           <span
-            class="absolute inset-0 bg-white dark:bg-slate-950/70 rounded-md transition-transform duration-150 ease-in-out"
+            class="absolute inset-0 rounded-md bg-white transition-transform duration-150 ease-in-out dark:bg-slate-950/70"
             :style="{ width: tabIndicatorWidth, transform: tabIndicatorClass }"
           />
         </span>
         <button
           v-for="(tab, index) in ticketGroups"
           :key="index"
-          class="relative flex-1 justify-center items-center z-10 flex text-sm font-medium p-1 duration-150 ease-in-out"
+          class="relative z-10 flex flex-1 items-center justify-center p-1 text-sm font-medium duration-150 ease-in-out"
           :class="tab.name === activeTab && 'text-slate-900 dark:text-slate-100'"
           @click.prevent="handleTabChange(tab.name)"
         >
@@ -492,7 +504,7 @@ watch(
           <Badge
             v-if="tab.count"
             :variant="tab.name === activeTab ? 'default' : 'outline'"
-            class="ml-2 scale-90 flex text-xs h-6 min-w-6 px-1.5 shrink-0 items-center justify-center rounded-full"
+            class="ml-2 flex h-6 min-w-6 shrink-0 scale-90 items-center justify-center rounded-full px-1.5 text-xs"
           >
             {{ tab.count }}
           </Badge>
@@ -511,12 +523,12 @@ watch(
           </span>
         </h3>
 
-        <ul v-if="ticketGroups" class="flex flex-wrap gap-2 items-start">
+        <ul v-if="ticketGroups" class="flex flex-wrap items-start gap-2">
           <li>Tickets:</li>
           <li
             v-for="ticket in ticketGroups.find((group: TicketGroup) => group.name === activeTab)?.tickets"
             :key="ticket.id"
-            class="text-xs border border-slate-300 rounded-lg font-medium px-2 py-1 dark:text-slate-300 dark:border-slate-600"
+            class="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium dark:border-slate-600 dark:text-slate-300"
           >
             {{ ticket.name }}
           </li>
@@ -528,18 +540,18 @@ watch(
           <Button variant="outline" class="bg-card" :disabled="isExporting">
             <Icon
               :icon="isExporting ? 'svg-spinners:ring-resize' : 'heroicons:arrow-right-start-on-rectangle'"
-              class="text-muted-foreground w-5 h-5 mr-2"
+              class="mr-2 size-5 text-muted-foreground"
             />
             {{ isExporting ? 'Exporting...' : 'Export' }}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem :disabled="isExporting" @click="handleExport('csv')">
-            <Icon icon="ph:file-csv" class="text-muted-foreground w-5 h-5 mr-2" />
+            <Icon icon="ph:file-csv" class="mr-2 size-5 text-muted-foreground" />
             Export to CSV
           </DropdownMenuItem>
           <DropdownMenuItem :disabled="isExporting" @click="handleExport('xlsx')">
-            <Icon icon="ph:file-xls" class="text-muted-foreground w-5 h-5 mr-2" />
+            <Icon icon="ph:file-xls" class="mr-2 size-5 text-muted-foreground" />
             Export to XLSX
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -549,32 +561,34 @@ watch(
 
   <section>
     <div
-      class="flex flex-col justify-between items-center min-h-12 w-full gap-2 bg-slate-50 px-4 py-2 sm:flex-row sm:px-6 sm:py-2 dark:bg-slate-950"
+      class="flex min-h-12 w-full flex-col items-center justify-between gap-2 bg-slate-50 px-4 py-2 dark:bg-slate-950 sm:flex-row sm:px-6 sm:py-2"
     >
       <div class="">
         <TableSearchForm v-model="filters.search" placeholder="Search Registrant..." />
       </div>
 
-      <div v-if="!isMetaLoading && !isDataLoading" class="number shrink-0 text-slate-500 text-sm">
-        <template v-if="totalData"
-          >Found
+      <div v-if="!isMetaLoading && !isDataLoading" class="number shrink-0 text-sm text-slate-500">
+        <template v-if="totalData">
+          Found
           <span class="font-semibold text-slate-900 dark:text-slate-300">{{ formatThousands(totalData) }}</span>
-          results.</template
-        >
-        <div v-else>No data found.</div>
+          results.
+        </template>
+        <div v-else>
+          No data found.
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="relative" :class="{ 'overflow-x-auto scroll-area': !isDataLoading }">
+  <section class="relative" :class="{ 'scroll-area overflow-x-auto': !isDataLoading }">
     <div class="w-full">
-      <div :style="{ minWidth: `${calculateMinWidth(columnConfigs)}px` }">
+      <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs))}px` }">
         <template v-if="isDataLoading">
-          <div class="absolute z-10 h-full w-full bg-card/10 ring-0" />
+          <div class="absolute z-10 size-full bg-card/10 ring-0" />
         </template>
         <table class="relative w-full bg-white dark:bg-transparent dark:text-slate-300/90">
           <thead
-            class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
+            class="border-y border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
           >
             <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
               <th
@@ -584,7 +598,7 @@ watch(
                 :style="{
                   minWidth: `${header.column.columnDef.size ?? 20}px`,
                 }"
-                class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 hover:bg-blue-200/20 dark:hover:bg-slate-900/50 first:pl-5 last:pr-5 text-xs"
+                class="whitespace-nowrap px-2 py-3 text-xs text-slate-500 first:pl-5 last:pr-5 hover:bg-blue-200/20 dark:text-slate-400 dark:hover:bg-slate-900/50"
                 :class="{
                   'bg-blue-200/20 text-blue-600 dark:bg-slate-800/50': header.column.getIsSorted(),
                   'cursor-pointer select-none': header.column.getCanSort(),
@@ -604,12 +618,12 @@ watch(
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-200 text-sm 2xl:text-sm dark:divide-slate-800 border-b">
+          <tbody class="divide-y divide-slate-200 border-b text-sm dark:divide-slate-800 2xl:text-sm">
             <template v-if="!table.getRowModel().rows.length">
               <template v-if="isDataLoading">
                 <tr v-for="index in 10" :key="index">
-                  <td v-for="(column, index2) in columns" :key="index2" class="px-2 py-2">
-                    <Skeleton class="w-full h-6 rounded" />
+                  <td v-for="(column, index2) in columns" :key="index2" class="p-2">
+                    <Skeleton class="h-6 w-full rounded" />
                   </td>
                 </tr>
               </template>
@@ -634,7 +648,7 @@ watch(
                 :key="cell.id"
                 class="number px-2 py-3 text-center first:pl-5 last:pr-5"
                 :class="{
-                  'text-slate-600 bg-blue-50/50 dark:bg-slate-600/20 dark:text-slate-300': cell.column.getIsSorted(),
+                  'bg-blue-50/50 text-slate-600 dark:bg-slate-600/20 dark:text-slate-300': cell.column.getIsSorted(),
                 }"
               >
                 <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />

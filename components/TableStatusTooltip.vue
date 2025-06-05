@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+
 import { getStatusInfo } from '@/utils/status-map';
 
 defineProps<{
-  status: string;
+  status: string
 }>();
 
 const tooltipOpen = ref(false);
@@ -35,9 +36,8 @@ const tooltipOpen = ref(false);
       >
         <div
           v-show="tooltipOpen"
-          :class="[
+          class="right-0 mb-2 overflow-hidden rounded border bg-white px-3 py-1 text-xs text-slate-800 shadow-lg dark:border-slate-700 dark:bg-slate-700 dark:text-slate-200" :class="[
             getStatusInfo(status).color,
-            'right-0 mb-2 overflow-hidden rounded border bg-white px-3 py-1 text-xs text-slate-800 shadow-lg dark:border-slate-700 dark:bg-slate-700 dark:text-slate-200',
           ]"
         >
           <slot />

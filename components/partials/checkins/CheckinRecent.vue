@@ -1,16 +1,17 @@
 <!-- components/checkins/CheckinRecent.vue -->
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
+
 import { formatToUTC7 } from '@/utils';
 
 interface RecentCheckin {
-  REG_ID: string;
-  REG_code: string;
-  name: string;
-  address: string;
-  city: string;
-  ticket: string;
-  check_time: string;
+  REG_ID: string
+  REG_code: string
+  name: string
+  address: string
+  city: string
+  ticket: string
+  check_time: string
 }
 
 const route = useRoute();
@@ -24,8 +25,8 @@ const getRecentCheckins = async () => {
 };
 
 const { data: recentCheckins, isLoading } = useQuery<RecentCheckin[]>({
-  queryKey: ['recent-checkins', eventId],
   queryFn: getRecentCheckins,
+  queryKey: ['recent-checkins', eventId],
   refetchInterval: hasEventEnded.value ? false : 30000,
 });
 
@@ -37,19 +38,31 @@ const getRegDetailsUrl = (regId: string) => {
 <template>
   <Card class="relative rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
     <CardHeader>
-      <CardTitle class="text-base font-semibold">Recent Check-ins</CardTitle>
+      <CardTitle class="text-base font-semibold">
+        Recent Check-ins
+      </CardTitle>
     </CardHeader>
 
     <CardContent>
-      <div class="relative max-h-[300px] overflow-auto scroll-area">
+      <div class="scroll-area relative max-h-[300px] overflow-auto">
         <table class="w-full">
           <thead class="sticky top-0 bg-white dark:bg-slate-900">
             <tr class="border-b border-slate-200 text-xs uppercase dark:border-slate-700">
-              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">Time</th>
-              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">Name</th>
-              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">Reg Code</th>
-              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">Ticket</th>
-              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">City</th>
+              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">
+                Time
+              </th>
+              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">
+                Name
+              </th>
+              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">
+                Reg Code
+              </th>
+              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">
+                Ticket
+              </th>
+              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">
+                City
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
@@ -69,18 +82,26 @@ const getRegDetailsUrl = (regId: string) => {
                 <td class="whitespace-nowrap px-4 py-2 font-medium text-slate-900 dark:text-slate-300">
                   {{ formatToUTC7(checkin.check_time) }}
                 </td>
-                <td class="px-4 py-2">{{ checkin.name }}</td>
+                <td class="px-4 py-2">
+                  {{ checkin.name }}
+                </td>
                 <td class="px-4 py-2 font-mono text-xs">
                   <NuxtLink :to="getRegDetailsUrl(checkin.REG_ID)" class="text-emerald-500 hover:underline">
                     {{ checkin.REG_code }}
                   </NuxtLink>
                 </td>
-                <td class="px-4 py-2">{{ checkin.ticket }}</td>
-                <td class="px-4 py-2">{{ checkin.city }}</td>
+                <td class="px-4 py-2">
+                  {{ checkin.ticket }}
+                </td>
+                <td class="px-4 py-2">
+                  {{ checkin.city }}
+                </td>
               </tr>
             </template>
             <tr v-else>
-              <td class="px-4 py-8 text-center text-sm text-slate-500" colspan="5">No recent check-ins</td>
+              <td class="px-4 py-8 text-center text-sm text-slate-500" colspan="5">
+                No recent check-ins
+              </td>
             </tr>
           </tbody>
         </table>

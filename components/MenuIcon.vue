@@ -2,9 +2,9 @@
 import { Icon } from '@iconify/vue';
 
 defineProps<{
-  name: string;
-  width?: string | number;
-  height?: string | number;
+  name: string
+  width?: string | number
+  height?: string | number
 }>();
 </script>
 

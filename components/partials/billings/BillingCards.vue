@@ -1,50 +1,51 @@
 <script setup lang="ts">
-import { formatThousands } from '@/utils';
-import { useQuery } from '@tanstack/vue-query';
 import { Icon } from '@iconify/vue';
+import { useQuery } from '@tanstack/vue-query';
+
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatThousands } from '@/utils';
 
 const route = useRoute();
 const eventId = ref(route.params.eventId as string) || ref('');
 
 interface BillingSummary {
-  gross_sales: number;
-  nett_sales: number;
-  total_withdrawn: number;
-  withdrawable: number;
-  fee_percentage: string;
+  gross_sales: number
+  nett_sales: number
+  total_withdrawn: number
+  withdrawable: number
+  fee_percentage: string
 }
 
 // Define the cards data structure
 const getCardData = (summaryData: BillingSummary) => [
   {
+    color: 'text-green-500',
+    icon: 'solar:graph-up-bold-duotone',
+    is_currency: true,
     title: 'Gross Sales',
     value: summaryData.gross_sales,
-    is_currency: true,
-    icon: 'solar:graph-up-bold-duotone',
-    color: 'text-green-500',
   },
   {
+    color: 'text-blue-500',
+    icon: 'solar:wallet-money-bold-duotone',
+    is_currency: true,
+    subtitle: `After ${summaryData.fee_percentage}% fee`,
     title: 'Nett Sales',
     value: summaryData.nett_sales,
-    is_currency: true,
-    icon: 'solar:wallet-money-bold-duotone',
-    color: 'text-blue-500',
-    subtitle: `After ${summaryData.fee_percentage}% fee`,
   },
   {
+    color: 'text-orange-500',
+    icon: 'solar:card-transfer-bold-duotone',
+    is_currency: true,
     title: 'Total Withdrawn',
     value: summaryData.total_withdrawn,
-    is_currency: true,
-    icon: 'solar:card-transfer-bold-duotone',
-    color: 'text-orange-500',
   },
   {
+    color: 'text-purple-500',
+    icon: 'solar:dollar-minimalistic-bold-duotone',
+    is_currency: true,
     title: 'Balance',
     value: summaryData.withdrawable,
-    is_currency: true,
-    icon: 'solar:dollar-minimalistic-bold-duotone',
-    color: 'text-purple-500',
   },
 ];
 
@@ -55,29 +56,32 @@ const getBillingSummary = async (evtId: Ref) => {
   return response.data;
 };
 
-const { data, isLoading, isError, isRefetching } = useQuery({
-  queryKey: ['billingSummary', eventId],
-  queryFn: () => getBillingSummary(eventId),
+const { data, isError, isLoading, isRefetching } = useQuery({
   enabled: !!eventId,
+  queryFn: () => getBillingSummary(eventId),
+  queryKey: ['billingSummary', eventId],
 });
 
 // Computed property for card data
 const cards = computed(() => {
-  if (!data.value?.success) return [];
+  if (!data.value?.success)
+    return [];
   return getCardData(data.value.data);
 });
 </script>
 
 <template>
-  <div v-if="isLoading || isRefetching" class="grid gap-4 grid-cols-12">
+  <div v-if="isLoading || isRefetching" class="grid grid-cols-12 gap-4">
     <Skeleton
       v-for="i in 4"
       :key="i"
-      class="h-28 rounded-xl col-span-12 sm:col-span-6 md:col-span-3 bg-muted-foreground/10"
+      class="col-span-12 h-28 rounded-xl bg-muted-foreground/10 sm:col-span-6 md:col-span-3"
     />
   </div>
   <div v-else-if="isError" class="py-16">
-    <div class="flex h-32 items-center justify-center">Error fetching billing summary. Please try again later.</div>
+    <div class="flex h-32 items-center justify-center">
+      Error fetching billing summary. Please try again later.
+    </div>
   </div>
   <template v-else-if="data?.success">
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -93,7 +97,7 @@ const cards = computed(() => {
             {{ formatThousands(item.value) }}
             <span v-if="item.is_currency" class="text-xs font-medium text-muted-foreground"> IDR </span>
           </div>
-          <p v-if="item.subtitle" class="text-xs text-muted-foreground mt-1">
+          <p v-if="item.subtitle" class="mt-1 text-xs text-muted-foreground">
             {{ item.subtitle }}
           </p>
         </CardContent>

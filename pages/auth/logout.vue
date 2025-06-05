@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useAuthStore } from '@/stores';
 import { useRouter } from '#app';
+import { ref } from 'vue';
+
+import { useAuthStore } from '@/stores';
 
 useHead({
   title: 'Logging out...',
@@ -18,7 +19,7 @@ async function performLogout() {
 }
 
 async function artificialDelay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 onMounted(async () => {
@@ -49,12 +50,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="max-w-9xl mx-auto w-full px-4 py-8 flex sm:px-6 lg:px-8 min-h-screen">
+  <div class="max-w-9xl mx-auto flex min-h-screen w-full px-4 py-8 sm:px-6 lg:px-8">
     <div class="m-auto max-w-2xl">
       <div class="px-4 text-center">
         <SpinnerRing />
         <h1>Logging out...</h1>
-        <p class="py-4 text-center text-muted-foreground text-sm">
+        <p class="py-4 text-center text-sm text-muted-foreground">
           You will be redirected in
           <span class="font-medium dark:text-slate-300">{{ seconds }}</span>
           seconds.

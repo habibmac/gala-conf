@@ -1,37 +1,38 @@
 <script setup lang="ts">
+import EventCover from '@/components/EventCover.vue';
 import { formatDate } from '@/utils';
 import { cn } from '~/lib/utils';
-import EventCover from '@/components/EventCover.vue';
 
 defineProps({
-  event: {
-    type: Object,
-    required: true,
-  },
   class: {
-    type: String,
     default: '',
+    type: String,
+  },
+  event: {
+    required: true,
+    type: Object,
   },
   isPast: {
-    type: Boolean,
     default: false,
+    type: Boolean,
   },
 });
 </script>
+
 <template>
   <NuxtLink
     :to="`/event/${event.id}`"
-    class="relative mx-auto flex flex-col max-w-xs sm:max-w-none overflow-hidden rounded-lg border border-border bg-card dark:bg-slate-900 hover:border-primary transition w-full sm:flex-row group"
+    class="group relative mx-auto flex w-full max-w-xs flex-col overflow-hidden rounded-lg border border-border bg-card transition hover:border-primary dark:bg-slate-900 sm:max-w-none sm:flex-row"
   >
     <!-- <PulseDot v-if="!isPast" class="absolute top-2 right-2 rounded-full z-20" dot-class="size-2.5 bg-green-400" pulse-class="bg-green-300 size-4" /> -->
 
     <!-- Image -->
-    <div class="relative flex items-center justify-center w-full sm:w-44 overflow-hidden md:shrink-0 mx-auto p-3">
+    <div class="relative mx-auto flex w-full items-center justify-center overflow-hidden p-3 sm:w-44 md:shrink-0">
       <EventCover
         :class="
           cn(
             'scale-125 absolute transition-transform duration-200 group-hover:scale-150 group-hover:blur-lg inset-0 w-full h-full blur-xl opacity-25 dark:opacity-45 object-cover',
-            'z-0'
+            'z-0',
           )
         "
         :title="event.title"
@@ -53,14 +54,16 @@ defineProps({
           {{ event.title }}
         </h3>
         <div class="">
-          <Badge :class="`event-package ${event.package}`">{{ event.package }}</Badge>
+          <Badge :class="`event-package ${event.package}`">
+            {{ event.package }}
+          </Badge>
         </div>
       </div>
       <!-- Footer -->
       <div v-if="!isPast" class="mt-3 flex flex-col items-center justify-between space-x-4 sm:flex-row">
         <!-- Location -->
         <div
-          class="hidden items-center rounded-full px-2.5 py-1 text-center text-xs font-medium sm:inline-flex bg-accent text-accent-foreground/70"
+          class="hidden items-center rounded-full bg-accent px-2.5 py-1 text-center text-xs font-medium text-accent-foreground/70 sm:inline-flex"
         >
           <span v-if="event.location" class="line-clamp-1">{{ event.location }}</span>
           <span v-else>---</span>
@@ -71,10 +74,12 @@ defineProps({
     <div
       class="order-1 flex shrink-0 flex-col items-center justify-center space-x-2 border-t p-4 text-center sm:w-1/5 sm:border-none"
     >
-      <div class="lining-nums ordinal slashed-zero tabular-nums" :class="[isPast ? 'text-xl' : 'text-3xl text-green-500 ']">
+      <div class="ordinal slashed-zero lining-nums tabular-nums" :class="[isPast ? 'text-xl' : 'text-3xl text-green-500 ']">
         {{ event.regs }}
       </div>
-      <div class="text-muted-foreground" :class="[isPast ? 'text-xs' : 'text-sm']">Regs</div>
+      <div class="text-muted-foreground" :class="[isPast ? 'text-xs' : 'text-sm']">
+        Regs
+      </div>
     </div>
   </NuxtLink>
 </template>

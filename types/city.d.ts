@@ -1,16 +1,16 @@
 export interface City {
-  name: string;
+  name: string
   states: {
-    name: string;
-  };
+    name: string
+  }
   countries: {
-    name: string;
-  };
+    name: string
+  }
 }
 
 export interface CityOption {
-  city: string;
-  state: string;
-  country: string;
-  country_code: string;
+  city: string
+  state: string
+  country: string
+  country_code: string
 }

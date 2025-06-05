@@ -1,5 +1,6 @@
-import { ref } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
+import { ref } from 'vue';
+
 import type { CityOption } from '~/types';
 
 export function useCitySearch(venueCity: Ref<string>) {
@@ -20,20 +21,22 @@ export function useCitySearch(venueCity: Ref<string>) {
         params: { city: query },
       });
       cityOptions.value = response;
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error fetching cities:', error);
       cityOptions.value = [];
-    } finally {
+    }
+    finally {
       isLoading.value = false;
     }
   }, 300);
 
   return {
-    venueCity,
     cityOptions,
-    searchCities,
-    isLoading,
     hasMinLength,
+    isLoading,
+    searchCities,
     selectedCity,
+    venueCity,
   };
 }

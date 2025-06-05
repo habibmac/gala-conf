@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { useForm } from 'vee-validate';
-import { ref, computed, provide, type PropType } from 'vue';
+import type { PropType } from 'vue';
+
 import { Icon } from '@iconify/vue';
+import { useForm } from 'vee-validate';
+import { computed, provide, ref } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 
 const props = defineProps({
   validationSchema: {
-    type: Array as PropType<ReturnType<typeof toTypedSchema>[]>,
     required: true,
+    type: Array as PropType<ReturnType<typeof toTypedSchema>[]>,
   },
 });
 
-const emit = defineEmits(['submit', 'update:currentStep', 'formValuesUpdate']);
+const emit = defineEmits(['submit', 'update:currentStep', 'form-values-update']);
 
 const currentStepIdx = ref(0);
 const stepCounter = ref(0);
@@ -28,9 +30,9 @@ const currentSchema = computed(() => {
   return props.validationSchema[currentStepIdx.value];
 });
 
-const { values, handleSubmit, errors, meta, setFieldValue } = useForm({
-  validationSchema: currentSchema,
+const { errors, handleSubmit, meta, setFieldValue, values } = useForm({
   keepValuesOnUnmount: true,
+  validationSchema: currentSchema,
 });
 
 function updateFormField(field: string, value: unknown) {
@@ -42,7 +44,7 @@ function errorMessages(field: string) {
 }
 
 // Expose the method to the parent component
-defineExpose({ updateFormField, errorMessages });
+defineExpose({ errorMessages, updateFormField });
 
 const onSubmit = handleSubmit((values) => {
   if (!isLastStep.value) {
@@ -67,9 +69,9 @@ provide('CURRENT_STEP_INDEX', currentStepIdx);
 watch(
   values,
   (newValues) => {
-    emit('formValuesUpdate', newValues);
+    emit('form-values-update', newValues);
   },
-  { deep: true }
+  { deep: true },
 );
 
 onBeforeRouteLeave((to, from, next) => {
@@ -77,21 +79,24 @@ onBeforeRouteLeave((to, from, next) => {
     const answer = window.confirm('You have unsaved changes. Do you really want to leave?');
     if (answer) {
       next();
-    } else {
+    }
+    else {
       next(false);
     }
-  } else {
+  }
+  else {
     next();
   }
 });
 </script>
+
 <template>
-  <form class="grow flex flex-col" @submit="onSubmit">
-    <header class="bg-muted/30 sticky backdrop-blur-sm w-full px-4 py-5 border-b">
-      <div class="relative flex justify-between items-center gap-2">
-        <div class="absolute top-1/2 -translate-y-1/2 hidden lg:block lg:left-5 z-10">
+  <form class="flex grow flex-col" @submit="onSubmit">
+    <header class="sticky w-full border-b bg-muted/30 px-4 py-5 backdrop-blur-sm">
+      <div class="relative flex items-center justify-between gap-2">
+        <div class="absolute top-1/2 z-10 hidden -translate-y-1/2 lg:left-5 lg:block">
           <Button as-child variant="link" class="flex shrink-0 text-muted-foreground">
-            <NuxtLink to="/my-events" class="items-center flex gap-1">
+            <NuxtLink to="/my-events" class="flex items-center gap-1">
               <Icon icon="heroicons:arrow-long-left" class="size-5" />
               <span class="hidden lg:inline-block"> Back to My Events </span>
             </NuxtLink>
@@ -102,7 +107,7 @@ onBeforeRouteLeave((to, from, next) => {
           <div />
         </slot>
 
-        <div class="absolute w-full lg:w-auto lg:right-0 top-1/2 -translate-y-1/2 flex justify-center">
+        <div class="absolute top-1/2 flex w-full -translate-y-1/2 justify-center lg:right-0 lg:w-auto">
           <div class="flex w-full justify-between gap-3">
             <Button
               v-if="hasPrevious"
@@ -114,7 +119,7 @@ onBeforeRouteLeave((to, from, next) => {
               <span class="hidden sm:inline-block">Previous</span>
             </Button>
             <div v-else />
-            <Button type="submit" class="flex left-auto items-center justify-center gap-1">
+            <Button type="submit" class="left-auto flex items-center justify-center gap-1">
               <span class="hidden sm:inline-block">{{ isLastStep ? 'Save draft' : 'Next' }}</span>
               <Icon icon="heroicons:chevron-right" class="size-4 sm:hidden" />
             </Button>

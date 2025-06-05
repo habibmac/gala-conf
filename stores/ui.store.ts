@@ -1,9 +1,10 @@
 // stores/ui.store.ts
 import { useLocalStorage } from '#imports';
-import { defineStore } from 'pinia';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { breakpointsTailwind, useBreakpoints, useDebounceFn } from '@vueuse/core';
-import type { UserPreferences, PreferencesResponse } from '~/types';
+import { defineStore } from 'pinia';
+
+import type { PreferencesResponse, UserPreferences } from '~/types';
 
 export const useUIStore = defineStore('ui', () => {
   const queryClient = useQueryClient();
@@ -19,9 +20,9 @@ export const useUIStore = defineStore('ui', () => {
   const sidebarExpanded = useLocalStorage('sidebarExpanded', false);
 
   const preferences = ref<UserPreferences>({
-    theme: 'system',
-    locale: 'en',
     itemsPerPage: 10,
+    locale: 'en',
+    theme: 'system',
   });
 
   // Mobile sidebar state
@@ -29,11 +30,11 @@ export const useUIStore = defineStore('ui', () => {
 
   // Query setup
   const query = useQuery({
-    queryKey: ['user-preferences'],
     queryFn: async () => {
       const response = await $galantisApi.get<PreferencesResponse>('/user/preferences');
       return response.data.data;
     },
+    queryKey: ['user-preferences'],
   });
 
   const data = computed(() => query.data.value);
@@ -47,7 +48,7 @@ export const useUIStore = defineStore('ui', () => {
         applyPreferences(newData);
       }
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   function applyPreferences(prefs: Partial<UserPreferences>) {
@@ -58,16 +59,19 @@ export const useUIStore = defineStore('ui', () => {
 
   // Debounced API call function
   const savePreferencesToAPI = useDebounceFn(async (prefsToSave: Partial<UserPreferences>) => {
-    if (isUpdating.value) return;
+    if (isUpdating.value)
+      return;
 
     try {
       isUpdating.value = true;
       const response = await $galantisApi.post<PreferencesResponse>('/user/preferences', prefsToSave);
       queryClient.setQueryData(['user-preferences'], response.data.data);
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Failed to save preferences:', error);
       throw error;
-    } finally {
+    }
+    finally {
       isUpdating.value = false;
     }
   }, 300); // 300ms debounce
@@ -94,7 +98,8 @@ export const useUIStore = defineStore('ui', () => {
     try {
       // Use debounced API call
       await savePreferencesToAPI(prefsToSave);
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Failed to save preferences:', error);
       // Revert on error
       preferences.value = previousState;
@@ -106,7 +111,8 @@ export const useUIStore = defineStore('ui', () => {
   const toggleSidebar = () => {
     if (isLargeScreen.value) {
       sidebarExpanded.value = !sidebarExpanded.value;
-    } else {
+    }
+    else {
       isSidebarOpenMobile.value = !isSidebarOpenMobile.value;
     }
   };
@@ -114,7 +120,8 @@ export const useUIStore = defineStore('ui', () => {
   const setSidebarExpanded = (expanded: boolean) => {
     if (isLargeScreen.value) {
       sidebarExpanded.value = expanded;
-    } else {
+    }
+    else {
       isSidebarOpenMobile.value = expanded;
     }
   };
@@ -144,14 +151,14 @@ export const useUIStore = defineStore('ui', () => {
   });
 
   return {
-    preferences,
     isLoading,
-    isUpdating,
     isSidebarOpen,
-    toggleSidebar,
+    isUpdating,
+    preferences,
+    setItemsPerPage,
     setSidebarExpanded,
     setTheme,
-    setItemsPerPage,
+    toggleSidebar,
     updatePreferences,
   };
 });

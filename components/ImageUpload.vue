@@ -10,6 +10,22 @@ const unhighlight = () => {
   isHighlighted.value = false;
 };
 
+const handleFiles = (files: FileList | null) => {
+  if (files && files.length > 0) {
+    const file = files[0];
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewUrl.value = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+    else {
+      alert('Please upload an image file');
+    }
+  }
+};
+
 const handleDrop = (e: DragEvent) => {
   unhighlight();
   const dt = e.dataTransfer;
@@ -26,21 +42,6 @@ const handleChange = (e: Event) => {
     handleFiles(target.files);
   }
 };
-
-const handleFiles = (files: FileList | null) => {
-  if (files && files.length > 0) {
-    const file = files[0];
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        previewUrl.value = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    } else {
-      alert('Please upload an image file');
-    }
-  }
-};
 </script>
 
 <template>
@@ -48,7 +49,7 @@ const handleFiles = (files: FileList | null) => {
     <div
       id="dropzone"
       :class="{ 'border-blue-500 bg-blue-100': isHighlighted }"
-      class="flex items-center justify-center w-full"
+      class="flex w-full items-center justify-center"
       @dragenter.prevent="highlight"
       @dragover.prevent="highlight"
       @dragleave.prevent="unhighlight"
@@ -56,11 +57,11 @@ const handleFiles = (files: FileList | null) => {
     >
       <label
         for="dropzone-file"
-        class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500"
+        class="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-gray-500 dark:hover:bg-gray-800"
       >
-        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+        <div class="flex flex-col items-center justify-center pb-6 pt-5">
           <svg
-            class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+            class="mb-4 size-8 text-gray-500 dark:text-gray-400"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -79,11 +80,11 @@ const handleFiles = (files: FileList | null) => {
           </p>
           <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
         </div>
-        <input id="dropzone-file" type="file" class="hidden" accept="image/*" @change="handleChange" />
+        <input id="dropzone-file" type="file" class="hidden" accept="image/*" @change="handleChange">
       </label>
     </div>
     <div v-if="previewUrl" class="mt-4">
-      <img :src="previewUrl" alt="Preview" class="max-w-full h-auto rounded-lg shadow-lg" />
+      <img :src="previewUrl" alt="Preview" class="h-auto max-w-full rounded-lg shadow-lg">
     </div>
   </div>
 </template>

@@ -1,10 +1,10 @@
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue';
+import { defineEmits, defineProps, ref } from 'vue';
 
 const props = defineProps({
   modelValue: {
-    type: Boolean,
     default: false,
+    type: Boolean,
   },
 });
 
@@ -17,16 +17,17 @@ function toggle() {
   emit('update:modelValue', show.value);
 }
 </script>
+
 <template>
   <button
     type="button"
-    @click="toggle"
     :aria-label="show ? 'Hide password' : 'Show password'"
     class="show-password-toggle"
+    @click="toggle"
   >
     <span v-if="show">
       <!-- Eye Open Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
         <rect width="24" height="24" fill="none" />
         <path
           fill="currentColor"

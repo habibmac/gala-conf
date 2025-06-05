@@ -1,57 +1,60 @@
 <!-- pages/[eventId]/checkins/index.vue -->
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import type { PaginationState, SortingState } from '@tanstack/vue-table';
+
 import {
+  createColumnHelper,
   FlexRender,
   getCoreRowModel,
+
   useVueTable,
-  createColumnHelper,
-  type SortingState,
-  type PaginationState,
 } from '@tanstack/vue-table';
 import { format } from 'date-fns';
-import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
-import type { CheckinItem, CheckinColumnConfig } from '@/types';
-import { useCheckins } from '~/composables/useCheckins';
+import { computed, ref } from 'vue';
+
+import type { CheckinColumnConfig, CheckinItem } from '@/types';
+
 import { formatToUTC7 } from '@/utils';
+import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
+import { useCheckins } from '~/composables/useCheckins';
+
+const props = withDefaults(
+  defineProps<{
+    search?: string
+    dateStart?: string
+    dateEnd?: string
+    page?: string
+    perPage?: string
+    sortBy?: string
+    order?: string
+  }>(),
+  {
+    dateEnd: '',
+    dateStart: '',
+    order: 'desc',
+    page: '1',
+    perPage: '10',
+    search: '',
+    sortBy: 'check_time',
+  },
+);
 
 useHead({
   title: 'Check-ins',
 });
 
 definePageMeta({
-  title: 'Check-ins',
-  showInMenu: true,
-  order: 1,
-  icon: 'solar:bill-check-bold-duotone',
-  group: 'tools',
-  layout: 'dashboard-with-sidebar',
-  requiresSelectedEvent: true,
-  packages: ['starter', 'smart', 'optima'],
-  roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
   capabilities: ['ee_read_checkins'],
+  group: 'tools',
+  icon: 'solar:bill-check-bold-duotone',
+  layout: 'dashboard-with-sidebar',
+  order: 1,
+  packages: ['starter', 'smart', 'optima'],
+  requiresSelectedEvent: true,
+  roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
+  showInMenu: true,
+  title: 'Check-ins',
 });
-
-const props = withDefaults(
-  defineProps<{
-    search?: string;
-    dateStart?: string;
-    dateEnd?: string;
-    page?: string;
-    perPage?: string;
-    sortBy?: string;
-    order?: string;
-  }>(),
-  {
-    search: '',
-    dateStart: '',
-    dateEnd: '',
-    page: '1',
-    perPage: '10',
-    sortBy: 'check_time',
-    order: 'desc',
-  }
-);
 
 const { event } = useEvent();
 const eventId = computed(() => event.value?.id);
@@ -72,15 +75,15 @@ const pagination = ref<PaginationState>({
 });
 
 const filters = ref({
-  search: props.search || '',
-  date_start: props.dateStart || '',
   date_end: props.dateEnd || '',
+  date_start: props.dateStart || '',
+  search: props.search || '',
 });
 
 const sorting = ref<SortingState>([
   {
-    id: props.sortBy || 'check_time',
     desc: props.order ? props.order.toLowerCase() === 'desc' : true,
+    id: props.sortBy || 'check_time',
   },
 ]);
 
@@ -94,93 +97,97 @@ const dateRange = computed(() => {
 // Table configurations
 const columnConfigs = ref<CheckinColumnConfig[]>([
   {
-    key: 'REG_code',
     header: 'Reg Code',
-    isVisible: true,
     isHideable: true,
+    isVisible: true,
+    key: 'REG_code',
     width: 15,
   },
   {
-    key: 'name',
     header: 'Name',
-    isVisible: true,
     isHideable: true,
+    isVisible: true,
+    key: 'name',
     width: 20,
   },
   {
-    key: 'ticket',
     header: 'Ticket',
-    isVisible: true,
     isHideable: true,
+    isVisible: true,
+    key: 'ticket',
     width: 15,
   },
   {
-    key: 'city',
     header: 'City',
-    isVisible: true,
     isHideable: true,
+    isVisible: true,
+    key: 'city',
     width: 15,
   },
   {
-    key: 'first_check_time',
     header: 'First Check-in',
-    isVisible: true,
     isHideable: true,
+    isVisible: true,
+    key: 'first_check_time',
     width: 15,
   },
   {
-    key: 'data',
     header: 'History',
-    isVisible: true,
     isHideable: true,
+    isVisible: true,
+    key: 'data',
     width: 20,
   },
 ]);
+
+const getRegistrationUrl = (regId: string) => {
+  return `/event/${eventId.value}/registrations?page=1&perPage=10&sortBy=reg_date&order=desc&details=${regId}`;
+};
 
 // Define columns
 const columnHelper = createColumnHelper<CheckinItem>();
 const columns = computed(() => {
   return columnConfigs.value
-    .filter((config) => config.isVisible)
+    .filter(config => config.isVisible)
     .map((config) => {
       switch (config.key) {
         case 'first_check_time':
           return columnHelper.accessor('first_check_time', {
+            cell: info => formatToUTC7(info.getValue()),
             header: config.header,
             size: config.width * 10,
-            cell: (info) => formatToUTC7(info.getValue()),
           });
         case 'data':
           return columnHelper.accessor('data', {
-            header: config.header,
-            size: config.width * 10,
-            cell: (info) =>
+            cell: info =>
               info
                 .getValue()
-                .map((item) => `${formatToUTC7(item.time)} ${item.type}`)
+                .map(item => `${formatToUTC7(item.time)} ${item.type}`)
                 .join(', '),
+            header: config.header,
+            size: config.width * 10,
           });
         case 'REG_code':
           return columnHelper.accessor('REG_code', {
-            header: config.header,
-            size: config.width * 10,
             cell: (info) => {
               const regId = info.getValue();
               return h(
                 resolveComponent('NuxtLink'),
                 {
-                  to: getRegistrationUrl(regId),
                   class: 'text-emerald-500 hover:underline',
+                  to: getRegistrationUrl(regId),
                 },
-                () => regId
+                () => regId,
               );
             },
+            header: config.header,
+            size: config.width * 10,
           });
         default:
           return columnHelper.accessor(config.key as keyof CheckinItem, {
+            cell: info => info.getValue(),
             header: config.header,
             size: config.width * 10,
-            cell: (info) => info.getValue(),
           });
       }
     });
@@ -189,9 +196,9 @@ const columns = computed(() => {
 // Get checkin data using composable
 const {
   checkinData,
+  isLoading: isDataLoading,
   totalData,
   totalPages,
-  isLoading: isDataLoading,
 } = useCheckins(eventId, pagination, sorting, filters);
 
 // Create table instance
@@ -202,13 +209,13 @@ const table = useVueTable({
   get data() {
     return checkinData.value;
   },
+  getCoreRowModel: getCoreRowModel(),
   state: {
     pagination: pagination.value,
     get sorting() {
       return sorting.value;
     },
   },
-  getCoreRowModel: getCoreRowModel(),
 });
 
 // Table helper functions
@@ -229,9 +236,9 @@ const handleNavigation = (pageNumber: number) => {
 
 const handleResetFilters = () => {
   filters.value = {
-    search: '',
-    date_start: '',
     date_end: '',
+    date_start: '',
+    search: '',
   };
   pagination.value = {
     pageIndex: 0,
@@ -239,8 +246,8 @@ const handleResetFilters = () => {
   };
   sorting.value = [
     {
-      id: 'check_time',
       desc: true,
+      id: 'check_time',
     },
   ];
 };
@@ -249,12 +256,14 @@ const handleSetDateRange = (dateRange: [Date | null, Date | null] | null) => {
   if (dateRange === null) {
     filters.value.date_start = '';
     filters.value.date_end = '';
-  } else {
+  }
+  else {
     const [start, end] = dateRange;
     if (!start || !end) {
       filters.value.date_start = '';
       filters.value.date_end = '';
-    } else {
+    }
+    else {
       filters.value.date_start = format(start, 'yyyy-MM-dd');
       filters.value.date_end = format(end, 'yyyy-MM-dd');
     }
@@ -267,47 +276,45 @@ const isAnyFilterActive = computed(() => {
 
 function calculateMinWidth(): number {
   const totalWidth = columnConfigs.value
-    .filter((config) => config.isVisible)
+    .filter(config => config.isVisible)
     .reduce((total, config) => total + config.width * 15, 0); // Multiply by a factor to get reasonable width
 
   // Return the greater of the calculated width or minimum width (e.g., 1000px)
   return Math.max(totalWidth, 1000);
 }
-
-const getRegistrationUrl = (regId: string) => {
-  return `/event/${eventId.value}/registrations?page=1&perPage=10&sortBy=reg_date&order=desc&details=${regId}`;
-};
 </script>
 
 <!-- Add the template section from the next message due to length -->
 <template>
   <div class="container mx-auto flex flex-col gap-5 2xl:mx-0">
     <div class="flex flex-col">
-      <header class="pt-10 mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <h1 class="h2">Check-ins</h1>
+      <header class="mb-5 flex flex-col gap-2 pt-10 sm:flex-row sm:items-start sm:justify-between">
+        <h1 class="h2">
+          Check-ins
+        </h1>
       </header>
       <CheckinStats />
     </div>
   </div>
 
   <section>
-    <div class="container 2xl:mx-0 py-4">
+    <div class="container py-4 2xl:mx-0">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex flex-col space-y-2 sm:gap-2 sm:grid sm:grid-flow-col sm:space-y-0">
+        <div class="flex flex-col space-y-2 sm:grid sm:grid-flow-col sm:gap-2 sm:space-y-0">
           <TableSearchForm v-model="filters.search" placeholder="Search by name, reg code, or ticket..." />
           <Datepicker :date-range="dateRange" @update:date-range="handleSetDateRange" />
-          <TableResetBtn v-if="isAnyFilterActive" @click.prevent="handleResetFilters" />
+          <TableResetBtn v-if="isAnyFilterActive" @reset-filters="handleResetFilters" />
         </div>
       </div>
     </div>
   </section>
 
-  <section class="relative" :class="{ 'overflow-x-auto scroll-area': !isDataLoading }">
+  <section class="relative" :class="{ 'scroll-area overflow-x-auto': !isDataLoading }">
     <div class="w-full">
       <div :style="{ minWidth: `${calculateMinWidth()}px` }">
         <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
           <thead
-            class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
+            class="border-y border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
           >
             <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
               <th
@@ -315,7 +322,7 @@ const getRegistrationUrl = (regId: string) => {
                 :key="header.id"
                 :colSpan="header.colSpan"
                 :style="{ width: `${header.column.columnDef.size}px` }"
-                class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 first:pl-5 last:pr-5 text-xs"
+                class="whitespace-nowrap px-2 py-3 text-xs text-slate-500 first:pl-5 last:pr-5 dark:text-slate-400"
               >
                 <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
               </th>
@@ -325,8 +332,8 @@ const getRegistrationUrl = (regId: string) => {
             <template v-if="!table.getRowModel().rows.length">
               <template v-if="isDataLoading">
                 <tr v-for="index in 3" :key="index">
-                  <td v-for="(column, index2) in columns" :key="index2" class="px-2 py-2">
-                    <Skeleton class="w-full h-6 rounded" />
+                  <td v-for="(column, index2) in columns" :key="index2" class="p-2">
+                    <Skeleton class="h-6 w-full rounded" />
                   </td>
                 </tr>
               </template>

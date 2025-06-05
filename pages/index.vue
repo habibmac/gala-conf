@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { useAuthStore } from '@/stores';
-import { useRouter } from 'vue-router';
 import { useLocalStorage } from '#imports';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+
+import { useAuthStore } from '@/stores';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -26,12 +27,12 @@ const showStatuses = () => {
               setTimeout(() => {
                 redirectBasedOnAuth();
                 loadingShown.value = true;
-              }, 1000)
+              }, 1000),
             );
           }
         },
-        index * 800 + Math.random() * 1000
-      )
+        index * 800 + Math.random() * 1000,
+      ),
     );
   });
 };
@@ -39,7 +40,8 @@ const showStatuses = () => {
 const redirectBasedOnAuth = () => {
   if (authStore.isAuthenticated) {
     router.replace('/my-events');
-  } else {
+  }
+  else {
     router.replace('/auth/login');
   }
 };
@@ -47,7 +49,8 @@ const redirectBasedOnAuth = () => {
 onMounted(() => {
   if (!loadingShown.value) {
     showStatuses();
-  } else {
+  }
+  else {
     redirectBasedOnAuth();
   }
 });
@@ -65,12 +68,12 @@ watch(
       router.replace('/my-events');
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
 <template>
-  <div v-if="!loadingShown" class="max-w-9xl mx-auto w-full px-4 py-8 flex sm:px-6 lg:px-8 min-h-screen">
+  <div v-if="!loadingShown" class="max-w-9xl mx-auto flex min-h-screen w-full px-4 py-8 sm:px-6 lg:px-8">
     <div class="m-auto max-w-2xl">
       <div class="px-4 text-center">
         <SpinnerRing />

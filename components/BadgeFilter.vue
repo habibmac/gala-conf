@@ -1,12 +1,12 @@
 <script setup lang="ts">
 defineProps({
   filter: {
-    type: String,
     required: true,
+    type: String,
   },
   label: {
-    type: String,
     required: true,
+    type: String,
   },
 });
 
@@ -17,6 +17,7 @@ const handleClearFilter = () => {
   emit('clear-filter');
 };
 </script>
+
 <template>
   <button
     v-if="filter !== ''"
@@ -29,13 +30,13 @@ const handleClearFilter = () => {
       {{ label }}
     </div>
     <div
-      class="ml-2 line-clamp-1 max-w-sm overflow-ellipsis group-hover:text-slate-700 dark:group-hover:text-slate-300"
+      class="ml-2 line-clamp-1 max-w-sm text-ellipsis group-hover:text-slate-700 dark:group-hover:text-slate-300"
     >
       {{ filter }}
     </div>
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      class="h-5 w-5 text-red-400 group-hover:text-red-600 dark:text-red-600 dark:group-hover:text-red-500"
+      class="size-5 text-red-400 group-hover:text-red-600 dark:text-red-600 dark:group-hover:text-red-500"
       viewBox="0 0 24 24"
     >
       <path

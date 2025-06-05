@@ -1,30 +1,31 @@
 <script setup lang="ts">
-import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue';
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/vue';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps<{
-  eventId: string | number;
-  itemId: string | number;
+  eventId: string | number
+  itemId: string | number
 }>();
 
 const emit = defineEmits(['refresh', 'delete']);
 
 const menuItems = [
-  { id: '', label: 'View', icon: 'carbon:view', action: 'link' },
-  { id: 'edit', label: 'Edit', icon: 'carbon:edit', action: 'link' },
+  { action: 'link', icon: 'carbon:view', id: '', label: 'View' },
+  { action: 'link', icon: 'carbon:edit', id: 'edit', label: 'Edit' },
   {
+    action: 'button',
+    icon: 'ri:refresh-line',
     id: 'refresh',
     label: 'Refresh',
-    icon: 'ri:refresh-line',
-    action: 'button',
   },
-  { id: 'delete', label: 'Delete', icon: 'carbon:trash', action: 'button' },
+  { action: 'button', icon: 'carbon:trash', id: 'delete', label: 'Delete' },
 ];
 
-const handleAction = (item: { id: string; action: string }) => {
+const handleAction = (item: { id: string, action: string }) => {
   if (item.action === 'button' && item.id === 'refresh') {
     emit('refresh');
-  } else if (item.action === 'button' && item.id === 'delete') {
+  }
+  else if (item.action === 'button' && item.id === 'delete') {
     emit('delete');
   }
 };
@@ -33,9 +34,9 @@ const handleAction = (item: { id: string; action: string }) => {
 <template>
   <Listbox as="div" class="relative">
     <ListboxButton
-      class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0"
+      class="inline-flex size-9 items-center justify-center rounded-md p-0 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
     >
-      <Icon icon="lucide:more-vertical" class="h-4 w-4" />
+      <Icon icon="lucide:more-vertical" class="size-4" />
       <span class="sr-only">Open menu</span>
     </ListboxButton>
     <transition
@@ -47,21 +48,21 @@ const handleAction = (item: { id: string; action: string }) => {
       leave-to-class="transform scale-95 opacity-0"
     >
       <ListboxOptions
-        class="absolute right-0 z-10 mt-2 min-w-32 origin-top-right divide-y divide-slate-100 rounded-md bg-white dark:bg-slate-950 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+        class="absolute right-0 z-10 mt-2 min-w-32 origin-top-right divide-y divide-slate-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none dark:bg-slate-950"
         as="ul"
       >
-        <div class="px-1 py-1">
+        <div class="p-1">
           <ListboxOption v-for="item in menuItems" :key="item.id" :value="item" as="li" class="dropdown-item">
             <NuxtLink
               v-if="item.action === 'link'"
               :to="`/event/${props.eventId}/insights/${props.itemId}/${item.id}`"
-              class="flex items-center w-full"
+              class="flex w-full items-center"
             >
-              <Icon :icon="item.icon" class="mr-2 h-4 w-4 text-slate-400" />
+              <Icon :icon="item.icon" class="mr-2 size-4 text-slate-400" />
               {{ item.label }}
             </NuxtLink>
-            <button v-else class="flex items-center w-full cursor-default" @click.prevent="handleAction(item)">
-              <Icon :icon="item.icon" class="mr-2 h-4 w-4 text-slate-400" />
+            <button v-else class="flex w-full cursor-default items-center" @click.prevent="handleAction(item)">
+              <Icon :icon="item.icon" class="mr-2 size-4 text-slate-400" />
               {{ item.label }}
             </button>
           </ListboxOption>

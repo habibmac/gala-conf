@@ -1,24 +1,26 @@
 import { defineStore } from 'pinia';
-import type { AuthResponse, UserProfile, Event } from '@/types';
+
+import type { AuthResponse, Event, UserProfile } from '@/types';
 
 const accessTokenField = 'gala_at';
 const refreshTokenField = 'gala_rt';
 
 export const useAuthStore = defineStore('auth', () => {
+  const config = useRuntimeConfig();
   const accessToken = useCookie(accessTokenField, {
+    domain: config.public.nodeEnv === 'production' ? '.galanesia.com' : undefined,
     maxAge: 7200,
     path: '/',
-    secure: true,
     sameSite: 'lax',
-    domain: process.env.NODE_ENV === 'production' ? '.galanesia.com' : undefined,
+    secure: true,
   });
 
   const refreshToken = useCookie(refreshTokenField, {
+    domain: config.public.nodeEnv === 'production' ? '.galanesia.com' : undefined,
     maxAge: 30 * 24 * 60 * 60,
     path: '/',
-    secure: true,
     sameSite: 'lax',
-    domain: process.env.NODE_ENV === 'production' ? '.galanesia.com' : undefined,
+    secure: true,
   });
 
   const packages = ref<string[]>([]);
@@ -41,12 +43,13 @@ export const useAuthStore = defineStore('auth', () => {
   const exchangeCodeForTokens = async (code: string) => {
     try {
       const response: AuthResponse = await $fetch('/api/exchange-token', {
-        method: 'POST',
         body: { code },
+        method: 'POST',
       });
       // Set the tokens in the store
       setAuth(response.access_token, response.refresh_token);
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error exchanging code for tokens', error);
       throw error;
     }
@@ -56,7 +59,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken.value = atToken;
     refreshToken.value = rtToken;
 
-    nuxtApp.$galantisApi.defaults.headers.common['Authorization'] = `Bearer ${atToken}`;
+    nuxtApp.$galantisApi.defaults.headers.common.Authorization = `Bearer ${atToken}`;
   };
 
   const clearAuth = () => {
@@ -69,19 +72,21 @@ export const useAuthStore = defineStore('auth', () => {
   const refreshingTokens = async () => {
     try {
       const response: AuthResponse = await $fetch('/api/refresh-token', {
-        method: 'POST',
         body: { refresh_token: refreshToken.value },
+        method: 'POST',
       });
       setAuth(response.access_token, response.refresh_token);
       return response.access_token;
-    } catch (error) {
+    }
+    catch (error) {
       clearAuth();
       throw error;
     }
   };
 
   const fetchUserProfile = async () => {
-    if (!isAuthenticated.value) return null;
+    if (!isAuthenticated.value)
+      return null;
 
     isLoadingUser.value = true;
     try {
@@ -93,11 +98,13 @@ export const useAuthStore = defineStore('auth', () => {
       });
       setUser(response);
       return response;
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error fetching user profile:', error);
       clearAuth();
       throw error;
-    } finally {
+    }
+    finally {
       isLoadingUser.value = false;
     }
   };
@@ -116,7 +123,8 @@ export const useAuthStore = defineStore('auth', () => {
       selectedEvent.value = event;
       eventId.value = event.id;
       eventCapabilities.value = event.capabilities || [];
-    } finally {
+    }
+    finally {
       isLoadingEvent.value = false;
     }
   };
@@ -141,21 +149,25 @@ export const useAuthStore = defineStore('auth', () => {
 
   const canAccessRoute = (requiredCapabilities: string[], requiredPermissions: string[]) => {
     // First check roles
-    const hasRole = userInfo.value?.user_roles?.some((role) =>
-      ['administrator', 'ee_event_organizer', 'ee_event_operator'].includes(role)
+    const hasRole = userInfo.value?.user_roles?.some(role =>
+      ['administrator', 'ee_event_operator', 'ee_event_organizer'].includes(role),
     );
 
-    if (!hasRole) return false;
+    if (!hasRole)
+      return false;
 
     // Check all required capabilities and permissions
     const allPermissions = [...new Set([...requiredCapabilities, ...requiredPermissions])];
-    return allPermissions.every((perm) => hasEventPermission(perm));
+    return allPermissions.every(perm => hasEventPermission(perm));
   };
 
   const hasAccess = (roles?: string[], pkgs?: string[]) => {
-    if (!roles && !pkgs) return true;
-    if (roles && roles.some((role) => userInfo.value?.user_roles?.includes(role))) return true;
-    if (pkgs && pkgs.some((pkg) => packages.value.includes(pkg))) return true;
+    if (!roles && !pkgs)
+      return true;
+    if (roles && roles.some(role => userInfo.value?.user_roles?.includes(role)))
+      return true;
+    if (pkgs && pkgs.some(pkg => packages.value.includes(pkg)))
+      return true;
     return false;
   };
 
@@ -165,9 +177,11 @@ export const useAuthStore = defineStore('auth', () => {
       await nuxtApp.$oauthApi.post('/destroy/', {
         access_token: accessToken.value,
       });
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error during logout', error);
-    } finally {
+    }
+    finally {
       clearAuth();
       loggingOut.value = false;
     }
@@ -175,27 +189,27 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     accessToken,
-    refreshToken,
-    userInfo,
-    packages,
-    isAuthenticated,
-    loggingOut,
-    exchangeCodeForTokens,
-    isLoadingUser,
-    fetchUserProfile,
-    setAuth,
+    canAccessRoute,
     clearAuth,
-    refreshingTokens,
-    setUser,
-    hasAccess,
-    userCapabilities,
     eventCapabilities,
+    exchangeCodeForTokens,
+    fetchUserProfile,
+    hasAccess,
     hasCapability,
     hasEventPermission,
-    canAccessRoute,
-    selectedEvent,
+    isAuthenticated,
     isLoadingEvent,
-    setSelectedEvent,
+    isLoadingUser,
+    loggingOut,
     logout,
+    packages,
+    refreshingTokens,
+    refreshToken,
+    selectedEvent,
+    setAuth,
+    setSelectedEvent,
+    setUser,
+    userCapabilities,
+    userInfo,
   };
 });

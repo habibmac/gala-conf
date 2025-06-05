@@ -1,36 +1,39 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import type { HTMLAttributes } from 'vue';
-import { Icon } from '@iconify/vue';
-import { useField } from 'vee-validate';
-import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
 import {
   Combobox,
-  ComboboxInput,
   ComboboxButton,
-  ComboboxOptions,
+  ComboboxInput,
   ComboboxOption,
+  ComboboxOptions,
   TransitionRoot,
 } from '@headlessui/vue';
-import { useCitySearch } from '~/composables/useCitySearch';
+import { Icon } from '@iconify/vue';
+import { useField } from 'vee-validate';
+import { computed, ref } from 'vue';
+
 import type { CityOption } from '~/types';
+
+import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
+import { useCitySearch } from '~/composables/useCitySearch';
 
 const props = defineProps<{
-  name: string;
-  defaultValue?: string;
-  class?: HTMLAttributes['class'];
-  label?: string;
-  placeholder?: string;
-  wrapperClass?: string;
+  name: string
+  defaultValue?: string
+  class?: HTMLAttributes['class']
+  label?: string
+  placeholder?: string
+  wrapperClass?: string
 }>();
 
 const emits = defineEmits<{
-  (e: 'update:modelValue', payload: string): void;
-  (e: 'select', payload: { city: string; state: string; country: string }): void;
+  (e: 'update:modelValue', payload: string): void
+  (e: 'select', payload: { city: string, state: string, country: string }): void
 }>();
 
-const { value, validate, resetField, handleChange } = useField(() => props.name, undefined, {
+const { handleChange, resetField, validate, value } = useField(() => props.name, undefined, {
   initialValue: props.defaultValue,
 });
 
@@ -48,7 +51,7 @@ const handleBlur = async () => {
   await validate();
 };
 
-const { cityOptions, isLoading, hasMinLength, searchCities, selectedCity } = useCitySearch(value);
+const { cityOptions, hasMinLength, isLoading, searchCities, selectedCity } = useCitySearch(value);
 
 const selectCity = (city: CityOption) => {
   value.value = city.city;
@@ -57,8 +60,8 @@ const selectCity = (city: CityOption) => {
   emits('update:modelValue', city.city);
   emits('select', {
     city: city.city,
-    state: city.state,
     country: city.country,
+    state: city.state,
   });
 };
 
@@ -66,7 +69,7 @@ const clearSelection = () => {
   selectedCity.value = null;
   value.value = '';
   emits('update:modelValue', '');
-  emits('select', { city: '', state: '', country: '' });
+  emits('select', { city: '', country: '', state: '' });
   resetField();
 };
 
@@ -81,7 +84,8 @@ const updateQuery = (event: Event) => {
 const displayValue = (item: unknown): string => {
   if (typeof item === 'object' && item !== null && 'city' in item) {
     return (item as CityOption).city;
-  } else if (value.value) {
+  }
+  else if (value.value) {
     return value.value;
   }
   return ''; // Add default return value
@@ -90,7 +94,8 @@ const displayValue = (item: unknown): string => {
 watch(value, (newValue) => {
   if (newValue) {
     useCitySearch(ref(newValue));
-  } else if (newValue === '') {
+  }
+  else if (newValue === '') {
     resetField();
   }
 });
@@ -106,7 +111,7 @@ watch(value, (newValue) => {
             :class="
               cn(
                 'pointer-events-none absolute z-10 px-3 font-medium text-xs text-muted-foreground transition-all duration-200',
-                showLabel ? 'opacity-100 -translate-y-4 top-5' : 'opacity-0 top-5'
+                showLabel ? 'opacity-100 -translate-y-4 top-5' : 'opacity-0 top-5',
               )
             "
           >
@@ -118,7 +123,7 @@ watch(value, (newValue) => {
                 cn(
                   'z-1 grid cursor-text rounded-md shadow-sm border min-h-[50px] transition-all duration-200 ease-in-out border-input',
                   { 'border-destructive': error },
-                  { 'border-primary': isInteracting }
+                  { 'border-primary': isInteracting },
                 )
               "
             >
@@ -131,7 +136,7 @@ watch(value, (newValue) => {
                 :class="
                   cn(
                     'text-sm w-full bg-transparent appearance-none transition-all duration-200 ease-in-out rounded-md p-3 border-none outline-none focus:outline-none focus:ring-2 ring-primary focus:border-none text-ellipsis placeholder:text-muted-foreground',
-                    showLabel ? 'pt-4 pb-1 placeholder:opacity-0' : 'placeholder:opacity-100'
+                    showLabel ? 'pt-4 pb-1 placeholder:opacity-0' : 'placeholder:opacity-100',
                   )
                 "
                 @change="updateQuery"
@@ -140,15 +145,15 @@ watch(value, (newValue) => {
               />
               <ClientOnly>
                 <ComboboxButton class="absolute inset-y-0 right-0 flex items-center pr-2">
-                  <Icon v-if="isLoading" icon="eos-icons:loading" class="h-5 w-5 animate-spin" aria-hidden="true" />
+                  <Icon v-if="isLoading" icon="eos-icons:loading" class="size-5 animate-spin" aria-hidden="true" />
                   <Icon
                     v-else-if="selectedCity"
                     icon="heroicons:x-mark"
-                    class="h-5 w-5 cursor-pointer"
+                    class="size-5 cursor-pointer"
                     aria-hidden="true"
                     @click.stop="clearSelection"
                   />
-                  <Icon v-else icon="heroicons:chevron-down" class="h-4 w-4" aria-hidden="true" />
+                  <Icon v-else icon="heroicons:chevron-down" class="size-4" aria-hidden="true" />
                 </ComboboxButton>
               </ClientOnly>
             </div>
@@ -156,9 +161,9 @@ watch(value, (newValue) => {
         </div>
         <TransitionRoot leave="transition ease-in duration-100" leave-from="opacity-100" leave-to="opacity-0">
           <ComboboxOptions
-            class="absolute z-20 max-h-60 max-w-sm w-full overflow-auto rounded-md bg-card py-1 shadow-lg focus:outline-none text-sm"
+            class="absolute z-20 max-h-60 w-full max-w-sm overflow-auto rounded-md bg-card py-1 text-sm shadow-lg focus:outline-none"
           >
-            <div v-if="cityOptions.length === 0 && value !== ''" class="relative cursor-default select-none py-2 px-4">
+            <div v-if="cityOptions.length === 0 && value !== ''" class="relative cursor-default select-none px-4 py-2">
               {{ hasMinLength ? 'No cities found.' : 'Type more to search...' }}
             </div>
             <ComboboxOption
@@ -176,14 +181,14 @@ watch(value, (newValue) => {
                 <span
                   class="block truncate"
                   :class="{
-                    'font-medium pl-7': selected,
+                    'pl-7 font-medium': selected,
                     'font-normal': !selected,
                   }"
                 >
                   {{ city.city }} - {{ city.state }}, {{ city.country }}
                 </span>
                 <span v-if="selected" class="absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Icon icon="heroicons:check" class="h-5 w-5" aria-hidden="true" />
+                  <Icon icon="heroicons:check" class="size-5" aria-hidden="true" />
                 </span>
               </li>
             </ComboboxOption>

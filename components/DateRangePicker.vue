@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import type { DateRange } from 'radix-vue';
-import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date';
+import type { Ref } from 'vue';
 
-import { type Ref, ref } from 'vue';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { RangeCalendar } from '@/components/ui/range-calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Icon } from '@iconify/vue';
+import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date';
+import { ref } from 'vue';
+
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { RangeCalendar } from '@/components/ui/range-calendar';
+import { cn } from '@/lib/utils';
 
 const df = new DateFormatter('id_ID', {
   dateStyle: 'medium',
@@ -16,8 +18,8 @@ const df = new DateFormatter('id_ID', {
 const calendarDate = new CalendarDate(2023, 0, 20);
 
 const value = ref({
-  start: calendarDate,
   end: calendarDate.add({ days: 20 }),
+  start: calendarDate,
 }) as Ref<DateRange>;
 </script>
 
@@ -27,10 +29,10 @@ const value = ref({
       <PopoverTrigger as-child>
         <Button
           id="date"
-          :variant="'outline'"
+          variant="outline"
           :class="cn('w-[300px] justify-start text-left font-normal', !value && 'text-muted-foreground')"
         >
-          <Icon icon="heroicons:calendar-date-range" class="mr-2 h-4 w-4" />
+          <Icon icon="heroicons:calendar-date-range" class="mr-2 size-4" />
 
           <template v-if="value.start">
             <template v-if="value.end">
@@ -42,7 +44,9 @@ const value = ref({
               {{ df.format(value.start.toDate(getLocalTimeZone())) }}
             </template>
           </template>
-          <template v-else> Pick a date </template>
+          <template v-else>
+            Pick a date
+          </template>
         </Button>
       </PopoverTrigger>
       <PopoverContent class="w-auto p-0" align="end">

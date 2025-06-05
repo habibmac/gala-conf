@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import VueDatePicker from '@vuepic/vue-datepicker';
 import { endOfMonth, startOfMonth, startOfYear, subMonths } from 'date-fns';
 import { id } from 'date-fns/locale';
-import VueDatePicker from '@vuepic/vue-datepicker';
+import { ref } from 'vue';
 
 defineProps<{
-  dateRange?: Date[] | null;
-  enableTimePicker?: boolean | false;
-  format?: string | 'd LLL yyyy';
-  maxDate?: Date | null;
-  minDate?: Date | null;
+  dateRange?: Date[] | null
+  enableTimePicker?: boolean | false
+  format?: string | 'd LLL yyyy'
+  maxDate?: Date | null
+  minDate?: Date | null
 }>();
 
 const emits = defineEmits(['update:dateRange']);
@@ -61,6 +61,6 @@ const presetDates = ref([
         </template>
       </VueDatePicker>
     </ClientOnly>
-    <span v-if="dateRange" class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500" />
+    <span v-if="dateRange" class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500" />
   </div>
 </template>

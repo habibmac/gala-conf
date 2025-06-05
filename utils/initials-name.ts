@@ -4,7 +4,8 @@ export function getInitials(name: string): string {
 
   if (words.length === 1) {
     initials = words[0].charAt(0);
-  } else if (words.length >= 2) {
+  }
+  else if (words.length >= 2) {
     initials = words[0].charAt(0) + words[words.length - 1].charAt(0);
   }
 

@@ -1,10 +1,23 @@
 import pkg from './package.json';
 
 export default defineNuxtConfig({
+  app: {
+    head: {
+      bodyAttrs: {
+        class: 'font-geist',
+      },
+    },
+  },
+  build: {
+    transpile: ['@vuepic/vue-datepicker'],
+  },
+  colorMode: {
+    classSuffix: '',
+  },
   compatibilityDate: '2024-04-03',
+  css: ['~/assets/scss/main.scss'],
   devtools: {
     enabled: true,
-
     timeline: {
       enabled: true,
     },
@@ -23,34 +36,20 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'nuxt-qrcode',
   ],
-  app: {
-    head: {
-      bodyAttrs: {
-        class: 'font-geist',
-      },
-    },
-  },
-  build: {
-    transpile: ['@vuepic/vue-datepicker'],
-  },
-  css: ['~/assets/scss/main.scss'],
-  colorMode: {
-    classSuffix: '',
-  },
+  plugins: ['~/plugins/api.ts'],
   runtimeConfig: {
     oauthClientSecret: '',
+    public: {
+      apiUrl: '',
+      clientVersion: pkg.version,
+      oauthAccessTokenTest: '',
+      oauthClientId: '',
+      oauthRedirectUri: '',
+      oauthUrl: '',
+    },
     typesenseApiKey: '',
     typesenseHost: '',
     typesensePort: '',
     typesenseProtocol: '',
-    public: {
-      apiUrl: '',
-      oauthUrl: '',
-      oauthClientId: '',
-      oauthRedirectUri: '',
-      clientVersion: pkg.version,
-      oauthAccessTokenTest: '',
-    },
   },
-  plugins: ['~/plugins/api.ts'],
 });

@@ -1,40 +1,42 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
-import { useField } from 'vee-validate';
-import createVueFilePond from 'vue-filepond';
+import type { AxiosProgressEvent } from 'axios';
+
+import FilePondPluginFilePoster from 'filepond-plugin-file-poster';
+import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css';
 import 'filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css';
-import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
-import FilePondPluginImageCrop from 'filepond-plugin-image-crop';
-import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
-import FilePondPluginFilePoster from 'filepond-plugin-file-poster';
-import type { AxiosProgressEvent } from 'axios';
+import FilePondPluginImageCrop from 'filepond-plugin-image-crop';
+import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
+import { useField } from 'vee-validate';
+import { computed, ref, watch } from 'vue';
+import createVueFilePond from 'vue-filepond';
+
 import { cn } from '~/lib/utils';
+
+const props = defineProps<{
+  name: string
+  modelValue?: string
+  label: string
+  id: string
+  type?: 'logo' | 'cover'
+  isMultiple?: boolean
+}>();
+
+const emit = defineEmits(['update:modelValue']);
 
 const FilePond = createVueFilePond(
   FilePondPluginImageCrop,
   FilePondPluginImagePreview,
   FilePondPluginFileValidateSize,
   FilePondPluginFileValidateType,
-  FilePondPluginFilePoster
+  FilePondPluginFilePoster,
 );
 
-const props = defineProps<{
-  name: string;
-  modelValue?: string;
-  label: string;
-  id: string;
-  type?: 'logo' | 'cover';
-  isMultiple?: boolean;
-}>();
-
-const emit = defineEmits(['update:modelValue']);
-
 const {
-  value: fieldValue,
   handleChange,
   resetField,
+  value: fieldValue,
 } = useField(props.name, undefined, {
   initialValue: props.modelValue,
 });
@@ -42,18 +44,18 @@ const {
 const error = useFieldError(props.name);
 
 interface FilePondFile {
-  source: string;
+  source: string
   options: {
-    type: string;
+    type: string
     file: {
-      name: string;
-      size: number;
-      type: string;
-    };
+      name: string
+      size: number
+      type: string
+    }
     metadata: {
-      poster: string;
-    };
-  };
+      poster: string
+    }
+  }
 }
 
 const files = ref<FilePondFile[]>([]);
@@ -68,29 +70,30 @@ const labelIdle = computed(() => {
 const filePondOptions = computed(() => {
   const common = {
     allowMultiple: props.isMultiple || false,
+    styleButtonProcessItemPosition: 'right bottom',
+    styleButtonRemoveItemPosition: 'left bottom',
     styleLoadIndicatorPosition: 'center bottom',
     styleProgressIndicatorPosition: 'right bottom',
-    styleButtonRemoveItemPosition: 'left bottom',
-    styleButtonProcessItemPosition: 'right bottom',
   };
 
   if (props.type === 'logo') {
     return {
       ...common,
-      stylePanelLayout: 'compact',
+      imageCropAspectRatio: '1:1',
       imagePreviewHeight: 200,
       imagePreviewWidth: 200,
-      imageCropAspectRatio: '1:1',
-      imageResizeTargetWidth: 500,
       imageResizeTargetHeight: 500,
+      imageResizeTargetWidth: 500,
+      stylePanelLayout: 'compact',
     };
-  } else {
+  }
+  else {
     return {
       ...common,
-      imagePreviewHeight: 300,
       imageCropAspectRatio: '851:315',
-      imageResizeTargetWidth: 851,
+      imagePreviewHeight: 300,
       imageResizeTargetHeight: 315,
+      imageResizeTargetWidth: 851,
     };
   }
 });
@@ -100,15 +103,13 @@ const { $galantisApi } = useNuxtApp();
 const loadExistingFile = async (fileId: string) => {
   try {
     const response = await $galantisApi.get(`/events/get-image`, {
-      params: { id: parseInt(fileId), type: props.type },
+      params: { id: Number.parseInt(fileId), type: props.type },
     });
     if (response.data && response.data.url) {
       uploadedFile.value = response.data.url;
       files.value = [
         {
-          source: fileId,
           options: {
-            type: 'local',
             file: {
               name: response.data.name,
               size: response.data.size,
@@ -117,11 +118,14 @@ const loadExistingFile = async (fileId: string) => {
             metadata: {
               poster: response.data.url,
             },
+            type: 'local',
           },
+          source: fileId,
         },
       ];
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error loading existing file:', error);
   }
 };
@@ -134,15 +138,17 @@ const server = {
     load: (uniqueFileId: string) => void,
     error: (errorText: string) => void,
     progress: (isDone: boolean, bytesWritten: number, bytesTotal: number) => void,
-    abort: () => void
+    abort: () => void,
   ) => {
     const formData = new FormData();
 
     if (file instanceof File) {
       formData.append('image', file, file.name);
-    } else if (file instanceof Blob) {
+    }
+    else if (file instanceof Blob) {
       formData.append('image', new File([file], 'image.jpg', { type: file.type }));
-    } else {
+    }
+    else {
       error('Invalid file object');
       return;
     }
@@ -152,7 +158,6 @@ const server = {
 
     $galantisApi
       .post('/events/upload-logo', formData, {
-        signal,
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -161,6 +166,7 @@ const server = {
             progress(false, progressEvent.loaded, progressEvent.total);
           }
         },
+        signal,
       })
       .then((response) => {
         if (response.data && response.data.url && response.data.id) {
@@ -171,17 +177,20 @@ const server = {
 
           // Return the processed image URL
           return response.data.url;
-        } else {
+        }
+        else {
           error('Invalid response format');
         }
       })
       .catch((err) => {
         resetField();
         if (err.name === 'CanceledError') {
-          console.log('Request aborted');
-        } else if (err.response && err.response.data) {
+          console.warn('Request aborted');
+        }
+        else if (err.response && err.response.data) {
           error(err.response.data.message || 'Error uploading file');
-        } else {
+        }
+        else {
           error('Error uploading file');
         }
       });
@@ -207,7 +216,8 @@ const server = {
         resetField();
         if (err.response && err.response.data) {
           error(err.response.data.message || 'Error deleting file');
-        } else {
+        }
+        else {
           error('Error deleting file');
         }
       });
@@ -221,7 +231,7 @@ const handleRemoveCover = () => {
 };
 
 const handleUpdateFiles = (fileItems: FilePondFile[]) => {
-  files.value = fileItems.map((fileItem) => fileItem);
+  files.value = fileItems.map(fileItem => fileItem);
 };
 
 onMounted(() => {
@@ -250,7 +260,7 @@ watch(fieldValue, (newValue) => {
               :files="files"
               :accepted-file-types="['image/*']"
               :server="server"
-              :max-file-size="'1MB'"
+              max-file-size="1MB"
               v-bind="filePondOptions"
               :class="
                 cn('filepond-custom', {
@@ -272,10 +282,10 @@ watch(fieldValue, (newValue) => {
             />
             <div
               v-if="uploadedFile"
-              class="absolute inset-0 flex h-full w-full items-center justify-center aspect-[851/315]"
+              class="absolute inset-0 flex aspect-[851/315] size-full items-center justify-center"
             >
-              <img :src="uploadedFile" alt="Cover image" class="object-cover w-full h-full pointer-events-none" />
-              <Button variant="outline" class="absolute top-4 right-4" size="sm" @click.prevent="handleRemoveCover">
+              <img :src="uploadedFile" alt="Cover image" class="pointer-events-none size-full object-cover">
+              <Button variant="outline" class="absolute right-4 top-4" size="sm" @click.prevent="handleRemoveCover">
                 Remove
               </Button>
             </div>
@@ -288,7 +298,7 @@ watch(fieldValue, (newValue) => {
               :files="files"
               :accepted-file-types="['image/*']"
               :server="server"
-              :max-file-size="'1MB'"
+              max-file-size="1MB"
               v-bind="filePondOptions"
               :class="
                 cn('filepond-custom', {

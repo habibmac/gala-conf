@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import type { SortableEvent } from 'vue-draggable-plus';
+
 import { Icon } from '@iconify/vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
-import { VueDraggable, type SortableEvent } from 'vue-draggable-plus';
+import { useColorMode } from '@vueuse/core';
+import { ref } from 'vue';
+import { VueDraggable } from 'vue-draggable-plus';
+
 import { Button } from '@/components/ui/button';
 import {
   NumberField,
@@ -11,32 +15,32 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from '@/components/ui/number-field';
+
 import FieldInput from './FieldInput.vue';
-import { useColorMode } from '@vueuse/core';
 
 interface EventDatetime {
-  name: string;
-  rangeDate: string[];
-  quota: number;
+  name: string
+  rangeDate: string[]
+  quota: number
 }
 
-const colorMode = useColorMode();
-
 const props = defineProps<{
-  modelValue: EventDatetime[];
-  minDate: Date;
-  newDateStart: string;
-  newDateEnd: string;
+  modelValue: EventDatetime[]
+  minDate: Date
+  newDateStart: string
+  newDateEnd: string
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: EventDatetime[]): void;
+  (e: 'update:modelValue', value: EventDatetime[]): void
 }>();
+
+const colorMode = useColorMode();
 
 const eventDatetimesRef = ref(props.modelValue);
 
 const onSort = (e: SortableEvent) => {
-  const { oldIndex, newIndex } = e;
+  const { newIndex, oldIndex } = e;
 
   if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
     return;
@@ -60,13 +64,14 @@ watch(
   (newValue) => {
     emit('update:modelValue', newValue);
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
+
 <template>
   <div>
     <label class="text-sm font-semibold">Sessions & Datetimes</label>
-    <div class="flex flex-col gap-2 md:gap-4 mt-2">
+    <div class="mt-2 flex flex-col gap-2 md:gap-4">
       <FieldArray v-slot="{ push, remove }" name="eventDatetimes">
         <VueDraggable
           v-model="eventDatetimesRef"
@@ -79,9 +84,9 @@ watch(
           <div
             v-for="(inputField, index) in eventDatetimesRef"
             :key="index"
-            class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5 py-2"
+            class="relative ml-5 flex flex-col items-start gap-2 border-l py-2 pl-3 sm:flex-row sm:flex-wrap"
           >
-            <Icon icon="mdi:drag-vertical" class="handle size-6 absolute -left-6 cursor-move text-muted-foreground" />
+            <Icon icon="mdi:drag-vertical" class="handle absolute -left-6 size-6 cursor-move text-muted-foreground" />
             <FieldInput
               :name="`eventDatetimes[${index}].name`"
               label="Session Name"
@@ -90,7 +95,7 @@ watch(
               wrapper-class="w-full sm:w-1/3 md:w-1/3"
             />
             <FormField v-slot="{ field, value, handleChange, errors }" :name="`eventDatetimes[${index}].rangeDate`">
-              <FormItem v-auto-animate class="flex-1 w-full">
+              <FormItem v-auto-animate class="w-full flex-1">
                 <FormLabel>Start - End</FormLabel>
                 <FormControl>
                   <VueDatePicker
@@ -113,7 +118,7 @@ watch(
                         placeholder="Start - End Date & Time"
                         :value="inputValue"
                         autocomplete="off"
-                      />
+                      >
                     </template>
                   </VueDatePicker>
                 </FormControl>
@@ -135,7 +140,7 @@ watch(
                 <FormMessage />
               </FormItem>
             </FormField>
-            <div class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8">
+            <div class="absolute bottom-0 right-0 sm:static sm:bottom-auto sm:right-auto sm:pt-8">
               <Button size="icon" class="text-red-500" variant="ghost" @click.prevent="remove(index)">
                 <Icon icon="material-symbols-light:close-rounded" class="size-6" />
               </Button>
@@ -161,6 +166,7 @@ watch(
     </div>
   </div>
 </template>
+
 <style scoped>
 .is-ghost {
   @apply opacity-40 bg-muted;

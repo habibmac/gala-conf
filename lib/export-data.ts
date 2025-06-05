@@ -1,7 +1,7 @@
 import { utils, write } from '@e965/xlsx';
 
 interface ExportData {
-  [key: string]: string | number | boolean | Date;
+  [key: string]: string | number | boolean | Date
 }
 
 export function exportToCSV(data: ExportData[], filename: string) {
@@ -9,14 +9,14 @@ export function exportToCSV(data: ExportData[], filename: string) {
   const headers = Object.keys(data[0]);
   const csvContent = [
     headers.join(','), // Header row
-    ...data.map((row) =>
+    ...data.map(row =>
       headers
         .map((header) => {
           const cell = row[header]?.toString() || '';
           // Escape quotes and wrap in quotes if contains comma
           return cell.includes(',') ? `"${cell.replace(/"/g, '""')}"` : cell;
         })
-        .join(',')
+        .join(','),
     ),
   ].join('\n');
 

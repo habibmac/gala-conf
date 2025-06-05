@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { Icon } from '@iconify/vue';
 import { useQuery } from '@tanstack/vue-query';
+import { computed } from 'vue';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Icon } from '@iconify/vue';
 
 useHead({
+  meta: [{ content: 'List of active events', name: 'description' }],
   title: 'My Events',
-  meta: [{ name: 'description', content: 'List of active events' }],
 });
 
 definePageMeta({
@@ -18,8 +19,8 @@ const router = useRouter();
 
 const { $galantisApi, $router } = useNuxtApp();
 const { data: evtCount } = useQuery({
+  queryFn: () => $galantisApi.get('/events/count?nocache=1').then(res => res.data),
   queryKey: ['events-count'],
-  queryFn: () => $galantisApi.get('/events/count?nocache=1').then((res) => res.data),
   staleTime: 1000 * 60 * 60, // 1 hour
 });
 
@@ -27,16 +28,16 @@ const activeTab = computed(() => ($router.currentRoute.value.query.status === 'p
 
 const tabsMeta = computed(() => [
   {
-    value: 'active',
-    label: 'Active',
     count: evtCount.value?.active,
+    label: 'Active',
     link: '/my-events',
+    value: 'active',
   },
   {
-    value: 'past',
-    label: 'Past',
     count: evtCount.value?.inactive,
+    label: 'Past',
     link: '/my-events?status=past',
+    value: 'past',
   },
 ]);
 
@@ -49,16 +50,19 @@ const translationClass = computed(() => {
   return activeTab.value === 'past' ? 'translate-x-full' : 'translate-x-0';
 });
 </script>
+
 <template>
-  <div class="flex h-full w-full flex-col">
+  <div class="flex size-full flex-col">
     <header class="mx-auto w-full max-w-4xl">
       <div class="px-4 py-10 sm:px-6 sm:pt-12">
         <div class="flex justify-between">
-          <h1 class="text-2xl font-semibold tracking-tight h2">My Events</h1>
+          <h1 class="h2 text-2xl font-semibold tracking-tight">
+            My Events
+          </h1>
           <div class="flex items-center space-x-2">
             <Button as-child>
               <NuxtLink to="/new-event">
-                <Icon icon="heroicons:plus" class="mr-2 w-5 h-5" />
+                <Icon icon="heroicons:plus" class="mr-2 size-5" />
                 Create New Event ⚡️
               </NuxtLink>
             </Button>
@@ -68,25 +72,25 @@ const translationClass = computed(() => {
     </header>
     <section>
       <div class="mx-auto sm:max-w-4xl">
-        <div class="px-4 py-4 sm:px-6 sm:py-6">
-          <div class="flex mb-6">
-            <div class="relative flex w-full max-w-sm p-1 bg-muted-foreground/10 rounded-md mx-auto sm:mx-0">
-              <span class="absolute inset-0 m-1 pointer-events-none" aria-hidden="true">
+        <div class="p-4 sm:p-6">
+          <div class="mb-6 flex">
+            <div class="relative mx-auto flex w-full max-w-sm rounded-md bg-muted-foreground/10 p-1 sm:mx-0">
+              <span class="pointer-events-none absolute inset-0 m-1" aria-hidden="true">
                 <span
-                  class="absolute inset-0 w-1/2 bg-card rounded-md transition-transform duration-150 ease-in-out"
+                  class="absolute inset-0 w-1/2 rounded-md bg-card transition-transform duration-150 ease-in-out"
                   :class="translationClass"
                 />
               </span>
               <template v-for="tab in tabsMeta" :key="tab.value">
                 <button
-                  class="relative flex-1 justify-center items-center z-10 flex text-sm font-medium p-1 duration-150 ease-in-out"
+                  class="relative z-10 flex flex-1 items-center justify-center p-1 text-sm font-medium duration-150 ease-in-out"
                   @click.prevent="handleTabChange(tab.value)"
                 >
                   {{ tab.label }}
                   <Badge
                     v-if="tab.count"
                     :variant="tab.value === activeTab ? 'default' : 'outline'"
-                    class="ml-2 scale-90 flex text-xs h-6 min-w-6 px-1.5 shrink-0 items-center justify-center rounded-full"
+                    class="ml-2 flex h-6 min-w-6 shrink-0 scale-90 items-center justify-center rounded-full px-1.5 text-xs"
                   >
                     {{ tab.count }}
                   </Badge>

@@ -1,22 +1,25 @@
-import { computed, ref, type Ref } from 'vue';
-import { useQuery, keepPreviousData } from '@tanstack/vue-query';
+import type { Ref } from 'vue';
+
+import { keepPreviousData, useQuery } from '@tanstack/vue-query';
+import { computed, ref } from 'vue';
+
 import type { EvtRequestParams } from '~/types';
 
 export const useEvents = ({
-  search = ref(''),
   evtStatus = ref('all'),
   page = ref(1),
   perPage = ref(10),
+  search = ref(''),
 }: EvtRequestParams = {}) => {
   const { $galantisApi } = useNuxtApp();
   const getData = async (evtStatus: Ref<string>, page: Ref<number>, perPage: Ref<number>, signal: AbortSignal) => {
     return $galantisApi
       .get('/events', {
         params: {
-          search: search.value,
+          evt_status: evtStatus.value,
           page: page.value,
           per_page: perPage.value,
-          evt_status: evtStatus.value,
+          search: search.value,
         },
         signal,
       })
@@ -31,10 +34,10 @@ export const useEvents = ({
       });
   };
 
-  const { isLoading, isError, error, data, isPlaceholderData, refetch, isRefetching } = useQuery({
-    queryKey: ['my-events', page, perPage, evtStatus, search],
-    queryFn: ({ signal }) => getData(evtStatus, page, perPage, signal),
+  const { data, error, isError, isLoading, isPlaceholderData, isRefetching, refetch } = useQuery({
     placeholderData: keepPreviousData,
+    queryFn: ({ signal }) => getData(evtStatus, page, perPage, signal),
+    queryKey: ['my-events', page, perPage, evtStatus, search],
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -69,21 +72,21 @@ export const useEvents = ({
   };
 
   return {
-    isLoading,
-    isError,
     error,
     events,
+    isError,
+    isLoading,
     isPlaceholderData,
-    pagination,
-    page,
-    perPage,
-    maxPage,
     isRefetching,
-    prevPage,
+    maxPage,
     nextPage,
+    page,
+    pagination,
+    perPage,
+    prevPage,
+    refetch,
+    setEvtStatus,
     setPage,
     setPerPage,
-    setEvtStatus,
-    refetch,
   };
 };

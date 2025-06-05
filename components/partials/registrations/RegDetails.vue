@@ -1,25 +1,35 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, toRef, watchEffect } from 'vue';
-import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { Icon } from '@iconify/vue';
+import { useQuery, useQueryClient } from '@tanstack/vue-query';
+import { onMounted, onUnmounted, ref, toRef, watchEffect } from 'vue';
 
-import { formatDate, formatCurrency, getCountryFlagWithName } from '@/utils';
 import PayMethodLogo from '@/components/partials/registrations/PayMethodLogo.vue';
+import { formatCurrency, formatDate, getCountryFlagWithName } from '@/utils';
 import { getStatusInfo } from '@/utils/status-map';
 
 const props = defineProps({
-  regDetailsOpen: Boolean,
   evtId: {
-    type: String,
     default: '',
+    type: String,
   },
+  regDetailsOpen: Boolean,
   regId: {
-    type: String,
     default: '',
+    type: String,
   },
 });
 
-const emit = defineEmits(['close-regDetails']);
+const emit = defineEmits(['close-reg-details']);
+const queryClient = useQueryClient();
+
+// Handle close to allow animation to finish
+const closePanel = () => {
+  queryClient.cancelQueries();
+  // Add a slight delay to allow the animation to complete
+  setTimeout(() => {
+    emit('close-reg-details');
+  }, 200); // Match this with your leave transition duration
+};
 
 const loading = ref(false);
 const panelContent = ref<HTMLElement | null>(null);
@@ -29,23 +39,26 @@ const closeBtn = ref<HTMLElement | null>(null);
 const clickHandler = (event: MouseEvent) => {
   const target = event.target as Node; // Type assertion for the target
   if (
-    !props.regDetailsOpen ||
-    (panelContent.value && panelContent.value.contains(target as Node)) ||
-    (closeBtn.value && closeBtn.value.contains(target as Node))
-  )
+    !props.regDetailsOpen
+    || (panelContent.value && panelContent.value.contains(target as Node))
+    || (closeBtn.value && closeBtn.value.contains(target as Node))
+  ) {
     return;
+  }
   closePanel();
 };
 
 // close if the esc key is pressed
 const keyHandler = (event: KeyboardEvent) => {
-  if (!props.regDetailsOpen || event.key !== 'Escape') return;
+  if (!props.regDetailsOpen || event.key !== 'Escape')
+    return;
   closePanel();
 };
 
 // Getting registered data from passed regId
 const getData = async (signal: AbortSignal) => {
-  if (!props.evtId || !props.regId) return [];
+  if (!props.evtId || !props.regId)
+    return [];
 
   // Set loading to true
   loading.value = true;
@@ -56,7 +69,7 @@ const getData = async (signal: AbortSignal) => {
     .get(`/event/${props.evtId}/registrations/${props.regId}`, {
       signal,
     })
-    .then((response) => response.data)
+    .then(response => response.data)
     .catch((error) => {
       throw new Error(error);
     })
@@ -66,15 +79,13 @@ const getData = async (signal: AbortSignal) => {
 };
 
 // Fetching data with useQuery and TypeScript for response typing
-const { isError, error, data, refetch, isRefetching } = useQuery({
-  queryKey: ['regDetails', { regId: toRef(props.regId), evtId: props.evtId }],
-  queryFn: ({ signal }) => getData(signal),
+const { data, error, isError, isRefetching, refetch } = useQuery({
   // After the data is fetched, set loading to false
   enabled: !!props.evtId && !!props.regId,
   placeholderData: {},
+  queryFn: ({ signal }) => getData(signal),
+  queryKey: ['regDetails', { evtId: props.evtId, regId: toRef(props.regId) }],
 });
-
-const queryClient = useQueryClient();
 
 // Watch for changes in route or events data to update the selected event
 watchEffect(() => {
@@ -83,15 +94,6 @@ watchEffect(() => {
     refetch();
   }
 });
-
-// Handle close to allow animation to finish
-const closePanel = () => {
-  queryClient.cancelQueries();
-  // Add a slight delay to allow the animation to complete
-  setTimeout(() => {
-    emit('close-regDetails');
-  }, 200); // Match this with your leave transition duration
-};
 
 onMounted(() => {
   document.addEventListener('click', clickHandler);
@@ -104,6 +106,7 @@ onUnmounted(async () => {
   document.removeEventListener('keydown', keyHandler);
 });
 </script>
+
 <template>
   <Transition
     enter-active-class="transition duration-100 ease-in-out"
@@ -113,25 +116,25 @@ onUnmounted(async () => {
     leave-from-class="translate-x-0 "
     leave-to-class="translate-x-[20%] opacity-0"
   >
-    <div v-show="regDetailsOpen" ref="panelContent" class="absolute inset-0 z-30 sm:block sm:left-auto">
+    <div v-show="regDetailsOpen" ref="panelContent" class="absolute inset-0 z-30 sm:left-auto sm:block">
       <div
         class="no-scrollbar sticky top-16 h-[calc(100dvh-64px)] w-full shrink-0 overflow-y-auto overflow-x-hidden border-l border-border bg-muted sm:w-[390px]"
       >
         <button
           ref="closeBtn"
           class="group absolute right-0 top-0 mr-6 mt-6 p-2"
-          @click.stop="$emit('close-regDetails')"
+          @click.stop="$emit('close-reg-details')"
         >
-          <Icon icon="iconamoon:close-thin" class="w-6 h-6" />
+          <Icon icon="iconamoon:close-thin" class="size-6" />
         </button>
 
         <div class="px-4 py-8 lg:px-8">
           <div v-if="loading || isRefetching" class="grid gap-4">
             <div>
-              <Skeleton class="h-8 w-40 mx-auto p-4 bg-muted-foreground/10" />
+              <Skeleton class="mx-auto h-8 w-40 bg-muted-foreground/10 p-4" />
             </div>
-            <Skeleton class="h-96 p-4 bg-muted-foreground/10" />
-            <Skeleton class="h-20 p-4 bg-muted-foreground/10" />
+            <Skeleton class="h-96 bg-muted-foreground/10 p-4" />
+            <Skeleton class="h-20 bg-muted-foreground/10 p-4" />
           </div>
           <div v-else-if="isError">
             {{ error ? error.message : 'Error' }}
@@ -162,13 +165,13 @@ onUnmounted(async () => {
               </div>
               <!-- Divider -->
               <div class="flex items-center justify-between" aria-hidden="true">
-                <svg class="h-5 w-5 fill-white dark:fill-slate-700" xmlns="http://www.w3.org/2000/svg">
+                <svg class="size-5 fill-white dark:fill-slate-700" xmlns="http://www.w3.org/2000/svg">
                   <path d="M0 20c5.523 0 10-4.477 10-10S5.523 0 0 0h20v20H0Z" />
                 </svg>
                 <div class="flex h-5 w-full grow flex-col justify-center bg-white dark:bg-slate-700">
                   <div class="h-px w-full border-t border-dashed border-slate-200 dark:border-slate-600" />
                 </div>
-                <svg class="h-5 w-5 rotate-180 fill-white dark:fill-slate-700" xmlns="http://www.w3.org/2000/svg">
+                <svg class="size-5 rotate-180 fill-white dark:fill-slate-700" xmlns="http://www.w3.org/2000/svg">
                   <path d="M0 20c5.523 0 10-4.477 10-10S5.523 0 0 0h20v20H0Z" />
                 </svg>
               </div>
@@ -182,13 +185,11 @@ onUnmounted(async () => {
                       <Qrcode :value="data.reg_url_link" />
                     </ClientOnly>
                   </div>
-                  <span class="number font-semibold tabular-nums font-mono">{{ data.code }}</span>
+                  <span class="number font-mono font-semibold tabular-nums">{{ data.code }}</span>
                 </div>
                 <div class="flex justify-between space-x-1">
                   <span class="">Age/Gender</span>
-                  <span class="text-right font-medium text-slate-700 dark:text-slate-100"
-                    >{{ data.age }} / {{ data.gender }}</span
-                  >
+                  <span class="text-right font-medium text-slate-700 dark:text-slate-100">{{ data.age }} / {{ data.gender }}</span>
                 </div>
                 <div class="flex justify-between space-x-1">
                   <span class="">Email:</span>
@@ -216,14 +217,18 @@ onUnmounted(async () => {
             </div>
             <!-- Payments -->
             <div class="mt-6">
-              <div class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Payments</div>
+              <div class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                Payments
+              </div>
               <div
                 class="number rounded border border-slate-200 p-4 shadow-sm duration-150 ease-in-out hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
               >
                 <div class="mb-2 grid grid-cols-12 items-center gap-x-2">
                   <div class="col-span-8 flex items-center space-x-4">
                     <div>
-                      <div class="text-sm font-medium">Total</div>
+                      <div class="text-sm font-medium">
+                        Total
+                      </div>
                     </div>
                   </div>
                   <div class="col-span-4 text-right text-slate-800 dark:text-slate-100">
@@ -233,7 +238,9 @@ onUnmounted(async () => {
                 <div class="mb-2 grid grid-cols-12 items-center gap-x-2">
                   <div class="col-span-8 flex items-center space-x-4">
                     <div>
-                      <div class="text-sm font-medium">Paid</div>
+                      <div class="text-sm font-medium">
+                        Paid
+                      </div>
                     </div>
                   </div>
                   <div class="col-span-4 text-right text-slate-800 dark:text-slate-100">
@@ -269,7 +276,7 @@ onUnmounted(async () => {
                   target="_blank"
                   class="btn w-full border border-slate-100 bg-white text-sm font-medium text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" viewBox="0 0 24 24">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 shrink-0" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
                       d="M13.5 9.75a.75.75 0 0 0-.75-.75h-6a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 .75-.75m-1 3a.75.75 0 0 0-.75-.75h-5a.75.75 0 1 0 0 1.5h5a.75.75 0 0 0 .75-.75m.25 2.25a.75.75 0 1 1 0 1.5h-6a.75.75 0 0 1 0-1.5z"
@@ -290,7 +297,7 @@ onUnmounted(async () => {
                   target="_blank"
                   class="btn border-emerald-border w-full bg-emerald-400 text-sm font-medium text-white hover:border-slate-300 hover:bg-emerald-500 dark:border-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" viewBox="0 0 24 24">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 shrink-0" viewBox="0 0 24 24">
                     <path
                       fill="none"
                       stroke="currentColor"
@@ -309,7 +316,7 @@ onUnmounted(async () => {
                   target="_blank"
                   class="btn w-full border border-slate-100 bg-white text-sm font-medium text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" viewBox="0 0 24 24">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 shrink-0" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
                       d="M7.23 18.25a4 4 0 0 1-2.83-1.16a4.23 4.23 0 0 1 .15-5.95l3.76-3.79A4.44 4.44 0 0 1 11.42 6a4 4 0 0 1 2.83 1.2a4.25 4.25 0 0 1-.15 6l-1.26 1.26a.75.75 0 1 1-1.06-1.06L13 12.1a2.73 2.73 0 0 0 .14-3.84a2.77 2.77 0 0 0-3.8.15l-3.73 3.78A2.74 2.74 0 0 0 5.46 16a2.5 2.5 0 0 0 2 .71a.74.74 0 0 1 .81.67a.75.75 0 0 1-.67.82Z"
@@ -325,16 +332,18 @@ onUnmounted(async () => {
             </div>
             <!-- Answers -->
             <div class="mt-6">
-              <div class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Answers</div>
+              <div class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                Answers
+              </div>
               <div
                 class="number rounded border border-slate-200 text-sm shadow-sm duration-150 ease-in-out hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
               >
                 <div
                   v-for="answer in data.ans"
                   :key="answer.id"
-                  class="transition-colors px-4 py-2 flex flex-col hover:bg-slate-200/70 dark:hover:bg-slate-900"
+                  class="flex flex-col px-4 py-2 transition-colors hover:bg-slate-200/70 dark:hover:bg-slate-900"
                 >
-                  <div class="text-muted-foreground text-xs dark:text-slate-500">
+                  <div class="text-xs text-muted-foreground dark:text-slate-500">
                     {{ answer.qst }}
                   </div>
                   <div class="font-medium text-slate-800 dark:text-slate-100">
@@ -345,7 +354,9 @@ onUnmounted(async () => {
             </div>
             <!-- Notes -->
             <div class="mt-6">
-              <div class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Notes</div>
+              <div class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                Notes
+              </div>
               <form>
                 <label class="sr-only" for="notes">Write a note</label>
                 <textarea

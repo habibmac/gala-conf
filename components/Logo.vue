@@ -1,13 +1,13 @@
 <script setup lang="ts">
 // Define props
 defineProps({
-  svgClass: {
-    type: String,
-    default: 'h-8 w-8',
-  },
   colored: {
-    type: Boolean,
     default: false,
+    type: Boolean,
+  },
+  svgClass: {
+    default: 'h-8 w-8',
+    type: String,
   },
 });
 </script>

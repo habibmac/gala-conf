@@ -1,6 +1,9 @@
-import { computed, type Ref } from 'vue';
-import { useQuery } from '@tanstack/vue-query';
 import type { PaginationState, SortingState } from '@tanstack/vue-table';
+import type { Ref } from 'vue';
+
+import { useQuery } from '@tanstack/vue-query';
+import { computed } from 'vue';
+
 import type { RegRequestParams } from '@/types';
 
 const DEFAULT_PAGE_COUNT = -1;
@@ -8,24 +11,24 @@ const DEFAULT_RESULT_COUNT = 0;
 
 type FilterValue = string | string[];
 
-type Filter = {
-  [key: string]: FilterValue;
-};
+interface Filter {
+  [key: string]: FilterValue
+}
 
 export const useRegs = (
   eventId: Ref<string>,
   endpoint: string,
   pagination: Ref<PaginationState>,
   sorting: Ref<SortingState>,
-  filters: Ref<Filter>
+  filters: Ref<Filter>,
 ) => {
   const nuxtApp = useNuxtApp();
 
   const requestParams = computed<RegRequestParams>(() => ({
-    per_page: pagination.value.pageSize.toString(),
-    page: (pagination.value.pageIndex + 1).toString(),
-    sort_by: sorting.value.length > 0 ? sorting.value[0].id : '',
     order: sorting.value.length > 0 && sorting.value[0].desc ? 'desc' : 'asc',
+    page: (pagination.value.pageIndex + 1).toString(),
+    per_page: pagination.value.pageSize.toString(),
+    sort_by: sorting.value.length > 0 ? sorting.value[0].id : '',
     ...filters.value,
   }));
 
@@ -37,7 +40,8 @@ export const useRegs = (
         if (Array.isArray(value)) {
           // Join array values with commas
           searchParams.append(key, value.join(','));
-        } else {
+        }
+        else {
           // Convert to string to ensure it's not undefined
           searchParams.append(key, String(value));
         }
@@ -60,8 +64,8 @@ export const useRegs = (
   };
 
   const { data, error, isLoading } = useQuery({
-    queryKey: [endpoint, requestParams, eventId],
     queryFn: ({ signal }) => getData(requestParams, signal),
+    queryKey: [endpoint, requestParams, eventId],
     // staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
@@ -71,10 +75,10 @@ export const useRegs = (
   const regData = computed(() => data.value?.events);
 
   return {
+    error,
+    isLoading,
     regData,
     totalData,
     totalPages,
-    error,
-    isLoading,
   };
 };

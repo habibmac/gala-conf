@@ -1,24 +1,27 @@
 <!-- components/checkins/CheckinStats.vue -->
 <script setup lang="ts">
-import { computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
+import { computed } from 'vue';
+
 import type { CheckinStats } from '~/types';
+
 import { formatThousands } from '@/utils';
-import CheckinRecent from './CheckinRecent.vue';
-import CheckinDistributions from './CheckinDistributions.vue';
 import Card from '~/components/ui/card/Card.vue';
+
+import CheckinDistributions from './CheckinDistributions.vue';
+import CheckinRecent from './CheckinRecent.vue';
 
 withDefaults(
   defineProps<{
-    showTotalRegs?: boolean;
-    showDetailedStats?: boolean;
-    showRecentCheckins?: boolean;
+    showTotalRegs?: boolean
+    showDetailedStats?: boolean
+    showRecentCheckins?: boolean
   }>(),
   {
-    showTotalRegs: true,
     showDetailedStats: true,
     showRecentCheckins: false,
-  }
+    showTotalRegs: true,
+  },
 );
 
 const route = useRoute();
@@ -38,81 +41,81 @@ const {
   isLoading,
   isRefetching,
 } = useQuery<CheckinStats>({
-  queryKey: ['checkin-stats', eventId],
   queryFn: () => getStats(eventId),
+  queryKey: ['checkin-stats', eventId],
   refetchInterval: hasEventEnded.value ? false : 30000,
   staleTime: hasEventEnded.value ? Infinity : 30000,
 });
 
 const totalRegs = computed(() =>
-  stats.value?.global.total_registrations ? formatThousands(stats.value.global.total_registrations) : 0
+  stats.value?.global.total_registrations ? formatThousands(stats.value.global.total_registrations) : 0,
 );
 
 const totalCheckins = computed(() =>
-  stats.value?.global.total_checkins ? formatThousands(stats.value.global.total_checkins) : 0
+  stats.value?.global.total_checkins ? formatThousands(stats.value.global.total_checkins) : 0,
 );
 const percentageCheckins = computed(
-  () => ((stats.value?.global.total_checkins ?? 0) / (stats.value?.global.total_registrations ?? 1)) * 100
+  () => ((stats.value?.global.total_checkins ?? 0) / (stats.value?.global.total_registrations ?? 1)) * 100,
 );
 
 const totalRemaining = computed(() =>
   stats.value?.global.total_registrations
     ? formatThousands(
-        parseInt((stats.value?.global.total_registrations ?? 0).toString()) -
-          parseInt((stats.value?.global.total_checkins ?? 0).toString())
+        Number.parseInt((stats.value?.global.total_registrations ?? 0).toString())
+        - Number.parseInt((stats.value?.global.total_checkins ?? 0).toString()),
       )
-    : 0
+    : 0,
 );
 
 const percentageRemaining = computed(
-  () => parseInt(totalRemaining.value.toString()) / (stats.value?.global.total_registrations ?? 1) * 100
+  () => Number.parseInt(totalRemaining.value.toString()) / (stats.value?.global.total_registrations ?? 1) * 100,
 );
 
 const totalCheckouts = computed(() =>
-  stats.value?.global.total_checkouts ? formatThousands(stats.value.global.total_checkouts) : 0
+  stats.value?.global.total_checkouts ? formatThousands(stats.value.global.total_checkouts) : 0,
 );
 const percentageCheckouts = computed(
-  () => ((stats.value?.global.total_checkouts ?? 0) / (stats.value?.global.total_registrations ?? 1)) * 100
+  () => ((stats.value?.global.total_checkouts ?? 0) / (stats.value?.global.total_registrations ?? 1)) * 100,
 );
 
 const statsCards = computed(() => [
   // if showTotalRegs
   {
+    bgColor: 'bg-blue-50',
+    color: 'text-blue-500',
+    icon: 'solar:users-group-rounded-linear',
     title: 'Total Registrations',
     value: totalRegs.value,
-    icon: 'solar:users-group-rounded-linear',
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-50',
   },
   {
+    bgColor: 'bg-green-50',
+    color: 'text-green-500',
+    icon: 'solar:login-2-linear',
+    percentage: percentageCheckins.value.toFixed(0),
     title: 'Total Check-ins',
     value: totalCheckins.value,
-    icon: 'solar:login-2-linear',
-    color: 'text-green-500',
-    percentage: percentageCheckins.value.toFixed(0),
-    bgColor: 'bg-green-50',
   },
   {
+    bgColor: 'bg-red-50',
+    color: 'text-red-500',
+    icon: 'solar:users-group-rounded-linear',
+    percentage: percentageRemaining.value.toFixed(0),
     title: 'Remaining',
     value: totalRemaining.value,
-    icon: 'solar:users-group-rounded-linear',
-    color: 'text-red-500',
-    percentage: percentageRemaining.value.toFixed(0),
-    bgColor: 'bg-red-50',
   },
   {
+    bgColor: 'bg-orange-50',
+    color: 'text-orange-500',
+    icon: 'solar:logout-2-linear',
+    percentage: percentageCheckouts.value.toFixed(0),
     title: 'Total Check-outs',
     value: totalCheckouts.value,
-    icon: 'solar:logout-2-linear',
-    color: 'text-orange-500',
-    percentage: percentageCheckouts.value.toFixed(0),
-    bgColor: 'bg-orange-50',
   },
 ]);
 </script>
 
 <template>
-  <div class="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <Card
       v-for="(card, index) in statsCards"
       :key="index"

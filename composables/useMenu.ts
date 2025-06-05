@@ -1,9 +1,12 @@
-import { ref, computed, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores';
-import { menuGroups } from '@/config/menuGroups';
 import type { RouteRecordRaw } from 'vue-router';
+
+import { computed, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+
 import type { MenuGroup, MenuItem } from '~/types';
+
+import { menuGroups } from '@/config/menuGroups';
+import { useAuthStore } from '@/stores';
 
 export const useMenu = () => {
   const router = useRouter();
@@ -40,23 +43,23 @@ export const useMenu = () => {
         const routeCapabilities = meta.capabilities as string[] | undefined;
 
         // Check if user has right role
-        const hasRole = routeRoles?.some((role) => authStore.userInfo?.user_roles?.includes(role)) ?? true;
+        const hasRole = routeRoles?.some(role => authStore.userInfo?.user_roles?.includes(role)) ?? true;
         // Check if event has right package
         const hasPackage = routePackages?.includes(authStore.selectedEvent?.package ?? '') ?? true;
         // Check if user has required capabilities
-        const hasCapabilities =
-          !routeCapabilities?.length || routeCapabilities.every((cap) => authStore.hasEventPermission(cap));
+        const hasCapabilities
+          = !routeCapabilities?.length || routeCapabilities.every(cap => authStore.hasEventPermission(cap));
 
         if (hasRole && hasPackage && hasCapabilities) {
           const menuItem: MenuItem = {
-            name: meta.title as string,
-            to: route.path as string,
-            roles: routeRoles,
-            packages: routePackages,
             capabilities: routeCapabilities,
             group: (meta.group as string) || '',
             icon: meta.icon as string | undefined,
+            name: meta.title as string,
             order: meta.order as number | undefined,
+            packages: routePackages,
+            roles: routeRoles,
+            to: route.path as string,
           };
           menuItem.generatedLink = generateLinkTo(menuItem);
           items.push(menuItem);
@@ -69,13 +72,13 @@ export const useMenu = () => {
     return items;
   };
   const menuItems = computed(() => {
-    const groupedItems: MenuGroup[] = menuGroups.map((group) => ({
+    const groupedItems: MenuGroup[] = menuGroups.map(group => ({
       ...group,
       menus: [],
     }));
 
     allMenuItems.value.forEach((item) => {
-      const groupIndex = groupedItems.findIndex((group) => group.id === item.group);
+      const groupIndex = groupedItems.findIndex(group => group.id === item.group);
       if (groupIndex !== -1) {
         groupedItems[groupIndex].menus.push(item);
       }
@@ -85,7 +88,7 @@ export const useMenu = () => {
       group.menus.sort((a, b) => (a.order || 0) - (b.order || 0));
     });
 
-    return groupedItems.filter((group) => group.menus.length > 0);
+    return groupedItems.filter(group => group.menus.length > 0);
   });
 
   // Watch for changes in authentication state or selected event
@@ -94,12 +97,12 @@ export const useMenu = () => {
     () => {
       loadMenuItems();
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   return {
-    menuItems,
     isMenuLoading,
     loadMenuItems,
+    menuItems,
   };
 };

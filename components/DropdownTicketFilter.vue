@@ -1,28 +1,30 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { useQuery } from '@tanstack/vue-query';
 import { Icon } from '@iconify/vue';
+import { useQuery } from '@tanstack/vue-query';
+import { computed, ref, watch } from 'vue';
+
+import type { TicketList } from '@/types';
+
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import type { TicketList } from '@/types';
 
 const props = defineProps<{
-  modelValue: string[];
+  modelValue: string[]
 }>();
+
+const emits = defineEmits(['update:modelValue']);
 
 const router = useRouter();
 
 const eventId = ref<string>(
   Array.isArray(router.currentRoute.value.params.eventId)
     ? router.currentRoute.value.params.eventId[0]
-    : router.currentRoute.value.params.eventId || ''
+    : router.currentRoute.value.params.eventId || '',
 );
 
 const selectedTickets = ref<string[]>(props.modelValue);
-const emits = defineEmits(['update:modelValue']);
-
 const getData = async (eventId: Ref<string>, signal: AbortSignal) => {
   const { $galantisApi } = useNuxtApp();
   return $galantisApi
@@ -30,7 +32,8 @@ const getData = async (eventId: Ref<string>, signal: AbortSignal) => {
     .then((response) => {
       if (response.data && response.data.length > 0) {
         return response.data;
-      } else {
+      }
+      else {
         return [];
       }
     })
@@ -41,9 +44,9 @@ const getData = async (eventId: Ref<string>, signal: AbortSignal) => {
 };
 
 const { data: tickets } = useQuery({
-  queryKey: ['tickets', eventId],
-  queryFn: ({ signal }) => getData(eventId, signal),
   enabled: true,
+  queryFn: ({ signal }) => getData(eventId, signal),
+  queryKey: ['tickets', eventId],
   staleTime: 1000 * 60 * 5, // 5 minutes
 });
 
@@ -51,12 +54,12 @@ watch(
   () => props.modelValue,
   (newValue) => {
     selectedTickets.value = newValue;
-  }
+  },
 );
 
 function updateValue(value: string) {
   const updatedTickets = selectedTickets.value.includes(value)
-    ? selectedTickets.value.filter((ticket) => ticket !== value)
+    ? selectedTickets.value.filter(ticket => ticket !== value)
     : [...selectedTickets.value, value];
 
   emits('update:modelValue', updatedTickets);
@@ -64,8 +67,10 @@ function updateValue(value: string) {
 }
 
 const buttonLabel = computed(() => {
-  if (selectedTickets.value.length === 0) return 'All Tickets';
-  if (selectedTickets.value.length === 1) return selectedTickets.value[0];
+  if (selectedTickets.value.length === 0)
+    return 'All Tickets';
+  if (selectedTickets.value.length === 1)
+    return selectedTickets.value[0];
   return `${selectedTickets.value.length} tickets selected`;
 });
 
@@ -78,9 +83,10 @@ const searchTerm = ref('');
 
 const filterFunction = computed(() => {
   return (list: TicketList[], term: string): TicketList[] => {
-    if (!list) return [];
+    if (!list)
+      return [];
     return list.filter(
-      (item) => item.name && typeof item.name === 'string' && item.name.toLowerCase().includes(term.toLowerCase())
+      item => item.name && typeof item.name === 'string' && item.name.toLowerCase().includes(term.toLowerCase()),
     );
   };
 });
@@ -94,7 +100,8 @@ const ticketOptions = computed(() => {
 });
 
 const filteredTickets = computed(() => {
-  if (!searchTerm.value) return ticketOptions.value;
+  if (!searchTerm.value)
+    return ticketOptions.value;
   return filterFunction.value(ticketOptions.value, searchTerm.value);
 });
 </script>
@@ -102,13 +109,13 @@ const filteredTickets = computed(() => {
 <template>
   <Popover>
     <PopoverTrigger as-child>
-      <Button variant="outline" class="h-[42px] relative bg-card dark:bg-background">
-        <span v-if="selectedTickets.length > 0" class="text-xs text-slate-500 border-r pr-2"> Ticket </span>
-        <span class="font-medium ml-2 truncate">
+      <Button variant="outline" class="relative h-[42px] bg-card dark:bg-background">
+        <span v-if="selectedTickets.length > 0" class="border-r pr-2 text-xs text-slate-500"> Ticket </span>
+        <span class="ml-2 truncate font-medium">
           {{ buttonLabel }}
         </span>
-        <Icon icon="heroicons:chevron-down" class="w-3.5 h-3.5 ml-2 text-slate-600 dark:text-slate-400" />
-        <span v-if="selectedTickets.length > 0" class="absolute h-2 w-2 rounded-full right-0.5 top-0.5 bg-rose-500" />
+        <Icon icon="heroicons:chevron-down" class="ml-2 size-3.5 text-slate-600 dark:text-slate-400" />
+        <span v-if="selectedTickets.length > 0" class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500" />
       </Button>
     </PopoverTrigger>
     <PopoverContent class="p-0" align="start">
@@ -122,11 +129,11 @@ const filteredTickets = computed(() => {
                 :class="
                   cn(
                     'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                    selectedTickets.length === 0 ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
+                    selectedTickets.length === 0 ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible',
                   )
                 "
               >
-                <Icon icon="radix-icons:check" class="h-4 w-4" />
+                <Icon icon="radix-icons:check" class="size-4" />
               </div>
               <span>All Tickets</span>
             </CommandItem>
@@ -142,11 +149,11 @@ const filteredTickets = computed(() => {
                     'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
                     selectedTickets.includes(ticket.name)
                       ? 'bg-primary text-primary-foreground'
-                      : 'opacity-50 [&_svg]:invisible'
+                      : 'opacity-50 [&_svg]:invisible',
                   )
                 "
               >
-                <Icon icon="radix-icons:check" class="h-4 w-4" />
+                <Icon icon="radix-icons:check" class="size-4" />
               </div>
               <span>{{ ticket.name }}</span>
             </CommandItem>

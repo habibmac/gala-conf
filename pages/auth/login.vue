@@ -1,22 +1,23 @@
 <script setup lang="ts">
-import { cn } from '@/lib/utils';
+import { useForm } from 'vee-validate';
+import * as z from 'zod';
+
 import { Button, buttonVariants } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useForm } from 'vee-validate';
-import * as z from 'zod';
 import { useToast } from '@/components/ui/toast/use-toast';
+import { cn } from '@/lib/utils';
 
 import packageJson from '../../package.json';
 
 interface authResponse {
-  access_token: string;
-  refresh_token: string;
+  access_token: string
+  refresh_token: string
 }
 
 useHead({
+  meta: [{ content: 'Login to your Galanesia account', name: 'description' }],
   title: 'Login',
-  meta: [{ name: 'description', content: 'Login to your Galanesia account' }],
 });
 
 const config = useRuntimeConfig();
@@ -26,16 +27,16 @@ const { toast } = useToast();
 
 // Form validation schema
 const formSchema = z.object({
-  username: z.string().email('Please enter a valid email'),
   password: z.string().min(1, 'Password is required'),
+  username: z.string().email('Please enter a valid email'),
 });
 
 const { handleSubmit } = useForm({
-  validationSchema: toTypedSchema(formSchema),
   initialValues: {
-    username: '',
     password: '',
+    username: '',
   },
+  validationSchema: toTypedSchema(formSchema),
 });
 
 const isShowPassword = ref(false);
@@ -43,26 +44,28 @@ const isSubmitting = ref(false);
 
 // Password grant login
 const onSubmit = handleSubmit(async (values) => {
-  if (isSubmitting.value) return; // Prevent multiple submissions
+  if (isSubmitting.value)
+    return; // Prevent multiple submissions
 
   isSubmitting.value = true;
   try {
     const response: authResponse = await $fetch('/api/login', {
-      method: 'POST',
       body: {
-        username: values.username,
         password: values.password,
+        username: values.username,
       },
+      method: 'POST',
     });
 
     authStore.setAuth(response.access_token, response.refresh_token);
     router.push('/my-events');
-  } catch (error) {
+  }
+  catch (error) {
     console.error(error);
     isSubmitting.value = false;
     toast({
-      title: 'Error',
       description: 'Invalid credentials. Please try again.',
+      title: 'Error',
       variant: 'destructive',
     });
   }
@@ -76,17 +79,19 @@ const loginWithOAuth = () => {
 };
 
 const handleOAuthLogin = () => {
-  if (isSubmitting.value) return; // Prevent multiple clicks
+  if (isSubmitting.value)
+    return; // Prevent multiple clicks
 
   isSubmitting.value = true;
   try {
     window.location.href = loginWithOAuth();
-  } catch (error) {
+  }
+  catch (error) {
     console.error(error);
     isSubmitting.value = false; // Reset loading only on error
     toast({
-      title: 'Error',
       description: 'OAuth login failed. Please try again.',
+      title: 'Error',
       variant: 'destructive',
     });
   }
@@ -117,24 +122,28 @@ onMounted(() => {
         <img
           src="https://images.unsplash.com/photo-1502691876148-a84978e59af8?q=80&w=4000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt=""
-          class="absolute object-cover h-full w-full inset-0"
-        />
+          class="absolute inset-0 size-full object-cover"
+        >
       </div>
-      <div class="relative z-20 space-x-2 flex items-center text-lg font-medium">
-        <Logo class="h-12 w-12 fill-white" />
+      <div class="relative z-20 flex items-center space-x-2 text-lg font-medium">
+        <Logo class="size-12 fill-white" />
         <span class="sr-only">Galanesia</span>
       </div>
     </div>
     <div class="lg:p-8">
       <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
         <div class="flex flex-col space-y-2 text-center">
-          <h1 class="text-2xl font-semibold tracking-tight">Event Organizer's Dashboard</h1>
-          <p class="text-sm text-muted-foreground">Sign in to continue</p>
+          <h1 class="text-2xl font-semibold tracking-tight">
+            Event Organizer's Dashboard
+          </h1>
+          <p class="text-sm text-muted-foreground">
+            Sign in to continue
+          </p>
         </div>
 
         <!-- Password Login Form -->
         <form class="space-y-4" @submit.prevent="onSubmit">
-          <FormField v-slot="{ field }" :name="'username'">
+          <FormField v-slot="{ field }" name="username">
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
@@ -144,7 +153,7 @@ onMounted(() => {
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ field }" :name="'password'">
+          <FormField v-slot="{ field }" name="password">
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
@@ -155,7 +164,7 @@ onMounted(() => {
                     v-bind="field"
                   />
                   <ShowPasswordToggle
-                    class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                    class="absolute right-2 top-1/2 -translate-y-1/2"
                     :model-value="isShowPassword"
                     @update:model-value="isShowPassword = $event"
                   />
@@ -181,7 +190,9 @@ onMounted(() => {
         </div>
 
         <!-- OAuth Login Button -->
-        <Button variant="outline" @click="handleOAuthLogin"> Continue with OAuth </Button>
+        <Button variant="outline" @click="handleOAuthLogin">
+          Continue with OAuth
+        </Button>
 
         <p class="px-8 text-center text-sm text-muted-foreground">
           By signing in, you agree to our

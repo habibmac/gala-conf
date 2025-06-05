@@ -1,25 +1,28 @@
-// composables/useBillings.ts
-import { computed, type Ref } from 'vue';
-import { useQuery } from '@tanstack/vue-query';
 import type { PaginationState, SortingState } from '@tanstack/vue-table';
+import type { Ref } from 'vue';
+
+import { useQuery } from '@tanstack/vue-query';
+// composables/useBillings.ts
+import { computed } from 'vue';
+
 import type { BillingFilters } from '@/types';
 
 export const useBillings = (
   eventId: Ref<string>,
   pagination: Ref<PaginationState>,
   sorting: Ref<SortingState>,
-  filters: Ref<BillingFilters>
+  filters: Ref<BillingFilters>,
 ) => {
   const { $galantisApi } = useNuxtApp();
 
   // Create computed request params to track all parameter changes
   const requestParams = computed(() => ({
-    per_page: pagination.value.pageSize.toString(),
+    nocache: 1,
+    order: sorting.value.length > 0 && sorting.value[0].desc ? 'desc' : 'asc',
     // Always send 1-based page numbers to the API
     page: String(pagination.value.pageIndex + 1),
+    per_page: pagination.value.pageSize.toString(),
     sort_by: sorting.value.length > 0 ? sorting.value[0].id : '',
-    order: sorting.value.length > 0 && sorting.value[0].desc ? 'desc' : 'asc',
-    nocache: 1,
     ...filters.value,
   }));
 
@@ -50,19 +53,19 @@ export const useBillings = (
   };
 
   const { data, error, isLoading, isRefetching } = useQuery({
-    queryKey: ['billings', requestParams, eventId],
     queryFn: ({ signal }) => getData(signal),
+    queryKey: ['billings', requestParams, eventId],
     // Optional: Add stale time if needed
     // staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
   return {
     billingData: computed(() => data.value?.data || []),
-    totalData: computed(() => data.value?.pagination.total_data || 0),
-    totalPages: computed(() => data.value?.pagination.total_pages || 1),
-    summary: computed(() => data.value?.summary || null),
+    error,
     isLoading,
     isRefetching,
-    error,
+    summary: computed(() => data.value?.summary || null),
+    totalData: computed(() => data.value?.pagination.total_data || 0),
+    totalPages: computed(() => data.value?.pagination.total_pages || 1),
   };
 };

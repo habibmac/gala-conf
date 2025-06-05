@@ -1,10 +1,17 @@
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod';
-import { z } from 'zod';
-import VueDatePicker from '@vuepic/vue-datepicker';
-import { VueDraggable, type SortableEvent } from 'vue-draggable-plus';
+import type { SortableEvent } from 'vue-draggable-plus';
+
 import { Icon } from '@iconify/vue';
-import { startOfDay, format, endOfDay } from 'date-fns';
+import { toTypedSchema } from '@vee-validate/zod';
+import VueDatePicker from '@vuepic/vue-datepicker';
+import { endOfDay, format, startOfDay } from 'date-fns';
+import { VueDraggable } from 'vue-draggable-plus';
+import { z } from 'zod';
+
+import FieldComboFilter from '@/components/FieldComboFilter.vue';
+import FieldTextarea from '@/components/FieldTextarea.vue';
+import FormStep from '@/components/FormStep.vue';
+import FormWizard from '@/components/FormWizard.vue';
 import {
   NumberField,
   NumberFieldContent,
@@ -12,50 +19,46 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from '@/components/ui/number-field';
-import FormWizard from '@/components/FormWizard.vue';
-import FormStep from '@/components/FormStep.vue';
-import FieldTextarea from '@/components/FieldTextarea.vue';
-import FieldComboFilter from '@/components/FieldComboFilter.vue';
 import FieldInputText from '~/components/FieldInputText.vue';
 
 interface FormValues {
-  eventDatetimes?: Array<{ name: string }>;
-  tickets?: Array<{ name: string }>;
+  eventDatetimes?: Array<{ name: string }>
+  tickets?: Array<{ name: string }>
 }
 const formValues = ref<FormValues>({});
 
 interface FormWizardExpose {
-  updateFormField: (field: unknown, value: unknown) => void;
-  errorMessages: (field: string) => string;
+  updateFormField: (field: unknown, value: unknown) => void
+  errorMessages: (field: string) => string
 }
 
 useHead({
-  title: 'New Event',
   meta: [
     {
-      name: 'description',
       content: 'Create a new event on Galanesia ID',
+      name: 'description',
     },
   ],
+  title: 'New Event',
 });
 
 definePageMeta({
-  navTitle: 'Create New Event',
   layout: 'dashboard',
+  navTitle: 'Create New Event',
 });
 
 const steps = [
   {
-    title: 'Event Details',
     description: 'Add your event details',
+    title: 'Event Details',
   },
   {
-    title: 'Datetimes & Tickets',
     description: 'Add your event datetimes and tickets',
+    title: 'Datetimes & Tickets',
   },
   {
-    title: 'Billing Info',
     description: 'Enter your payment information',
+    title: 'Billing Info',
   },
 ];
 
@@ -74,76 +77,76 @@ const eventScaleOptions = ref([
 
 const eventCategories = ref([
   {
+    icon: 'mdi:presentation',
     id: 'seminar',
     label: 'Seminar & Konferensi',
-    icon: 'mdi:presentation',
   },
   {
+    icon: 'mdi:run',
     id: 'olahraga',
     label: 'Olahraga & Kebugaran',
-    icon: 'mdi:run',
   },
   {
+    icon: 'mdi:theater',
     id: 'pertunjukan',
     label: 'Pertunjukan & Hiburan',
-    icon: 'mdi:theater',
   },
   {
+    icon: 'mdi:party-popper',
     id: 'parties',
     label: 'Pesta & Perayaan',
-    icon: 'mdi:party-popper',
   },
   {
+    icon: 'mdi:view-gallery',
     id: 'pameran',
     label: 'Pameran & Expo',
-    icon: 'mdi:view-gallery',
   },
   {
+    icon: 'mdi:dots-horizontal-circle',
     id: 'other',
     label: 'Lainnya',
-    icon: 'mdi:dots-horizontal-circle',
   },
 ]);
 
 // Define the schema for each step
 const step1Schema = z.object({
-  eventTitle: z.string().min(5, 'Event title must be at least 5 characters long'),
+  coverImg: z.any(),
+  eventCategory: z
+    .string()
+    .min(1, 'Event category is required')
+    .refine(
+      (value) => {
+        return eventCategories.value.some(cat => cat.label === value);
+      },
+      {
+        message: 'Please choose a valid event category',
+      },
+    ),
   eventDescription: z.string().min(10, 'Event description must be at least 10 characters long'),
   eventScale: z
     .string()
     .min(1, 'Event scale is required')
     .refine(
       (value) => {
-        return eventScaleOptions.value.some((scale) => scale.label === value);
+        return eventScaleOptions.value.some(scale => scale.label === value);
       },
       {
         message: 'Please choose a valid event scale',
-      }
-    ),
-  eventCategory: z
-    .string()
-    .min(1, 'Event category is required')
-    .refine(
-      (value) => {
-        return eventCategories.value.some((cat) => cat.label === value);
       },
-      {
-        message: 'Please choose a valid event category',
-      }
     ),
-  website: z.string().url().optional(),
+  eventTitle: z.string().min(5, 'Event title must be at least 5 characters long'),
   logo: z
     .string()
     .min(1, 'Logo ID is required')
-    .refine((value) => value.length > 0, {
+    .refine(value => value.length > 0, {
       message: 'Please upload your logo',
     }),
-  coverImg: z.any(),
-  venueName: z.string().min(1, 'Venue name is required'),
   venueAddress: z.string().min(1, 'Venue address is required'),
   venueCity: z.string().min(1, 'Venue city is required'),
-  venueState: z.string().min(1, 'Venue state is required'),
   venueCountry: z.string().min(1, 'Venue country is required'),
+  venueName: z.string().min(1, 'Venue name is required'),
+  venueState: z.string().min(1, 'Venue state is required'),
+  website: z.string().url().optional(),
 });
 
 const step2Schema = z
@@ -152,26 +155,26 @@ const step2Schema = z
       .array(
         z.object({
           name: z.string().min(1, 'Session Name is required'),
-          rangeDate: z.array(z.string()).length(2, 'Date range is required'),
           quota: z.number().int().min(1, 'Quota must be more than 0'),
-        })
+          rangeDate: z.array(z.string()).length(2, 'Date range is required'),
+        }),
       )
       .min(1, 'At least one event datetime is required'),
     tickets: z
       .array(
         z.object({
           name: z.string().min(1, 'Ticket Name is required'),
-          rangeDate: z.array(z.string()).length(2, 'Date range is required'),
           price: z.number().min(0, 'Price must be a positive number'),
           quota: z.number().int().min(1, 'Quota must be more than 0'),
+          rangeDate: z.array(z.string()).length(2, 'Date range is required'),
           sessions: z.array(z.string()).min(1, 'At least one session is required'),
-        })
+        }),
       )
       .min(1, 'At least one ticket is required'),
   })
   .superRefine((data, ctx) => {
     // Check for unique session names
-    const sessionNames = data.eventDatetimes.map((dt) => dt.name);
+    const sessionNames = data.eventDatetimes.map(dt => dt.name);
     const uniqueSessionNames = new Set(sessionNames);
     if (sessionNames.length !== uniqueSessionNames.size) {
       ctx.addIssue({
@@ -182,7 +185,7 @@ const step2Schema = z
     }
 
     // Check for unique ticket names
-    const ticketNames = data.tickets.map((ticket) => ticket.name);
+    const ticketNames = data.tickets.map(ticket => ticket.name);
     const uniqueTicketNames = new Set(ticketNames);
     if (ticketNames.length !== uniqueTicketNames.size) {
       ctx.addIssue({
@@ -195,7 +198,7 @@ const step2Schema = z
     // Validate sessions in tickets
     const validSessionNames = new Set(sessionNames);
     const validatedTickets = data.tickets.filter((ticket) => {
-      const validSessions = ticket.sessions.filter((session) => validSessionNames.has(session));
+      const validSessions = ticket.sessions.filter(session => validSessionNames.has(session));
       return validSessions.length > 0;
     });
 
@@ -211,24 +214,24 @@ const step2Schema = z
   });
 
 const step3Schema = z.object({
-  bankName: z.string().min(1, 'Bank name is required'),
-  bankAccount: z.string().min(1, 'Bank account is required'),
-  acceptTerms: z.boolean().refine((value) => value, {
+  acceptTerms: z.boolean().refine(value => value, {
     message: 'You must agree to the NDA',
   }),
+  bankAccount: z.string().min(1, 'Bank account is required'),
+  bankName: z.string().min(1, 'Bank name is required'),
 });
 
 // Create an array of typed schemas for each step
 const validationSchema = [toTypedSchema(step1Schema), toTypedSchema(step2Schema), toTypedSchema(step3Schema)];
 
-const selectCity = (option: { city: string; state: string; country: string }) => {
+const selectCity = (option: { city: string, state: string, country: string }) => {
   formWizardRef.value?.updateFormField('venueCity', option.city);
   formWizardRef.value?.updateFormField('venueState', option.state);
   formWizardRef.value?.updateFormField('venueCountry', option.country);
 };
 
 const onSort = (e: SortableEvent, fieldName: 'eventDatetimes' | 'tickets') => {
-  const { oldIndex, newIndex } = e;
+  const { newIndex, oldIndex } = e;
 
   if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
     return;
@@ -248,7 +251,7 @@ const onSort = (e: SortableEvent, fieldName: 'eventDatetimes' | 'tickets') => {
 
 const isAnySessionExists = computed(() => {
   // Check if there are any event datetimes with non-empty names
-  return formValues.value?.eventDatetimes?.some((dt) => dt.name.trim() !== '');
+  return formValues.value?.eventDatetimes?.some(dt => dt.name.trim() !== '');
 });
 
 // Range date picker options
@@ -275,8 +278,8 @@ const updateFormValues = (values: FormValues) => {
 // Check if there are any duplicate errors
 const hasDuplicateErrors = computed(() => {
   return (
-    !!formWizardRef.value?.errorMessages('eventDatetimes.duplicate') ||
-    !!formWizardRef.value?.errorMessages('tickets.duplicate')
+    !!formWizardRef.value?.errorMessages('eventDatetimes.duplicate')
+    || !!formWizardRef.value?.errorMessages('tickets.duplicate')
   );
 });
 
@@ -285,13 +288,13 @@ const handleStepChange = (step: number) => {
 };
 
 function onSubmit(formData: FormData) {
-  console.log(JSON.stringify(formData, null, 2));
+  console.warn(JSON.stringify(formData, null, 2));
 }
 </script>
 
 <template>
   <section class="relative flex h-full">
-    <div class="grow flex flex-col md:translate-x-0 transition-transform duration-300 ease-in-out translate-x-0">
+    <div class="flex grow translate-x-0 flex-col transition-transform duration-300 ease-in-out md:translate-x-0">
       <FormWizard
         id="new-event-form"
         ref="formWizardRef"
@@ -301,19 +304,18 @@ function onSubmit(formData: FormData) {
         @form-values-update="updateFormValues"
       >
         <template #form-steps>
-          <div class="flex-1 relative w-full overflow-auto">
+          <div class="relative w-full flex-1 overflow-auto">
             <div
-              class="flex py-3 sm:py-6 px-4 sm:px-0 space-x-0 sm:space-x-6 sm:max-w-5xl justify-center items-center mx-auto"
+              class="mx-auto flex items-center justify-center space-x-0 px-4 py-3 sm:max-w-5xl sm:space-x-6 sm:px-0 sm:py-6"
             >
               <div
                 v-for="(step, index) in validationSchema.map((_, i) => steps[i])"
                 :key="index"
-                :class="[currentStep === index ? '' : 'hidden md:flex', 'flex items-center space-x-2 shrink-0']"
+                class="flex shrink-0 items-center space-x-2" :class="[currentStep === index ? '' : 'hidden md:flex']"
               >
                 <div
-                  :class="[
+                  class="flex size-6 items-center justify-center rounded-full" :class="[
                     currentStep === index ? 'bg-primary' : 'bg-accent',
-                    'flex items-center justify-center size-6 rounded-full',
                   ]"
                 >
                   <span
@@ -327,8 +329,7 @@ function onSubmit(formData: FormData) {
                   </span>
                 </div>
                 <h3
-                  :class="[
-                    'text-sm font-medium whitespace-nowrap',
+                  class="whitespace-nowrap text-sm font-medium" :class="[
                     currentStep === index ? 'text-primary' : 'text-muted-foreground',
                   ]"
                 >
@@ -341,8 +342,8 @@ function onSubmit(formData: FormData) {
 
         <template #form-content>
           <FormStep>
-            <div class="relative w-full h-80 overflow-hidden">
-              <div class="absolute top-0 w-full h-full">
+            <div class="relative h-80 w-full overflow-hidden">
+              <div class="absolute top-0 size-full">
                 <FieldImageUpload id="cover-img-upload" name="coverImg" label="Cover Image" type="cover" />
               </div>
             </div>
@@ -350,7 +351,7 @@ function onSubmit(formData: FormData) {
             <!-- Event Details -->
             <div class="container pb-10">
               <div class="mx-auto max-w-3xl py-10">
-                <div class="-mt-40 mx-auto sm:-mt-40 mb-6 text-center">
+                <div class="mx-auto -mt-40 mb-6 text-center sm:-mt-40">
                   <FieldImageUpload id="logo-upload" name="logo" label="Logo" type="logo" />
                 </div>
 
@@ -373,8 +374,8 @@ function onSubmit(formData: FormData) {
                   />
                   <FieldInputText name="website" label="Website" />
 
-                  <div class="grid sm:grid-cols-3 gap-4">
-                    <label class="font-semibold text-sm">Venue</label>
+                  <div class="grid gap-4 sm:grid-cols-3">
+                    <label class="text-sm font-semibold">Venue</label>
                     <FieldInputText name="venueName" label="Venue Name" wrapper-class="sm:col-span-3" />
                     <FieldInputText name="venueAddress" label="Venue Address" wrapper-class="sm:col-span-3" />
                     <FieldComboFilter name="venueCity" label="Venue City" @select="selectCity" />
@@ -392,13 +393,13 @@ function onSubmit(formData: FormData) {
                 <div class="space-y-6">
                   <div
                     v-if="hasDuplicateErrors"
-                    class="bg-destructive-foreground text-sm text-destructive p-4 rounded-lg mb-4"
+                    class="mb-4 rounded-lg bg-destructive-foreground p-4 text-sm text-destructive"
                   >
-                    <div class="flex gap-1 items-center text-xs">
+                    <div class="flex items-center gap-1 text-xs">
                       <Icon icon="heroicons-solid:exclamation-circle" class="size-6" />
                       <div>Please fix the errors below</div>
                     </div>
-                    <ul class="list-disc list-inside ml-2.5">
+                    <ul class="ml-2.5 list-inside list-disc">
                       <li v-if="formWizardRef?.errorMessages('eventDatetimes.duplicate')">
                         {{ formWizardRef?.errorMessages('eventDatetimes.duplicate') }}
                       </li>
@@ -409,8 +410,8 @@ function onSubmit(formData: FormData) {
                   </div>
                   <div class="">
                     <label class="text-sm font-semibold">Sessions & Datetimes</label>
-                    <div class="flex flex-col gap-2 md:gap-4 mt-2">
-                      <FieldArray v-slot="{ fields, push, remove }" name="eventDatetimes">
+                    <div class="mt-2 flex flex-col gap-2 md:gap-4">
+                      <FieldArray v-slot="{ push, remove }" name="eventDatetimes">
                         <VueDraggable
                           v-model="eventDatetimesRef"
                           :animation="150"
@@ -422,11 +423,11 @@ function onSubmit(formData: FormData) {
                           <div
                             v-for="(field, index) in eventDatetimesRef"
                             :key="index"
-                            class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5 py-2"
+                            class="relative ml-5 flex flex-col items-start gap-2 border-l py-2 pl-3 sm:flex-row sm:flex-wrap"
                           >
                             <Icon
                               icon="mdi:drag-vertical"
-                              class="handle size-6 absolute -left-6 cursor-move text-muted-foreground"
+                              class="handle absolute -left-6 size-6 cursor-move text-muted-foreground"
                             />
                             <FormField v-slot="{ componentField }" :name="`eventDatetimes[${index}].name`">
                               <FormItem v-auto-animate class="w-full sm:w-1/3 md:w-1/3">
@@ -438,14 +439,14 @@ function onSubmit(formData: FormData) {
                               </FormItem>
                             </FormField>
                             <FormField
-                              v-slot="{ field, value, handleChange, errors }"
+                              v-slot="{ componentField, value, handleChange, errors }"
                               :name="`eventDatetimes[${index}].rangeDate`"
                             >
-                              <FormItem v-auto-animate class="flex-1 w-full">
+                              <FormItem v-auto-animate class="w-full flex-1">
                                 <FormLabel>Start - End</FormLabel>
                                 <FormControl>
                                   <VueDatePicker
-                                    v-bind="field"
+                                    v-bind="componentField"
                                     :model-value="value"
                                     range
                                     multi-calendars
@@ -456,7 +457,7 @@ function onSubmit(formData: FormData) {
                                     :min-date="minDate"
                                     @update:model-value="handleChange"
                                   >
-                                    <template #dp-input="{ value }">
+                                    <template #dp-input="{ value: inputValue }">
                                       <input
                                         type="text"
                                         class="form-input w-full"
@@ -464,9 +465,9 @@ function onSubmit(formData: FormData) {
                                           'is-invalid': !!errors.length,
                                         }"
                                         placeholder="Start - End Date & Time"
-                                        :value="value"
+                                        :value="inputValue"
                                         autocomplete="off"
-                                      />
+                                      >
                                     </template>
                                   </VueDatePicker>
                                 </FormControl>
@@ -493,7 +494,7 @@ function onSubmit(formData: FormData) {
                                 <FormMessage />
                               </FormItem>
                             </FormField>
-                            <div class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8">
+                            <div class="absolute bottom-0 right-0 sm:static sm:bottom-auto sm:right-auto sm:pt-8">
                               <Button size="icon" class="text-red-500" variant="ghost" @click.prevent="remove(index)">
                                 <Icon icon="material-symbols-light:close-rounded" class="size-6" />
                               </Button>
@@ -519,7 +520,7 @@ function onSubmit(formData: FormData) {
                   <!-- Tickets -->
                   <div>
                     <label class="text-sm font-semibold">Tickets</label>
-                    <div v-if="isAnySessionExists" class="flex flex-col gap-2 mt-2">
+                    <div v-if="isAnySessionExists" class="mt-2 flex flex-col gap-2">
                       <FieldArray v-slot="{ fields, push, remove }" name="tickets">
                         <VueDraggable
                           v-model="eventTicketsRef"
@@ -532,13 +533,13 @@ function onSubmit(formData: FormData) {
                           <div
                             v-for="(field, index) in fields"
                             :key="field.key"
-                            class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5"
+                            class="relative ml-5 flex flex-col items-start gap-2 border-l pl-3 sm:flex-row sm:flex-wrap"
                           >
                             <Icon
                               icon="mdi:drag-vertical"
-                              class="handle size-6 absolute -left-6 cursor-move text-muted-foreground"
+                              class="handle absolute -left-6 size-6 cursor-move text-muted-foreground"
                             />
-                            <div class="flex-1 grid grid-cols-12 gap-2">
+                            <div class="grid flex-1 grid-cols-12 gap-2">
                               <FormField v-slot="{ componentField }" :name="`tickets[${index}].name`">
                                 <FormItem v-auto-animate class="col-span-12">
                                   <FormLabel>Ticket Name</FormLabel>
@@ -549,14 +550,14 @@ function onSubmit(formData: FormData) {
                                 </FormItem>
                               </FormField>
                               <FormField
-                                v-slot="{ field, value, handleChange, errors }"
+                                v-slot="{ componentField, value, handleChange, errors }"
                                 :name="`tickets[${index}].rangeDate`"
                               >
                                 <FormItem class="col-span-12 sm:col-span-6 md:col-span-6">
                                   <FormLabel>Selling Period</FormLabel>
                                   <FormControl>
                                     <VueDatePicker
-                                      v-bind="field"
+                                      v-bind="componentField"
                                       :model-value="value"
                                       range
                                       multi-calendars
@@ -567,7 +568,7 @@ function onSubmit(formData: FormData) {
                                       :min-date="minDate"
                                       @update:model-value="handleChange"
                                     >
-                                      <template #dp-input="{ value }">
+                                      <template #dp-input="{ value: inputValue }">
                                         <input
                                           type="text"
                                           class="form-input w-full"
@@ -575,9 +576,9 @@ function onSubmit(formData: FormData) {
                                             'is-invalid': !!errors.length,
                                           }"
                                           placeholder="Start - End Date & Time"
-                                          :value="value"
+                                          :value="inputValue"
                                           autocomplete="off"
-                                        />
+                                        >
                                       </template>
                                     </VueDatePicker>
                                   </FormControl>
@@ -633,8 +634,8 @@ function onSubmit(formData: FormData) {
                                   <FormMessage />
                                 </FormItem>
                               </FormField>
-                              <div class="col-span-9 py-2 flex flex-col gap-2">
-                                <label class="text-sm font-semibold w-full">Sessions scope of this ticket</label>
+                              <div class="col-span-9 flex flex-col gap-2 py-2">
+                                <label class="w-full text-sm font-semibold">Sessions scope of this ticket</label>
                                 <FormField
                                   v-for="datetime in formValues.eventDatetimes"
                                   v-slot="{ value, handleChange }"
@@ -660,7 +661,7 @@ function onSubmit(formData: FormData) {
                                 </FormField>
                               </div>
                             </div>
-                            <div class="absolute sm:static bottom-0 right-0 sm:bottom-auto sm:right-auto sm:pt-8">
+                            <div class="absolute bottom-0 right-0 sm:static sm:bottom-auto sm:right-auto sm:pt-8">
                               <Button size="icon" class="text-red-500" variant="ghost" @click.prevent="remove(index)">
                                 <Icon icon="material-symbols-light:close-rounded" class="size-6" />
                               </Button>
@@ -686,7 +687,9 @@ function onSubmit(formData: FormData) {
                       </FieldArray>
                     </div>
                     <div v-else>
-                      <p class="text-sm text-gray-500">Please add at least one event datetime to add tickets</p>
+                      <p class="text-sm text-gray-500">
+                        Please add at least one event datetime to add tickets
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -718,7 +721,9 @@ function onSubmit(formData: FormData) {
           </FormStep>
           <FormStep>
             <div class="space-y-6">
-              <h2 class="text-2xl font-semibold">Preview</h2>
+              <h2 class="text-2xl font-semibold">
+                Preview
+              </h2>
               <pre class="text-xs">{{ formValues }}</pre>
             </div>
           </FormStep>
@@ -727,6 +732,7 @@ function onSubmit(formData: FormData) {
     </div>
   </section>
 </template>
+
 <style scoped>
 .err-msg {
   @apply text-red-500 text-xs;

@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
 const props = defineProps<{
-  name: string;
-  label: string;
-  type?: string;
-  placeholder?: string;
-  wrapperClass?: string;
+  name: string
+  label: string
+  type?: string
+  placeholder?: string
+  wrapperClass?: string
 }>();
 
 const inputComponent = computed(() => {
@@ -20,6 +21,7 @@ const inputComponent = computed(() => {
   }
 });
 </script>
+
 <template>
   <FormField v-slot="{ componentField }" :name="name">
     <FormItem v-auto-animate :class="wrapperClass">

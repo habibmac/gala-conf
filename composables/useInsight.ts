@@ -1,15 +1,18 @@
-import { computed, type Ref } from 'vue';
-import { useQuery } from '@tanstack/vue-query';
 import type { PaginationState, SortingState } from '@tanstack/vue-table';
+import type { Ref } from 'vue';
+
+import { useQuery } from '@tanstack/vue-query';
+import { computed } from 'vue';
+
 import type { RegRequestParams } from '@/types';
 
 interface InsightFilters {
-  search?: string;
-  date_start?: string;
-  date_end?: string;
-  group?: string;
-  nocache?: string;
-  [key: string]: string | string[] | undefined;
+  search?: string
+  date_start?: string
+  date_end?: string
+  group?: string
+  nocache?: string
+  [key: string]: string | string[] | undefined
 }
 
 export const useInsight = (
@@ -17,28 +20,28 @@ export const useInsight = (
   insightId: string,
   pagination?: Ref<PaginationState>,
   sorting?: Ref<SortingState>,
-  filters?: Ref<InsightFilters>
+  filters?: Ref<InsightFilters>,
 ) => {
   const nuxtApp = useNuxtApp();
 
   // Default values
   const defaultPagination = ref<PaginationState>({
-    pageSize: 10,
     pageIndex: 0,
+    pageSize: 10,
   });
 
   const defaultSorting = ref<SortingState>([
     {
-      id: 'date',
       desc: false,
+      id: 'date',
     },
   ]);
 
   const defaultFilters = ref<InsightFilters>({
-    search: '',
-    date_start: '',
     date_end: '',
+    date_start: '',
     group: '',
+    search: '',
   });
 
   // 1. Metadata query - just get insight details
@@ -47,8 +50,8 @@ export const useInsight = (
     error: metaError,
     isLoading: isMetaLoading,
   } = useQuery({
-    queryKey: ['insight-meta', eventId, insightId],
     queryFn: ({ signal }) => getMetaData(signal),
+    queryKey: ['insight-meta', eventId, insightId],
     staleTime: 30000, // 30 seconds
   });
 
@@ -59,13 +62,13 @@ export const useInsight = (
 
   // 2. Registration data query - handles all filters, pagination, sorting
   const requestParams = computed<RegRequestParams>(() => ({
-    per_page: activePagination.value.pageSize.toString(),
-    page: (activePagination.value.pageIndex + 1).toString(),
-    sort_by: activeSorting.value.length > 0 ? activeSorting.value[0].id : 'date',
-    order: activeSorting.value.length > 0 && activeSorting.value[0].desc ? 'desc' : 'asc',
-    search: activeFilters.value.search || '',
-    date_start: activeFilters.value.date_start || '',
     date_end: activeFilters.value.date_end || '',
+    date_start: activeFilters.value.date_start || '',
+    order: activeSorting.value.length > 0 && activeSorting.value[0].desc ? 'desc' : 'asc',
+    page: (activePagination.value.pageIndex + 1).toString(),
+    per_page: activePagination.value.pageSize.toString(),
+    search: activeFilters.value.search || '',
+    sort_by: activeSorting.value.length > 0 ? activeSorting.value[0].id : 'date',
     ...activeFilters.value, // Include any additional filters
   }));
 
@@ -74,24 +77,24 @@ export const useInsight = (
     error: dataError,
     isLoading: isDataLoading,
   } = useQuery({
-    queryKey: ['insight-data', requestParams, eventId, insightId],
     queryFn: ({ signal }) => getRegData(requestParams, signal),
+    queryKey: ['insight-data', requestParams, eventId, insightId],
     staleTime: 30000, // 30 seconds
   });
 
   // API calls
   const getMetaData = async (signal: AbortSignal) => {
-    return nuxtApp.$galantisApi.get(`/event/${eventId.value}/insight/${insightId}`, { signal }).then((response) => ({
-      id: response.data.data.id,
-      title: response.data.data.title,
-      created_at: response.data.data.created_at,
-      last_modified: response.data.data.last_modified,
+    return nuxtApp.$galantisApi.get(`/event/${eventId.value}/insight/${insightId}`, { signal }).then(response => ({
       author: response.data.data.author,
       avatar: response.data.data.avatar,
-      is_public: response.data.data.is_public,
+      created_at: response.data.data.created_at,
       event_id: response.data.data.event_id,
       fields: response.data.data.fields,
       groups: response.data.data.groups,
+      id: response.data.data.id,
+      is_public: response.data.data.is_public,
+      last_modified: response.data.data.last_modified,
+      title: response.data.data.title,
     }));
   };
 
@@ -101,7 +104,8 @@ export const useInsight = (
       if (value !== undefined && value !== '') {
         if (Array.isArray(value)) {
           searchParams.append(key, value.join(','));
-        } else {
+        }
+        else {
           searchParams.append(key, String(value));
         }
       }
@@ -109,9 +113,9 @@ export const useInsight = (
 
     return nuxtApp.$galantisApi
       .get(`/event/${eventId.value}/insight/${insightId}/data?${searchParams.toString()}`, { signal })
-      .then((response) => ({
-        registrations: response.data.data,
+      .then(response => ({
         pagination: response.data.pagination,
+        registrations: response.data.data,
       }));
   };
 
@@ -122,7 +126,8 @@ export const useInsight = (
       if (value !== undefined && value !== '') {
         if (Array.isArray(value)) {
           searchParams.append(key, value.join(','));
-        } else {
+        }
+        else {
           searchParams.append(key, String(value));
         }
       }
@@ -139,15 +144,15 @@ export const useInsight = (
   };
 
   return {
-    insightData: computed(() => metaData.value),
-    ticketGroups: computed(() => metaData.value?.groups),
-    regData: computed(() => regData.value?.registrations),
+    dataError,
     fetchAllData,
+    insightData: computed(() => metaData.value),
+    isDataLoading,
+    isMetaLoading,
+    metaError,
+    regData: computed(() => regData.value?.registrations),
+    ticketGroups: computed(() => metaData.value?.groups),
     totalData: computed(() => regData.value?.pagination.total_data || 0),
     totalPages: computed(() => regData.value?.pagination.total_pages || -1),
-    isMetaLoading,
-    isDataLoading,
-    metaError,
-    dataError,
   };
 };

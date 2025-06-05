@@ -1,10 +1,10 @@
 // types/runtime-config.ts
 export interface RuntimeConfig {
-  oauthClientSecret: string;
+  oauthClientSecret: string
   public: {
-    apiUrl: string;
-    oauthUrl: string;
-    oauthClientId: string;
-    oauthRedirectUri: string;
-  };
+    apiUrl: string
+    oauthUrl: string
+    oauthClientId: string
+    oauthRedirectUri: string
+  }
 }

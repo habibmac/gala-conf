@@ -3,13 +3,13 @@ import { ref } from 'vue';
 
 const props = withDefaults(
   defineProps<{
-    size?: string;
-    class?: string;
+    size?: string
+    class?: string
   }>(),
   {
-    size: '42',
     class: '',
-  }
+    size: '42',
+  },
 );
 
 const size = ref(props.size);

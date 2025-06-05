@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
+
 import { useInsight } from '@/composables/useInsight';
 
 useHead({
@@ -7,15 +8,15 @@ useHead({
 });
 
 definePageMeta({
-  title: 'Edit Insight',
-  group: 'insights',
-  showInMenu: true,
-  icon: 'solar:widget-4-bold-duotone',
-  requiresSelectedEvent: true,
-  packages: ['smart', 'optima'],
-  roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
   capabilities: ['ee_edit_insights'],
+  group: 'insights',
+  icon: 'solar:widget-4-bold-duotone',
   layout: 'dashboard-with-sidebar',
+  packages: ['smart', 'optima'],
+  requiresSelectedEvent: true,
+  roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
+  showInMenu: true,
+  title: 'Edit Insight',
 });
 
 const route = useRoute();
@@ -32,21 +33,25 @@ const { insightData } = useInsight(eventId, insightId);
     <header class="pt-5">
       <NuxtLink
         :to="`/event/${eventId}/insights`"
-        class="pb-5 inline-flex hover:underline text-xs items-center space-x-1 text-slate-500"
+        class="inline-flex items-center space-x-1 pb-5 text-xs text-slate-500 hover:underline"
       >
-        <Icon icon="heroicons-outline:arrow-left" class="w-3 h-3" />
+        <Icon icon="heroicons-outline:arrow-left" class="size-3" />
         <span>Back to All Insights</span>
       </NuxtLink>
       <!-- subtitle -->
-      <h2 class="text-slate-500 font-medium">Edit Insight</h2>
-      <h1 class="h2 mb-5">{{ insightData?.title }}</h1>
+      <h2 class="font-medium text-slate-500">
+        Edit Insight
+      </h2>
+      <h1 class="h2 mb-5">
+        {{ insightData?.title }}
+      </h1>
     </header>
 
     <section>
       <div class="m-auto my-16 max-w-2xl">
         <div class="px-4 text-center">
           <div
-            class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-t from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
+            class="mb-4 inline-flex size-16 items-center justify-center rounded-full bg-gradient-to-t from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800"
           >
             <svg class="h-6 w-5 fill-current" viewBox="0 0 20 24">
               <path
@@ -63,8 +68,12 @@ const { insightData } = useInsight(eventId, insightId);
               />
             </svg>
           </div>
-          <h2 class="mb-2 text-xl font-bold dark:text-slate-100">Coming soon...</h2>
-          <p class="mb-5 text-sm text-slate-400 dark:text-slate-500">This feature is not available yet.</p>
+          <h2 class="mb-2 text-xl font-bold dark:text-slate-100">
+            Coming soon...
+          </h2>
+          <p class="mb-5 text-sm text-slate-400 dark:text-slate-500">
+            This feature is not available yet.
+          </p>
         </div>
       </div>
     </section>

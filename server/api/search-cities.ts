@@ -3,18 +3,18 @@ import Typesense from 'typesense';
 
 // Define the interface for our city document
 interface CityDocument {
-  id: string;
-  name: string;
-  state_name: string;
-  country_name: string;
+  id: string
+  name: string
+  state_name: string
+  country_name: string
 }
 
 // Define the CityOption interface
 interface CityOption {
-  city: string;
-  state: string;
-  country: string;
-  id: string;
+  city: string
+  state: string
+  country: string
+  id: string
 }
 
 export default defineEventHandler(async (event) => {
@@ -22,6 +22,8 @@ export default defineEventHandler(async (event) => {
 
   // Initialize Typesense client
   const typesense = new Typesense.Client({
+    apiKey: config.typesenseApiKey,
+    connectionTimeoutSeconds: 2,
     nodes: [
       {
         host: config.typesenseHost,
@@ -29,8 +31,6 @@ export default defineEventHandler(async (event) => {
         protocol: config.typesenseProtocol,
       },
     ],
-    apiKey: config.typesenseApiKey,
-    connectionTimeoutSeconds: 2,
   });
 
   const query = getQuery(event);
@@ -42,11 +42,11 @@ export default defineEventHandler(async (event) => {
 
   try {
     const searchParameters = {
+      filter_by: 'country_code:!=XX', // Exclude any entries with invalid country codes
+      limit: 10,
       q: cityQuery,
       query_by: 'name',
-      filter_by: 'country_code:!=XX', // Exclude any entries with invalid country codes
       sort_by: '_text_match:desc',
-      limit: 10,
     };
 
     const searchResults = await typesense.collections('cities').documents().search(searchParameters);
@@ -59,13 +59,14 @@ export default defineEventHandler(async (event) => {
       const city = hit.document as CityDocument;
       return {
         city: city.name,
-        state: city.state_name,
         country: city.country_name,
         id: city.id,
+        state: city.state_name,
       };
     });
     return cities;
-  } catch (error) {
+  }
+  catch (error) {
     return error;
   }
 });

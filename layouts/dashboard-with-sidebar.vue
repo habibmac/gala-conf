@@ -12,9 +12,10 @@ watch(
   () => {
     checkAccess(route.meta);
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
+
 <template>
   <Sidebar
     :sidebar-open="uiStore.isSidebarOpen"

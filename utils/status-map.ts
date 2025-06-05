@@ -1,75 +1,75 @@
 export const allRegStatuses = [
   {
+    color: 'emerald',
     id: 'RAP',
     label: 'Approved',
     value: 'RAP',
-    color: 'emerald',
   },
   {
+    color: 'sky',
     id: 'RPP',
     label: 'Pending',
     value: 'RPP',
-    color: 'sky',
   },
   {
+    color: 'red',
     id: 'RCN',
     label: 'Cancelled',
     value: 'RCN',
-    color: 'red',
   },
 ];
 
 export const allTransStatuses = [
   {
+    color: 'emerald',
     id: 'TCM',
     label: 'Completed',
     value: 'TCM',
-    color: 'emerald',
   },
   {
+    color: 'blue',
     id: 'TIN',
     label: 'Incomplete',
     value: 'TIN',
-    color: 'blue',
   },
   {
+    color: 'gray',
     id: 'TAB',
     label: 'Abandoned',
     value: 'TAB',
-    color: 'gray',
   },
 ];
 
 export const allTicketStatuses = [
   {
+    color: 'purple',
     id: 'TKS',
     label: 'Sold Out',
     value: 'TKS',
-    color: 'purple',
   },
   {
+    color: 'gray',
     id: 'TKE',
     label: 'Expired',
     value: 'TKE',
-    color: 'gray',
   },
   {
+    color: 'slate',
     id: 'TKA',
     label: 'Archived',
     value: 'TKA',
-    color: 'slate',
   },
   {
+    color: 'sky',
     id: 'TKP',
     label: 'Pending',
     value: 'TKP',
-    color: 'sky',
   },
   {
+    color: 'emerald',
     id: 'TKO',
     label: 'On Sale',
     value: 'TKO',
-    color: 'emerald',
   },
 ];
 
@@ -79,10 +79,10 @@ const allStatuses = [...allRegStatuses, ...allTransStatuses, ...allTicketStatuse
 // Convert the array into an object for quick access
 export const statusMap = allStatuses.reduce(
   (acc, status) => {
-    acc[status.id] = { label: status.label, color: status.color };
+    acc[status.id] = { color: status.color, label: status.label };
     return acc;
   },
-  {} as Record<string, { label: string; color: string }>
+  {} as Record<string, { label: string, color: string }>,
 );
 
 // Universal function to get status color and label

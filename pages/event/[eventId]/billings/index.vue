@@ -1,59 +1,62 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import type { PaginationState, SortingState } from '@tanstack/vue-table';
+
+import { Icon } from '@iconify/vue';
 import {
+  createColumnHelper,
   FlexRender,
   getCoreRowModel,
+
   useVueTable,
-  createColumnHelper,
-  type SortingState,
-  type PaginationState,
 } from '@tanstack/vue-table';
 import { format } from 'date-fns';
-import { Icon } from '@iconify/vue';
+import { computed, ref } from 'vue';
+
+import type { Billing, BillingFilters, ColumnConfig, StatusConfig } from '@/types';
+
 import { formatThousands } from '@/utils';
-import type { ColumnConfig, Billing, BillingFilters, StatusConfig } from '@/types';
-import { useBillings } from '~/composables/useBillings';
 import BillingCards from '~/components/partials/billings/BillingCards.vue';
+import { useBillings } from '~/composables/useBillings';
+
+const props = withDefaults(
+  defineProps<{
+    search?: string
+    status?: string
+    dateStart?: string
+    dateEnd?: string
+    page?: string
+    perPage?: string
+    sortBy?: string
+    order?: string
+  }>(),
+  {
+    dateEnd: '',
+    dateStart: '',
+    order: 'desc',
+    page: '1',
+    perPage: '10',
+    search: '',
+    sortBy: 'date',
+    status: '',
+  },
+);
 
 useHead({
   title: 'Billings',
 });
 
 definePageMeta({
-  title: 'Billings',
-  showInMenu: true,
-  order: 1,
-  icon: 'solar:wallet-money-bold-duotone',
-  group: 'billings',
-  layout: 'dashboard-with-sidebar',
-  requiresSelectedEvent: true,
-  packages: ['starter', 'smart', 'optima'],
-  roles: ['administrator', 'ee_event_organizer'],
   capabilities: ['ee_read_billings'],
+  group: 'billings',
+  icon: 'solar:wallet-money-bold-duotone',
+  layout: 'dashboard-with-sidebar',
+  order: 1,
+  packages: ['starter', 'smart', 'optima'],
+  requiresSelectedEvent: true,
+  roles: ['administrator', 'ee_event_organizer'],
+  showInMenu: true,
+  title: 'Billings',
 });
-
-const props = withDefaults(
-  defineProps<{
-    search?: string;
-    status?: string;
-    dateStart?: string;
-    dateEnd?: string;
-    page?: string;
-    perPage?: string;
-    sortBy?: string;
-    order?: string;
-  }>(),
-  {
-    search: '',
-    status: '',
-    dateStart: '',
-    dateEnd: '',
-    page: '1',
-    perPage: '10',
-    sortBy: 'date',
-    order: 'desc',
-  }
-);
 
 const { event } = useEvent();
 const eventId = computed(() => event.value?.id);
@@ -75,16 +78,16 @@ const pagination = ref<PaginationState>({
 });
 
 const filters = ref<BillingFilters>({
+  date_end: props.dateEnd || '',
+  date_start: props.dateStart || '',
   search: props.search || '',
   status: props.status || '',
-  date_start: props.dateStart || '',
-  date_end: props.dateEnd || '',
 });
 
 const sorting = ref<SortingState>([
   {
-    id: props.sortBy || 'date',
     desc: props.order ? props.order.toLowerCase() === 'desc' : true,
+    id: props.sortBy || 'date',
   },
 ]);
 
@@ -102,38 +105,38 @@ const parseDesc = (order: string): boolean => order.toLowerCase() === 'desc';
 // Table configurations
 const columnConfigs = ref<ColumnConfig[]>([
   {
-    key: 'request_date',
     header: 'Date',
-    isVisible: true,
     isHideable: true,
+    isVisible: true,
+    key: 'request_date',
     width: 15,
   },
   {
-    key: 'amount',
     header: 'Amount',
-    isVisible: true,
     isHideable: true,
+    isVisible: true,
+    key: 'amount',
     width: 10,
   },
   {
-    key: 'status',
     header: 'Status',
-    isVisible: true,
     isHideable: true,
+    isVisible: true,
+    key: 'status',
     width: 10,
   },
   {
-    key: 'transferred_date',
     header: 'Transferred Date',
-    isVisible: true,
     isHideable: true,
+    isVisible: true,
+    key: 'transferred_date',
     width: 15,
   },
   {
-    key: 'notes',
     header: 'Notes',
-    isVisible: true,
     isHideable: true,
+    isVisible: true,
+    key: 'notes',
     width: 15,
   },
 ]);
@@ -141,14 +144,14 @@ const columnConfigs = ref<ColumnConfig[]>([
 // Add status config
 const statusConfig: StatusConfig = {
   completed: {
-    icon: 'material-symbols:check-circle',
-    color: 'text-green-500',
     bgColor: 'bg-green-50',
+    color: 'text-green-500',
+    icon: 'material-symbols:check-circle',
   },
   pending: {
-    icon: 'material-symbols:pending',
-    color: 'text-orange-500',
     bgColor: 'bg-orange-50',
+    color: 'text-orange-500',
+    icon: 'material-symbols:pending',
   },
 };
 
@@ -156,18 +159,17 @@ const statusConfig: StatusConfig = {
 const columnHelper = createColumnHelper<Billing>();
 const columns = computed(() => {
   return columnConfigs.value
-    .filter((config) => config.isVisible)
+    .filter(config => config.isVisible)
     .map((config) => {
       return columnHelper.accessor(config.key as keyof Billing, {
-        header: config.header,
-        size: config.width * 10,
         cell: (info) => {
           const value = info.getValue();
 
           switch (config.key) {
             case 'request_date':
             case 'transferred_date': {
-              if (!value) return '-';
+              if (!value)
+                return '-';
               return format(new Date(value), 'dd MMM yyyy HH:mm');
             }
             case 'amount':
@@ -175,9 +177,9 @@ const columns = computed(() => {
             case 'status': {
               const status = value as string;
               const config = statusConfig[status] || {
-                icon: 'material-symbols:help',
-                color: 'text-gray-500',
                 bgColor: 'bg-gray-50',
+                color: 'text-gray-500',
+                icon: 'material-symbols:help',
               };
               return h(
                 'div',
@@ -186,11 +188,11 @@ const columns = computed(() => {
                 },
                 [
                   h(Icon, {
-                    icon: config.icon,
                     class: config.color,
+                    icon: config.icon,
                   }),
                   h('span', {}, status.charAt(0).toUpperCase() + status.slice(1)),
-                ]
+                ],
               );
             }
             case 'notes':
@@ -199,6 +201,8 @@ const columns = computed(() => {
               return value;
           }
         },
+        header: config.header,
+        size: config.width * 10,
       });
     });
 });
@@ -206,10 +210,10 @@ const columns = computed(() => {
 // Get billing data using composable
 const {
   billingData,
-  totalData,
-  totalPages,
   isLoading: isDataLoading,
   isRefetching,
+  totalData,
+  totalPages,
 } = useBillings(eventId, pagination, sorting, filters);
 
 // Create table instance
@@ -220,13 +224,13 @@ const table = useVueTable({
   get data() {
     return billingData.value;
   },
+  getCoreRowModel: getCoreRowModel(),
   state: {
     pagination: pagination.value,
     get sorting() {
       return sorting.value;
     },
   },
-  getCoreRowModel: getCoreRowModel(),
 });
 
 // Table helper functions
@@ -250,10 +254,10 @@ const handleNavigation = (pageNumber: number) => {
 // Add reset filters function
 const handleResetFilters = () => {
   filters.value = {
+    date_end: '',
+    date_start: '',
     search: '',
     status: '',
-    date_start: '',
-    date_end: '',
   };
 
   pagination.value = {
@@ -263,8 +267,8 @@ const handleResetFilters = () => {
 
   sorting.value = [
     {
-      id: 'date',
       desc: true,
+      id: 'date',
     },
   ];
 };
@@ -274,12 +278,14 @@ const handleSetDateRange = (dateRange: [Date | null, Date | null] | null) => {
   if (dateRange === null) {
     filters.value.date_start = '';
     filters.value.date_end = '';
-  } else {
+  }
+  else {
     const [start, end] = dateRange;
     if (!start || !end) {
       filters.value.date_start = '';
       filters.value.date_end = '';
-    } else {
+    }
+    else {
       filters.value.date_start = format(start, 'yyyy-MM-dd');
       filters.value.date_end = format(end, 'yyyy-MM-dd');
     }
@@ -293,7 +299,7 @@ const isAnyFilterActive = computed(() => {
 
 function calculateMinWidth(): number {
   const totalWidth = columnConfigs.value
-    .filter((config) => config.isVisible)
+    .filter(config => config.isVisible)
     .reduce((total, config) => total + config.width * 15, 0); // Multiply by a factor to get reasonable width
 
   // Return the greater of the calculated width or minimum width (e.g., 1000px)
@@ -305,19 +311,19 @@ watch(
   [filters, pagination, sorting],
   ([newFilters, newPagination, newSorting]) => {
     const query = {
-      search: newFilters.search || undefined,
-      status: newFilters.status || undefined,
-      dateStart: newFilters.date_start || undefined,
       dateEnd: newFilters.date_end || undefined,
+      dateStart: newFilters.date_start || undefined,
+      order: newSorting[0]?.desc ? 'desc' : 'asc',
       // Always use 1-based page numbers in the URL
       page: String(newPagination.pageIndex + 1),
       perPage: String(newPagination.pageSize),
+      search: newFilters.search || undefined,
       sortBy: newSorting[0]?.id || undefined,
-      order: newSorting[0]?.desc ? 'desc' : 'asc',
+      status: newFilters.status || undefined,
     };
     router.push({ query });
   },
-  { deep: true }
+  { deep: true },
 );
 
 // Watch for URL changes and update the state
@@ -325,10 +331,10 @@ watch(
   () => route.query,
   (newQuery) => {
     filters.value = {
+      date_end: (newQuery.dateEnd as string) || '',
+      date_start: (newQuery.dateStart as string) || '',
       search: (newQuery.search as string) || '',
       status: (newQuery.status as string) || '',
-      date_start: (newQuery.dateStart as string) || '',
-      date_end: (newQuery.dateEnd as string) || '',
     };
 
     pagination.value = {
@@ -339,43 +345,45 @@ watch(
 
     sorting.value = [
       {
-        id: (newQuery.sortBy as string) || 'date',
         desc: parseDesc((newQuery.order as string) || 'desc'),
+        id: (newQuery.sortBy as string) || 'date',
       },
     ];
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
 
 <template>
   <div class="container mx-auto flex flex-col gap-5 2xl:mx-0">
     <div class="flex flex-col">
-      <header class="pt-10 mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <h1 class="h2">Billings</h1>
+      <header class="mb-5 flex flex-col gap-2 pt-10 sm:flex-row sm:items-start sm:justify-between">
+        <h1 class="h2">
+          Billings
+        </h1>
       </header>
       <BillingCards />
     </div>
   </div>
 
   <section>
-    <div class="container 2xl:mx-0 py-4">
+    <div class="container py-4 2xl:mx-0">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex flex-col space-y-2 sm:gap-2 sm:grid sm:grid-flow-col sm:space-y-0">
+        <div class="flex flex-col space-y-2 sm:grid sm:grid-flow-col sm:gap-2 sm:space-y-0">
           <TableSearchForm v-model="filters.search" placeholder="Search billings..." />
           <Datepicker :date-range="dateRange" @update:date-range="handleSetDateRange" />
-          <TableResetBtn v-if="isAnyFilterActive" @click.prevent="handleResetFilters" />
+          <TableResetBtn v-if="isAnyFilterActive" @reset-filters="handleResetFilters" />
         </div>
       </div>
     </div>
   </section>
 
-  <section class="relative" :class="{ 'overflow-x-auto scroll-area': !isDataLoading }">
+  <section class="relative" :class="{ 'scroll-area overflow-x-auto': !isDataLoading }">
     <div class="w-full">
       <div :style="{ minWidth: `${calculateMinWidth()}px` }">
         <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
           <thead
-            class="border-b border-t border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
+            class="border-y border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
           >
             <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
               <th
@@ -383,7 +391,7 @@ watch(
                 :key="header.id"
                 :colSpan="header.colSpan"
                 :style="{ width: `${header.column.columnDef.size}px` }"
-                class="whitespace-nowrap px-2 py-3 text-slate-500 dark:text-slate-400 first:pl-5 last:pr-5 text-xs"
+                class="whitespace-nowrap px-2 py-3 text-xs text-slate-500 first:pl-5 last:pr-5 dark:text-slate-400"
               >
                 <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
               </th>
@@ -393,8 +401,8 @@ watch(
             <template v-if="!table.getRowModel().rows.length">
               <template v-if="isDataLoading || isRefetching">
                 <tr v-for="index in 10" :key="index">
-                  <td v-for="(column, index2) in columns" :key="index2" class="px-2 py-2">
-                    <Skeleton class="w-full h-6 rounded" />
+                  <td v-for="(column, index2) in columns" :key="index2" class="p-2">
+                    <Skeleton class="h-6 w-full rounded" />
                   </td>
                 </tr>
               </template>

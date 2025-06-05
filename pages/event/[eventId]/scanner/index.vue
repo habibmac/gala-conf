@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useDebounceFn, useClipboard } from '@vueuse/core';
+import { Icon } from '@iconify/vue';
+import { useClipboard, useDebounceFn } from '@vueuse/core';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { useToast } from '@/components/ui/toast/use-toast';
+
+import type { ApiError, RegistrationData, ScanHistoryItem, ScannerMode, ScannerSettings } from '~/types';
+
+import ScanResultModal from '@/components/partials/scanner/ScanResultModal.vue';
+import SimpleQRScanner from '@/components/partials/scanner/SimpleQRScanner.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -16,43 +19,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Icon } from '@iconify/vue';
-
-import EnhancedQRScanner from '~/components/partials/scanner/EnhancedQRScanner.vue';
-import ScanResultModal from '~/components/partials/scanner/ScanResultModal.vue';
-import SimpleQRScanner from '~/components/partials/scanner/SimpleQRScanner.vue';
-
-import type { RegistrationData, ScanHistoryItem, ScannerMode, ScannerSettings } from '~/types';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/components/ui/toast/use-toast';
 
 type CapabilityKey = keyof ScannerSettings['capabilities'];
 
-type SupportedBarcodeFormat = 
-  | "qr_code" 
-  | "code_128" 
-  | "code_39" 
-  | "ean_13" 
-  | "ean_8" 
-  | "code_93" 
-  | "upc_a" 
-  | "upc_e" 
-  | "itf" 
-  | "pdf417" 
-  | "data_matrix" 
-  | "aztec" 
-  | "codabar" 
-  | "databar" 
-  | "databar_expanded";
+type SupportedBarcodeFormat =
+  | 'qr_code'
+  | 'code_128'
+  | 'code_39'
+  | 'ean_13'
+  | 'ean_8'
+  | 'code_93'
+  | 'upc_a'
+  | 'upc_e'
+  | 'itf'
+  | 'pdf417'
+  | 'data_matrix'
+  | 'aztec'
+  | 'codabar'
+  | 'databar'
+  | 'databar_expanded';
 
 definePageMeta({
-  title: 'Ticket Scanner',
-  group: 'tools',
-  showInMenu: true,
-  icon: 'solar:code-scan-line-duotone',
-  requiresSelectedEvent: true,
-  packages: ['optima'],
-  roles: ['administrator', 'ee_event_organizer'],
   capabilities: ['ee_read_checkins'],
+  group: 'tools',
+  icon: 'solar:code-scan-line-duotone',
   layout: 'dashboard-with-sidebar',
+  packages: ['optima'],
+  requiresSelectedEvent: true,
+  roles: ['administrator', 'ee_event_organizer'],
+  showInMenu: true,
+  title: 'Ticket Scanner',
 });
 
 const route = useRoute();
@@ -70,9 +69,6 @@ const scannerMode = ref<ScannerMode>('lookup');
 const isSearching = ref(false);
 const supportedFormats = ref<string[]>([]);
 
-const scannerStatus = ref<string>('inactive');
-const lastError = ref<string>('');
-const scannerRef = ref<InstanceType<typeof EnhancedQRScanner> | null>(null);
 const showScanResult = ref(false);
 const currentScanResult = ref<RegistrationData | null>(null);
 
@@ -85,68 +81,69 @@ const lookupResult = ref<RegistrationData | null>(null);
 const eventId = computed(() => route.params.eventId as string);
 const canScan = computed(() => !!selectedDatetime.value && !!scannerSettings.value);
 const recentScans = computed(() => scanHistory.value.slice(0, 10));
-const successfulScans = computed(() => scanHistory.value.filter((scan) => scan.status === 'success').length);
-const failedScans = computed(() => scanHistory.value.filter((scan) => scan.status === 'error').length);
+const successfulScans = computed(() => scanHistory.value.filter(scan => scan.status === 'success').length);
+const failedScans = computed(() => scanHistory.value.filter(scan => scan.status === 'error').length);
 
 const showClearConfirmDialog = ref(false);
-const { copy, copied, isSupported } = useClipboard();
+const { copy, isSupported } = useClipboard();
 
 // Scanner mode configuration
 const modeConfig = computed(() => ({
-  lookup: {
-    title: 'Lookup Mode',
-    description: 'Scan or enter code to view registration details',
-    icon: 'heroicons:qr-code',
-    color: 'blue',
-    capability: 'lookup' as CapabilityKey,
-  },
   continuous: {
-    title: 'Continuous Check-in',
+    capability: 'continuous_scan' as CapabilityKey,
+    color: 'orange',
     description: 'Automatic check-in mode for high volume',
     icon: 'heroicons:bolt',
-    color: 'orange',
-    capability: 'continuous_scan' as CapabilityKey,
+    title: 'Continuous Check-in',
+  },
+  lookup: {
+    capability: 'lookup' as CapabilityKey,
+    color: 'blue',
+    description: 'Scan or enter code to view registration details',
+    icon: 'heroicons:qr-code',
+    title: 'Lookup Mode',
   },
   search: {
-    title: 'Search Mode',
+    capability: 'search' as CapabilityKey,
+    color: 'green',
     description: 'Search registrations by name, email, or code',
     icon: 'heroicons:magnifying-glass',
-    color: 'green',
-    capability: 'search' as CapabilityKey,
+    title: 'Search Mode',
   },
 }));
 
 const scannerInstructions = computed(() => [
   {
-    title: 'Select Session',
     description: 'Choose the active session for scanning.',
+    title: 'Select Session',
   },
   {
-    title: 'Choose Input Mode',
     description: 'Use camera scanner or manual entry.',
+    title: 'Choose Input Mode',
   },
   {
-    title: 'Process & Review',
     description: 'View results and take actions as needed.',
+    title: 'Process & Review',
   },
 ]);
 
 // Available scanner modes for the dropdown
 const availableModes = computed(() => {
-  if (!scannerSettings.value?.capabilities) return [];
+  if (!scannerSettings.value?.capabilities)
+    return [];
 
   return Object.entries(modeConfig.value)
-    .filter(([key, config]) => {
+    .filter(([_key, config]) => {
       // Use the capability mapping from modeConfig
       const requiredCapability = config.capability;
       return scannerSettings.value?.capabilities?.[requiredCapability] ?? false;
     })
     .map(([key, config]) => ({
-      value: key,
-      label: config.title,
+      color: config.color,
       description: config.description,
       icon: config.icon,
-      color: config.color,
+      label: config.title,
+      value: key,
     }));
 });
 
@@ -159,7 +156,8 @@ const loadScannerSettings = async () => {
 
     if (response.data && response.data.success && response.data.data) {
       scannerData = response.data.data;
-    } else if (response.data && response.data.event) {
+    }
+    else if (response.data && response.data.event) {
       scannerData = response.data;
     }
 
@@ -167,55 +165,67 @@ const loadScannerSettings = async () => {
       scannerSettings.value = scannerData;
 
       if (scannerSettings.value?.datetimes) {
-        const activeDateTime = scannerSettings.value.datetimes.find((dt) => dt.is_active);
+        const activeDateTime = scannerSettings.value.datetimes.find(dt => dt.is_active);
         if (activeDateTime) {
           selectedDatetime.value = activeDateTime.id;
-        } else if (scannerSettings.value.datetimes.length > 0) {
+        }
+        else if (scannerSettings.value.datetimes.length > 0) {
           selectedDatetime.value = scannerSettings.value.datetimes[0].id;
         }
 
         // Set supported formats
         supportedFormats.value = scannerSettings.value.supported_formats || [];
       }
-    } else {
+    }
+    else {
       throw new Error('Invalid response format from scanner API');
     }
-  } catch (error: any) {
+  }
+  catch (error: unknown) {
     console.error('Failed to load scanner settings:', error);
+    const apiError = error as ApiError;
 
     console.error('Error details:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
+      message: apiError.message,
+      response: apiError.response?.data,
+      status: apiError.response?.status,
+      statusText: apiError.response?.statusText,
     });
 
     let errorMessage = 'Failed to load scanner settings';
 
-    if (error.response?.status === 401) {
-      errorMessage = 'Authentication failed. Please log in again.';
-    } else if (error.response?.status === 403) {
-      errorMessage = 'You do not have permission to access the scanner.';
-    } else if (error.response?.status === 404) {
-      errorMessage = 'Scanner endpoint not found. Please check if the event exists.';
-    } else if (error.response?.status >= 500) {
-      errorMessage = 'Server error. Please try again later.';
-    } else if (error.message) {
-      errorMessage = error.message;
+    if (apiError.response && apiError.response.status) {
+      if (apiError.response.status === 401) {
+        errorMessage = 'Authentication failed. Please log in again.';
+      }
+      else if (apiError.response.status === 403) {
+        errorMessage = 'You do not have permission to access the scanner.';
+      }
+      else if (apiError.response.status === 404) {
+        errorMessage = 'Scanner endpoint not found. Please check if the event exists.';
+      }
+      else if (apiError.response.status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
+      }
+    }
+    else if (apiError.message) {
+      errorMessage = apiError.message;
     }
 
     toast({
-      title: 'Scanner Error',
       description: errorMessage,
+      title: 'Scanner Error',
       variant: 'destructive',
     });
-  } finally {
+  }
+  finally {
     isLoading.value = false;
   }
 };
 
 const performLookup = async (code: string) => {
-  if (!selectedDatetime.value) return;
+  if (!selectedDatetime.value)
+    return;
 
   try {
     const response = await $galantisApi.post(`/event/${eventId.value}/scanner/lookup`, {
@@ -227,66 +237,72 @@ const performLookup = async (code: string) => {
       lookupResult.value = response.data.registration;
 
       const scanEntry: ScanHistoryItem = {
-        id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        code,
-        timestamp: Date.now(),
-        status: 'lookup',
-        message: 'Registration found',
         attendeeName: response.data.registration?.attendee?.full_name,
+        code,
+        id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        message: 'Registration found',
         registrationData: response.data.registration,
+        status: 'lookup',
+        timestamp: Date.now(),
       };
 
       scanHistory.value.unshift(scanEntry);
-    } else {
+    }
+    else {
       throw new Error(response.data.message || 'Registration not found');
     }
-  } catch (error: any) {
+  }
+  catch (error: unknown) {
+    const apiError = error as ApiError;
     handleScanError(
-      { rawValue: code, format: 'manual', timestamp: Date.now() },
-      error.response?.data?.message || 'Lookup failed'
+      { format: 'manual', rawValue: code, timestamp: Date.now() },
+      apiError.response?.data?.message || 'Lookup failed',
     );
   }
 };
 
 const performCheckin = async (code: string, action = 'checkin') => {
-  if (!selectedDatetime.value) return;
+  if (!selectedDatetime.value)
+    return;
 
   try {
     const response = await $galantisApi.post(`/event/${eventId.value}/scanner/checkin`, {
+      action,
       barcode: code,
-      datetime_id: selectedDatetime.value,
-      action: action,
       check_approved: true,
+      datetime_id: selectedDatetime.value,
     });
 
     if (response.data.success) {
       const scanEntry: ScanHistoryItem = {
-        id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        code,
-        timestamp: Date.now(),
-        status: 'success',
-        message: `${action} successful`,
-        attendeeName: response.data.registration?.attendee?.full_name,
         action: response.data.action_taken,
+        attendeeName: response.data.registration?.attendee?.full_name,
+        code,
+        id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        message: `${action} successful`,
         registrationData: response.data.registration,
+        status: 'success',
+        timestamp: Date.now(),
       };
 
       scanHistory.value.unshift(scanEntry);
 
       toast({
-        title: `${action} Successful ✅`,
         description: `${response.data.registration?.attendee?.full_name || 'Attendee'} ${action} completed`,
+        title: `${action} Successful ✅`,
       });
 
-      playSuccessSound();
       return response.data;
-    } else {
+    }
+    else {
       throw new Error(response.data.message || `${action} failed`);
     }
-  } catch (error: any) {
+  }
+  catch (error: unknown) {
+    const apiError = error as ApiError;
     handleScanError(
-      { rawValue: code, format: 'manual', timestamp: Date.now() },
-      error.response?.data?.message || `${action} failed`
+      { format: 'manual', rawValue: code, timestamp: Date.now() },
+      apiError.response?.data?.message || `${action} failed`,
     );
   }
 };
@@ -318,7 +334,8 @@ const getActionButtonLabel = () => {
 };
 
 const handleUnifiedAction = async () => {
-  if (!unifiedInput.value.trim() || !selectedDatetime.value) return;
+  if (!unifiedInput.value.trim() || !selectedDatetime.value)
+    return;
 
   isProcessing.value = true;
 
@@ -336,7 +353,8 @@ const handleUnifiedAction = async () => {
         unifiedInput.value = ''; // Clear after checkin
         break;
     }
-  } finally {
+  }
+  finally {
     isProcessing.value = false;
   }
 };
@@ -356,25 +374,29 @@ const debouncedSearch = useDebounceFn(async (searchTerm: string) => {
 
   try {
     const response = await $galantisApi.post(`/event/${eventId.value}/scanner/search`, {
-      keyword: searchTerm,
       datetime_id: selectedDatetime.value,
+      keyword: searchTerm,
       limit: 20,
     });
 
     if (response.data.success) {
       searchResults.value = response.data.results;
-    } else {
+    }
+    else {
       searchResults.value = [];
     }
-  } catch (error: any) {
-    console.error('Search error:', error);
+  }
+  catch (error: unknown) {
     searchResults.value = [];
+
+    const apiError = error as ApiError;
     toast({
+      description: apiError.response?.data?.message || 'Search failed',
       title: 'Search Error',
-      description: error.response?.data?.message || 'Search failed',
       variant: 'destructive',
     });
-  } finally {
+  }
+  finally {
     isSearching.value = false;
   }
 }, 300); // 300ms debounce delay
@@ -383,10 +405,11 @@ const performSearch = async () => {
   debouncedSearch(unifiedInput.value);
 };
 
-const handleScanResult = async (result: { rawValue: string; format: string; timestamp: number }) => {
-  if (isProcessing.value || !selectedDatetime.value) return;
+const handleScanResult = async (result: { rawValue: string, format: string, timestamp: number }) => {
+  if (isProcessing.value || !selectedDatetime.value)
+    return;
 
-  console.log('🎯 Barcode detected:', result);
+  console.warn('🎯 Barcode detected:', result);
 
   isProcessing.value = true;
 
@@ -399,16 +422,16 @@ const handleScanResult = async (result: { rawValue: string; format: string; time
 
     if (response.data.success) {
       currentScanResult.value = response.data.registration;
-      
+
       // Add to scan history
       const scanEntry: ScanHistoryItem = {
-        id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        code: result.rawValue,
-        timestamp: Date.now(),
-        status: 'lookup',
-        message: 'Registration found',
         attendeeName: response.data.registration?.attendee?.full_name,
+        code: result.rawValue,
+        id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        message: 'Registration found',
         registrationData: response.data.registration,
+        status: 'lookup',
+        timestamp: Date.now(),
       };
       scanHistory.value.unshift(scanEntry);
 
@@ -419,26 +442,30 @@ const handleScanResult = async (result: { rawValue: string; format: string; time
       if (scannerMode.value === 'continuous' && response.data.registration.can_checkin) {
         await handleRegistrationAction(response.data.registration, 'checkin');
       }
-    } else {
+    }
+    else {
       throw new Error(response.data.message || 'Registration not found');
     }
-  } catch (error: any) {
+  }
+  catch (error: unknown) {
+    const apiError = error as ApiError;
     handleScanError(
-      { rawValue: result.rawValue, format: result.format, timestamp: result.timestamp },
-      error.response?.data?.message || 'Lookup failed'
+      { format: result.format, rawValue: result.rawValue, timestamp: result.timestamp },
+      apiError.response?.data?.message || 'Lookup failed',
     );
-  } finally {
+  }
+  finally {
     isProcessing.value = false;
   }
 };
 
-const handleScanError = (result: { rawValue: string; format: string; timestamp: number }, message: string) => {
+const handleScanError = (result: { rawValue: string, format: string, timestamp: number }, message: string) => {
   const scanEntry: ScanHistoryItem = {
-    id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     code: result.rawValue,
-    timestamp: result.timestamp,
-    status: 'error',
+    id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     message,
+    status: 'error',
+    timestamp: result.timestamp,
   };
 
   scanHistory.value.unshift(scanEntry);
@@ -447,18 +474,16 @@ const handleScanError = (result: { rawValue: string; format: string; timestamp: 
   const isPaymentError = message.includes('Payment') || message.includes('payment');
 
   toast({
-    title: isPaymentError ? 'Payment Required ⚠️' : 'Scan Error ⚠️',
     description: message,
+    title: isPaymentError ? 'Payment Required ⚠️' : 'Scan Error ⚠️',
     variant: 'destructive',
   });
-
-  playErrorSound();
 };
 
 const handleScannerError = (error: string) => {
   toast({
-    title: 'Scanner Error',
     description: error,
+    title: 'Scanner Error',
     variant: 'destructive',
   });
 };
@@ -466,8 +491,8 @@ const handleScannerError = (error: string) => {
 const toggleScanner = () => {
   if (!canScan.value) {
     toast({
-      title: 'Cannot Start Scanner',
       description: 'Please select a datetime session first',
+      title: 'Cannot Start Scanner',
       variant: 'destructive',
     });
     return;
@@ -479,8 +504,8 @@ const toggleScanner = () => {
 const confirmClearHistory = () => {
   if (scanHistory.value.length === 0) {
     toast({
-      title: 'Nothing to Clear',
       description: 'Scan history is already empty',
+      title: 'Nothing to Clear',
     });
     return;
   }
@@ -492,29 +517,30 @@ const clearHistory = () => {
   scanHistory.value = [];
   showClearConfirmDialog.value = false;
   toast({
-    title: 'History Cleared',
     description: 'Scan history has been cleared',
+    title: 'History Cleared',
   });
 };
 
 const exportHistory = () => {
-  if (scanHistory.value.length === 0) return;
+  if (scanHistory.value.length === 0)
+    return;
 
-  const data = scanHistory.value.map((scan) => ({
-    timestamp: formatTimestamp(scan.timestamp),
-    code: scan.code,
-    status: scan.status,
-    message: scan.message || '',
-    attendee: scan.attendeeName || '',
+  const data = scanHistory.value.map(scan => ({
     action: scan.action || '',
+    attendee: scan.attendeeName || '',
+    code: scan.code,
+    message: scan.message || '',
+    status: scan.status,
+    timestamp: formatTimestamp(scan.timestamp),
   }));
 
   const csv = [
     'Timestamp,Code,Status,Message,Attendee,Action',
-    ...data.map((row) =>
+    ...data.map(row =>
       Object.values(row)
-        .map((val) => `"${val}"`)
-        .join(',')
+        .map(val => `"${val}"`)
+        .join(','),
     ),
   ].join('\n');
 
@@ -531,22 +557,6 @@ const formatTimestamp = (timestamp: number) => {
   return new Date(timestamp).toLocaleString();
 };
 
-const playSuccessSound = () => {
-  try {
-    const audio = new Audio('/sounds/success.mp3');
-    audio.volume = 0.3;
-    audio.play().catch(() => {});
-  } catch {}
-};
-
-const playErrorSound = () => {
-  try {
-    const audio = new Audio('/sounds/error.mp3');
-    audio.volume = 0.3;
-    audio.play().catch(() => {});
-  } catch {}
-};
-
 const handleRegistrationAction = async (registration: RegistrationData, action: 'checkin' | 'checkout') => {
   try {
     const result = await performCheckin(registration.code, action);
@@ -560,7 +570,8 @@ const handleRegistrationAction = async (registration: RegistrationData, action: 
     showScanResult.value = false;
 
     // Show success toast (already handled in performCheckin)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Registration action failed:', error);
   }
 };
@@ -571,10 +582,13 @@ const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       toast({
-        title: 'Copied! 📋',
         description: `Registration code "${text}" copied to clipboard`,
+        title: 'Copied! 📋',
       });
-    } catch (err) {
+    }
+    catch (error: unknown) {
+      console.error('Failed to copy to clipboard:', error);
+
       // Final fallback - create a temporary input element
       const textArea = document.createElement('textarea');
       textArea.value = text;
@@ -584,8 +598,8 @@ const copyToClipboard = async (text: string) => {
       document.body.removeChild(textArea);
 
       toast({
-        title: 'Copied! 📋',
         description: `Registration code "${text}" copied to clipboard`,
+        title: 'Copied! 📋',
       });
     }
     return;
@@ -594,14 +608,15 @@ const copyToClipboard = async (text: string) => {
   try {
     await copy(text);
     toast({
-      title: 'Copied! 📋',
       description: `Registration code "${text}" copied to clipboard`,
+      title: 'Copied! 📋',
     });
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to copy to clipboard:', error);
     toast({
-      title: 'Copy Failed',
       description: 'Failed to copy registration code to clipboard',
+      title: 'Copy Failed',
       variant: 'destructive',
     });
   }
@@ -624,59 +639,37 @@ const displayFormat = (format: string) => {
   }
 };
 
-const handleInputChange = (value: string) => {
-  unifiedInput.value = value;
-};
-
 const enhancedFormats = computed((): SupportedBarcodeFormat[] => {
   // Default Event Espresso formats
   const eventEspressoFormats: SupportedBarcodeFormat[] = ['qr_code', 'code_128', 'code_39', 'ean_13'];
-  
-  // Use API formats if available, otherwise fall back to defaults
-  const apiFormats = supportedFormats.value?.length > 0 
-    ? supportedFormats.value.filter((format): format is SupportedBarcodeFormat => 
-        ['qr_code', 'code_128', 'code_39', 'ean_13', 'ean_8', 'code_93', 'upc_a', 'upc_e', 'itf', 'pdf417', 'data_matrix', 'aztec', 'codabar', 'databar', 'databar_expanded'].includes(format as SupportedBarcodeFormat)
-      )
-    : eventEspressoFormats;
 
-  console.log('📋 Using formats for Event Espresso:', apiFormats);
+  // Use API formats if available, otherwise fall back to defaults
+  const apiFormats
+    = supportedFormats.value?.length > 0
+      ? supportedFormats.value.filter((format): format is SupportedBarcodeFormat =>
+          [
+            'aztec',
+            'codabar',
+            'code_39',
+            'code_93',
+            'code_128',
+            'data_matrix',
+            'databar',
+            'databar_expanded',
+            'ean_8',
+            'ean_13',
+            'itf',
+            'pdf417',
+            'qr_code',
+            'upc_a',
+            'upc_e',
+          ].includes(format as SupportedBarcodeFormat),
+        )
+      : eventEspressoFormats;
+
+  console.warn('📋 Using formats for Event Espresso:', apiFormats);
   return apiFormats;
 });
-
-const handleEnhancedScannerError = (error: string) => {
-  lastError.value = error;
-  scannerStatus.value = 'error';
-  console.error('❌ Scanner error:', error);
-
-  // More specific error handling
-  if (error.includes('permission')) {
-    toast({
-      title: 'Camera Permission Required',
-      description: 'Please allow camera access to use the scanner. Check your browser settings.',
-      variant: 'destructive',
-    });
-  } else if (error.includes('https')) {
-    toast({
-      title: 'HTTPS Required',
-      description: 'Camera access requires HTTPS connection for security reasons.',
-      variant: 'destructive',
-    });
-  } else {
-    handleScannerError(error);
-  }
-};
-
-// Enhanced scanner event handlers
-const handleScannerStarted = () => {
-  scannerStatus.value = 'active';
-  lastError.value = '';
-  console.log('✅ Scanner started successfully');
-};
-
-const handleScannerStopped = () => {
-  scannerStatus.value = 'inactive';
-  console.log('🛑 Scanner stopped');
-};
 
 // Handle continue scan
 const handleContinueScan = () => {
@@ -689,7 +682,7 @@ const handleSwitchToLookup = () => {
   showScanResult.value = false;
   scannerMode.value = 'lookup';
   isScannerOpen.value = false;
-  
+
   // Set the scanned value in the input
   if (currentScanResult.value) {
     unifiedInput.value = currentScanResult.value.code;
@@ -704,7 +697,7 @@ watch(
     if (scannerMode.value === 'search') {
       debouncedSearch(newValue);
     }
-  }
+  },
 );
 
 // Watch for scanner mode changes
@@ -716,11 +709,12 @@ watch(
       if (unifiedInput.value.trim()) {
         debouncedSearch(unifiedInput.value);
       }
-    } else {
+    }
+    else {
       // Clear search results when not in search mode
       searchResults.value = [];
     }
-  }
+  },
 );
 
 // Clear search results when datetime changes
@@ -730,7 +724,7 @@ watch(
     if (scannerMode.value === 'search' && unifiedInput.value.trim()) {
       debouncedSearch(unifiedInput.value);
     }
-  }
+  },
 );
 
 onMounted(() => {
@@ -758,10 +752,10 @@ onUnmounted(() => {
 });
 
 // Add navigation guard to warn about unsaved scan history
-onBeforeRouteLeave((to, from) => {
+onBeforeRouteLeave((_to, _from) => {
   if (scanHistory.value.length > 0) {
     const answer = window.confirm(
-      `You have ${scanHistory.value.length} scan history entries. Are you sure you want to leave this page? Your scan history will be lost.`
+      `You have ${scanHistory.value.length} scan history entries. Are you sure you want to leave this page? Your scan history will be lost.`,
     );
 
     if (!answer) {
@@ -772,22 +766,24 @@ onBeforeRouteLeave((to, from) => {
 });
 
 useHead({
-  title: 'Ticket Scanner',
   meta: [
     {
-      name: 'description',
       content: 'Advanced scanner for managing event registrations and check-ins.',
+      name: 'description',
     },
   ],
+  title: 'Ticket Scanner',
 });
 </script>
 
 <template>
   <div class="container mx-auto mb-20">
-    <div class="flex flex-col sm:flex-row justify-between items-start pt-10 gap-5">
+    <div class="flex flex-col items-start justify-between gap-5 pt-10 sm:flex-row">
       <header class="sm:grow">
-        <h1 class="h2">Ticket Scanner</h1>
-        <p class="text-muted-foreground mt-2 max-w-2xl">
+        <h1 class="h2">
+          Ticket Scanner
+        </h1>
+        <p class="mt-2 max-w-2xl text-muted-foreground">
           Use the scanner to check in attendees, search registrations, or look up details by scanning barcodes or
           entering codes.
         </p>
@@ -795,19 +791,19 @@ useHead({
     </div>
 
     <div v-if="isLoading" class="mt-8">
-      <div class="grid gap-4 grid-cols-12">
-        <Skeleton v-for="i in 3" :key="i" class="h-32 rounded-xl col-span-12 md:col-span-4" />
+      <div class="grid grid-cols-12 gap-4">
+        <Skeleton v-for="i in 3" :key="i" class="col-span-12 h-32 rounded-xl md:col-span-4" />
       </div>
     </div>
 
     <div v-else-if="scannerSettings" class="mt-8 space-y-6">
       <div class="grid gap-4">
-        <div class="w-full max-w-2xl sm:w-auto flex flex-col sm:flex-row gap-2 sm:items-center" v-if="scannerSettings">
-          <Label class="flex-shrink-0 sm:w-48">
+        <div v-if="scannerSettings" class="flex w-full max-w-2xl flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <Label class="shrink-0 sm:w-48">
             <span class="text-sm font-medium">Select Session</span>
           </Label>
           <Select v-model="selectedDatetime">
-            <SelectTrigger class="h-12 bg-card max-w-80 sm:max-w-none dark:bg-background">
+            <SelectTrigger class="h-12 max-w-80 bg-card dark:bg-background sm:max-w-none">
               <SelectValue placeholder="Select a session" />
             </SelectTrigger>
             <SelectContent align="end">
@@ -819,15 +815,15 @@ useHead({
           </Select>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-2">
-          <div class="max-w-md flex-shrink-0">
+        <div class="flex flex-col gap-2 sm:flex-row">
+          <div class="max-w-md shrink-0">
             <Select v-model="scannerMode" class="w-full">
-              <SelectTrigger class="h-12 sm:w-60 bg-card dark:bg-background">
+              <SelectTrigger class="h-12 bg-card dark:bg-background sm:w-60">
                 <SelectValue placeholder="Select scanner mode">
                   <div class="flex items-center gap-2 font-medium">
                     <Icon
                       :icon="modeConfig[scannerMode].icon"
-                      class="w-5 h-5 text-muted-foreground"
+                      class="size-5 text-muted-foreground"
                       :style="{ color: modeConfig[scannerMode].color }"
                     />
                     <span>{{ modeConfig[scannerMode].title }}</span>
@@ -837,10 +833,10 @@ useHead({
               <SelectContent>
                 <SelectItem v-for="mode in availableModes" :key="mode.value" :value="mode.value" class="px-4 py-3">
                   <div class="flex items-center gap-2">
-                    <Icon :icon="mode.icon" class="w-5 h-5" :style="{ color: mode.color }" />
+                    <Icon :icon="mode.icon" class="size-5" :style="{ color: mode.color }" />
                     <span class="font-medium">{{ mode.label }}</span>
                   </div>
-                  <div class="text-xs text-muted-foreground mt-1">
+                  <div class="mt-1 text-xs text-muted-foreground">
                     {{ mode.description }}
                   </div>
                 </SelectItem>
@@ -851,29 +847,29 @@ useHead({
           <Input
             v-model="unifiedInput"
             :placeholder="getInputPlaceholder()"
-            class="grow bg-card dark:bg-background h-12 text-base"
+            class="h-12 grow bg-card text-base dark:bg-background"
             @keyup.enter="handleUnifiedAction"
           />
 
           <Button
-            @click="handleUnifiedAction"
             :disabled="!unifiedInput.trim() || isProcessing || isSearching"
             class="h-12 flex-1 sm:flex-none"
+            @click="handleUnifiedAction"
           >
             <Icon
               v-if="isProcessing || (scannerMode === 'search' && isSearching)"
               icon="svg-spinners:ring-resize"
-              class="w-4 h-4 mr-2"
+              class="mr-2 size-4"
             />
             {{ getActionButtonLabel() }}
           </Button>
 
           <Button
-            @click="toggleScanner"
-            class="h-12 bg-amber-500 hover:bg-amber-600 flex-1 sm:flex-none"
+            class="h-12 flex-1 bg-amber-500 hover:bg-amber-600 sm:flex-none"
             :disabled="!canScan"
+            @click="toggleScanner"
           >
-            <Icon :icon="isScannerOpen ? 'heroicons:x-mark' : 'heroicons:camera'" class="w-5 h-5 mr-2" />
+            <Icon :icon="isScannerOpen ? 'heroicons:x-mark' : 'heroicons:camera'" class="mr-2 size-5" />
             {{ isScannerOpen ? 'Close Camera' : 'Use Camera' }}
           </Button>
         </div>
@@ -883,10 +879,10 @@ useHead({
         <Card>
           <CardHeader>
             <CardTitle class="flex items-center gap-2">
-              <Icon icon="heroicons:camera" class="w-5 h-5" />
+              <Icon icon="heroicons:camera" class="size-5" />
               Camera Scanner
               <Badge v-if="isProcessing" variant="secondary" class="ml-2">
-                <Icon icon="svg-spinners:ring-resize" class="w-4 h-4 mr-1" />
+                <Icon icon="svg-spinners:ring-resize" class="mr-1 size-4" />
                 Processing...
               </Badge>
             </CardTitle>
@@ -914,32 +910,34 @@ useHead({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div class="border rounded-lg p-4 space-y-3">
+          <div class="space-y-3 rounded-lg border p-4">
             <div class="flex flex-col items-center justify-between">
-              <h4 class="font-semibold">{{ lookupResult.attendee.full_name }}</h4>
+              <h4 class="font-semibold">
+                {{ lookupResult.attendee.full_name }}
+              </h4>
               <Badge :variant="lookupResult.can_checkin ? 'default' : 'secondary'">
                 {{ lookupResult.checkin_status_text }}
               </Badge>
             </div>
 
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
               <div>
                 <ClientOnly>
-                  <Qrcode :value="lookupResult.code" class="w-16 h-16 mr-4" />
+                  <Qrcode :value="lookupResult.code" class="mr-4 size-16" />
                 </ClientOnly>
               </div>
-              <div class="grid sm:grid-cols-2 gap-4 text-sm">
+              <div class="grid gap-4 text-sm sm:grid-cols-2">
                 <div>
                   <span class="text-muted-foreground">Code:</span>
                   <span class="ml-2 font-semibold">{{ lookupResult.code }}</span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    class="h-6 w-6 p-0 hover:bg-muted"
-                    @click="copyToClipboard(lookupResult.code)"
+                    class="size-6 p-0 hover:bg-muted"
                     :title="`Copy ${lookupResult.code}`"
+                    @click="copyToClipboard(lookupResult.code)"
                   >
-                    <Icon icon="heroicons:document-duplicate" class="w-3 h-3" />
+                    <Icon icon="heroicons:document-duplicate" class="size-3" />
                   </Button>
                 </div>
                 <div>
@@ -991,11 +989,11 @@ useHead({
                 Found {{ searchResults.length }} result{{ searchResults.length === 1 ? '' : 's' }}
               </div>
 
-              <div class="space-y-2 max-h-96 overflow-y-auto">
+              <div class="max-h-96 space-y-2 overflow-y-auto">
                 <div
                   v-for="result in searchResults"
                   :key="result.id"
-                  class="border rounded-lg p-3 hover:bg-muted/50 cursor-pointer transition-colors"
+                  class="cursor-pointer rounded-lg border p-3 transition-colors hover:bg-muted/50"
                   :class="{
                     'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20':
                       result.payment_validation && !result.payment_validation.can_checkin_payment,
@@ -1004,16 +1002,20 @@ useHead({
                 >
                   <div class="space-y-4 sm:flex sm:items-center sm:justify-between sm:space-y-0">
                     <div class="flex-1">
-                      <div class="font-medium">{{ result.attendee.full_name }}</div>
-                      <div class="text-sm text-muted-foreground">{{ result.code }} • {{ result.ticket.name }}</div>
-                      <div class="text-xs text-muted-foreground mt-1">
+                      <div class="font-medium">
+                        {{ result.attendee.full_name }}
+                      </div>
+                      <div class="text-sm text-muted-foreground">
+                        {{ result.code }} • {{ result.ticket.name }}
+                      </div>
+                      <div class="mt-1 text-xs text-muted-foreground">
                         {{ result.attendee.email }}
                       </div>
 
                       <!-- Payment Status Warning -->
                       <div
                         v-if="result.payment_validation && !result.payment_validation.can_checkin_payment"
-                        class="text-xs text-red-600 dark:text-red-400 mt-1 font-medium"
+                        class="mt-1 text-xs font-medium text-red-600 dark:text-red-400"
                       >
                         ⚠️ {{ result.payment_validation.payment_message }}
                       </div>
@@ -1045,9 +1047,9 @@ useHead({
             <!-- No Search Results -->
             <div
               v-else-if="scannerMode === 'search' && unifiedInput.trim() && searchResults.length === 0 && !isProcessing"
-              class="text-center text-muted-foreground py-4"
+              class="py-4 text-center text-muted-foreground"
             >
-              <Icon icon="heroicons:magnifying-glass" class="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <Icon icon="heroicons:magnifying-glass" class="mx-auto mb-2 size-8 opacity-50" />
               <p>No registrations found for "{{ unifiedInput }}"</p>
             </div>
           </div>
@@ -1064,29 +1066,29 @@ useHead({
             </div>
             <div class="flex gap-2">
               <Button variant="outline" size="sm" @click="exportHistory">
-                <Icon icon="heroicons:arrow-down-tray" class="w-4 h-4 mr-1" />
+                <Icon icon="heroicons:arrow-down-tray" class="mr-1 size-4" />
                 Export
               </Button>
               <Button variant="outline" size="sm" @click="confirmClearHistory">
-                <Icon icon="heroicons:trash" class="w-4 h-4 mr-1" />
+                <Icon icon="heroicons:trash" class="mr-1 size-4" />
                 Clear
               </Button>
             </div>
           </CardHeader>
           <CardContent>
-            <div class="space-y-3 max-h-96 overflow-y-auto">
+            <div class="max-h-96 space-y-3 overflow-y-auto">
               <div
                 v-for="scan in recentScans"
                 :key="scan.id"
-                class="flex items-start justify-between p-3 rounded-lg border"
+                class="flex items-start justify-between rounded-lg border p-3"
                 :class="{
-                  'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800': scan.status === 'success',
-                  'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800': scan.status === 'lookup',
-                  'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800': scan.status === 'error',
+                  'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20': scan.status === 'success',
+                  'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20': scan.status === 'lookup',
+                  'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20': scan.status === 'error',
                 }"
               >
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2 mb-1">
+                <div class="min-w-0 flex-1">
+                  <div class="mb-1 flex items-center gap-2">
                     <Icon
                       :icon="
                         scan.status === 'success'
@@ -1100,9 +1102,9 @@ useHead({
                         'text-blue-500': scan.status === 'lookup',
                         'text-red-500': scan.status === 'error',
                       }"
-                      class="w-4 h-4 flex-shrink-0"
+                      class="size-4 shrink-0"
                     />
-                    <span class="text-sm font-medium truncate">{{ scan.code }}</span>
+                    <span class="truncate text-sm font-medium">{{ scan.code }}</span>
                     <Badge v-if="scan.action" variant="outline" class="text-xs">
                       {{ scan.action }}
                     </Badge>
@@ -1110,12 +1112,12 @@ useHead({
                   <p class="text-xs text-muted-foreground">
                     {{ formatTimestamp(scan.timestamp) }}
                   </p>
-                  <p v-if="scan.attendeeName" class="text-sm font-medium mt-1">
+                  <p v-if="scan.attendeeName" class="mt-1 text-sm font-medium">
                     {{ scan.attendeeName }}
                   </p>
                   <p
                     v-if="scan.message"
-                    class="text-xs mt-1"
+                    class="mt-1 text-xs"
                     :class="{
                       'text-green-600 dark:text-green-400': scan.status === 'success',
                       'text-blue-600 dark:text-blue-400': scan.status === 'lookup',
@@ -1133,7 +1135,7 @@ useHead({
                     variant="outline"
                     @click="handleRegistrationAction(scan.registrationData, 'checkin')"
                   >
-                    <Icon icon="heroicons:arrow-right-end-on-rectangle" class="w-3 h-3" />
+                    <Icon icon="heroicons:arrow-right-end-on-rectangle" class="size-3" />
                   </Button>
                   <Button
                     v-if="scan.registrationData.can_checkout"
@@ -1141,7 +1143,7 @@ useHead({
                     variant="outline"
                     @click="handleRegistrationAction(scan.registrationData, 'checkout')"
                   >
-                    <Icon icon="heroicons:arrow-left-start-on-rectangle" class="w-3 h-3" />
+                    <Icon icon="heroicons:arrow-left-start-on-rectangle" class="size-3" />
                   </Button>
                 </div>
               </div>
@@ -1154,29 +1156,43 @@ useHead({
         <Card>
           <CardHeader>
             <CardTitle class="flex items-center gap-2">
-              <Icon icon="heroicons:chart-bar" class="w-5 h-5 text-muted-foreground" />
+              <Icon icon="heroicons:chart-bar" class="size-5 text-muted-foreground" />
               Session Stats
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-4 gap-4">
               <div class="text-center">
-                <div class="text-2xl font-bold text-green-500">{{ Number(scannerSettings.stats.total_checkins) }}</div>
-                <div class="text-sm text-muted-foreground">Check-ins</div>
+                <div class="text-2xl font-bold text-green-500">
+                  {{ Number(scannerSettings.stats.total_checkins) }}
+                </div>
+                <div class="text-sm text-muted-foreground">
+                  Check-ins
+                </div>
               </div>
               <div class="text-center">
                 <div class="text-2xl font-bold text-blue-500">
                   {{ Number(scannerSettings.stats.currently_checked_in) }}
                 </div>
-                <div class="text-sm text-muted-foreground">Currently Here</div>
+                <div class="text-sm text-muted-foreground">
+                  Currently Here
+                </div>
               </div>
               <div class="text-center">
-                <div class="text-2xl font-bold text-purple-500">{{ successfulScans }}</div>
-                <div class="text-sm text-muted-foreground">Successful</div>
+                <div class="text-2xl font-bold text-purple-500">
+                  {{ successfulScans }}
+                </div>
+                <div class="text-sm text-muted-foreground">
+                  Successful
+                </div>
               </div>
               <div class="text-center">
-                <div class="text-2xl font-bold text-red-500">{{ failedScans }}</div>
-                <div class="text-sm text-muted-foreground">Failed</div>
+                <div class="text-2xl font-bold text-red-500">
+                  {{ failedScans }}
+                </div>
+                <div class="text-sm text-muted-foreground">
+                  Failed
+                </div>
               </div>
             </div>
           </CardContent>
@@ -1193,32 +1209,38 @@ useHead({
             <div class="grid gap-4 md:grid-cols-2">
               <div class="space-y-4">
                 <div v-for="(step, index) in scannerInstructions" :key="index" class="flex items-start gap-3">
-                  <div class="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                  <div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
                     <span class="text-sm font-semibold text-primary">{{ index + 1 }}</span>
                   </div>
                   <div>
-                    <h4 class="font-semibold">{{ step.title }}</h4>
-                    <p class="text-sm text-muted-foreground">{{ step.description }}</p>
+                    <h4 class="font-semibold">
+                      {{ step.title }}
+                    </h4>
+                    <p class="text-sm text-muted-foreground">
+                      {{ step.description }}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div class="space-y-3">
-                <h4 class="font-semibold">Scanner Modes</h4>
+                <h4 class="font-semibold">
+                  Scanner Modes
+                </h4>
                 <div class="space-y-2 text-sm">
                   <div v-for="mode in availableModes" :key="mode.value" class="flex items-center gap-2">
-                    <Icon :icon="mode.icon" class="w-4 h-4" :style="{ color: mode.color }" />
-                    <span
-                      ><strong>{{ mode.label }}:</strong> {{ mode.description }}</span
-                    >
+                    <Icon :icon="mode.icon" class="size-4" :style="{ color: mode.color }" />
+                    <span><strong>{{ mode.label }}:</strong> {{ mode.description }}</span>
                   </div>
                 </div>
 
                 <div class="mt-4">
-                  <h4 class="font-semibold mb-2">Supported Formats</h4>
+                  <h4 class="mb-2 font-semibold">
+                    Supported Formats
+                  </h4>
                   <div class="grid grid-cols-2 gap-1 text-xs">
                     <div v-for="format in supportedFormats" :key="format" class="flex items-center gap-2">
-                      <Icon icon="heroicons:bars-3" class="w-4 h-4" />
+                      <Icon icon="heroicons:bars-3" class="size-4" />
                       {{ displayFormat(format) }}
                     </div>
                   </div>
@@ -1234,13 +1256,15 @@ useHead({
     <div v-else class="mt-8">
       <Card>
         <CardContent class="p-8 text-center">
-          <Icon icon="heroicons:exclamation-triangle" class="w-12 h-12 mx-auto text-yellow-500 mb-4" />
-          <h3 class="text-lg font-semibold mb-2">Unable to Load Scanner</h3>
-          <p class="text-muted-foreground mb-4">
+          <Icon icon="heroicons:exclamation-triangle" class="mx-auto mb-4 size-12 text-yellow-500" />
+          <h3 class="mb-2 text-lg font-semibold">
+            Unable to Load Scanner
+          </h3>
+          <p class="mb-4 text-muted-foreground">
             Failed to load scanner settings. Please check your permissions and try again.
           </p>
           <Button @click="loadScannerSettings">
-            <Icon icon="heroicons:arrow-path" class="w-4 h-4 mr-2" />
+            <Icon icon="heroicons:arrow-path" class="mr-2 size-4" />
             Retry
           </Button>
         </CardContent>
@@ -1253,7 +1277,7 @@ useHead({
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
-          <Icon icon="heroicons:exclamation-triangle" class="w-5 h-5 text-amber-500" />
+          <Icon icon="heroicons:exclamation-triangle" class="size-5 text-amber-500" />
           Clear Scan History
         </DialogTitle>
         <DialogDescription>
@@ -1261,27 +1285,35 @@ useHead({
         </DialogDescription>
       </DialogHeader>
 
-      <div class="bg-muted/50 rounded-lg p-3 my-4">
+      <div class="my-4 rounded-lg bg-muted/50 p-3">
         <div class="text-sm text-muted-foreground">
-          <div class="flex justify-between items-center mb-2">
+          <div class="mb-2 flex items-center justify-between">
             <span>Total entries:</span>
-            <Badge variant="outline">{{ scanHistory.length }}</Badge>
+            <Badge variant="outline">
+              {{ scanHistory.length }}
+            </Badge>
           </div>
-          <div class="flex justify-between items-center mb-2">
+          <div class="mb-2 flex items-center justify-between">
             <span>Successful scans:</span>
-            <Badge variant="outline" class="bg-green-50 text-green-700">{{ successfulScans }}</Badge>
+            <Badge variant="outline" class="bg-green-50 text-green-700">
+              {{ successfulScans }}
+            </Badge>
           </div>
-          <div class="flex justify-between items-center">
+          <div class="flex items-center justify-between">
             <span>Failed scans:</span>
-            <Badge variant="outline" class="bg-red-50 text-red-700">{{ failedScans }}</Badge>
+            <Badge variant="outline" class="bg-red-50 text-red-700">
+              {{ failedScans }}
+            </Badge>
           </div>
         </div>
       </div>
 
       <DialogFooter class="gap-2">
-        <Button variant="outline" @click="showClearConfirmDialog = false"> Cancel </Button>
+        <Button variant="outline" @click="showClearConfirmDialog = false">
+          Cancel
+        </Button>
         <Button variant="destructive" @click="clearHistory">
-          <Icon icon="heroicons:trash" class="w-4 h-4 mr-2" />
+          <Icon icon="heroicons:trash" class="mr-2 size-4" />
           Clear History
         </Button>
       </DialogFooter>
