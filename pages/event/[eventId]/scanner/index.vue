@@ -924,7 +924,9 @@ useHead({
 
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div>
-                <Qrcode :value="lookupResult.code" class="w-16 h-16 mr-4" />
+                <ClientOnly>
+                  <Qrcode :value="lookupResult.code" class="w-16 h-16 mr-4" />
+                </ClientOnly>
               </div>
               <div class="grid sm:grid-cols-2 gap-4 text-sm">
                 <div>

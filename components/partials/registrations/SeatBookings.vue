@@ -87,7 +87,7 @@ function isAisle(col: number): boolean {
   return seatData.value?.layout.aisles.some((aisle) => aisle.afterCol === col) ?? false;
 }
 
-function handleSeatClick(seat: Seat | null) {
+function handleSeatClick(seat: SeatItem | null) {
   if (!seat) return;
 
   if (selectedSeat.value === seat.code) {

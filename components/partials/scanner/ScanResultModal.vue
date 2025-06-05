@@ -97,7 +97,9 @@ const handleAction = (action: 'checkin' | 'checkout') => {
 
           <div class="flex flex-col space-y-3">
             <div>
-              <Qrcode :value="registration.code" class="w-20 h-20 mr-4" />
+              <ClientOnly>
+                <Qrcode :value="registration.code" class="w-20 h-20 mr-4" />
+              </ClientOnly>
             </div>
             <div class="grid grid-cols-1 gap-4 text-sm">
               <div>

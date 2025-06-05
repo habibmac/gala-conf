@@ -421,7 +421,7 @@ function onSubmit(formData: FormData) {
                         >
                           <div
                             v-for="(field, index) in eventDatetimesRef"
-                            :key="field.key"
+                            :key="index"
                             class="relative flex items-start gap-2 flex-col sm:flex-row sm:flex-wrap border-l pl-3 ml-5 py-2"
                           >
                             <Icon
