@@ -8,7 +8,7 @@ import PayMethodLogo from '@/components/partials/registrations/PayMethodLogo.vue
 import { getStatusInfo } from '@/utils/status-map';
 
 const props = defineProps({
-  transactionPanelOpen: Boolean,
+  regDetailsOpen: Boolean,
   evtId: {
     type: String,
     default: '',
@@ -19,7 +19,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['close-transactionpanel']);
+const emit = defineEmits(['close-regDetails']);
 
 const loading = ref(false);
 const panelContent = ref<HTMLElement | null>(null);
@@ -29,7 +29,7 @@ const closeBtn = ref<HTMLElement | null>(null);
 const clickHandler = (event: MouseEvent) => {
   const target = event.target as Node; // Type assertion for the target
   if (
-    !props.transactionPanelOpen ||
+    !props.regDetailsOpen ||
     (panelContent.value && panelContent.value.contains(target as Node)) ||
     (closeBtn.value && closeBtn.value.contains(target as Node))
   )
@@ -39,7 +39,7 @@ const clickHandler = (event: MouseEvent) => {
 
 // close if the esc key is pressed
 const keyHandler = (event: KeyboardEvent) => {
-  if (!props.transactionPanelOpen || event.key !== 'Escape') return;
+  if (!props.regDetailsOpen || event.key !== 'Escape') return;
   closePanel();
 };
 
@@ -89,7 +89,7 @@ const closePanel = () => {
   queryClient.cancelQueries();
   // Add a slight delay to allow the animation to complete
   setTimeout(() => {
-    emit('close-transactionpanel');
+    emit('close-regDetails');
   }, 200); // Match this with your leave transition duration
 };
 
@@ -113,14 +113,14 @@ onUnmounted(async () => {
     leave-from-class="translate-x-0 "
     leave-to-class="translate-x-[20%] opacity-0"
   >
-    <div v-show="transactionPanelOpen" ref="panelContent" class="absolute inset-0 z-30 sm:block sm:left-auto">
+    <div v-show="regDetailsOpen" ref="panelContent" class="absolute inset-0 z-30 sm:block sm:left-auto">
       <div
         class="no-scrollbar sticky top-16 h-[calc(100dvh-64px)] w-full shrink-0 overflow-y-auto overflow-x-hidden border-l border-border bg-muted sm:w-[390px]"
       >
         <button
           ref="closeBtn"
           class="group absolute right-0 top-0 mr-6 mt-6 p-2"
-          @click.stop="$emit('close-transactionpanel')"
+          @click.stop="$emit('close-regDetails')"
         >
           <Icon icon="iconamoon:close-thin" class="w-6 h-6" />
         </button>
@@ -177,9 +177,11 @@ onUnmounted(async () => {
                 class="space-y-3 rounded-b-xl bg-white p-5 pt-2.5 text-sm dark:bg-slate-800 dark:bg-gradient-to-b dark:from-slate-700 dark:to-slate-700/70"
               >
                 <div v-if="data.code" class="flex flex-col items-center justify-center space-y-2">
-                  <ClientOnly>
-                    <qr-code :value="data.reg_url_link" />
-                  </ClientOnly>
+                  <div class="w-40">
+                    <ClientOnly>
+                      <Qrcode :value="data.reg_url_link" />
+                    </ClientOnly>
+                  </div>
                   <span class="number font-semibold tabular-nums font-mono">{{ data.code }}</span>
                 </div>
                 <div class="flex justify-between space-x-1">

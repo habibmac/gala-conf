@@ -1,7 +1,5 @@
-import VueQrcode from '@chenfengyuan/vue-qrcode';
-import VueBarcode from '@chenfengyuan/vue-barcode';
+import { VueQrcodeReader } from 'vue-qrcode-reader';
 
 export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.component('qr-code', VueQrcode);
-  nuxtApp.vueApp.component('bar-code', VueBarcode);
+  nuxtApp.vueApp.component('bar-code', VueQrcodeReader);
 });

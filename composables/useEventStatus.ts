@@ -40,11 +40,17 @@ export function useEventStatus() {
     return formatTimeAgo(fromUnixTime(event.value.end));
   });
 
+  // Has seating?
+  const hasSeating = computed(() => {
+    return event.value?.has_seating && event.value.has_seating.length > 0;
+  });
+
   return {
     eventStatus,
     hasEventEnded,
     formattedDates,
     timeUntilStart,
     timeUntilEnd,
+    hasSeating,
   };
 }

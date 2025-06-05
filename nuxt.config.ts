@@ -21,6 +21,7 @@ export default defineNuxtConfig({
     '@vee-validate/nuxt',
     '@formkit/auto-animate/nuxt',
     '@nuxt/image',
+    'nuxt-qrcode',
   ],
   app: {
     head: {

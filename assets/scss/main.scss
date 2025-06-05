@@ -1,9 +1,9 @@
-@import 'additional-styles/forms.scss';
-@import 'additional-styles/vue-datepicker.scss';
-@import 'additional-styles/toast.scss';
-@import 'additional-styles/utility-patterns.scss';
-@import 'additional-styles/statuses.scss';
-@import 'additional-styles/filepond.scss';
+@use 'additional-styles/forms.scss';
+@use 'additional-styles/vue-datepicker.scss';
+@use 'additional-styles/toast.scss';
+@use 'additional-styles/utility-patterns.scss';
+@use 'additional-styles/statuses.scss';
+@use 'additional-styles/filepond.scss';
 
 html {
   color-scheme: light dark;

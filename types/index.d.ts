@@ -10,3 +10,4 @@ export * from './stats';
 export * from './billings';
 export * from './checkins';
 export * from './seat-bookings';
+export * from './scanner';

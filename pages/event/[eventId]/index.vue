@@ -20,7 +20,7 @@ definePageMeta({
   layout: 'dashboard-with-sidebar',
 });
 
-const { hasEventEnded } = useEventStatus();
+const { hasEventEnded, hasSeating } = useEventStatus();
 
 // Function to trigger confetti
 const triggerConfetti = () => {
@@ -52,7 +52,7 @@ onMounted(() => {
         <RegCards v-else />
         <CheckinStats :show-detailed-stats="false" :show-recent-checkins="true" />
 
-        <SeatBookings />
+        <SeatBookings v-if="hasSeating" />
       </ClientOnly>
     </div>
   </div>

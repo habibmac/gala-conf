@@ -22,7 +22,7 @@ import DropdownTableFilter from '~/components/DropdownColumnFilter.vue';
 import TableSearchForm from '@/components/TableSearchForm.vue';
 import TablePagination from '@/components/TablePagination.vue';
 import TableStatusTooltip from '@/components/TableStatusTooltip.vue';
-import TransactionPanel from '@/components/partials/registrations/TransactionPanel.vue';
+import RegDetails from '@/components/partials/registrations/RegDetails.vue';
 import TableResetBtn from '@/components/TableResetBtn.vue';
 import Datepicker from '@/components/Datepicker.vue';
 
@@ -673,10 +673,10 @@ watch(
     @update:current-page="handleNavigation"
   />
   <div v-else class="h-40" />
-  <TransactionPanel
-    :transaction-panel-open="selectedRegId !== ''"
+  <RegDetails
+    :reg-details-open="selectedRegId !== ''"
     :evt-id="eventId"
     :reg-id="selectedRegId ? selectedRegId : undefined"
-    @close-transactionpanel="handleCloseDetails"
+    @close-RegDetails="handleCloseDetails"
   />
 </template>

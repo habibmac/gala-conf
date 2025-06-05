@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const props = defineProps({
   currentPage: { type: Number, default: 1 },
@@ -14,8 +15,8 @@ const emits = defineEmits(['update:pageSize', 'update:currentPage']);
 
 const route = useRoute();
 
-const handlePageSizeChange = (event: Event) => {
-  emits('update:pageSize', Number((event.target as HTMLSelectElement).value));
+const handlePageSizeChange = (value: string) => {
+  emits('update:pageSize', Number(value));
 };
 
 const navigateToPage = (page: number) => {
@@ -54,9 +55,19 @@ const shouldShowPage = (page: number) => {
 <template>
   <div class="mb-20 mt-5 p-4 pt-0 sm:items-center sm:justify-between sm:p-6 sm:pt-0 grid grid-cols-2 sm:grid-cols-3">
     <div class="order-2 sm:order-1">
-      <select :value="pageSize" class="form-select" @change="handlePageSizeChange">
-        <option v-for="(size, index) in pageSizes" :key="index" :value="size">Show {{ size }}</option>
-      </select>
+      <Select 
+        :options="pageSizes.map(size => ({ label: `Show ${size}`, value: size }))"
+        @update:model-value="handlePageSizeChange"
+      >
+        <SelectTrigger class="form-select w-32">
+          <span class="text-sm">{{ `Show ${pageSize}` }}</span>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem v-for="(size, index) in pageSizes" :key="index" :value="String(size)">
+            {{ `Show ${size}` }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </div>
     <nav role="navigation" aria-label="Pagination" class="order-3 sm:order-2 col-span-2 sm:col-span-1">
       <ul class="flex justify-center items-center space-x-1">
