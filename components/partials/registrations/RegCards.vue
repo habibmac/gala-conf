@@ -24,12 +24,8 @@ const { data, isError, isLoading, isRefetching, refetch } = useQuery({
 </script>
 
 <template>
-  <div v-if="isLoading || isRefetching" class="grid grid-cols-12 gap-4">
-    <Skeleton
-      v-for="i in 4"
-      :key="i"
-      class="col-span-12 h-28 rounded-xl bg-muted-foreground/10 sm:col-span-6 md:col-span-3"
-    />
+  <div v-if="isLoading || isRefetching" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 ">
+    <Skeleton v-for="i in 4" :key="i" class="h-28 rounded-xl bg-muted-foreground/10" />
   </div>
   <div v-else-if="isError" class="py-16">
     <div class="flex h-32 items-center justify-center">
@@ -38,12 +34,17 @@ const { data, isError, isLoading, isRefetching, refetch } = useQuery({
   </div>
   <template v-else-if="data">
     <div v-if="data.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card v-for="item in data" :key="item.title" class="relative overflow-hidden">
+      <Card v-for="item in data" :key="item.title" class="relative h-28 overflow-hidden">
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle class="text-sm font-medium tracking-normal">
             {{ item.title }}
           </CardTitle>
-          <Button variant="ghost" size="icon" class="group absolute right-3 top-3" @click="refetch">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="group absolute right-3 top-3"
+            @click="refetch"
+          >
             <Icon
               icon="ri:refresh-line"
               class="size-3.5 text-slate-400 transition-transform group-hover:rotate-180 group-hover:text-slate-800 dark:group-hover:text-slate-100"

@@ -12,7 +12,7 @@ import {
 import { format, fromUnixTime } from 'date-fns';
 import { computed, ref } from 'vue';
 
-import type { Answer, ColumnConfig, CustomField, Reg, TicketGroup } from '@/types';
+import type { Answer, ColumnConfig, CustomField, RegItem, TicketGroup } from '@/types';
 
 import TablePagination from '@/components/TablePagination.vue';
 import { Badge } from '@/components/ui/badge';
@@ -134,19 +134,19 @@ const columnConfigs = computed<ColumnConfig[]>(() => {
 });
 
 // Define columns
-const columnHelper = createColumnHelper<Reg>();
+const columnHelper = createColumnHelper<RegItem>();
 const columns = computed(() => {
   return columnConfigs.value
     .filter(config => config.isVisible)
     .map((config) => {
       return columnHelper.accessor(
-        (row: Reg) => {
+        (row: RegItem) => {
           // Handle custom fields by checking if there's an accessor function
           if (config.accessor) {
             return config.accessor(row);
           }
           // Handle regular fields
-          return row[config.key as keyof Reg];
+          return row[config.key as keyof RegItem];
         },
         {
           cell: (cellProps) => {
@@ -257,7 +257,7 @@ const activeTab = computed({
 
 function getCustomFieldsColumns(fields: CustomField[]): ColumnConfig[] {
   return fields.map(field => ({
-    accessor: (row: Reg) => {
+    accessor: (row: RegItem) => {
       const answer = row.ans?.find((a: Answer) => a.qst === field.label);
       return answer?.ans || '';
     },
@@ -361,7 +361,7 @@ const tabIndicatorWidth = computed(() => {
   return `calc(100% / ${tabCount})`;
 });
 
-function formatExportData(data: Reg[]) {
+function formatExportData(data: RegItem[]) {
   return data.map((row) => {
     const formattedRow: { [key: string]: string | number } = {
       'Date': format(fromUnixTime(Number(row.date)), 'dd MMM yyyy HH:mm'),
@@ -563,7 +563,7 @@ watch(
     <div
       class="flex min-h-12 w-full flex-col items-center justify-between gap-2 bg-slate-50 px-4 py-2 dark:bg-slate-950 sm:flex-row sm:px-6 sm:py-2"
     >
-      <div class="">
+      <div class="w-full sm:w-auto">
         <TableSearchForm v-model="filters.search" placeholder="Search Registrant..." />
       </div>
 
