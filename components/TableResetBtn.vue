@@ -10,12 +10,15 @@ const handleResetFilters = () => {
 </script>
 
 <template>
-  <button
-    type="button"
-    class="flex h-10 items-center space-x-1 rounded-lg px-3 py-2 text-xs transition-colors hover:bg-white dark:hover:bg-slate-800 dark:hover:text-slate-200"
-    @click="handleResetFilters"
-  >
-    <span>Reset</span>
-    <Icon icon="iconamoon:close-thin" class="size-6 dark:text-slate-600" />
-  </button>
+  <div>
+    <Button
+      type="button"
+      variant="outline"
+      class="h-[42px] w-auto"
+      @click="handleResetFilters"
+    >
+      Reset
+      <Icon icon="iconamoon:close-thin" class="size-6 dark:text-slate-600" />
+    </Button>
+  </div>
 </template>

@@ -44,12 +44,14 @@ function updateValue(value: string) {
     updatedStatuses = filteredStatus.value
       .map(status => status.value)
       .filter(statusValue => statusValue !== value);
-  } else {
+  }
+  else {
     // Normal toggle behavior when in partial selection
     if (selectedStatuses.value.includes(value)) {
       // Removing a status
       updatedStatuses = selectedStatuses.value.filter(status => status !== value);
-    } else {
+    }
+    else {
       // Adding a status
       updatedStatuses = [...selectedStatuses.value, value];
 
@@ -82,7 +84,7 @@ const buttonLabel = computed(() => {
   if (selectedStatuses.value.length === 0) {
     return 'All Status';
   }
-  // When all individual statuses are explicitly selected = "All Status" 
+  // When all individual statuses are explicitly selected = "All Status"
   if (selectedStatuses.value.length === filteredStatus.value.length) {
     return 'All Status';
   }
@@ -111,7 +113,8 @@ const toggleAllSelection = () => {
     // User wants to select all -> set to empty array (which means "All Status")
     emits('update:modelValue', []);
     selectedStatuses.value = [];
-  } else {
+  }
+  else {
     // Currently showing "All Status", user wants partial selection
     // Select just the first status to move to partial selection state
     if (filteredStatus.value.length > 0) {
@@ -144,14 +147,18 @@ const isAllStatusSelected = computed(() => {
         <PopoverTrigger as-child>
           <Button variant="outline" class="relative h-[42px] bg-card dark:bg-background">
             <!-- Only show "Status" label and indicator when partial selection -->
-            <span v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
-              class="border-r pr-2 text-xs text-slate-500">Status</span>
+            <span
+              v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
+              class="border-r pr-2 text-xs text-slate-500"
+            >Status</span>
             <span class="ml-2 font-medium">
               {{ buttonLabel }}
             </span>
             <Icon icon="heroicons:chevron-down" class="ml-2 size-3.5 text-slate-600 dark:text-slate-400" />
-            <span v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
-              class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500" />
+            <span
+              v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
+              class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500"
+            />
           </Button>
         </PopoverTrigger>
         <PopoverContent class="w-full p-0 sm:w-[200px]" align="center">
@@ -160,24 +167,30 @@ const isAllStatusSelected = computed(() => {
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
                 <CommandItem :value="{ label: 'All Status', value: '' }" @select="clearAllStatuses">
-                  <div :class="cn(
-                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                    isAllStatusSelected
-                      ? 'bg-primary text-primary-foreground'
-                      : 'opacity-50 [&_svg]:invisible',
-                  )">
+                  <div
+                    :class="cn(
+                      'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                      isAllStatusSelected
+                        ? 'bg-primary text-primary-foreground'
+                        : 'opacity-50 [&_svg]:invisible',
+                    )"
+                  >
                     <Icon icon="radix-icons:check" class="size-4" />
                   </div>
                   <span>All Status</span>
                 </CommandItem>
-                <CommandItem v-for="item in filteredStatus" :key="item.value" :value="item"
-                  @select="() => updateValue(item.value)">
-                  <div :class="cn(
-                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                    selectedValues.has(item.value) || isAllStatusSelected
-                      ? 'bg-primary text-primary-foreground'
-                      : 'opacity-50 [&_svg]:invisible',
-                  )">
+                <CommandItem
+                  v-for="item in filteredStatus" :key="item.value" :value="item"
+                  @select="() => updateValue(item.value)"
+                >
+                  <div
+                    :class="cn(
+                      'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                      selectedValues.has(item.value) || isAllStatusSelected
+                        ? 'bg-primary text-primary-foreground'
+                        : 'opacity-50 [&_svg]:invisible',
+                    )"
+                  >
                     <Icon icon="radix-icons:check" class="size-4" />
                   </div>
                   <span :class="`dot ${item.color} h-2 w-2 rounded-full inline-block mr-2`" />
@@ -190,17 +203,23 @@ const isAllStatusSelected = computed(() => {
       </Popover>
 
       <!-- Mobile: Button that opens sheet -->
-      <Button v-else variant="outline" class="relative h-[42px] w-full bg-card dark:bg-background"
-        @click="isSheetOpen = true">
+      <Button
+        v-else variant="outline" class="relative h-[42px] w-full bg-card dark:bg-background"
+        @click="isSheetOpen = true"
+      >
         <!-- Only show "Status" label and indicator when partial selection -->
-        <span v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
-          class="border-r pr-2 text-xs text-slate-500">Status</span>
+        <span
+          v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
+          class="border-r pr-2 text-xs text-slate-500"
+        >Status</span>
         <span class="ml-2 font-medium">
           {{ buttonLabel }}
         </span>
         <Icon icon="heroicons:chevron-down" class="ml-2 size-3.5 text-slate-600 dark:text-slate-400" />
-        <span v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
-          class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500" />
+        <span
+          v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
+          class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500"
+        />
       </Button>
 
       <!-- Mobile: Sheet/Drawer -->
@@ -227,13 +246,17 @@ const isAllStatusSelected = computed(() => {
             <!-- Status List -->
             <div class="max-h-60 space-y-2 overflow-y-auto">
               <!-- Individual Statuses -->
-              <div v-for="status in filteredStatus" :key="status.value"
+              <div
+                v-for="status in filteredStatus" :key="status.value"
                 class="flex items-center space-x-3 rounded-md border p-3 transition-colors hover:bg-muted/50"
                 :class="{ 'bg-muted/50': isAllStatusSelected || isStatusSelected(status.value) }"
-                @click="toggleStatusMobile(status.value)">
-                <Checkbox :checked="isAllStatusSelected || isStatusSelected(status.value)"
+                @click="toggleStatusMobile(status.value)"
+              >
+                <Checkbox
+                  :checked="isAllStatusSelected || isStatusSelected(status.value)"
                   :disabled="selectedStatuses.length === 1 && isStatusSelected(status.value)" @click.stop
-                  @update:checked="toggleStatusMobile(status.value)" />
+                  @update:checked="toggleStatusMobile(status.value)"
+                />
                 <div class="flex min-w-0 flex-1 items-center space-x-2">
                   <span :class="`dot ${status.color} h-3 w-3 rounded-full inline-block`" />
                   <div class="text-sm font-medium">

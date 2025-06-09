@@ -55,25 +55,28 @@ const shouldShowPage = (page: number) => {
 </script>
 
 <template>
-  <div class="mb-20 mt-5 grid grid-cols-2 p-4 pt-0 sm:grid-cols-3 sm:items-center sm:justify-between sm:p-6 sm:pt-0">
-    <div class="order-2 sm:order-1">
-      <Select
-        :options="pageSizes.map(size => ({ label: `Show ${size}`, value: size }))"
-        @update:model-value="handlePageSizeChange"
-      >
-        <SelectTrigger class="form-select w-32">
-          <span class="text-sm">{{ `Show ${pageSize}` }}</span>
+  <div
+    class="mb-20 mt-5 grid grid-cols-2 items-center gap-5 p-4 pt-0 sm:grid-cols-3 sm:justify-between sm:p-6 sm:pt-0"
+  >
+    <div class="order-2 flex items-center space-x-2 sm:order-1">
+      <Select :model-value="String(pageSize)" @update:model-value="handlePageSizeChange">
+        <SelectTrigger class="form-select w-auto">
+          <SelectValue placeholder="Per page" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem v-for="(size, index) in pageSizes" :key="index" :value="String(size)">
-            {{ `Show ${size}` }}
+          <!-- Don't pass 'options' prop here, use v-for instead -->
+          <SelectItem v-for="size in pageSizes" :key="`page-size-${size}`" :value="String(size)">
+            {{ size }}
           </SelectItem>
         </SelectContent>
       </Select>
+      <Label>
+        <span class="text-sm font-normal">per page</span>
+      </Label>
     </div>
     <nav role="navigation" aria-label="Pagination" class="order-3 col-span-2 sm:order-2 sm:col-span-1">
-      <ul class="flex items-center justify-center space-x-1">
-        <li>
+      <ul class="flex flex-wrap items-center justify-center space-x-1 sm:flex-nowrap">
+        <li class="hidden sm:block">
           <RouterLink
             :to="createLink(1)"
             class="page-link"
@@ -130,7 +133,7 @@ const shouldShowPage = (page: number) => {
             </svg>
           </RouterLink>
         </li>
-        <li>
+        <li class="hidden sm:block">
           <RouterLink
             :to="createLink(pageCount)"
             class="page-link"

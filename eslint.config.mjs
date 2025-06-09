@@ -2,15 +2,16 @@
 import antfu from '@antfu/eslint-config';
 import perfectionist from 'eslint-plugin-perfectionist';
 import tailwind from 'eslint-plugin-tailwindcss';
-import vue from 'eslint-plugin-vue';
 
 import withNuxt from './.nuxt/eslint.config.mjs';
 
 export default withNuxt(
-  await antfu({ formatters: true, stylistic: true }),
-
-  // Vue recommended config
-  ...vue.configs['flat/recommended'],
+  await antfu({
+    formatters: true,
+    stylistic: true,
+    vue: true,
+    typescript: true,
+  }),
 
   // Tailwind CSS plugin configuration
   ...tailwind.configs['flat/recommended'],

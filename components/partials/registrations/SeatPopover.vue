@@ -179,7 +179,8 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    ref="reference" :class="
+    ref="reference"
+    :class="
       cn(
         'seat relative select-none border text-sm h-full w-full flex items-center justify-center rounded-xl transition-colors duration-200 border-border cursor-pointer hover:border-primary',
         {
@@ -189,7 +190,8 @@ onBeforeUnmount(() => {
           '!border-primary text-primary': selected,
         },
       )
-    " @click="handleClick"
+    "
+    @click="handleClick"
   >
     <div v-if="bookingStatus" class="absolute right-1 top-1">
       <Badge
@@ -207,8 +209,11 @@ onBeforeUnmount(() => {
   </div>
 
   <div
-    v-if="shouldRenderPopover" ref="floating" :style="floatingStyles"
-    class="popover-content z-50 w-80 rounded-md border bg-card shadow-lg" @click="handlePopoverClick"
+    v-if="shouldRenderPopover"
+    ref="floating"
+    :style="floatingStyles"
+    class="popover-content z-50 w-80 rounded-md border bg-card shadow-lg"
+    @click="handlePopoverClick"
   >
     <div class="mb-3 flex items-center justify-between rounded-t-md bg-primary p-4 text-primary-foreground">
       <h4 class="text-sm font-medium">
@@ -258,7 +263,8 @@ onBeforeUnmount(() => {
                 <span class="text-xs opacity-75">{{ booking.reg_code }}</span>
               </div>
               <Badge
-                variant="outline" :class="
+                variant="outline"
+                :class="
                   cn('ml-auto flex-shrink-0', {
                     'border-emerald-500 text-emerald-500': booking.status === 'RAP',
                     'border-amber-500 text-amber-500': booking.status === 'RPP',
@@ -279,7 +285,9 @@ onBeforeUnmount(() => {
     </div>
 
     <div
-      ref="arrowRef" :style="arrowStyles" :class="cn(
+      ref="arrowRef"
+      :style="arrowStyles"
+      :class="cn(
         'absolute size-2 rotate-45 bg-card',
         currentPlacement.includes('top') ? 'border-b border-r' : 'border-l border-t',
       )"
