@@ -2,31 +2,15 @@
 import antfu from '@antfu/eslint-config';
 import perfectionist from 'eslint-plugin-perfectionist';
 import tailwind from 'eslint-plugin-tailwindcss';
+import vue from 'eslint-plugin-vue';
 
 import withNuxt from './.nuxt/eslint.config.mjs';
 
 export default withNuxt(
-  await antfu({
-    // Enable formatting rules
-    formatters: {
-      css: true,
-      html: true,
-      markdown: 'prettier',
-    },
+  await antfu({ formatters: true, stylistic: true }),
 
-    // Customize stylistic rules
-    stylistic: {
-      indent: 2,
-      quotes: 'single',
-      semi: false,
-    },
-
-    // Enable TypeScript support
-    typescript: true,
-
-    // Enable Vue support
-    vue: true,
-  }),
+  // Vue recommended config
+  ...vue.configs['flat/recommended'],
 
   // Tailwind CSS plugin configuration
   ...tailwind.configs['flat/recommended'],
@@ -67,7 +51,6 @@ export default withNuxt(
         },
       ],
       'perfectionist/sort-named-imports': ['error', { order: 'asc', type: 'natural' }],
-      'perfectionist/sort-objects': ['error', { order: 'asc', type: 'natural' }],
     },
   },
 

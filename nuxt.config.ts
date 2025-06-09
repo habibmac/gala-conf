@@ -22,6 +22,11 @@ export default defineNuxtConfig({
       enabled: true,
     },
   },
+  eslint: {
+    config: {
+      standalone: false,
+    },
+  },
   modules: [
     '@pinia/nuxt',
     '@nuxtjs/tailwindcss',
