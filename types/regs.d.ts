@@ -14,7 +14,7 @@ export interface RegRequestParams {
   [key: string]: string | string[] | undefined // Allow string arrays and undefined
 }
 
-export interface Reg {
+export interface RegItem {
   id: string
   code: string
   date: string
@@ -35,15 +35,15 @@ export interface ColumnConfig {
   isVisible: boolean
   isHideable: boolean
   width: number // Width in percentage
-  accessor?: (row: Reg) => string
+  accessor?: (row: RegItem) => string
 }
 
 export interface Filter {
   search: string
   ticket_name: string[]
   status: string[]
-  date_start: string // Allow undefined
-  date_end: string // Allow undefined
+  date_start: string
+  date_end: string
 }
 
 export interface TicketGroup {

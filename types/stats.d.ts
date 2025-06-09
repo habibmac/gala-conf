@@ -89,7 +89,5 @@ export interface CheckinStats {
     currently_checked_in: number
   }
   tickets: TicketCheckinStats[]
-  custom: {
-    questions: QuestionStats[]
-  }
+  custom: QuestionStats[]
 }

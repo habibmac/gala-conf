@@ -5,21 +5,19 @@ export interface CheckinFilters {
 }
 
 export interface CheckinItem {
-  REG_ID: string
-  REG_code: string
+  id: string
+  code: string
+  stt_id: string
   name: string
   address: string
   city: string
   ticket: string
   first_check_time: string
-  data: {
-    time: string
-    type: 'checkin' | 'checkout'
-  }[]
+  checkin_data: CheckinData[]
 }
 
 export interface CheckinColumnConfig extends ColumnConfig {
-  key: keyof CheckinItem | 'data' // explicitly include 'data' since it's a special case
+  key: keyof CheckinItem | 'checkin_data' // explicitly include 'checkin_data' since it's a special case
   header: string
   isVisible?: boolean
   isHideable?: boolean
@@ -34,6 +32,16 @@ export interface TicketCheckinStats {
   total_checkouts: string
   checkin_percentage: string
   checkout_percentage: string
+}
+
+export interface RecentCheckin {
+  id: string
+  code: string
+  name: string
+  address: string
+  city: string
+  ticket: string
+  check_time: string
 }
 
 interface CustomItemCheckinStats {
@@ -53,5 +61,15 @@ interface CheckinStats {
     total_remaining: number
   }
   tickets: TicketCheckinStats[]
-  items?: CustomItemCheckinStats[]
+  custom?: CustomStats[]
+}
+
+interface CustomStats {
+  info: Record<string, string>
+  options: CustomItemCheckinStats[]
+}
+
+interface CheckinData {
+  time: string
+  type: 'checkin' | 'checkout'
 }

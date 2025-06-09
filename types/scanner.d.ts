@@ -55,6 +55,7 @@ export interface ScannerSettings {
 export interface RegistrationData {
   id: string
   code: string
+  url_link: string
   status: string
   checkin_status: number
   checkin_status_text: string
@@ -115,7 +116,25 @@ export interface ScanHistoryItem {
   attendeeName?: string
   action?: string
   registrationData?: RegistrationData
+  note?: string
 }
 
 // Scanner modes
 export type ScannerMode = 'lookup' | 'continuous' | 'search';
+
+export type SupportedBarcodeFormat =
+  | 'qr_code'
+  | 'code_128'
+  | 'code_39'
+  | 'ean_13'
+  | 'ean_8'
+  | 'code_93'
+  | 'upc_a'
+  | 'upc_e'
+  | 'itf'
+  | 'pdf417'
+  | 'data_matrix'
+  | 'aztec'
+  | 'codabar'
+  | 'databar'
+  | 'databar_expanded';
