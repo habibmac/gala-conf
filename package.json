@@ -54,6 +54,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "typesense": "^1.8.2",
+    "vaul-vue": "^0.4.1",
     "vee-validate": "^4.15.0",
     "vue": "latest",
     "vue-draggable-plus": "^0.5.6",
