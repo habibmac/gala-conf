@@ -55,7 +55,7 @@ const resetColumns = () => {
       <DropdownMenu v-if="!isMobile">
         <DropdownMenuTrigger as-child>
           <Button variant="outline" class="h-[42px] bg-card">
-            <Icon icon="heroicons:view-columns" class="size-4" />
+            <Icon icon="heroicons:view-columns" class="size-4 text-muted-foreground" />
             <span class="hidden md:ml-2 md:inline-block">Columns</span>
           </Button>
         </DropdownMenuTrigger>

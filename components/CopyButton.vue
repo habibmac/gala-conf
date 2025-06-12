@@ -29,7 +29,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   buttonClass: '',
   copiedText: 'Copied!',
-  iconClass: 'size-3.5',
+  iconClass: 'size-4',
   side: 'top',
   size: 'icon',
   text: 'Copy',
@@ -55,7 +55,7 @@ const handleCopy = () => {
             :class="buttonClass"
             @click="handleCopy"
           >
-            <Icon icon="iconamoon:copy" :class="iconClass" />
+            <Icon icon="tabler:copy" :class="iconClass" />
             <span class="sr-only">{{ text }}</span>
           </Button>
         </TooltipTrigger>
@@ -76,7 +76,7 @@ const handleCopy = () => {
           :class="buttonClass"
           @click="handleCopy"
         >
-          <Icon icon="iconamoon:copy" :class="iconClass" />
+          <Icon icon="tabler:copy" :class="iconClass" />
           <span class="sr-only">{{ text }}</span>
         </Button>
       </PopoverTrigger>
