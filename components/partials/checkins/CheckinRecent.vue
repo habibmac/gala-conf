@@ -1,18 +1,9 @@
 <!-- components/checkins/CheckinRecent.vue -->
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
+import { fromUnixTime } from 'date-fns';
 
-import { formatToUTC7 } from '@/utils';
-
-interface RecentCheckin {
-  REG_ID: string
-  REG_code: string
-  name: string
-  address: string
-  city: string
-  ticket: string
-  check_time: string
-}
+import type { RecentCheckin } from '~/types';
 
 const route = useRoute();
 const eventId = ref(route.params.eventId as string);
@@ -76,18 +67,18 @@ const getRegDetailsUrl = (regId: string) => {
             <template v-else-if="recentCheckins && recentCheckins.length > 0">
               <tr
                 v-for="checkin in recentCheckins"
-                :key="checkin.REG_ID"
+                :key="checkin.id"
                 class="text-sm hover:bg-slate-50 dark:hover:bg-slate-800/50"
               >
                 <td class="whitespace-nowrap px-4 py-2 font-medium text-slate-900 dark:text-slate-300">
-                  {{ formatToUTC7(checkin.check_time) }}
+                  {{ fromUnixTime(Number(checkin.check_time)) }}
                 </td>
                 <td class="px-4 py-2">
                   {{ checkin.name }}
                 </td>
                 <td class="px-4 py-2 font-mono text-xs">
-                  <NuxtLink :to="getRegDetailsUrl(checkin.REG_ID)" class="text-emerald-500 hover:underline">
-                    {{ checkin.REG_code }}
+                  <NuxtLink :to="getRegDetailsUrl(checkin.id)" class="text-emerald-500 hover:underline">
+                    {{ checkin.code }}
                   </NuxtLink>
                 </td>
                 <td class="px-4 py-2">

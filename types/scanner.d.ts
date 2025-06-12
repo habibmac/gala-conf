@@ -1,3 +1,5 @@
+import type { EvtDatetime } from './events';
+
 // Types
 export interface ScannerSettings {
   event: {
@@ -6,19 +8,7 @@ export interface ScannerSettings {
     status: string
     package: string
   }
-  datetimes: Array<{
-    id: string
-    name: string
-    start: string // API returns string, not number
-    end: string // API returns string, not number
-    reg_limit: number | null
-    sold: number
-    reserved: number
-    available: number | null
-    is_active: boolean
-    is_upcoming: boolean
-    is_expired: boolean
-  }>
+  datetimes: EvtDatetime[]
   capabilities: {
     lookup: boolean
     continuous_scan: boolean
@@ -59,9 +49,8 @@ export interface RegistrationData {
   status: string
   checkin_status: number
   checkin_status_text: string
-  last_checkin_time: string | null
+  last_checkin_time: number | null
   attendee: {
-    id: number
     first_name: string
     last_name: string
     full_name: string
@@ -69,12 +58,10 @@ export interface RegistrationData {
     phone: string
   }
   ticket: {
-    id: number
     name: string
     price: number
   }
   transaction: {
-    id: number
     total: number
     paid: number
     status: string
@@ -88,7 +75,6 @@ export interface RegistrationData {
     payment_message: string
   }
   group_registrations?: Array<{
-    id: string
     code: string
     attendee_name: string
     ticket_name: string
@@ -102,9 +88,28 @@ export interface RegistrationData {
     // You can access properties like:
     // registrationData.group_registrations[0].id
   }> | null | undefined
-
+  checkin_count: number
+  checkin_history?: CheckinHistoryItem[] | null | undefined
   can_checkin: boolean
   can_checkout: boolean
+}
+
+export interface RegistrationValidation {
+  status: string
+  canCheckin: boolean
+  canCheckout: boolean
+  checkinStatus: number
+  checkinStatusText: string
+  isCheckedIn: boolean
+  lastCheckinTime: number | null
+}
+
+export interface PaymentValidation {
+  canCheckinPayment: boolean
+  isPaymentCompleted: boolean
+  isRegistrationApproved: boolean
+  paymentMessage: string
+  requiresPayment: boolean
 }
 
 export interface ScanHistoryItem {
@@ -119,8 +124,15 @@ export interface ScanHistoryItem {
   note?: string
 }
 
+export interface CheckinHistoryItem {
+  timestamp: number
+  status: string
+}
+
 // Scanner modes
 export type ScannerMode = 'lookup' | 'continuous' | 'search';
+
+export type actionTaken = 'checked_in' | 'checked_out' | 'no_change';
 
 export type SupportedBarcodeFormat =
   | 'qr_code'

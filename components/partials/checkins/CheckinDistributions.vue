@@ -1,12 +1,11 @@
 <!-- components/checkins/CheckinDistribution.vue -->
 <script setup lang="ts">
-import type { QuestionStats, TicketCheckinStats } from '~/types';
+import type { CustomStats, TicketCheckinStats } from '~/types';
 
 defineProps<{
   tickets: TicketCheckinStats[]
-  custom?: {
-    questions: QuestionStats[]
-  }
+  custom?: CustomStats[]
+
 }>();
 </script>
 
@@ -39,32 +38,32 @@ defineProps<{
       </CardContent>
     </Card>
     <!-- Custom Questions Stats -->
-    <div v-if="custom && custom?.questions?.length">
-      <Card v-for="question in custom.questions" :key="question.info.QST_ID" class="mb-4">
+    <div v-if="custom && custom?.length" class="col-span-1 md:col-span-2">
+      <Card v-for="question in custom" :key="question.info.QST_ID" class="mb-4">
         <CardHeader>
           <CardTitle>Check-in Status by {{ question.info.QST_display_text }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="grid grid-cols-1 gap-4">
             <div
-              v-for="option in question.options"
-              :key="option.answer"
+              v-for="item in question.options"
+              :key="item.option"
               class="rounded-lg bg-slate-50 p-4 dark:bg-slate-800/50"
             >
               <div class="mb-2 flex items-center justify-between">
-                <span class="font-medium">{{ option.answer }}</span>
-                <Badge> {{ parseInt(option.pickup_percentage.toString()).toFixed(0) }}% </Badge>
+                <span class="font-medium">{{ item.option }}</span>
+                <Badge> {{ parseInt(item.pickup_percentage.toString()).toFixed(0) }}% </Badge>
               </div>
               <div class="h-1 w-full rounded-full bg-slate-200 dark:bg-slate-700">
                 <div
                   class="h-1 rounded-full bg-gradient-to-r from-primary to-emerald-400 transition-all"
-                  :style="{ width: `${option.pickup_percentage}%` }"
+                  :style="{ width: `${item.pickup_percentage}%` }"
                 />
               </div>
               <div class="mt-2 flex justify-between text-sm text-slate-600 dark:text-slate-400">
-                <span class="tabular-nums">{{ option.picked_up }}/{{ option.total_registered }}</span>
+                <span class="tabular-nums">{{ item.picked_up }}/{{ item.total_registered }}</span>
                 <span class="tabular-nums">
-                  {{ parseInt(option.total_registered.toString()) - parseInt(option.picked_up.toString()) }} left
+                  {{ parseInt(item.total_registered.toString()) - parseInt(item.picked_up.toString()) }} left
                 </span>
               </div>
             </div>

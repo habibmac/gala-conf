@@ -9,12 +9,13 @@ import {
 
   useVueTable,
 } from '@tanstack/vue-table';
-import { format } from 'date-fns';
+import { format, fromUnixTime } from 'date-fns';
 import { computed, ref } from 'vue';
 
-import type { CheckinColumnConfig, CheckinItem } from '@/types';
+import type { CheckinColumnConfig, CheckinData, CheckinItem } from '@/types';
 
-import { formatToUTC7 } from '@/utils';
+import RegDetails from '@/components/partials/registrations/RegDetails.vue';
+import { getStatusInfo } from '@/utils/status-map';
 import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
 import { useCheckins } from '~/composables/useCheckins';
 
@@ -62,6 +63,11 @@ const eventId = computed(() => event.value?.id);
 const route = useRoute();
 const router = useRouter();
 
+const endpoint = 'checkins';
+
+// Selected registration ID for details modal
+const selectedRegId = ref<string>((route.query.details as string) || '');
+
 // Pagination configs
 const INITIAL_PAGE_SIZE = 10;
 const pageSizes = [10, 20, 30, 40, 50];
@@ -100,7 +106,7 @@ const columnConfigs = ref<CheckinColumnConfig[]>([
     header: 'Reg Code',
     isHideable: true,
     isVisible: true,
-    key: 'REG_code',
+    key: 'code',
     width: 15,
   },
   {
@@ -135,14 +141,10 @@ const columnConfigs = ref<CheckinColumnConfig[]>([
     header: 'History',
     isHideable: true,
     isVisible: true,
-    key: 'data',
+    key: 'checkin_data',
     width: 20,
   },
 ]);
-
-const getRegistrationUrl = (regId: string) => {
-  return `/event/${eventId.value}/registrations?page=1&perPage=10&sortBy=reg_date&order=desc&details=${regId}`;
-};
 
 // Define columns
 const columnHelper = createColumnHelper<CheckinItem>();
@@ -150,46 +152,72 @@ const columns = computed(() => {
   return columnConfigs.value
     .filter(config => config.isVisible)
     .map((config) => {
-      switch (config.key) {
-        case 'first_check_time':
-          return columnHelper.accessor('first_check_time', {
-            cell: info => formatToUTC7(info.getValue()),
-            header: config.header,
-            size: config.width * 10,
-          });
-        case 'data':
-          return columnHelper.accessor('data', {
-            cell: info =>
-              info
-                .getValue()
-                .map(item => `${formatToUTC7(item.time)} ${item.type}`)
-                .join(', '),
-            header: config.header,
-            size: config.width * 10,
-          });
-        case 'REG_code':
-          return columnHelper.accessor('REG_code', {
-            cell: (info) => {
-              const regId = info.getValue();
+      return columnHelper.accessor(config.key, {
+        cell: (cellProps) => {
+          switch (config.key) {
+            case 'first_check_time': {
+              const date = fromUnixTime(Number(cellProps.getValue()));
               return h(
-                resolveComponent('NuxtLink'),
+                'div',
                 {
-                  class: 'text-emerald-500 hover:underline',
-                  to: getRegistrationUrl(regId),
+                  class: 'text-right text-slate-900 dark:text-slate-300 text-xs xl:text-sm',
                 },
-                () => regId,
+                [
+                  h('div', { class: 'whitespace-nowrap' }, format(date, 'd MMM yyyy')),
+                  h(
+                    'div',
+                    {
+                      class: 'text-xs text-slate-400 dark:text-slate-600',
+                    },
+                    format(date, 'hh:mm'),
+                  ),
+                ],
               );
-            },
-            header: config.header,
-            size: config.width * 10,
-          });
-        default:
-          return columnHelper.accessor(config.key as keyof CheckinItem, {
-            cell: info => info.getValue(),
-            header: config.header,
-            size: config.width * 10,
-          });
-      }
+            }
+            case 'checkin_data': {
+              const value = cellProps.getValue() as CheckinData[];
+              return value.map((item: CheckinData) => {
+                const date = fromUnixTime(Number(item.time));
+                return h(
+                  'div',
+                  { class: 'text-xs text-slate-900 dark:text-slate-300' },
+                  `${format(date, 'd MMM yyyy hh:mm')} - ${item.type}`,
+                );
+              });
+            }
+            case 'code': {
+              const stt_id = cellProps.row.original.stt_id;
+              const newParams = {
+                ...route.query,
+                details: cellProps.row.original.id,
+              };
+              return h(
+                'a',
+                {
+                  class: 'number text-center group inline-block whitespace-nowrap',
+                  href: `/event/${eventId.value}/${endpoint}?${new URLSearchParams(newParams).toString()}`,
+                  onClick: (e: Event) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleOpenDetails(cellProps.row.original.id);
+                  },
+                },
+                h(
+                  'span',
+                  {
+                    class: `text-status group-hover:underline ${getStatusInfo(stt_id).color}`,
+                  },
+                  cellProps.getValue() as string,
+                ),
+              );
+            }
+            default:
+              return cellProps.getValue();
+          }
+        },
+        header: config.header,
+        size: config.width * 10, // Adjust size for better display
+      });
     });
 });
 
@@ -282,6 +310,43 @@ function calculateMinWidth(): number {
   // Return the greater of the calculated width or minimum width (e.g., 1000px)
   return Math.max(totalWidth, 1000);
 }
+
+const handleOpenDetails = (id: string) => {
+  selectedRegId.value = id;
+};
+
+const handleCloseDetails = () => {
+  selectedRegId.value = '';
+  const currentQuery = { ...route.query };
+  delete currentQuery.details;
+};
+
+watch(selectedRegId, () => {
+  const newQuery = { ...route.query };
+  if (selectedRegId.value) {
+    newQuery.details = selectedRegId.value;
+  }
+  else {
+    delete newQuery.details;
+  }
+  router.push({ query: newQuery });
+});
+
+watch(
+  () => route.query.details,
+  (newDetails) => {
+    selectedRegId.value = (newDetails as string) || '';
+  },
+  { immediate: true },
+);
+
+watch(
+  () => route.query,
+  (newQuery) => {
+    selectedRegId.value = (newQuery.details as string) || '';
+  },
+  { deep: true },
+);
 </script>
 
 <!-- Add the template section from the next message due to length -->
@@ -379,5 +444,11 @@ function calculateMinWidth(): number {
     :total-data="totalData"
     @update:page-size="handlePageSizeChange"
     @update:current-page="handleNavigation"
+  />
+  <RegDetails
+    :reg-details-open="selectedRegId !== ''"
+    :evt-id="eventId"
+    :reg-id="selectedRegId ? selectedRegId : undefined"
+    @close-reg-details="handleCloseDetails"
   />
 </template>
