@@ -8,13 +8,6 @@ declare module '#app' {
   }
 }
 
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $oauthApi: AxiosInstance
-    $galantisApi: AxiosInstance
-  }
-}
-
 export interface ApiErrorResponse {
   error?: string
   message?: string
