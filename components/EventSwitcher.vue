@@ -80,7 +80,12 @@ const open = ref(false);
           <CommandList>
             <CommandInput placeholder="Search event..." />
             <CommandEmpty>No event found.</CommandEmpty>
-            <CommandItem v-for="i in events" :key="i.id" :value="i.id" @click="handleselectEvent(i.id)">
+            <CommandItem
+              v-for="i in events"
+              :key="i.id"
+              :value="i.id"
+              @click="handleselectEvent(i.id)"
+            >
               <div class="flex items-center space-x-2">
                 <EventCover :src="i.logo" :title="i.title" class="h-8" />
                 <div class="grow">

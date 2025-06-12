@@ -112,12 +112,14 @@ onUnmounted(() => {
       <!-- Sidebar backdrop (mobile only) -->
       <div
         class=" fixed inset-0 z-20 bg-slate-900/30 transition-opacity duration-200 lg:z-auto lg:hidden"
-        :class="sidebarOpen ? 'opacity-100' : 'pointer-events-none opacity-0'" aria-hidden="true"
+        :class="sidebarOpen ? 'opacity-100' : 'pointer-events-none opacity-0'"
+        aria-hidden="true"
         @click="handleCloseSidebar"
       />
       <!-- Sidebar -->
       <div
-        id="sidebar" ref="sidebar"
+        id="sidebar"
+        ref="sidebar"
         class="no-scrollbar absolute left-0 top-0 z-30 flex h-dvh w-64 shrink-0 flex-col overflow-y-scroll bg-gradient-to-t from-blue-700 to-blue-700 transition-all duration-200 ease-in-out lg:static lg:left-auto lg:top-auto lg:w-20 lg:translate-x-0 lg:overflow-y-auto lg:sidebar-expanded:!w-64"
         :class="[
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
@@ -130,9 +132,13 @@ onUnmounted(() => {
         >
           <!-- Close button -->
           <Button
-            ref="trigger" variant="ghost" size="icon"
+            ref="trigger"
+            variant="ghost"
+            size="icon"
             class="absolute right-4 top-4 text-slate-300 hover:bg-transparent hover:text-slate-100 lg:hidden"
-            aria-controls="sidebar" :aria-expanded="sidebarOpen" @click="handleCloseSidebar"
+            aria-controls="sidebar"
+            :aria-expanded="sidebarOpen"
+            @click="handleCloseSidebar"
           >
             <span class="sr-only">Close sidebar</span>
             <Icon icon="material-symbols-light:close-rounded" class="size-7" />
@@ -159,18 +165,25 @@ onUnmounted(() => {
               </h3>
               <ul class="mt-2">
                 <NuxtLink
-                  v-for="(linkItem, index) in group.menus" v-slot="{ href, navigate }" :key="index"
-                  :to="linkItem.generatedLink?.path" custom
+                  v-for="(linkItem, index) in group.menus"
+                  v-slot="{ href, navigate }"
+                  :key="index"
+                  :to="linkItem.generatedLink?.path"
+                  custom
                 >
                   <li class="mb-0.5 last:mb-0">
                     <a
-                      class="flex items-center truncate rounded-md text-slate-200 transition" :class="isMenuItemActive(linkItem.generatedLink?.path)
+                      class="flex items-center truncate rounded-md text-slate-200 transition"
+                      :class="isMenuItemActive(linkItem.generatedLink?.path)
                         ? 'bg-blue-950 hover:bg-blue-950 hover:text-slate-200'
                         : 'hover:bg-blue-900/60 hover:text-white'
-                      " :href="href" @click="navigate"
+                      "
+                      :href="href"
+                      @click="navigate"
                     >
                       <MenuIcon
-                        v-if="linkItem.icon" :name="linkItem.icon"
+                        v-if="linkItem.icon"
+                        :name="linkItem.icon"
                         class="box-content size-7 shrink-0 fill-current p-1.5 px-2.5"
                       />
                       <span class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100">{{
@@ -190,7 +203,12 @@ onUnmounted(() => {
         </template>
         <!-- Expand / collapse button -->
         <div class="mt-auto hidden justify-end p-4 lg:inline-flex">
-          <Button variant="ghost" size="icon" class="text-slate-200" @click="handleToggleSidebar">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="text-slate-200"
+            @click="handleToggleSidebar"
+          >
             <span class="sr-only">Expand / collapse sidebar</span>
             <Icon icon="radix-icons:pin-right" class="size-6 sidebar-expanded:rotate-180" />
           </Button>

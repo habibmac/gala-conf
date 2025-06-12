@@ -72,7 +72,12 @@ onUnmounted(() => {
         v-show="dropdownOpen"
         class="absolute right-0 top-full z-10 mt-1 min-w-64 origin-top-right overflow-hidden rounded-md border border-slate-200 bg-white py-1.5 shadow-lg dark:border-slate-800 dark:bg-slate-950"
       >
-        <ul ref="dropdown" class="text-left" @focusin="dropdownOpen = true" @focusout="dropdownOpen = false">
+        <ul
+          ref="dropdown"
+          class="text-left"
+          @focusin="dropdownOpen = true"
+          @focusout="dropdownOpen = false"
+        >
           <template v-if="user">
             <li class="mb-1 border-b border-slate-200 px-3 pb-2 pt-0.5 dark:border-slate-900">
               <div class="text-sm font-medium text-slate-800 dark:text-slate-100">

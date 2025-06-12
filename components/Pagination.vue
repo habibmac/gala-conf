@@ -27,7 +27,12 @@ const pageNumbers = Array.from({ length: props.totalPages }, (_, i) => i + 1);
 
 <template>
   <div class="mb-20 mt-10 flex items-center justify-center space-x-2">
-    <Button variant="outline" class="size-10 p-0" :disabled="currentPage === 1" @click="updatePage(currentPage - 1)">
+    <Button
+      variant="outline"
+      class="size-10 p-0"
+      :disabled="currentPage === 1"
+      @click="updatePage(currentPage - 1)"
+    >
       <Icon icon="heroicons:chevron-left" />
     </Button>
 

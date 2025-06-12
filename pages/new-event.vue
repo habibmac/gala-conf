@@ -311,10 +311,12 @@ function onSubmit(formData: FormData) {
               <div
                 v-for="(step, index) in validationSchema.map((_, i) => steps[i])"
                 :key="index"
-                class="flex shrink-0 items-center space-x-2" :class="[currentStep === index ? '' : 'hidden md:flex']"
+                class="flex shrink-0 items-center space-x-2"
+                :class="[currentStep === index ? '' : 'hidden md:flex']"
               >
                 <div
-                  class="flex size-6 items-center justify-center rounded-full" :class="[
+                  class="flex size-6 items-center justify-center rounded-full"
+                  :class="[
                     currentStep === index ? 'bg-primary' : 'bg-accent',
                   ]"
                 >
@@ -329,7 +331,8 @@ function onSubmit(formData: FormData) {
                   </span>
                 </div>
                 <h3
-                  class="whitespace-nowrap text-sm font-medium" :class="[
+                  class="whitespace-nowrap text-sm font-medium"
+                  :class="[
                     currentStep === index ? 'text-primary' : 'text-muted-foreground',
                   ]"
                 >
@@ -344,7 +347,12 @@ function onSubmit(formData: FormData) {
           <FormStep>
             <div class="relative h-80 w-full overflow-hidden">
               <div class="absolute top-0 size-full">
-                <FieldImageUpload id="cover-img-upload" name="coverImg" label="Cover Image" type="cover" />
+                <FieldImageUpload
+                  id="cover-img-upload"
+                  name="coverImg"
+                  label="Cover Image"
+                  type="cover"
+                />
               </div>
             </div>
 
@@ -352,7 +360,12 @@ function onSubmit(formData: FormData) {
             <div class="container pb-10">
               <div class="mx-auto max-w-3xl py-10">
                 <div class="mx-auto -mt-40 mb-6 text-center sm:-mt-40">
-                  <FieldImageUpload id="logo-upload" name="logo" label="Logo" type="logo" />
+                  <FieldImageUpload
+                    id="logo-upload"
+                    name="logo"
+                    label="Logo"
+                    type="logo"
+                  />
                 </div>
 
                 <div class="space-y-5">
@@ -495,7 +508,12 @@ function onSubmit(formData: FormData) {
                               </FormItem>
                             </FormField>
                             <div class="absolute bottom-0 right-0 sm:static sm:bottom-auto sm:right-auto sm:pt-8">
-                              <Button size="icon" class="text-red-500" variant="ghost" @click.prevent="remove(index)">
+                              <Button
+                                size="icon"
+                                class="text-red-500"
+                                variant="ghost"
+                                @click.prevent="remove(index)"
+                              >
                                 <Icon icon="material-symbols-light:close-rounded" class="size-6" />
                               </Button>
                             </div>
@@ -662,7 +680,12 @@ function onSubmit(formData: FormData) {
                               </div>
                             </div>
                             <div class="absolute bottom-0 right-0 sm:static sm:bottom-auto sm:right-auto sm:pt-8">
-                              <Button size="icon" class="text-red-500" variant="ghost" @click.prevent="remove(index)">
+                              <Button
+                                size="icon"
+                                class="text-red-500"
+                                variant="ghost"
+                                @click.prevent="remove(index)"
+                              >
                                 <Icon icon="material-symbols-light:close-rounded" class="size-6" />
                               </Button>
                             </div>

@@ -27,7 +27,12 @@ const inputComponent = computed(() => {
     <FormItem v-auto-animate :class="wrapperClass">
       <FormLabel>{{ label }}</FormLabel>
       <FormControl>
-        <component :is="inputComponent" :type="type" :placeholder="placeholder" v-bind="componentField" />
+        <component
+          :is="inputComponent"
+          :type="type"
+          :placeholder="placeholder"
+          v-bind="componentField"
+        />
       </FormControl>
       <FormMessage />
     </FormItem>

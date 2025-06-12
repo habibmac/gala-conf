@@ -285,7 +285,12 @@ watch(fieldValue, (newValue) => {
               class="absolute inset-0 flex aspect-[851/315] size-full items-center justify-center"
             >
               <img :src="uploadedFile" alt="Cover image" class="pointer-events-none size-full object-cover">
-              <Button variant="outline" class="absolute right-4 top-4" size="sm" @click.prevent="handleRemoveCover">
+              <Button
+                variant="outline"
+                class="absolute right-4 top-4"
+                size="sm"
+                @click.prevent="handleRemoveCover"
+              >
                 Remove
               </Button>
             </div>

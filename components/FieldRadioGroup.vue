@@ -31,7 +31,12 @@ const icon = Icon;
           label
         }}
       </FormLabel>
-      <Field v-slot="{ field }" :name="name" as="div" :class="wrapperClass">
+      <Field
+        v-slot="{ field }"
+        :name="name"
+        as="div"
+        :class="wrapperClass"
+      >
         <div v-for="option in options" :key="option.value || option.id">
           <label class="relative block cursor-pointer">
             <input
@@ -43,7 +48,8 @@ const icon = Icon;
               @change="field.onChange"
             >
             <div
-              class="rounded-lg border bg-background text-sm font-medium shadow-sm outline-none duration-100 ease-in-out" :class="[
+              class="rounded-lg border bg-background text-sm font-medium shadow-sm outline-none duration-100 ease-in-out"
+              :class="[
                 layout === 'horizontal'
                   ? 'flex items-center px-2 py-2.5'
                   : 'flex flex-col items-center justify-center p-4',
@@ -59,7 +65,12 @@ const icon = Icon;
                 />
               </template>
               <template v-else>
-                <component :is="icon" v-if="option.icon" :icon="option.icon" class="mb-2 size-7" />
+                <component
+                  :is="icon"
+                  v-if="option.icon"
+                  :icon="option.icon"
+                  class="mb-2 size-7"
+                />
               </template>
               <span :class="[field.value === (option.value || option.label) ? 'text-primary' : '']">
                 {{ option.label }}

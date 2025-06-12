@@ -180,7 +180,9 @@ const isAllStatusSelected = computed(() => {
                   <span>All Status</span>
                 </CommandItem>
                 <CommandItem
-                  v-for="item in filteredStatus" :key="item.value" :value="item"
+                  v-for="item in filteredStatus"
+                  :key="item.value"
+                  :value="item"
                   @select="() => updateValue(item.value)"
                 >
                   <div
@@ -204,7 +206,9 @@ const isAllStatusSelected = computed(() => {
 
       <!-- Mobile: Button that opens sheet -->
       <Button
-        v-else variant="outline" class="relative h-[42px] w-full bg-card dark:bg-background"
+        v-else
+        variant="outline"
+        class="relative h-[42px] w-full bg-card dark:bg-background"
         @click="isSheetOpen = true"
       >
         <!-- Only show "Status" label and indicator when partial selection -->
@@ -235,7 +239,12 @@ const isAllStatusSelected = computed(() => {
           <div class="mt-6 space-y-4">
             <!-- Action Button -->
             <div class="flex items-center justify-center">
-              <Button variant="outline" size="sm" :disabled="filteredStatus.length === 0" @click="toggleAllSelection">
+              <Button
+                variant="outline"
+                size="sm"
+                :disabled="filteredStatus.length === 0"
+                @click="toggleAllSelection"
+              >
                 <Icon :icon="shouldShowSelectAll ? 'heroicons:check' : 'heroicons:x-mark'" class="mr-2 size-4" />
                 {{ shouldShowSelectAll ? 'Select All' : 'Clear Selection' }}
               </Button>
@@ -247,14 +256,16 @@ const isAllStatusSelected = computed(() => {
             <div class="max-h-60 space-y-2 overflow-y-auto">
               <!-- Individual Statuses -->
               <div
-                v-for="status in filteredStatus" :key="status.value"
+                v-for="status in filteredStatus"
+                :key="status.value"
                 class="flex items-center space-x-3 rounded-md border p-3 transition-colors hover:bg-muted/50"
                 :class="{ 'bg-muted/50': isAllStatusSelected || isStatusSelected(status.value) }"
                 @click="toggleStatusMobile(status.value)"
               >
                 <Checkbox
                   :checked="isAllStatusSelected || isStatusSelected(status.value)"
-                  :disabled="selectedStatuses.length === 1 && isStatusSelected(status.value)" @click.stop
+                  :disabled="selectedStatuses.length === 1 && isStatusSelected(status.value)"
+                  @click.stop
                   @update:checked="toggleStatusMobile(status.value)"
                 />
                 <div class="flex min-w-0 flex-1 items-center space-x-2">

@@ -78,6 +78,26 @@ export default withNuxt(
       'vue/multi-word-component-names': 'off',
 
       'vue/no-multiple-template-root': 'off',
+
+      // Vue template formatting rules
+      'vue/html-closing-bracket-newline': ['error', {
+        singleline: 'never',
+        multiline: 'always',
+      }],
+      'vue/html-indent': ['error', 2],
+      'vue/max-attributes-per-line': ['error', {
+        singleline: 3,
+        multiline: 1,
+      }],
+      'vue/first-attribute-linebreak': ['error', {
+        singleline: 'ignore',
+        multiline: 'below',
+      }],
+      'vue/html-closing-bracket-spacing': ['error', {
+        startTag: 'never',
+        endTag: 'never',
+        selfClosingTag: 'always',
+      }],
     },
   },
   {

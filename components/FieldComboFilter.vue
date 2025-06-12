@@ -145,7 +145,12 @@ watch(value, (newValue) => {
               />
               <ClientOnly>
                 <ComboboxButton class="absolute inset-y-0 right-0 flex items-center pr-2">
-                  <Icon v-if="isLoading" icon="eos-icons:loading" class="size-5 animate-spin" aria-hidden="true" />
+                  <Icon
+                    v-if="isLoading"
+                    icon="eos-icons:loading"
+                    class="size-5 animate-spin"
+                    aria-hidden="true"
+                  />
                   <Icon
                     v-else-if="selectedCity"
                     icon="heroicons:x-mark"
@@ -153,7 +158,12 @@ watch(value, (newValue) => {
                     aria-hidden="true"
                     @click.stop="clearSelection"
                   />
-                  <Icon v-else icon="heroicons:chevron-down" class="size-4" aria-hidden="true" />
+                  <Icon
+                    v-else
+                    icon="heroicons:chevron-down"
+                    class="size-4"
+                    aria-hidden="true"
+                  />
                 </ComboboxButton>
               </ClientOnly>
             </div>

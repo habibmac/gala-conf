@@ -52,7 +52,13 @@ const handleAction = (item: { id: string, action: string }) => {
         as="ul"
       >
         <div class="p-1">
-          <ListboxOption v-for="item in menuItems" :key="item.id" :value="item" as="li" class="dropdown-item">
+          <ListboxOption
+            v-for="item in menuItems"
+            :key="item.id"
+            :value="item"
+            as="li"
+            class="dropdown-item"
+          >
             <NuxtLink
               v-if="item.action === 'link'"
               :to="`/event/${props.eventId}/insights/${props.itemId}/${item.id}`"

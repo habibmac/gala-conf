@@ -231,7 +231,9 @@ const isAllTicketsSelected = computed(() => {
                   <span>All Tickets</span>
                 </CommandItem>
                 <CommandItem
-                  v-for="ticket in filteredTickets" :key="ticket.id" :value="ticket"
+                  v-for="ticket in filteredTickets"
+                  :key="ticket.id"
+                  :value="ticket"
                   @select="() => updateValue(ticket.name)"
                 >
                   <div
@@ -254,7 +256,9 @@ const isAllTicketsSelected = computed(() => {
 
       <!-- Mobile: Button that opens sheet -->
       <Button
-        v-else variant="outline" class="relative h-[42px] w-full bg-card dark:bg-background"
+        v-else
+        variant="outline"
+        class="relative h-[42px] w-full bg-card dark:bg-background"
         @click="isSheetOpen = true"
       >
         <!-- Only show "Ticket" label and indicator when partial selection -->
@@ -295,7 +299,9 @@ const isAllTicketsSelected = computed(() => {
             <!-- Action Buttons -->
             <div class="flex items-center justify-center">
               <Button
-                variant="outline" size="sm" :disabled="!tickets || tickets.length === 0"
+                variant="outline"
+                size="sm"
+                :disabled="!tickets || tickets.length === 0"
                 @click="toggleAllSelection"
               >
                 <Icon :icon="shouldShowSelectAll ? 'heroicons:check' : 'heroicons:x-mark'" class="mr-2 size-4" />
@@ -310,14 +316,16 @@ const isAllTicketsSelected = computed(() => {
               <!-- Individual Tickets -->
               <template v-if="filteredTickets.length > 0">
                 <div
-                  v-for="ticket in filteredTickets" :key="ticket.id"
+                  v-for="ticket in filteredTickets"
+                  :key="ticket.id"
                   class="flex items-center space-x-3 rounded-md border p-3 transition-colors hover:bg-muted/50"
                   :class="{ 'bg-muted/50': isAllTicketsSelected || isTicketSelected(ticket.name) }"
                   @click="toggleTicketMobile(ticket.name)"
                 >
                   <Checkbox
                     :checked="isAllTicketsSelected || isTicketSelected(ticket.name)"
-                    :disabled="selectedTickets.length === 1 && isTicketSelected(ticket.name)" @click.stop
+                    :disabled="selectedTickets.length === 1 && isTicketSelected(ticket.name)"
+                    @click.stop
                     @update:checked="toggleTicketMobile(ticket.name)"
                   />
                   <div class="min-w-0 flex-1">

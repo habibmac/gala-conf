@@ -107,7 +107,12 @@ const hasActions = computed(() => Boolean(props.cta?.label || props.cta2?.label)
               {{ cta2.label }}
             </NuxtLink>
           </Button>
-          <Button v-else variant="outline" type="button" @click="() => handleClick(cta2, 'secondary')">
+          <Button
+            v-else
+            variant="outline"
+            type="button"
+            @click="() => handleClick(cta2, 'secondary')"
+          >
             <template v-if="cta2.icon">
               <Icon :icon="cta2.icon" :class="cn('mr-2', cta2.iconClass)" />
             </template>

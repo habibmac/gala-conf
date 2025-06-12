@@ -128,7 +128,12 @@ watch(
             <FormField v-slot="{ value, handleChange }" :name="`eventDatetimes[${index}].quota`">
               <FormItem v-auto-animate class="max-w-32">
                 <FormLabel>Quota</FormLabel>
-                <NumberField class="gap-2" :min="0" :model-value="value" @update:model-value="handleChange">
+                <NumberField
+                  class="gap-2"
+                  :min="0"
+                  :model-value="value"
+                  @update:model-value="handleChange"
+                >
                   <NumberFieldContent>
                     <NumberFieldDecrement />
                     <FormControl>
@@ -141,7 +146,12 @@ watch(
               </FormItem>
             </FormField>
             <div class="absolute bottom-0 right-0 sm:static sm:bottom-auto sm:right-auto sm:pt-8">
-              <Button size="icon" class="text-red-500" variant="ghost" @click.prevent="remove(index)">
+              <Button
+                size="icon"
+                class="text-red-500"
+                variant="ghost"
+                @click.prevent="remove(index)"
+              >
                 <Icon icon="material-symbols-light:close-rounded" class="size-6" />
               </Button>
             </div>

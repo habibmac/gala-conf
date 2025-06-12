@@ -36,7 +36,8 @@ const tooltipOpen = ref(false);
       >
         <div
           v-show="tooltipOpen"
-          class="right-0 mb-2 overflow-hidden rounded border bg-white px-3 py-1 text-xs text-slate-800 shadow-lg dark:border-slate-700 dark:bg-slate-700 dark:text-slate-200" :class="[
+          class="right-0 mb-2 overflow-hidden rounded border bg-white px-3 py-1 text-xs text-slate-800 shadow-lg dark:border-slate-700 dark:bg-slate-700 dark:text-slate-200"
+          :class="[
             getStatusInfo(status).color,
           ]"
         >

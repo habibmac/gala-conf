@@ -80,7 +80,13 @@ const handleChange = (e: Event) => {
           </p>
           <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
         </div>
-        <input id="dropzone-file" type="file" class="hidden" accept="image/*" @change="handleChange">
+        <input
+          id="dropzone-file"
+          type="file"
+          class="hidden"
+          accept="image/*"
+          @change="handleChange"
+        >
       </label>
     </div>
     <div v-if="previewUrl" class="mt-4">

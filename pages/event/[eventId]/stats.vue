@@ -192,7 +192,12 @@ const formatDate = (date: Date): string => {
               <CardTitle>Status Distribution</CardTitle>
             </CardHeader>
             <CardContent class="">
-              <DonutChart :data="statusChartData" index="name" category="total" :value-formatter="valueFormatter" />
+              <DonutChart
+                :data="statusChartData"
+                index="name"
+                category="total"
+                :value-formatter="valueFormatter"
+              />
               <div class="mt-4 grid justify-center gap-2">
                 <div v-for="(value, i) in statusChartData.slice(0, 8)" :key="i" class="flex w-full items-start gap-2">
                   <Badge variant="outline" class="flex w-full justify-between">
@@ -211,7 +216,12 @@ const formatDate = (date: Date): string => {
               <CardTitle>Ticket Distribution</CardTitle>
             </CardHeader>
             <CardContent class="">
-              <DonutChart :data="ticketChartData" index="name" category="total" :value-formatter="valueFormatter" />
+              <DonutChart
+                :data="ticketChartData"
+                index="name"
+                category="total"
+                :value-formatter="valueFormatter"
+              />
               <div class="mt-4 grid justify-center gap-2">
                 <div v-for="(value, i) in ticketChartData.slice(0, 8)" :key="i" class="flex w-full items-start gap-2">
                   <Badge variant="outline" class="flex w-full justify-between">
