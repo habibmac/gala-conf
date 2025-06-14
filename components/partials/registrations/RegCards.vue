@@ -12,7 +12,7 @@ const eventId = ref(route.params.eventId as string) || ref('');
 // Use queryClient to fetch data
 const getEventSummary = async (evtId: Ref) => {
   const { $galantisApi } = useNuxtApp();
-  const response = await $galantisApi.get(`/event/${evtId.value}/summary`);
+  const response = await $galantisApi.get(`/event/${evtId.value}/registrations/summary`);
   return response.data;
 };
 
