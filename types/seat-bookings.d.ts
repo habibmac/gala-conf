@@ -15,8 +15,8 @@ export interface TicketScope {
   day: number
   name: string
   id: number
-  start: string
-  end: string
+  date_start: string
+  date_end: string
 }
 
 export interface SeatItem {
