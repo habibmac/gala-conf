@@ -11,7 +11,6 @@ interface InsightFilters {
   date_start?: string
   date_end?: string
   group?: string
-  nocache?: string
   [key: string]: string | string[] | undefined
 }
 

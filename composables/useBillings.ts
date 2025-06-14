@@ -17,7 +17,6 @@ export const useBillings = (
 
   // Create computed request params to track all parameter changes
   const requestParams = computed(() => ({
-    nocache: 1,
     order: sorting.value.length > 0 && sorting.value[0].desc ? 'desc' : 'asc',
     // Always send 1-based page numbers to the API
     page: String(pagination.value.pageIndex + 1),
