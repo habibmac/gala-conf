@@ -9,12 +9,13 @@ import {
 
   useVueTable,
 } from '@tanstack/vue-table';
-import { format, fromUnixTime } from 'date-fns';
+import { format } from 'date-fns';
 import { computed, ref } from 'vue';
 
 import type { CheckinColumnConfig, CheckinData, CheckinItem } from '@/types';
 
 import RegDetails from '@/components/partials/registrations/RegDetails.vue';
+import { formatDate } from '@/utils';
 import { getStatusInfo } from '@/utils/status-map';
 import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
 import { useCheckins } from '~/composables/useCheckins';
@@ -103,10 +104,10 @@ const dateRange = computed(() => {
 // Table configurations
 const columnConfigs = ref<CheckinColumnConfig[]>([
   {
-    header: 'Reg Code',
+    header: 'Time',
     isHideable: true,
     isVisible: true,
-    key: 'code',
+    key: 'first_check_time',
     width: 15,
   },
   {
@@ -115,6 +116,13 @@ const columnConfigs = ref<CheckinColumnConfig[]>([
     isVisible: true,
     key: 'name',
     width: 20,
+  },
+  {
+    header: 'Reg Code',
+    isHideable: true,
+    isVisible: true,
+    key: 'code',
+    width: 15,
   },
   {
     header: 'Ticket',
@@ -128,13 +136,6 @@ const columnConfigs = ref<CheckinColumnConfig[]>([
     isHideable: true,
     isVisible: true,
     key: 'city',
-    width: 15,
-  },
-  {
-    header: 'First Check-in',
-    isHideable: true,
-    isVisible: true,
-    key: 'first_check_time',
     width: 15,
   },
   {
@@ -156,34 +157,75 @@ const columns = computed(() => {
         cell: (cellProps) => {
           switch (config.key) {
             case 'first_check_time': {
-              const date = fromUnixTime(Number(cellProps.getValue()));
-              return h(
-                'div',
-                {
-                  class: 'text-right text-slate-900 dark:text-slate-300 text-xs xl:text-sm',
-                },
-                [
-                  h('div', { class: 'whitespace-nowrap' }, format(date, 'd MMM yyyy')),
-                  h(
-                    'div',
-                    {
-                      class: 'text-xs text-slate-400 dark:text-slate-600',
-                    },
-                    format(date, 'hh:mm'),
-                  ),
-                ],
-              );
+              const value = cellProps.getValue() as string;
+
+              if (!value || value === '' || value === '-') {
+                return h('div', { class: 'text-right text-slate-400' }, '-');
+              }
+
+              try {
+                return h(
+                  'div',
+                  {
+                    class: 'text-right text-slate-900 dark:text-slate-300 text-xs xl:text-sm',
+                  },
+                  [
+                    h('div', { class: 'whitespace-nowrap' }, formatDate(value, 'd MMM yyyy')),
+                    h(
+                      'div',
+                      {
+                        class: 'text-xs text-slate-400 dark:text-slate-600',
+                      },
+                      formatDate(value, 'HH:mm'),
+                    ),
+                  ],
+                );
+              }
+              catch (error) {
+                console.error('Error formatting first_check_time:', value, error);
+                return h('div', { class: 'text-right text-slate-400' }, 'Format error');
+              }
             }
             case 'checkin_data': {
               const value = cellProps.getValue() as CheckinData[];
-              return value.map((item: CheckinData) => {
-                const date = fromUnixTime(Number(item.time));
-                return h(
-                  'div',
-                  { class: 'text-xs text-slate-900 dark:text-slate-300' },
-                  `${format(date, 'd MMM yyyy hh:mm')} - ${item.type}`,
-                );
-              });
+
+              if (!value || !Array.isArray(value) || value.length === 0) {
+                return h('div', { class: 'text-xs text-slate-400' }, 'No history');
+              }
+
+              // Create a container div that holds all the history items
+              const historyItems = value
+                .filter((item: CheckinData) => item.time && item.time !== '' && item.time !== '-')
+                .map((item: CheckinData, index: number) => {
+                  try {
+                    const date = new Date(item.time);
+
+                    if (Number.isNaN(date.getTime())) {
+                      throw new TypeError('Invalid date');
+                    }
+
+                    return h(
+                      'div',
+                      {
+                        key: index,
+                        class: 'text-xs text-slate-900 dark:text-slate-300 mb-1',
+                      },
+                      `${format(date, 'd MMM yyyy HH:mm')} - ${item.type}`,
+                    );
+                  }
+                  catch (error) {
+                    console.error('Error formatting checkin_data time:', item.time, item.type, error);
+                    return null;
+                  }
+                })
+                .filter(Boolean);
+
+              // Return a single container div with all history items
+              return h(
+                'div',
+                { class: 'space-y-1' },
+                historyItems,
+              );
             }
             case 'code': {
               const stt_id = cellProps.row.original.stt_id;

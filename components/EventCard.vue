@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import EventCover from '@/components/EventCover.vue';
-import { formatDate } from '@/utils';
+import { formatDateRange } from '@/utils';
 import { cn } from '~/lib/utils';
 
 defineProps({
@@ -45,7 +45,7 @@ defineProps({
     <div class="flex grow flex-col p-5 text-center sm:text-left">
       <div class="grow">
         <div class="text-xs text-muted-foreground">
-          {{ formatDate(event.start, 'd MMM yyy HH:mm') }} - {{ formatDate(event.end, 'd MMM yyy HH:mm') }}
+          {{ formatDateRange(event.date_start, event.date_end) }}
         </div>
         <h3
           class="font-semibold leading-snug tracking-tight"

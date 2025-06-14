@@ -22,7 +22,9 @@ export const useUIStore = defineStore('ui', () => {
   const preferences = ref<UserPreferences>({
     itemsPerPage: 10,
     locale: 'en',
+    sidebarExpanded: sidebarExpanded.value,
     theme: 'system',
+    timezone: 'Asia/Jakarta',
   });
 
   // Mobile sidebar state
@@ -131,7 +133,15 @@ export const useUIStore = defineStore('ui', () => {
     return isLargeScreen.value ? sidebarExpanded.value : isSidebarOpenMobile.value;
   });
 
+  // User timezone handling
+  const userTimezone = useLocalStorage('userTimezone', 'Asia/Jakarta');
+
   // Other preference functions with update check
+  const setUserTimezone = (timezone: string) => {
+    if (userTimezone.value !== timezone && !isUpdating.value) {
+      updatePreferences({ timezone });
+    }
+  };
   const setTheme = (theme: 'dark' | 'light' | 'system') => {
     if (preferences.value.theme !== theme && !isUpdating.value) {
       updatePreferences({ theme });
@@ -160,5 +170,7 @@ export const useUIStore = defineStore('ui', () => {
     setTheme,
     toggleSidebar,
     updatePreferences,
+    userTimezone,
+    setUserTimezone,
   };
 });

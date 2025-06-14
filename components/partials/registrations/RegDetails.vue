@@ -171,7 +171,7 @@ onUnmounted(async () => {
           <div v-else-if="data" class="mx-auto max-w-sm lg:max-w-none">
             <div class="mb-1 text-center font-semibold text-slate-800 dark:text-slate-100" />
             <div class="text-center text-xs">
-              {{ data.date ? formatDate(data.date, 'd MMM yyyy hh:mm') : '-' }}
+              {{ data.date ? formatDate(data.date, 'd MMM yyyy HH:mm') : '-' }}
             </div>
             <!-- Details -->
             <div class="mt-8 drop-shadow-lg">
@@ -229,11 +229,6 @@ onUnmounted(async () => {
                       side="top"
                     />
                   </div>
-                </div>
-                <div class="flex justify-between space-x-1">
-                  <span class="">Age/Gender</span>
-                  <span class="text-right font-medium text-slate-700 dark:text-slate-100">{{ data.age }} / {{
-                    data.gender }}</span>
                 </div>
                 <div class="flex justify-between space-x-1">
                   <span class="">Email:</span>

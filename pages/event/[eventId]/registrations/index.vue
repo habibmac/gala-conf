@@ -8,7 +8,7 @@ import {
   getCoreRowModel,
   useVueTable,
 } from '@tanstack/vue-table';
-import { format, fromUnixTime } from 'date-fns';
+import { format } from 'date-fns';
 import { computed, h, ref, toRefs, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -182,20 +182,19 @@ const columns = computed(() => {
         cell: (cellProps) => {
           switch (config.key) {
             case 'date': {
-              const date = fromUnixTime(Number(cellProps.getValue()));
               return h(
                 'div',
                 {
                   class: 'text-right text-slate-900 dark:text-slate-300 text-xs xl:text-sm',
                 },
                 [
-                  h('div', { class: 'whitespace-nowrap' }, format(date, 'd MMM yyyy')),
+                  h('div', { class: 'whitespace-nowrap' }, formatDate(cellProps.getValue(), 'd MMM yyyy')),
                   h(
                     'div',
                     {
                       class: 'text-xs text-slate-400 dark:text-slate-600',
                     },
-                    format(date, 'hh:mm'),
+                    formatDate(cellProps.getValue(), 'HH:mm'),
                   ),
                 ],
               );
@@ -360,7 +359,7 @@ const fetchAllRegistrations = async () => {
 const formatExportData = (data: RegItem[]) => {
   return data.map((row) => {
     const formattedRow: { [key: string]: string | number } = {
-      'Date': format(fromUnixTime(Number(row.date)), 'dd MMM yyyy HH:mm'),
+      'Date': formatDate(row.date, 'dd MMM yyyy HH:mm'),
       'Email': row.email || '',
       'Full Name': row.fullname || '',
       'Paid': Number(row.paid) || 0,

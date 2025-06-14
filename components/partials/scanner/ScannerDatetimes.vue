@@ -54,16 +54,16 @@ watch(selectedDatetimeRef, (newValue) => {
           <div class="flex flex-row items-center gap-1">
             <span class="font-medium">{{ datetime.name }}</span>
             <span
-              v-if="datetime.start"
+              v-if="datetime.date_start"
               class="text-sm text-muted-foreground"
             >
-              {{ formatDate(Number(datetime.start), 'dd MMM yyyy HH:mm') }}
+              {{ formatDate(datetime.date_start, 'dd MMM yyyy HH:mm') }}
             </span>
             <span
-              v-if="datetime.end"
+              v-if="datetime.date_end"
               class="text-sm text-muted-foreground"
             >
-              - {{ formatDate(Number(datetime.end), 'dd MMM yyyy HH:mm') }}
+              - {{ formatDate(datetime.date_end, 'dd MMM yyyy HH:mm') }}
             </span>
             <span
               v-if="datetime.available !== null"

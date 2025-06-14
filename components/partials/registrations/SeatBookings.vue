@@ -106,7 +106,7 @@ function handlePopoverClose() {
             <SelectGroup>
               <SelectLabel>Event Days</SelectLabel>
               <SelectItem v-for="scope in seatData?.ticket_scopes" :key="scope.id" :value="scope.day.toString()">
-                {{ scope.name }} ({{ scope.start }})
+                {{ scope.name }} ({{ scope.date_start }})
               </SelectItem>
             </SelectGroup>
           </SelectContent>

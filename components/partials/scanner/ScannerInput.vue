@@ -105,7 +105,7 @@ const getActionButtonLabel = () => {
       </Select>
 
       <!-- Input Field -->
-      <div class="relative">
+      <div class="relative grow md:col-span-5">
         <Input
           ref="targetInput"
           :model-value="unifiedInput"

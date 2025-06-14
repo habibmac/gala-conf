@@ -1,14 +1,10 @@
-import { fromUnixTime } from 'date-fns';
-
-import { formatDate, formatTimeAgo } from '@/utils';
-
 export function useEventStatus() {
   const { event } = useEvent();
 
   const hasEventEnded = computed(() => {
-    if (!event.value?.end)
+    if (!event.value?.end_date)
       return false;
-    return fromUnixTime(event.value.end) < new Date();
+    return new Date(event.value.end_date) < new Date();
   });
 
   const eventStatus = computed(() => {
@@ -16,9 +12,9 @@ export function useEventStatus() {
       return 'unknown';
 
     const now = new Date();
-    const startDate = fromUnixTime(event.value.start);
-    const endDate = fromUnixTime(event.value.end);
-    const regDate = fromUnixTime(event.value.reg_begins);
+    const startDate = new Date(event.value.date_start);
+    const endDate = new Date(event.value.end_date);
+    const regDate = new Date(event.value.reg_begins);
 
     if (now < regDate)
       return 'registration-pending';
@@ -29,33 +25,24 @@ export function useEventStatus() {
     return 'active';
   });
 
-  // Add some useful computed properties
-  const formattedDates = computed(() => ({
-    end: formatDate(event.value?.end || 0, 'dd MMM yyyy HH:mm'),
-    regBegins: formatDate(event.value?.reg_begins || 0, 'dd MMM yyyy HH:mm'),
-    start: formatDate(event.value?.start || 0, 'dd MMM yyyy HH:mm'),
-  }));
-
   const timeUntilStart = computed(() => {
-    if (!event.value?.start)
+    if (!event.value?.date_start)
       return '';
-    return formatTimeAgo(fromUnixTime(event.value.start));
+    return formatTimeAgo(event.value.date_start);
   });
 
   const timeUntilEnd = computed(() => {
-    if (!event.value?.end)
+    if (!event.value?.date_end)
       return '';
-    return formatTimeAgo(fromUnixTime(event.value.end));
+    return formatTimeAgo(event.value.date_end);
   });
 
-  // Has seating?
   const hasSeating = computed(() => {
-    return event.value?.has_seating && event.value.has_seating.length > 0;
+    return event.value?.has_seating;
   });
 
   return {
     eventStatus,
-    formattedDates,
     hasEventEnded,
     hasSeating,
     timeUntilEnd,

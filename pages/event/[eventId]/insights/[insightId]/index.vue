@@ -166,7 +166,7 @@ const columns = computed(() => {
                       {
                         class: 'text-xs text-slate-400 dark:text-slate-600',
                       },
-                      format(date, 'hh:mm'),
+                      format(date, 'HH:mm'),
                     ),
                   ],
                 );

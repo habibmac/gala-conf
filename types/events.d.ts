@@ -8,8 +8,8 @@ export interface EvtRequestParams {
 export interface EvtDatetime {
   id: string
   name: string
-  start: string // Unix timestamp as string
-  end: string // Unix timestamp as string
+  date_start: string // Unix timestamp as string
+  date_end: string // Unix timestamp as string
   reg_limit: string | null // Unix timestamp as string or null
   sold: number
   reserved: number

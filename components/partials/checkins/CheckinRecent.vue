@@ -1,7 +1,6 @@
 <!-- components/checkins/CheckinRecent.vue -->
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
-import { fromUnixTime } from 'date-fns';
 
 import type { RecentCheckin } from '~/types';
 
@@ -71,7 +70,7 @@ const getRegDetailsUrl = (regId: string) => {
                 class="text-sm hover:bg-slate-50 dark:hover:bg-slate-800/50"
               >
                 <td class="whitespace-nowrap px-4 py-2 font-medium text-slate-900 dark:text-slate-300">
-                  {{ fromUnixTime(Number(checkin.check_time)) }}
+                  {{ formatDate(checkin.check_time, 'dd MMM yyyy HH:mm') }}
                 </td>
                 <td class="px-4 py-2">
                   {{ checkin.name }}
