@@ -9,7 +9,7 @@ export default defineNuxtConfig({
     },
   },
   build: {
-    transpile: ['@vuepic/vue-datepicker'],
+    transpile: ['@vuepic/vue-datepicker', 'vue-sonner'],
   },
   colorMode: {
     classSuffix: '',
@@ -40,6 +40,7 @@ export default defineNuxtConfig({
     '@formkit/auto-animate/nuxt',
     '@nuxt/image',
     'nuxt-qrcode',
+    'vue-sonner/nuxt',
   ],
   plugins: ['~/plugins/api.ts'],
   runtimeConfig: {
