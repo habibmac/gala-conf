@@ -72,3 +72,55 @@ html.dark {
     field-sizing: content;
   }
 }
+
+// Custom toast colors that override vue-sonner defaults
+[data-sonner-toaster] {
+  // Error toasts
+  [data-type='error'] {
+    background-color: rgb(220 38 38) !important;
+    /* red-600 */
+    color: white !important;
+    border-color: rgb(185 28 28) !important;
+    /* red-700 */
+  }
+
+  // Success toasts
+  [data-type='success'] {
+    background-color: rgb(1, 191, 77) !important;
+    /* emerald-800 */
+    color: white !important;
+    border-color: rgb(0, 171, 74) !important;
+    /* emerald-700 */
+  }
+
+  // Warning toasts
+  [data-type='warning'] {
+    background-color: rgb(245 158 11) !important;
+    /* amber-500 */
+    color: white !important;
+    border-color: rgb(217 119 6) !important;
+    /* amber-600 */
+  }
+
+  // Info toasts
+  [data-type='info'] {
+    background-color: rgb(37 99 235) !important;
+    /* blue-600 */
+    color: white !important;
+    border-color: rgb(29 78 216) !important;
+    /* blue-700 */
+  }
+}
+
+// Dark mode adjustments
+.dark [data-sonner-toaster] {
+  [data-type='error'] {
+    background-color: rgb(185 28 28) !important;
+    /* red-700 for better dark mode visibility */
+  }
+
+  [data-type='success'] {
+    background-color: rgb(25, 172, 66) !important;
+    /* emerald-700 for better dark mode visibility */
+  }
+}

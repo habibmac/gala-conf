@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import Toaster from '@/components/ui/toast/Toaster.vue';
-
 useHead({
   titleTemplate: (titleChunk) => {
     return titleChunk ? `${titleChunk} | Galanesia ID` : 'Galanesia ID';
@@ -14,6 +12,6 @@ useHead({
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
-    <Toaster />
+    <Sonner position="top-center" />
   </div>
 </template>

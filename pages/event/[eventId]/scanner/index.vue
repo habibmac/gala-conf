@@ -3,6 +3,7 @@ import { Icon } from '@iconify/vue';
 import { breakpointsTailwind, useBreakpoints, useDebounceFn, useSwipe } from '@vueuse/core';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { toast } from 'vue-sonner';
 
 import type { ApiError, RegistrationData, ScanHistoryItem, ScannerMode, ScannerSettings, SupportedBarcodeFormat } from '~/types';
 
@@ -25,7 +26,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useToast } from '@/components/ui/toast/use-toast';
 
 type CapabilityKey = keyof ScannerSettings['capabilities'];
 
@@ -43,7 +43,6 @@ definePageMeta({
 
 const route = useRoute();
 const { $galantisApi } = useNuxtApp();
-const { toast } = useToast();
 
 // Get datetime id from route params
 const selectedDatetime = ref<string>(route.params.datetimeId as string || '');
@@ -138,7 +137,7 @@ const availableModes = computed(() => {
 const loadScannerSettings = async () => {
   try {
     isLoading.value = true;
-    const response = await $galantisApi.get(`/event/${eventId.value}/scanner/details`);
+    const response = await $galantisApi.get(`/event/${eventId.value}/scanner`);
 
     let scannerData = null;
 
@@ -200,11 +199,12 @@ const loadScannerSettings = async () => {
       errorMessage = apiError.message;
     }
 
-    toast({
-      description: errorMessage,
-      title: 'Scanner Error',
-      variant: 'destructive',
-    });
+    toast.error(
+      'Scanner Error',
+      {
+        description: errorMessage,
+      },
+    );
   }
   finally {
     isLoading.value = false;
@@ -226,7 +226,7 @@ const performLookup = async (code: string) => {
       lookupResult.value = registrationData;
 
       const scanEntry: ScanHistoryItem = {
-        attendeeName: registrationData?.attendee?.full_name,
+        attendeeName: registrationData?.attendee?.fullname,
         code,
         id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         message: 'Registration found',
@@ -267,7 +267,7 @@ const performCheckin = async (code: string, action = 'checkin') => {
 
       const scanEntry: ScanHistoryItem = {
         action: response.data.action_taken,
-        attendeeName: registrationData?.attendee?.full_name,
+        attendeeName: registrationData?.attendee?.fullname,
         code,
         id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         message: `${action} successful`,
@@ -278,10 +278,14 @@ const performCheckin = async (code: string, action = 'checkin') => {
 
       scanHistory.value.unshift(scanEntry);
 
-      toast({
-        description: `${registrationData?.attendee?.full_name || 'Attendee'} ${action} completed`,
-        title: `${action} Successful ✅`,
-      });
+      console.warn('Check-in response:', response.data);
+
+      toast.success(
+        `${action} Successful ✅`,
+        {
+          description: `${registrationData?.attendee?.fullname || 'Attendee'} ${action} completed`,
+        },
+      );
 
       return response.data;
     }
@@ -340,7 +344,7 @@ const debouncedSearch = useDebounceFn(async (searchTerm: string) => {
   try {
     const response = await $galantisApi.post(`/event/${eventId.value}/scanner/search`, {
       datetime_id: selectedDatetime.value,
-      keyword: searchTerm,
+      search: searchTerm,
       limit: 20,
     });
 
@@ -353,13 +357,7 @@ const debouncedSearch = useDebounceFn(async (searchTerm: string) => {
   }
   catch (error: unknown) {
     searchResults.value = [];
-
-    const apiError = error as ApiError;
-    toast({
-      description: apiError.response?.data?.message || 'Search failed',
-      title: 'Search Error',
-      variant: 'destructive',
-    });
+    console.error('Search failed:', error);
   }
   finally {
     isSearching.value = false;
@@ -388,7 +386,7 @@ const handleScanResult = async (result: { rawValue: string, format: string, time
 
       // Add to scan history
       const scanEntry: ScanHistoryItem = {
-        attendeeName: currentScanResult.value?.attendee?.full_name,
+        attendeeName: currentScanResult.value?.attendee?.fullname,
         code: result.rawValue,
         id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         message: 'Registration found',
@@ -476,22 +474,25 @@ const handleScanError = (result: { rawValue: string, format: string, timestamp: 
   // Show different toast styles for payment errors
   const isPaymentError = message.includes('Payment') || message.includes('payment');
 
-  toast({
-    description: message,
-    title: isPaymentError ? 'Payment Required ⚠️' : 'Scan Error ⚠️',
-    variant: 'destructive',
-  });
+  toast.error(
+    isPaymentError ? 'Payment Required ⚠️' : 'Scan Error ⚠️',
+    {
+      description: message,
+    },
+  );
 };
 
 const handleScannerError = (error: string) => {
   // Play error beep for camera/scanner errors
   TicketScannerRef.value?.playErrorBeep();
 
-  toast({
-    description: error,
-    title: 'Scanner Error',
-    variant: 'destructive',
-  });
+  toast.error(
+    'Scanner Error',
+    {
+      description: error,
+
+    },
+  );
 };
 
 const resumeScanning = () => {
@@ -510,11 +511,12 @@ const clearLookupResult = () => {
 
 const handleScannerCheckin = async (data: { registration: any, note: string }) => {
   if (!data.registration) {
-    toast({
-      description: 'Registration data is missing',
-      title: 'Check-in Error',
-      variant: 'destructive',
-    });
+    toast.error(
+      'Check-in Error',
+      {
+        description: 'Registration data is missing',
+      },
+    );
     return;
   }
   await handleRegistrationAction(data.registration, 'checkin', data.note);
@@ -522,11 +524,12 @@ const handleScannerCheckin = async (data: { registration: any, note: string }) =
 
 const handleScannerCheckout = async (data: { registration: any, note: string }) => {
   if (!data.registration) {
-    toast({
-      description: 'Registration data is missing',
-      title: 'Check-out Error',
-      variant: 'destructive',
-    });
+    toast.error(
+      'Check-out Error',
+      {
+        description: 'Registration data is missing',
+      },
+    );
     return;
   }
   await handleRegistrationAction(data.registration, 'checkout', data.note);
@@ -534,22 +537,24 @@ const handleScannerCheckout = async (data: { registration: any, note: string }) 
 
 const handleSaveNoteOnly = (data: { registration: any, note: string }) => {
   if (!data.registration) {
-    toast({
-      description: 'Registration data is missing',
-      title: 'Note Error',
-      variant: 'destructive',
-    });
+    toast.error(
+      'Save Note Error',
+      {
+        description: 'Registration data is missing',
+      },
+    );
   }
   // Implementation for saving note without action would go here
 };
 
 const toggleScanner = () => {
   if (!canScan.value) {
-    toast({
-      description: 'Please select a datetime session first',
-      title: 'Cannot Start Scanner',
-      variant: 'destructive',
-    });
+    toast.error(
+      'Cannot Start Scanner',
+      {
+        description: 'Please select a datetime session first',
+      },
+    );
     return;
   }
 
@@ -563,10 +568,12 @@ const toggleScanner = () => {
 
 const confirmClearHistory = () => {
   if (scanHistory.value.length === 0) {
-    toast({
-      description: 'Scan history is already empty',
-      title: 'Nothing to Clear',
-    });
+    toast.error(
+      'Nothing to Clear',
+      {
+        description: 'Scan history is already empty',
+      },
+    );
     return;
   }
 
@@ -576,10 +583,12 @@ const confirmClearHistory = () => {
 const clearHistory = () => {
   scanHistory.value = [];
   showClearConfirmDialog.value = false;
-  toast({
-    description: 'Scan history has been cleared',
-    title: 'History Cleared',
-  });
+  toast.success(
+    'History Cleared',
+    {
+      description: 'Scan history has been cleared',
+    },
+  );
 };
 
 const exportHistory = () => {
@@ -615,6 +624,15 @@ const exportHistory = () => {
 
 const formatTimestamp = (timestamp: number) => {
   return new Date(timestamp).toLocaleString();
+};
+
+const handleClickSearchResultOnDesktop = (result: any) => {
+  lookupResult.value = result;
+  // Scroll to lookup result
+  const lookupElement = document.getElementById('lookup-result-card');
+  if (lookupElement) {
+    lookupElement.scrollIntoView({ behavior: 'smooth' });
+  }
 };
 
 const handleRegistrationAction = async (
@@ -653,7 +671,7 @@ const handleRegistrationAction = async (
 
       const scanEntry: ScanHistoryItem = {
         action: response.data.action_taken,
-        attendeeName: updatedRegistration?.attendee?.full_name,
+        attendeeName: updatedRegistration?.attendee?.fullname,
         code: registration.code,
         id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         message: `${action} successful${note ? ' (with note)' : ''}`,
@@ -665,12 +683,9 @@ const handleRegistrationAction = async (
 
       scanHistory.value.unshift(scanEntry);
 
-      $toast.success(
-        `${action.charAt(0).toUpperCase() + action.slice(1)} Successful`,
-        {
-          description: `${updatedRegistration?.attendee?.fullname || 'Attendee'} ${action} completed${note ? ' with note' : ''}`,
-        },
-      );
+      toast.success(`${action} Successful ✅`, {
+        description: `${updatedRegistration?.attendee?.fullname || 'Attendee'} ${action} completed${note ? ' with note' : ''}`,
+      });
 
       // Resume scanning after action
       setTimeout(() => {
@@ -969,7 +984,7 @@ useHead({
             :unified-input="unifiedInput"
             :is-processing="isProcessing"
             :is-searching="isSearching"
-            @select-result="lookupResult = $event"
+            @select-result="handleClickSearchResultOnDesktop($event)"
           />
         </div>
       </div>
