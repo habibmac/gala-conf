@@ -1,5 +1,4 @@
 import { defineNuxtPlugin } from '#app';
-// plugins/api.ts
 import axios from 'axios';
 
 import { useAuthStore } from '@/stores';
@@ -12,6 +11,11 @@ export default defineNuxtPlugin(() => {
     baseURL: config.public.oauthUrl,
     withCredentials: true,
   });
+
+  // Check if already defined to prevent redefinition
+  if (import.meta.client && '$galantisApi' in useNuxtApp()) {
+    return;
+  }
 
   const galantisApi = axios.create({
     baseURL: `${config.public.apiUrl}/wp-json/galantis/v1`,
