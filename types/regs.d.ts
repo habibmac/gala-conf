@@ -35,6 +35,7 @@ export interface ColumnConfig {
   isVisible: boolean
   isHideable: boolean
   width: number // Width in percentage
+  enableSorting?: boolean
   accessor?: (row: RegItem) => string
 }
 

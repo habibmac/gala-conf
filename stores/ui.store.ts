@@ -32,7 +32,7 @@ export const useUIStore = defineStore('ui', () => {
 
   // Query setup
   const query = useQuery({
-    queryFn: async () => {
+    queryFn: async (): Promise<UserPreferences> => {
       const response = await $galantisApi.get<PreferencesResponse>('/user/preferences');
       return response.data.data;
     },
