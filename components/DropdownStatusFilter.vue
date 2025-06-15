@@ -34,30 +34,31 @@ watch(
   },
 );
 
+// Fixed: Simple dropdown logic
 function updateValue(value: string) {
   let updatedStatuses: string[];
 
-  // If we're currently in "All Status" state (empty array)
-  if (selectedStatuses.value.length === 0) {
-    // User is unchecking one item from "All Status"
-    // So we need all statuses EXCEPT the one being unchecked
-    updatedStatuses = filteredStatus.value
-      .map(status => status.value)
-      .filter(statusValue => statusValue !== value);
+  if (value === 'all') {
+    // User clicked "All Status" - select everything (empty array represents "all")
+    updatedStatuses = [];
   }
   else {
-    // Normal toggle behavior when in partial selection
-    if (selectedStatuses.value.includes(value)) {
-      // Removing a status
+    // User clicked a specific status
+    if (selectedStatuses.value.length === 0) {
+      // Currently "All" is selected, user wants only this specific status
+      updatedStatuses = [value];
+    }
+    else if (selectedStatuses.value.includes(value)) {
+      // This status is currently selected - remove it
       updatedStatuses = selectedStatuses.value.filter(status => status !== value);
     }
     else {
-      // Adding a status
+      // This status is not selected - add it
       updatedStatuses = [...selectedStatuses.value, value];
 
       // Check if we now have all statuses selected
       if (updatedStatuses.length === filteredStatus.value.length) {
-        // Convert to "All Status" (empty array)
+        // All individual statuses are selected, so convert to "All" (empty array)
         updatedStatuses = [];
       }
     }
@@ -75,17 +76,9 @@ const filteredStatus = computed(() =>
   })),
 );
 
-// Removed selectedStatusLabels - not needed anymore
-
-const selectedValues = computed(() => new Set(selectedStatuses.value));
-
 const buttonLabel = computed(() => {
   // When no specific statuses selected = "All Status" (this represents all are active)
   if (selectedStatuses.value.length === 0) {
-    return 'All Status';
-  }
-  // When all individual statuses are explicitly selected = "All Status"
-  if (selectedStatuses.value.length === filteredStatus.value.length) {
     return 'All Status';
   }
   // Single selection
@@ -96,11 +89,20 @@ const buttonLabel = computed(() => {
   return `${selectedStatuses.value.length} selected`;
 });
 
-// This function sets the filter to "All Status" (empty array)
-function clearAllStatuses() {
-  emits('update:modelValue', []);
-  selectedStatuses.value = [];
-}
+// Fixed: Check if option is selected - this shows the ACTUAL state
+const isChecked = (value: string) => {
+  if (value === 'all') {
+    // "All" is checked when no specific statuses are selected (empty array = all selected)
+    return selectedStatuses.value.length === 0;
+  }
+  // For individual statuses:
+  // - If "All" is selected (empty array), show all individual options as checked
+  // - If specific statuses are selected, only show those as checked
+  if (selectedStatuses.value.length === 0) {
+    return true; // When "All" is active, show all individual options as checked
+  }
+  return selectedStatuses.value.includes(value);
+};
 
 // Mobile-specific functions
 const shouldShowSelectAll = computed(() => {
@@ -111,32 +113,16 @@ const shouldShowSelectAll = computed(() => {
 const toggleAllSelection = () => {
   if (shouldShowSelectAll.value) {
     // User wants to select all -> set to empty array (which means "All Status")
-    emits('update:modelValue', []);
-    selectedStatuses.value = [];
+    updateValue('all');
   }
   else {
     // Currently showing "All Status", user wants partial selection
     // Select just the first status to move to partial selection state
     if (filteredStatus.value.length > 0) {
-      const firstStatus = [filteredStatus.value[0].value];
-      emits('update:modelValue', firstStatus);
-      selectedStatuses.value = firstStatus;
+      updateValue(filteredStatus.value[0].value);
     }
   }
 };
-
-const toggleStatusMobile = (statusValue: string) => {
-  updateValue(statusValue);
-};
-
-const isStatusSelected = (statusValue: string) => {
-  return selectedStatuses.value.includes(statusValue);
-};
-
-const isAllStatusSelected = computed(() => {
-  // "All Status" is selected when array is empty OR when all individual statuses are selected
-  return selectedStatuses.value.length === 0 || selectedStatuses.value.length === filteredStatus.value.length;
-});
 </script>
 
 <template>
@@ -166,11 +152,12 @@ const isAllStatusSelected = computed(() => {
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                <CommandItem :value="{ label: 'All Status', value: '' }" @select="clearAllStatuses">
+                <!-- All Status Option -->
+                <CommandItem :value="{ label: 'All Status', value: 'all' }" @select="() => updateValue('all')">
                   <div
                     :class="cn(
                       'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                      isAllStatusSelected
+                      isChecked('all')
                         ? 'bg-primary text-primary-foreground'
                         : 'opacity-50 [&_svg]:invisible',
                     )"
@@ -179,6 +166,8 @@ const isAllStatusSelected = computed(() => {
                   </div>
                   <span>All Status</span>
                 </CommandItem>
+
+                <!-- Individual Status Options -->
                 <CommandItem
                   v-for="item in filteredStatus"
                   :key="item.value"
@@ -188,7 +177,7 @@ const isAllStatusSelected = computed(() => {
                   <div
                     :class="cn(
                       'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                      selectedValues.has(item.value) || isAllStatusSelected
+                      isChecked(item.value)
                         ? 'bg-primary text-primary-foreground'
                         : 'opacity-50 [&_svg]:invisible',
                     )"
@@ -254,19 +243,32 @@ const isAllStatusSelected = computed(() => {
 
             <!-- Status List -->
             <div class="max-h-60 space-y-2 overflow-y-auto">
+              <!-- All Status Option -->
+              <div
+                class="flex items-center space-x-3 rounded-md border p-3 transition-colors hover:bg-muted/50"
+                :class="{ 'bg-muted/50': isChecked('all') }"
+                @click="() => updateValue('all')"
+              >
+                <Checkbox :checked="isChecked('all')" @click.stop @update:checked="() => updateValue('all')" />
+                <div class="flex min-w-0 flex-1 items-center space-x-2">
+                  <div class="text-sm font-medium">
+                    All Status
+                  </div>
+                </div>
+              </div>
+
               <!-- Individual Statuses -->
               <div
                 v-for="status in filteredStatus"
                 :key="status.value"
                 class="flex items-center space-x-3 rounded-md border p-3 transition-colors hover:bg-muted/50"
-                :class="{ 'bg-muted/50': isAllStatusSelected || isStatusSelected(status.value) }"
-                @click="toggleStatusMobile(status.value)"
+                :class="{ 'bg-muted/50': isChecked(status.value) }"
+                @click="() => updateValue(status.value)"
               >
                 <Checkbox
-                  :checked="isAllStatusSelected || isStatusSelected(status.value)"
-                  :disabled="selectedStatuses.length === 1 && isStatusSelected(status.value)"
+                  :checked="isChecked(status.value)"
                   @click.stop
-                  @update:checked="toggleStatusMobile(status.value)"
+                  @update:checked="() => updateValue(status.value)"
                 />
                 <div class="flex min-w-0 flex-1 items-center space-x-2">
                   <span :class="`dot ${status.color} h-3 w-3 rounded-full inline-block`" />

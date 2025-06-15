@@ -4,8 +4,6 @@ import { useQuery } from '@tanstack/vue-query';
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 
-import type { TicketList } from '~/types';
-
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -71,30 +69,31 @@ watch(
   },
 );
 
+// Fixed: Simple dropdown logic
 function updateValue(value: string) {
   let updatedTickets: string[];
 
-  // If we're currently in "All Tickets" state (empty array)
-  if (selectedTickets.value.length === 0) {
-    // User is unchecking one item from "All Tickets"
-    // So we need all tickets EXCEPT the one being unchecked
-    updatedTickets = ticketOptions.value
-      .map((ticket: TicketList) => ticket.name)
-      .filter((ticketName: string) => ticketName !== value);
+  if (value === 'all') {
+    // User clicked "All Tickets" - select everything (empty array represents "all")
+    updatedTickets = [];
   }
   else {
-    // Normal toggle behavior when in partial selection
-    if (selectedTickets.value.includes(value)) {
-      // Removing a ticket
+    // User clicked a specific ticket
+    if (selectedTickets.value.length === 0) {
+      // Currently "All" is selected, user wants only this specific ticket
+      updatedTickets = [value];
+    }
+    else if (selectedTickets.value.includes(value)) {
+      // This ticket is currently selected - remove it
       updatedTickets = selectedTickets.value.filter(ticket => ticket !== value);
     }
     else {
-      // Adding a ticket
+      // This ticket is not selected - add it
       updatedTickets = [...selectedTickets.value, value];
 
       // Check if we now have all tickets selected
       if (updatedTickets.length === ticketOptions.value.length) {
-        // Convert to "All Tickets" (empty array)
+        // All individual tickets are selected, so convert to "All" (empty array)
         updatedTickets = [];
       }
     }
@@ -111,15 +110,27 @@ const buttonLabel = computed(() => {
   // When no specific tickets are selected = "All Tickets"
   if (selectedTickets.value.length === 0)
     return 'All Tickets';
-  // When all individual tickets are explicitly selected = "All Tickets"
-  if (selectedTickets.value.length === tickets.value.length)
-    return 'All Tickets';
   // Single selection
   if (selectedTickets.value.length === 1)
     return selectedTickets.value[0];
   // Multiple but not all
   return `${selectedTickets.value.length} tickets selected`;
 });
+
+// Fixed: Check if option is selected - this shows the ACTUAL state
+const isChecked = (value: string) => {
+  if (value === 'all') {
+    // "All" is checked when no specific tickets are selected (empty array = all selected)
+    return selectedTickets.value.length === 0;
+  }
+  // For individual tickets:
+  // - If "All" is selected (empty array), show all individual options as checked
+  // - If specific tickets are selected, only show those as checked
+  if (selectedTickets.value.length === 0) {
+    return true; // When "All" is active, show all individual options as checked
+  }
+  return selectedTickets.value.includes(value);
+};
 
 const searchTerm = ref('');
 
@@ -147,46 +158,9 @@ const filteredTickets = computed(() => {
   return filterFunction.value(ticketOptions.value, searchTerm.value);
 });
 
-function clearAllTickets() {
-  emits('update:modelValue', []);
-  selectedTickets.value = [];
-}
-
-// Mobile-specific functions
-const shouldShowSelectAll = computed(() => {
-  // Show "Select All" when some but not all tickets are selected
-  return selectedTickets.value.length > 0 && selectedTickets.value.length < (tickets.value?.length || 0);
-});
-
 const toggleAllSelection = () => {
-  if (shouldShowSelectAll.value) {
-    // User wants to select all -> set to empty array (which means "All Tickets")
-    emits('update:modelValue', []);
-    selectedTickets.value = [];
-  }
-  else {
-    // Currently showing "All Tickets", user wants partial selection
-    // Select just the first ticket to move to partial selection state
-    if (filteredTickets.value.length > 0) {
-      const firstTicket = [filteredTickets.value[0].name];
-      emits('update:modelValue', firstTicket);
-      selectedTickets.value = firstTicket;
-    }
-  }
+  updateValue('all');
 };
-
-const toggleTicketMobile = (ticketName: string) => {
-  updateValue(ticketName);
-};
-
-const isTicketSelected = (ticketName: string) => {
-  return selectedTickets.value.includes(ticketName);
-};
-
-const isAllTicketsSelected = computed(() => {
-  // "All Tickets" is selected when array is empty OR when all individual tickets are selected
-  return selectedTickets.value.length === 0 || selectedTickets.value.length === (tickets.value?.length || 0);
-});
 </script>
 
 <template>
@@ -217,11 +191,12 @@ const isAllTicketsSelected = computed(() => {
             <CommandList>
               <CommandEmpty>No tickets found.</CommandEmpty>
               <CommandGroup>
-                <CommandItem :value="{ label: 'All Tickets', value: '' }" @select="clearAllTickets">
+                <!-- All Tickets Option -->
+                <CommandItem :value="{ label: 'All Tickets', value: 'all' }" @select="() => updateValue('all')">
                   <div
                     :class="cn(
                       'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                      isAllTicketsSelected
+                      isChecked('all')
                         ? 'bg-primary text-primary-foreground'
                         : 'opacity-50 [&_svg]:invisible',
                     )"
@@ -230,6 +205,8 @@ const isAllTicketsSelected = computed(() => {
                   </div>
                   <span>All Tickets</span>
                 </CommandItem>
+
+                <!-- Individual Ticket Options -->
                 <CommandItem
                   v-for="ticket in filteredTickets"
                   :key="ticket.id"
@@ -239,7 +216,7 @@ const isAllTicketsSelected = computed(() => {
                   <div
                     :class="cn(
                       'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                      selectedTickets.includes(ticket.name) || isAllTicketsSelected
+                      isChecked(ticket.name)
                         ? 'bg-primary text-primary-foreground'
                         : 'opacity-50 [&_svg]:invisible',
                     )"
@@ -304,8 +281,8 @@ const isAllTicketsSelected = computed(() => {
                 :disabled="!tickets || tickets.length === 0"
                 @click="toggleAllSelection"
               >
-                <Icon :icon="shouldShowSelectAll ? 'heroicons:check' : 'heroicons:x-mark'" class="mr-2 size-4" />
-                {{ shouldShowSelectAll ? 'Select All' : 'Clear Selection' }}
+                <Icon icon="heroicons:check" class="mr-2 size-4" />
+                Select All
               </Button>
             </div>
 
@@ -313,20 +290,33 @@ const isAllTicketsSelected = computed(() => {
 
             <!-- Tickets List -->
             <div class="space-y-2 overflow-y-auto">
+              <!-- All Tickets Option -->
+              <div
+                class="flex items-center space-x-3 rounded-md border p-3 transition-colors hover:bg-muted/50"
+                :class="{ 'bg-muted/50': isChecked('all') }"
+                @click="() => updateValue('all')"
+              >
+                <Checkbox :checked="isChecked('all')" @click.stop @update:checked="() => updateValue('all')" />
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-medium">
+                    All Tickets
+                  </div>
+                </div>
+              </div>
+
               <!-- Individual Tickets -->
               <template v-if="filteredTickets.length > 0">
                 <div
                   v-for="ticket in filteredTickets"
                   :key="ticket.id"
                   class="flex items-center space-x-3 rounded-md border p-3 transition-colors hover:bg-muted/50"
-                  :class="{ 'bg-muted/50': isAllTicketsSelected || isTicketSelected(ticket.name) }"
-                  @click="toggleTicketMobile(ticket.name)"
+                  :class="{ 'bg-muted/50': isChecked(ticket.name) }"
+                  @click="() => updateValue(ticket.name)"
                 >
                   <Checkbox
-                    :checked="isAllTicketsSelected || isTicketSelected(ticket.name)"
-                    :disabled="selectedTickets.length === 1 && isTicketSelected(ticket.name)"
+                    :checked="isChecked(ticket.name)"
                     @click.stop
-                    @update:checked="toggleTicketMobile(ticket.name)"
+                    @update:checked="() => updateValue(ticket.name)"
                   />
                   <div class="min-w-0 flex-1">
                     <div class="text-sm font-medium">
