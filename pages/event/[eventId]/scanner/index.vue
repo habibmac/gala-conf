@@ -665,10 +665,12 @@ const handleRegistrationAction = async (
 
       scanHistory.value.unshift(scanEntry);
 
-      toast({
-        description: `${updatedRegistration?.attendee?.full_name || 'Attendee'} ${action} completed${note ? ' with note' : ''}`,
-        title: `${action} Successful ✅`,
-      });
+      $toast.success(
+        `${action.charAt(0).toUpperCase() + action.slice(1)} Successful`,
+        {
+          description: `${updatedRegistration?.attendee?.fullname || 'Attendee'} ${action} completed${note ? ' with note' : ''}`,
+        },
+      );
 
       // Resume scanning after action
       setTimeout(() => {

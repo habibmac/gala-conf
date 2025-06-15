@@ -19,9 +19,9 @@ export interface ScannerSettings {
     stats: boolean
   }
   stats: {
-    total_checkins: string | number // API returns string
-    total_checkouts: string | number // API returns string
-    currently_checked_in: string | number // API returns string
+    total_checkins: number
+    total_checkouts: number
+    currently_checked_in: number
   }
   recent_activity: Array<{
     REG_ID: string
@@ -53,7 +53,7 @@ export interface RegistrationData {
   attendee: {
     first_name: string
     last_name: string
-    full_name: string
+    fullname: string
     email: string
     phone: string
   }
@@ -134,19 +134,19 @@ export type ScannerMode = 'lookup' | 'continuous' | 'search';
 
 export type actionTaken = 'checked_in' | 'checked_out' | 'no_change';
 
-export type SupportedBarcodeFormat =
-  | 'qr_code'
-  | 'code_128'
-  | 'code_39'
-  | 'ean_13'
-  | 'ean_8'
-  | 'code_93'
-  | 'upc_a'
-  | 'upc_e'
-  | 'itf'
-  | 'pdf417'
-  | 'data_matrix'
-  | 'aztec'
-  | 'codabar'
-  | 'databar'
-  | 'databar_expanded';
+export type SupportedBarcodeFormat
+  = | 'qr_code'
+    | 'code_128'
+    | 'code_39'
+    | 'ean_13'
+    | 'ean_8'
+    | 'code_93'
+    | 'upc_a'
+    | 'upc_e'
+    | 'itf'
+    | 'pdf417'
+    | 'data_matrix'
+    | 'aztec'
+    | 'codabar'
+    | 'databar'
+    | 'databar_expanded';
