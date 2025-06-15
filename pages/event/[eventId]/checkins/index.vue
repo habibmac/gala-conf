@@ -344,15 +344,6 @@ const isAnyFilterActive = computed(() => {
   return filters.value.search || filters.value.date_start || filters.value.date_end;
 });
 
-function calculateMinWidth(): number {
-  const totalWidth = columnConfigs.value
-    .filter(config => config.isVisible)
-    .reduce((total, config) => total + config.width * 15, 0); // Multiply by a factor to get reasonable width
-
-  // Return the greater of the calculated width or minimum width (e.g., 1000px)
-  return Math.max(totalWidth, 1000);
-}
-
 const handleOpenDetails = (id: string) => {
   selectedRegId.value = id;
 };
@@ -419,6 +410,7 @@ watch(
   <section class="relative" :class="{ 'scroll-area overflow-x-auto': !isDataLoading }">
     <div class="w-full">
       <div :style="{ minWidth: `${calculateMinWidth()}px` }">
+      <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs), totalData)}px` }">
         <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
           <thead
             class="border-y border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
