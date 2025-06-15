@@ -50,7 +50,7 @@ const getCardData = (summaryData: BillingSummary) => [
 ];
 
 // Fetch billing summary data
-const getBillingSummary = async (evtId: Ref) => {
+const getBillingSummary = async (evtId: Ref): Promise<BillingSummary> => {
   const { $galantisApi } = useNuxtApp();
   const response = await $galantisApi.get(`/event/${evtId.value}/billings-summary`);
   return response.data;
@@ -64,9 +64,9 @@ const { data, isError, isLoading, isRefetching } = useQuery({
 
 // Computed property for card data
 const cards = computed(() => {
-  if (!data.value?.success)
+  if (!data.value)
     return [];
-  return getCardData(data.value.data);
+  return getCardData(data.value); // Direct access, no .data wrapper
 });
 </script>
 
@@ -83,7 +83,7 @@ const cards = computed(() => {
       Error fetching billing summary. Please try again later.
     </div>
   </div>
-  <template v-else-if="data?.success">
+  <template v-else-if="data">
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card v-for="item in cards" :key="item.title" class="relative overflow-hidden">
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">

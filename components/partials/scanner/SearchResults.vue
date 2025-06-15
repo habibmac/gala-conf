@@ -48,7 +48,7 @@ defineEmits<{
               <div class="space-y-6 sm:flex sm:items-center sm:justify-between sm:space-y-0">
                 <div class="flex-1">
                   <div class="font-medium">
-                    {{ result.attendee.full_name }}
+                    {{ result.attendee.fullname }}
                   </div>
                   <div class="number text-sm text-muted-foreground">
                     {{ result.code }}

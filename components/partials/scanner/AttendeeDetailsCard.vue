@@ -10,7 +10,7 @@ const props = defineProps<Props>();
 const attendeeCardValue = computed(() => {
   const attendee = props.lookupResult.attendee;
   return [
-    { field: 'Full Name', value: attendee.full_name },
+    { field: 'Full Name', value: attendee.fullname },
     { field: 'Email', value: attendee.email },
     { field: 'Phone', value: attendee.phone || 'N/A' },
     { field: 'Ticket', value: props.lookupResult.ticket.name },

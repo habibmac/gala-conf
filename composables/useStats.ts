@@ -21,7 +21,7 @@ export const useStats = (eventId: Ref<string>, filters?: Ref<StatsFilters>) => {
           params: filters?.value,
           signal,
         })
-        .then(response => response.data.data as AttendeeStats),
+        .then(response => response.data as AttendeeStats),
     queryKey: ['attendee-stats', eventId, filters],
   });
 
@@ -38,7 +38,7 @@ export const useStats = (eventId: Ref<string>, filters?: Ref<StatsFilters>) => {
           params: filters?.value,
           signal,
         })
-        .then(response => response.data.data as TransactionStats),
+        .then(response => response.data as TransactionStats),
     queryKey: ['transaction-stats', eventId, filters],
   });
 
@@ -55,7 +55,7 @@ export const useStats = (eventId: Ref<string>, filters?: Ref<StatsFilters>) => {
           params: filters?.value,
           signal,
         })
-        .then(response => response.data.data as CustomFieldStats),
+        .then(response => response.data as CustomFieldStats),
     queryKey: ['custom-field-stats', eventId, filters],
   });
 

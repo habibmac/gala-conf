@@ -29,7 +29,7 @@ const eventId = computed(() => event.value?.id);
 const getInsights = async (eventId: Ref<string>, signal: AbortSignal) => {
   const { $galantisApi } = useNuxtApp();
   const response = await $galantisApi.get(`/event/${eventId.value}/insights`, { signal });
-  return response.data?.data;
+  return response.data;
 };
 
 const {

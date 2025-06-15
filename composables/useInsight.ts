@@ -84,16 +84,16 @@ export const useInsight = (
   // API calls
   const getMetaData = async (signal: AbortSignal) => {
     return nuxtApp.$galantisApi.get(`/event/${eventId.value}/insight/${insightId}`, { signal }).then(response => ({
-      author: response.data.data.author,
-      avatar: response.data.data.avatar,
-      created_at: response.data.data.created_at,
-      event_id: response.data.data.event_id,
-      fields: response.data.data.fields,
-      groups: response.data.data.groups,
-      id: response.data.data.id,
-      is_public: response.data.data.is_public,
-      last_modified: response.data.data.last_modified,
-      title: response.data.data.title,
+      author: response.data.author,
+      avatar: response.data.avatar,
+      created_at: response.data.created_at,
+      event_id: response.data.event_id,
+      fields: response.data.fields,
+      groups: response.data.groups,
+      id: response.data.id,
+      is_public: response.data.is_public,
+      last_modified: response.data.last_modified,
+      title: response.data.title,
     }));
   };
 
