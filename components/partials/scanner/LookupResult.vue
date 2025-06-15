@@ -158,7 +158,7 @@ watch(() => props.lookupResult, () => {
   </Dialog>
 
   <!-- Desktop: Show as Card -->
-  <Card v-else class="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
+  <Card v-else id="lookup-result-card" class="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
     <CardHeader>
       <CardTitle class="flex items-center justify-between">
         <div class="flex items-center gap-2">
