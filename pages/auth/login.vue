@@ -49,11 +49,11 @@ const onSubmit = handleSubmit(async (values) => {
 
   isSubmitting.value = true;
   try {
-    const response: authResponse = await $fetch('/api/login', {
+    const response: authResponse = await $fetch<authResponse>('/api/login', {
       body: {
         password: values.password,
         username: values.username,
-      },
+      } as { password: string, username: string },
       method: 'POST',
     });
 

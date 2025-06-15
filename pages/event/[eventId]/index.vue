@@ -53,7 +53,6 @@ onMounted(() => {
         <CongratulationsBanner v-if="hasEventEnded" />
         <RegCards v-else />
         <CheckinStats :show-detailed-stats="false" :show-recent-checkins="true" />
-
         <SeatBookings v-if="hasSeating" />
       </ClientOnly>
     </div>
