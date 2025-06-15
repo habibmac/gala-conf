@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import type { PaginationState, SortingState } from '@tanstack/vue-table';
 
+import { Icon } from '@iconify/vue';
 import {
   createColumnHelper,
   FlexRender,
@@ -11,6 +12,7 @@ import {
 } from '@tanstack/vue-table';
 import { format } from 'date-fns';
 import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 import type { CheckinColumnConfig, CheckinData, CheckinItem } from '@/types';
 
@@ -101,10 +103,14 @@ const dateRange = computed(() => {
   return null;
 });
 
+// Export state
+const { exportData } = useExport();
+const isExporting = ref(false);
+
 // Table configurations
 const columnConfigs = ref<CheckinColumnConfig[]>([
   {
-    header: 'Time',
+    header: 'Check Time',
     isHideable: true,
     isVisible: true,
     key: 'first_check_time',
@@ -340,6 +346,29 @@ const handleSetDateRange = (dateRange: [Date | null, Date | null] | null) => {
   }
 };
 
+// Export functionality
+const handleExport = async (format: 'csv' | 'xlsx') => {
+  try {
+    isExporting.value = true;
+
+    await exportData(
+      eventId.value,
+      endpoint,
+      format,
+      filters.value,
+    );
+
+    toast('Export completed successfully');
+  }
+  catch (error) {
+    console.error('Export failed:', error);
+    toast('Export failed. Please try again.');
+  }
+  finally {
+    isExporting.value = false;
+  }
+};
+
 const isAnyFilterActive = computed(() => {
   return filters.value.search || filters.value.date_start || filters.value.date_end;
 });
@@ -403,13 +432,36 @@ watch(
           <Datepicker :date-range="dateRange" @update:date-range="handleSetDateRange" />
           <TableResetBtn v-if="isAnyFilterActive" @reset-filters="handleResetFilters" />
         </div>
+        <div>
+          <!-- Export Dropdown -->
+          <DropdownMenu v-if="!isDataLoading">
+            <DropdownMenuTrigger as-child>
+              <Button variant="outline" class="h-[42px] bg-card dark:bg-background" :disabled="isExporting">
+                <Icon
+                  :icon="isExporting ? 'svg-spinners:ring-resize' : 'heroicons:arrow-down-tray'"
+                  class="mr-2 size-4 text-muted-foreground"
+                />
+                {{ isExporting ? 'Exporting...' : 'Export' }}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center">
+              <DropdownMenuItem :disabled="isExporting" @click="handleExport('csv')">
+                <Icon icon="ph:file-csv" class="mr-2 size-4 text-muted-foreground" />
+                Export to CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem :disabled="isExporting" @click="handleExport('xlsx')">
+                <Icon icon="ph:file-xls" class="mr-2 size-4 text-muted-foreground" />
+                Export to XLSX
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </div>
   </section>
 
   <section class="relative" :class="{ 'scroll-area overflow-x-auto': !isDataLoading }">
     <div class="w-full">
-      <div :style="{ minWidth: `${calculateMinWidth()}px` }">
       <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs), totalData)}px` }">
         <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
           <thead
@@ -479,6 +531,7 @@ watch(
     @update:page-size="handlePageSizeChange"
     @update:current-page="handleNavigation"
   />
+  <div v-else class="h-40" />
   <RegDetails
     :reg-details-open="selectedRegId !== ''"
     :evt-id="eventId"

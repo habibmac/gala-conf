@@ -11,8 +11,9 @@ import {
 import { format } from 'date-fns';
 import { computed, h, ref, toRefs, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { toast } from 'vue-sonner';
 
-import type { Answer, ColumnConfig, Filter, RegItem } from '@/types';
+import type { ColumnConfig, Filter, RegItem } from '@/types';
 
 import Datepicker from '@/components/Datepicker.vue';
 import DropdownStatusFilter from '@/components/DropdownStatusFilter.vue';
@@ -24,7 +25,6 @@ import TableResetBtn from '@/components/TableResetBtn.vue';
 import TableSearchForm from '@/components/TableSearchForm.vue';
 import TableStatusTooltip from '@/components/TableStatusTooltip.vue';
 import { useRegs } from '@/composables/useRegs';
-import { exportToCSV, exportToXLSX } from '@/lib/export-data';
 import { calculateMinWidth, formatThousands, getStatusInfo } from '@/utils';
 import DropdownTableFilter from '~/components/DropdownColumnFilter.vue';
 
@@ -67,9 +67,9 @@ const route = useRoute();
 const router = useRouter();
 
 const endpoint = 'registrations';
-const nuxtApp = useNuxtApp();
 
 // Export state
+const { exportData } = useExport();
 const isExporting = ref(false);
 
 // Selected registration ID for details modal
@@ -321,93 +321,22 @@ const table = useVueTable({
 });
 
 // Export functionality
-const fetchAllRegistrations = async () => {
-  const searchParams = new URLSearchParams();
-
-  // Add all current filters except pagination
-  Object.entries(filters.value).forEach(([key, value]) => {
-    if (value !== undefined && value !== '') {
-      if (Array.isArray(value)) {
-        searchParams.append(key, value.join(','));
-      }
-      else {
-        searchParams.append(key, String(value));
-      }
-    }
-  });
-
-  // Add sorting
-  if (sorting.value.length > 0) {
-    searchParams.append('sort_by', sorting.value[0].id);
-    searchParams.append('order', sorting.value[0].desc ? 'desc' : 'asc');
-  }
-
-  // Request all data by setting a high per_page limit
-  searchParams.append('per_page', '10000');
-  searchParams.append('page', '1');
-
-  return nuxtApp.$galantisApi
-    .get(`/event/${eventId.value}/${endpoint}?${searchParams.toString()}`)
-    .then((response) => {
-      if (!response.data.success && response.data.success !== undefined) {
-        throw new Error(response.data.message || 'Failed to fetch data');
-      }
-      return response.data.data || [];
-    });
-};
-
-const formatExportData = (data: RegItem[]) => {
-  return data.map((row) => {
-    const formattedRow: { [key: string]: string | number } = {
-      'Date': formatDate(row.date, 'dd MMM yyyy HH:mm'),
-      'Email': row.email || '',
-      'Full Name': row.fullname || '',
-      'Paid': Number(row.paid) || 0,
-      'Phone': row.phone || '',
-      'Price': Number(row.ticket_price) || 0,
-      'Reg Code': row.code || '',
-      'Status': row.status || '',
-      'Ticket': row.ticket_name || '',
-      'Total': Number(row.total) || 0,
-    };
-
-    // Add custom fields if they exist
-    if (Array.isArray(row.ans)) {
-      row.ans.forEach((answer: Answer) => {
-        formattedRow[answer.qst] = answer.ans || '';
-      });
-    }
-
-    return formattedRow;
-  });
-};
-
-const handleExport = async (type: 'csv' | 'xlsx') => {
-  if (!event.value)
-    return;
-
+const handleExport = async (format: 'csv' | 'xlsx') => {
   try {
     isExporting.value = true;
 
-    // Fetch all registration data
-    const allData = await fetchAllRegistrations();
+    await exportData(
+      eventId.value,
+      endpoint,
+      format,
+      filters.value,
+    );
 
-    // Format data for export
-    const formattedData = formatExportData(allData);
-
-    // Generate filename
-    const filename = `${event.value.title || 'registrations'}_${format(new Date(), 'yyyy-MM-dd')}`;
-
-    if (type === 'csv') {
-      exportToCSV(formattedData, filename);
-    }
-    else {
-      exportToXLSX(formattedData, filename);
-    }
+    toast('Export completed successfully');
   }
   catch (error) {
     console.error('Export failed:', error);
-    // You could add a toast notification here for user feedback
+    toast('Export failed. Please try again.');
   }
   finally {
     isExporting.value = false;
@@ -681,7 +610,7 @@ watch(
 
   <section class="relative" :class="{ 'scroll-area overflow-x-auto': !isLoading }">
     <div class="w-full">
-      <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs))}px` }">
+      <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs), totalData)}px` }">
         <template v-if="isLoading">
           <div class="absolute z-10 size-full ring-0" />
         </template>

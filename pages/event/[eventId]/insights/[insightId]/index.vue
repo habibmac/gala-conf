@@ -11,13 +11,13 @@ import {
 } from '@tanstack/vue-table';
 import { format, fromUnixTime } from 'date-fns';
 import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 import type { Answer, ColumnConfig, CustomField, RegItem, TicketGroup } from '@/types';
 
 import TablePagination from '@/components/TablePagination.vue';
 import { Badge } from '@/components/ui/badge';
 import { useInsight } from '@/composables/useInsight';
-import { exportToCSV, exportToXLSX } from '@/lib/export-data';
 import { formatThousands } from '@/utils';
 
 const props = defineProps<{
@@ -51,9 +51,14 @@ const { group, order, page, perPage, search, sortBy } = toRefs(props);
 const route = useRoute();
 const router = useRouter();
 
-const { event } = useEvent();
-const eventId = computed(() => event.value?.id);
+const eventId = ref(route.params.eventId as string);
 const insightId = route.params.insightId as string;
+
+const endpoint = 'insights';
+
+// Export state
+const { exportData } = useExport();
+const isExporting = ref(false);
 
 // Pagination configs
 const INITIAL_PAGE_SIZE = 10;
@@ -79,7 +84,7 @@ const sorting = ref<SortingState>([
   },
 ]);
 
-const { fetchAllData, insightData, isDataLoading, isMetaLoading, regData, ticketGroups, totalData, totalPages }
+const { insightData, isDataLoading, isMetaLoading, regData, ticketGroups, totalData, totalPages }
   = useInsight(eventId, insightId, pagination, sorting, filters);
 
 // Table configuration
@@ -109,7 +114,7 @@ const columnConfigs = computed<ColumnConfig[]>(() => {
     {
       header: 'Ticket',
       isHideable: true,
-      isVisible: false,
+      isVisible: true,
       key: 'ticket_name',
       width: 15,
     },
@@ -196,6 +201,7 @@ const columns = computed(() => {
           header: config.header,
           id: config.key,
           size: config.width * 10,
+          enableSorting: config.enableSorting !== false, // Default to true if not specified
         },
       );
     });
@@ -266,6 +272,7 @@ function getCustomFieldsColumns(fields: CustomField[]): ColumnConfig[] {
     isVisible: true,
     key: field.slug,
     width: 10,
+    enableSorting: false,
   }));
 }
 
@@ -361,59 +368,40 @@ const tabIndicatorWidth = computed(() => {
   return `calc(100% / ${tabCount})`;
 });
 
-function formatExportData(data: RegItem[]) {
-  return data.map((row) => {
-    const formattedRow: { [key: string]: string | number } = {
-      'Date': format(fromUnixTime(Number(row.date)), 'dd MMM yyyy HH:mm'),
-      'Email': row.email || '',
-      'Full Name': row.fullname || '',
-      'Phone': row.phone || '',
-      'Reg Code': row.code || '',
-      'Ticket': row.ticket_name || '',
-    };
-
-    // Add custom fields
-    if (Array.isArray(row.ans)) {
-      row.ans.forEach((answer: Answer) => {
-        formattedRow[answer.qst] = answer.ans || '';
-      });
-    }
-
-    return formattedRow;
-  });
-}
-
-const isExporting = ref(false);
-
-async function handleExport(type: 'csv' | 'xlsx') {
-  if (!insightData.value)
-    return;
-
+const handleExport = async (format: 'csv' | 'xlsx') => {
   try {
     isExporting.value = true;
 
-    // Fetch all data
-    const allData = await fetchAllData();
+    await exportData(
+      eventId.value,
+      endpoint,
+      format,
+      {
+        ...filters.value,
+        insight_id: insightId, // Include the insight ID
+      },
+    );
 
-    // Format the data
-    const formattedData = formatExportData(allData);
-    const filename = `${insightData.value.title || 'export'}_${format(new Date(), 'yyyy-MM-dd')}`;
-
-    if (type === 'csv') {
-      exportToCSV(formattedData, filename);
-    }
-    else {
-      exportToXLSX(formattedData, filename);
-    }
+    toast('Export completed successfully');
   }
   catch (error) {
     console.error('Export failed:', error);
-    // You might want to show an error message to the user
+    toast('Export failed. Please try again.');
   }
   finally {
     isExporting.value = false;
   }
-}
+};
+
+const currentGroupTickets = computed(() => {
+  if (!ticketGroups.value || !activeTab.value)
+    return [];
+
+  const currentGroup = ticketGroups.value.find((group: TicketGroup) => group.name === activeTab.value);
+  return currentGroup?.tickets || [];
+});
+
+const hasTickets = computed(() => currentGroupTickets.value.length > 0);
 
 // Watch for changes in filters, pagination, and sorting, and update the route query
 watch(
@@ -514,7 +502,7 @@ watch(
   </section>
 
   <section>
-    <div class="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between sm:px-8">
+    <div class="flex flex-col gap-2 p-4 sm:flex-row sm:items-end sm:justify-between sm:px-8">
       <div class="shrink-0">
         <h3>
           Group:
@@ -523,39 +511,56 @@ watch(
           </span>
         </h3>
 
-        <ul v-if="ticketGroups" class="flex flex-wrap items-start gap-2">
+        <ul v-if="ticketGroups" class="flex flex-wrap items-center gap-2">
           <li>Tickets:</li>
+
+          <!-- Show actual tickets if they exist -->
+          <template v-if="hasTickets">
+            <li
+              v-for="ticket in currentGroupTickets"
+
+              :key="ticket.id"
+              class="inline-flex items-center gap-x-1 rounded-lg border border-slate-300 px-2 py-1 text-sm font-medium dark:border-slate-600 dark:text-slate-300"
+            >
+              <Icon icon="tabler:ticket" class="size-4 text-slate-500 dark:text-slate-400" />
+              <span>{{ ticket.name }}</span>
+            </li>
+          </template>
+
+          <!-- Fallback when no tickets -->
           <li
-            v-for="ticket in ticketGroups.find((group: TicketGroup) => group.name === activeTab)?.tickets"
-            :key="ticket.id"
-            class="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium dark:border-slate-600 dark:text-slate-300"
+            v-if="!hasTickets"
+            class="inline-flex items-center gap-x-1 rounded-lg border border-slate-300 px-2 py-1 text-sm font-medium text-slate-500 dark:border-slate-600 dark:text-slate-400"
           >
-            {{ ticket.name }}
+            <Icon icon="tabler:ticket" class="size-4 text-slate-500 dark:text-slate-400" />
+            <span>All Tickets</span>
           </li>
         </ul>
       </div>
 
-      <DropdownMenu v-if="!isMetaLoading && !isDataLoading">
-        <DropdownMenuTrigger as-child>
-          <Button variant="outline" class="bg-card" :disabled="isExporting">
-            <Icon
-              :icon="isExporting ? 'svg-spinners:ring-resize' : 'heroicons:arrow-right-start-on-rectangle'"
-              class="mr-2 size-5 text-muted-foreground"
-            />
-            {{ isExporting ? 'Exporting...' : 'Export' }}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem :disabled="isExporting" @click="handleExport('csv')">
-            <Icon icon="ph:file-csv" class="mr-2 size-5 text-muted-foreground" />
-            Export to CSV
-          </DropdownMenuItem>
-          <DropdownMenuItem :disabled="isExporting" @click="handleExport('xlsx')">
-            <Icon icon="ph:file-xls" class="mr-2 size-5 text-muted-foreground" />
-            Export to XLSX
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div>
+        <DropdownMenu v-if="!isMetaLoading && !isDataLoading">
+          <DropdownMenuTrigger as-child>
+            <Button variant="outline" class="bg-card" :disabled="isExporting">
+              <Icon
+                :icon="isExporting ? 'svg-spinners:ring-resize' : 'heroicons:arrow-right-start-on-rectangle'"
+                class="mr-2 size-5 text-muted-foreground"
+              />
+              {{ isExporting ? 'Exporting...' : 'Export' }}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem :disabled="isExporting" @click="handleExport('csv')">
+              <Icon icon="ph:file-csv" class="mr-2 size-5 text-muted-foreground" />
+              Export to CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem :disabled="isExporting" @click="handleExport('xlsx')">
+              <Icon icon="ph:file-xls" class="mr-2 size-5 text-muted-foreground" />
+              Export to XLSX
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   </section>
 
@@ -582,7 +587,7 @@ watch(
 
   <section class="relative" :class="{ 'scroll-area overflow-x-auto': !isDataLoading }">
     <div class="w-full">
-      <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs))}px` }">
+      <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs), totalData)}px` }">
         <template v-if="isDataLoading">
           <div class="absolute z-10 size-full bg-card/10 ring-0" />
         </template>

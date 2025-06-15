@@ -7,6 +7,8 @@ import { computed } from 'vue';
 
 import type { BillingFilters } from '@/types';
 
+import { transformFiltersForAPI } from '@/utils';
+
 export const useBillings = (
   eventId: Ref<string>,
   pagination: Ref<PaginationState>,
@@ -22,7 +24,7 @@ export const useBillings = (
     page: String(pagination.value.pageIndex + 1),
     per_page: pagination.value.pageSize.toString(),
     sort_by: sorting.value.length > 0 ? sorting.value[0].id : '',
-    ...filters.value,
+    ...transformFiltersForAPI(filters.value),
   }));
 
   const getData = async (signal: AbortSignal) => {

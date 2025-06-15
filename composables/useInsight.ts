@@ -118,33 +118,8 @@ export const useInsight = (
       }));
   };
 
-  // 3. Export function - separate from queries, called on demand
-  const fetchAllData = async () => {
-    const searchParams = new URLSearchParams();
-    Object.entries(activeFilters.value).forEach(([key, value]) => {
-      if (value !== undefined && value !== '') {
-        if (Array.isArray(value)) {
-          searchParams.append(key, value.join(','));
-        }
-        else {
-          searchParams.append(key, String(value));
-        }
-      }
-    });
-
-    return nuxtApp.$galantisApi
-      .get(`/event/${eventId.value}/insight/${insightId}/export?${searchParams.toString()}`)
-      .then((response) => {
-        if (!response.data.success) {
-          throw new Error(response.data.message);
-        }
-        return response.data.data;
-      });
-  };
-
   return {
     dataError,
-    fetchAllData,
     insightData: computed(() => metaData.value),
     isDataLoading,
     isMetaLoading,
