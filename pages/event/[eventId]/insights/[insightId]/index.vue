@@ -477,7 +477,7 @@ watch(
       >
         <span class="pointer-events-none absolute inset-0 m-1" aria-hidden="true">
           <span
-            class="absolute inset-0 rounded-md bg-white transition-transform duration-150 ease-in-out dark:bg-slate-950/70"
+            class="absolute inset-0 rounded-md bg-white transition-transform duration-150 ease-in-out dark:bg-primary"
             :style="{ width: tabIndicatorWidth, transform: tabIndicatorClass }"
           />
         </span>
@@ -503,7 +503,7 @@ watch(
 
   <section>
     <div class="flex flex-col gap-2 p-4 sm:flex-row sm:items-end sm:justify-between sm:px-8">
-      <div class="shrink-0">
+      <div class="w-full grow sm:w-auto">
         <h3>
           Group:
           <span class="font-semibold text-slate-950 dark:text-slate-200">
@@ -511,34 +511,49 @@ watch(
           </span>
         </h3>
 
-        <ul v-if="ticketGroups" class="flex flex-wrap items-center gap-2">
-          <li>Tickets:</li>
-
-          <!-- Show actual tickets if they exist -->
-          <template v-if="hasTickets">
+        <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
+          <div>Tickets:</div>
+          <template v-if="ticketGroups">
+            <!-- Show actual tickets if they exist -->
+            <ul v-if="hasTickets" class="flex max-w-xl flex-wrap items-center gap-2">
+              <li
+                v-for="ticket in currentGroupTickets"
+                :key="ticket.id"
+                class="inline-flex items-center gap-x-1 rounded-lg border border-slate-300 px-2 py-1 text-sm font-medium dark:border-slate-600 dark:text-slate-300"
+              >
+                <Icon icon="tabler:ticket" class="size-4 text-slate-500 dark:text-slate-400" />
+                <span>{{ ticket.name }}</span>
+              </li>
+              <li
+                v-for="ticket in currentGroupTickets"
+                :key="ticket.id"
+                class="inline-flex items-center gap-x-1 rounded-lg border border-slate-300 px-2 py-1 text-sm font-medium dark:border-slate-600 dark:text-slate-300"
+              >
+                <Icon icon="tabler:ticket" class="size-4 text-slate-500 dark:text-slate-400" />
+                <span>{{ ticket.name }}</span>
+              </li>
+              <li
+                v-for="ticket in currentGroupTickets"
+                :key="ticket.id"
+                class="inline-flex items-center gap-x-1 rounded-lg border border-slate-300 px-2 py-1 text-sm font-medium dark:border-slate-600 dark:text-slate-300"
+              >
+                <Icon icon="tabler:ticket" class="size-4 text-slate-500 dark:text-slate-400" />
+                <span>{{ ticket.name }}</span>
+              </li>
+            </ul>
+            <!-- Fallback when no tickets -->
             <li
-              v-for="ticket in currentGroupTickets"
-
-              :key="ticket.id"
-              class="inline-flex items-center gap-x-1 rounded-lg border border-slate-300 px-2 py-1 text-sm font-medium dark:border-slate-600 dark:text-slate-300"
+              v-if="!hasTickets"
+              class="inline-flex shrink-0 items-center gap-x-1 rounded-lg border border-slate-300 px-2 py-1 text-sm font-medium text-slate-500 dark:border-slate-600 dark:text-slate-400"
             >
               <Icon icon="tabler:ticket" class="size-4 text-slate-500 dark:text-slate-400" />
-              <span>{{ ticket.name }}</span>
+              <span>All Tickets</span>
             </li>
           </template>
-
-          <!-- Fallback when no tickets -->
-          <li
-            v-if="!hasTickets"
-            class="inline-flex items-center gap-x-1 rounded-lg border border-slate-300 px-2 py-1 text-sm font-medium text-slate-500 dark:border-slate-600 dark:text-slate-400"
-          >
-            <Icon icon="tabler:ticket" class="size-4 text-slate-500 dark:text-slate-400" />
-            <span>All Tickets</span>
-          </li>
-        </ul>
+        </div>
       </div>
 
-      <div>
+      <div class="shrink-0">
         <DropdownMenu v-if="!isMetaLoading && !isDataLoading">
           <DropdownMenuTrigger as-child>
             <Button variant="outline" class="bg-card" :disabled="isExporting">
