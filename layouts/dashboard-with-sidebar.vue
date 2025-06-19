@@ -21,12 +21,12 @@ watch(
 
 <template>
   <Sidebar
-    :sidebar-open="uiStore.isSidebarOpen"
+    :sidebar-open="uiStore.isSidebarOpen ?? false"
     @close-sidebar="uiStore.setSidebarExpanded(false)"
     @toggle-sidebar="uiStore.toggleSidebar()"
   />
   <div class="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-    <NavBar :show-events="true" :sidebar-open="uiStore.isSidebarOpen" @toggle-sidebar="uiStore.toggleSidebar()" />
+    <NavBar :show-events="true" :sidebar-open="uiStore.isSidebarOpen ?? false" @toggle-sidebar="uiStore.toggleSidebar()" />
     <main class="grow">
       <div class="relative h-full">
         <slot />
