@@ -42,7 +42,11 @@ export default defineNuxtConfig({
     'nuxt-qrcode',
     'vue-sonner/nuxt',
   ],
-  plugins: ['~/plugins/api.ts'],
+  plugins: [
+    '~/plugins/vue-query.ts',
+    '~/plugins/api.ts',
+    '~/plugins/auth.ts',
+  ],
   runtimeConfig: {
     oauthClientSecret: '',
     public: {
