@@ -204,14 +204,17 @@ onUnmounted(() => {
                     :active-condition="isMenuItemActive(linkItem.generatedLink?.path) || isSubMenuActive(linkItem.subMenus)"
                   >
                     <div
-                      class="rounded-md px-3 py-2"
+                      class="rounded-md transition duration-150"
                       :class="(isMenuItemActive(linkItem.generatedLink?.path) || isSubMenuActive(linkItem.subMenus))
-                        ? 'bg-blue-950 hover:bg-blue-950 hover:text-slate-200'
+                        ? 'bg-blue-950 hover:bg-blue-950'
                         : 'hover:bg-blue-900/60 text-white'"
                     >
                       <a
                         href="#0"
-                        class="block truncate text-slate-200 transition duration-150"
+                        class="block truncate rounded-md px-3 py-2 text-slate-200 transition duration-150"
+                        :class="(isMenuItemActive(linkItem.generatedLink?.path) || isSubMenuActive(linkItem.subMenus))
+                          ? 'bg-blue-950 hover:bg-blue-950 hover:text-slate-200'
+                          : 'hover:bg-blue-900/60 text-white'"
                         @click.prevent="handleMenuItemClick(linkItem, parentLink)"
                       >
                         <div class="flex items-center justify-between">
@@ -239,15 +242,15 @@ onUnmounted(() => {
 
                       <!-- Sub-menu items - only show when expanded -->
                       <div v-if="shouldShowExpandedContent" class="duration-200 lg:hidden lg:sidebar-expanded:block">
-                        <ul class="mt-1 pl-9" :class="!parentLink.expanded && 'hidden'">
+                        <ul class="mt-1 pb-2 pl-9" :class="!parentLink.expanded && 'hidden'">
                           <li
                             v-for="(subMenuItem, subIndex) in linkItem.subMenus"
                             :key="subIndex"
-                            class="mb-1 last:mb-0"
+                            class="mb-1"
                           >
                             <NuxtLink
                               :to="subMenuItem.generatedLink?.path"
-                              class="block truncate transition duration-150"
+                              class="block truncate rounded-md px-3 transition duration-150"
                               :class="isMenuItemActive(subMenuItem.generatedLink?.path)
                                 ? 'text-indigo-100'
                                 : 'text-slate-400 hover:text-slate-200'"
