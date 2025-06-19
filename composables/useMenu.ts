@@ -1,3 +1,4 @@
+// composables/useMenu.ts
 import type { RouteRecordRaw } from 'vue-router';
 
 import { computed, ref, watch } from 'vue';
@@ -28,7 +29,12 @@ export const useMenu = () => {
       if (!eventId) {
         return { path: '/my-events' };
       }
-      return { path: linkItem.to.replace(':eventId()', eventId) };
+      // Fix: Handle both :eventId and :eventId() patterns
+      return {
+        path: linkItem.to
+          .replace(':eventId()', eventId)
+          .replace(':eventId', eventId),
+      };
     }
     return { path: linkItem.to };
   };
@@ -42,13 +48,9 @@ export const useMenu = () => {
         const routePackages = meta.packages as string[] | undefined;
         const routeCapabilities = meta.capabilities as string[] | undefined;
 
-        // Check if user has right role
         const hasRole = routeRoles?.some(role => authStore.userInfo?.user_roles?.includes(role)) ?? true;
-        // Check if event has right package
         const hasPackage = routePackages?.includes(authStore.selectedEvent?.package ?? '') ?? true;
-        // Check if user has required capabilities
-        const hasCapabilities
-          = !routeCapabilities?.length || routeCapabilities.every(cap => authStore.hasEventPermission(cap));
+        const hasCapabilities = !routeCapabilities?.length || routeCapabilities.every(cap => authStore.hasEventPermission(cap));
 
         if (hasRole && hasPackage && hasCapabilities) {
           const menuItem: MenuItem = {
@@ -60,6 +62,8 @@ export const useMenu = () => {
             packages: routePackages,
             roles: routeRoles,
             to: route.path as string,
+            isSubMenu: meta.isSubMenu as boolean | undefined,
+            parentPath: meta.parentPath as string | undefined,
           };
           menuItem.generatedLink = generateLinkTo(menuItem);
           items.push(menuItem);
@@ -71,15 +75,37 @@ export const useMenu = () => {
     });
     return items;
   };
+
   const menuItems = computed(() => {
     const groupedItems: MenuGroup[] = menuGroups.map(group => ({
       ...group,
       menus: [],
     }));
 
-    allMenuItems.value.forEach((item) => {
+    // Separate main menu items and sub-menu items
+    const mainMenuItems = allMenuItems.value.filter(item => !item.isSubMenu);
+    const subMenuItems = allMenuItems.value.filter(item => item.isSubMenu);
+
+    // Process main menu items
+    mainMenuItems.forEach((item) => {
       const groupIndex = groupedItems.findIndex(group => group.id === item.group);
       if (groupIndex !== -1) {
+        // Find sub-menus for this item
+        const subMenus = subMenuItems
+          .filter((subItem) => {
+            // Fix: Handle both :eventId and :eventId() patterns in parentPath
+            const parentPattern = subItem.parentPath
+              ?.replace(':eventId()', authStore.selectedEvent?.id || '')
+              ?.replace(':eventId', authStore.selectedEvent?.id || '');
+            return parentPattern === item.generatedLink?.path;
+          })
+          .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        // Add sub-menus to the main menu item
+        if (subMenus.length > 0) {
+          item.subMenus = subMenus;
+        }
+
         groupedItems[groupIndex].menus.push(item);
       }
     });
@@ -91,7 +117,6 @@ export const useMenu = () => {
     return groupedItems.filter(group => group.menus.length > 0);
   });
 
-  // Watch for changes in authentication state or selected event
   watch(
     [() => authStore.selectedEvent],
     () => {

@@ -22,12 +22,12 @@ export const useUIStore = defineStore('ui', () => {
   const preferences = ref<UserPreferences>({
     itemsPerPage: 10,
     locale: 'en',
-    sidebarExpanded: sidebarExpanded.value,
+    language: 'en',
+    sidebarExpanded: sidebarExpanded.value, // Initialize from localStorage
     theme: 'system',
     timezone: 'Asia/Jakarta',
   });
 
-  // Mobile sidebar state
   const isUpdating = ref(false);
 
   // Query setup
@@ -47,6 +47,8 @@ export const useUIStore = defineStore('ui', () => {
     (newData) => {
       if (newData) {
         preferences.value = newData;
+        // Sync localStorage with server preferences
+        sidebarExpanded.value = newData.sidebarExpanded ?? false;
         applyPreferences(newData);
       }
     },
@@ -76,14 +78,11 @@ export const useUIStore = defineStore('ui', () => {
     finally {
       isUpdating.value = false;
     }
-  }, 300); // 300ms debounce
+  }, 300);
 
   // Update preferences with debounce
   const updatePreferences = async (newPrefs: Partial<UserPreferences>) => {
     const previousState = { ...preferences.value };
-
-    // Only update sidebar preference if on large screen
-    const shouldUpdateSidebar = isLargeScreen.value && 'sidebarExpanded' in newPrefs;
 
     // Update local state immediately
     preferences.value = {
@@ -94,27 +93,27 @@ export const useUIStore = defineStore('ui', () => {
     // Apply changes immediately
     applyPreferences(newPrefs);
 
-    // Prepare API preferences
-    const prefsToSave = shouldUpdateSidebar ? newPrefs : 'sidebarExpanded' in newPrefs ? { ...newPrefs } : newPrefs;
-
     try {
-      // Use debounced API call
-      await savePreferencesToAPI(prefsToSave);
+      await savePreferencesToAPI(newPrefs);
     }
     catch (error) {
       console.error('Failed to save preferences:', error);
-      // Revert on error
       preferences.value = previousState;
       applyPreferences(previousState);
     }
   };
 
-  // Sidebar specific functions
+  // Fix: Sidebar specific functions
   const toggleSidebar = () => {
     if (isLargeScreen.value) {
-      sidebarExpanded.value = !sidebarExpanded.value;
+      // On desktop: toggle the expanded state
+      const newExpanded = !sidebarExpanded.value;
+      sidebarExpanded.value = newExpanded;
+      // Use updatePreferences instead of direct mutation
+      updatePreferences({ sidebarExpanded: newExpanded });
     }
     else {
+      // On mobile: toggle the open state
       isSidebarOpenMobile.value = !isSidebarOpenMobile.value;
     }
   };
@@ -122,6 +121,8 @@ export const useUIStore = defineStore('ui', () => {
   const setSidebarExpanded = (expanded: boolean) => {
     if (isLargeScreen.value) {
       sidebarExpanded.value = expanded;
+      preferences.value.sidebarExpanded = expanded;
+      updatePreferences({ sidebarExpanded: expanded });
     }
     else {
       isSidebarOpenMobile.value = expanded;
@@ -136,12 +137,12 @@ export const useUIStore = defineStore('ui', () => {
   // User timezone handling
   const userTimezone = useLocalStorage('userTimezone', 'Asia/Jakarta');
 
-  // Other preference functions with update check
   const setUserTimezone = (timezone: string) => {
     if (userTimezone.value !== timezone && !isUpdating.value) {
       updatePreferences({ timezone });
     }
   };
+
   const setTheme = (theme: 'dark' | 'light' | 'system') => {
     if (preferences.value.theme !== theme && !isUpdating.value) {
       updatePreferences({ theme });
@@ -154,11 +155,12 @@ export const useUIStore = defineStore('ui', () => {
     }
   };
 
+  // Apply sidebar expanded class to document
   watch(sidebarExpanded, (expanded) => {
     if (isLargeScreen.value) {
       document.documentElement.classList.toggle('sidebar-expanded', expanded);
     }
-  });
+  }, { immediate: true });
 
   return {
     isLoading,

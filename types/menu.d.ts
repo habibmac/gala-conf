@@ -9,6 +9,9 @@ export interface MenuItem {
   icon?: string
   order?: number
   generatedLink?: { path: string }
+  subMenus?: MenuItem[]
+  isSubMenu?: boolean
+  parentPath?: string
 }
 
 export interface MenuGroup {
