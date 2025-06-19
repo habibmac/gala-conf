@@ -81,7 +81,14 @@ export default defineNuxtPlugin(() => {
         catch (refreshError) {
           processQueue(refreshError, null);
           authStore.clearAuth();
-          navigateTo('/auth/login');
+
+          // ✅ Force reload instead of just navigating
+          if (import.meta.client) {
+            window.location.href = '/auth/login';
+          }
+          else {
+            navigateTo('/auth/login');
+          }
 
           return Promise.reject(refreshError);
         }

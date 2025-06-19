@@ -1,22 +1,38 @@
 // composables/useAuth.ts
 export const useAuth = () => {
   const authStore = useAuthStore();
+  const router = useRouter();
+
   const isModalOpen = ref(false);
   const unauthorizedReason = ref('');
 
-  const checkAccess = (meta: any) => {
-    if (!meta.requiresSelectedEvent)
-      return true;
+  const checkAccess = (routeMeta: any) => {
+    // ✅ First check: If not authenticated, redirect instead of showing modal
+    if (!authStore.isAuthenticated) {
+      router.push('/auth/login');
+      return false;
+    }
 
-    const routeRoles = meta.roles as string[] | undefined;
-    const routePackages = meta.packages as string[] | undefined;
-    const routeCapabilities = meta.capabilities as string[] | undefined;
+    // ✅ Second check: If no user info, don't show modal yet
+    if (!authStore.userInfo) {
+      return false; // Let middleware handle this
+    }
 
-    const hasRole = routeRoles?.some(role => authStore.userInfo?.user_roles?.includes(role)) ?? true;
+    const routeRoles = routeMeta?.roles;
+    const routeCapabilities = routeMeta?.capabilities;
+    const routePackages = routeMeta?.packages;
 
-    const hasPackage = routePackages?.includes(authStore.selectedEvent?.package as string) ?? true;
+    const hasRole = routeRoles?.some((role: string) =>
+      authStore.userInfo?.user_roles?.includes(role),
+    ) ?? true;
 
-    const hasCapabilities = routeCapabilities?.every(cap => authStore.hasEventPermission(cap)) ?? true;
+    const hasPackage = routePackages?.includes(
+      authStore.selectedEvent?.package as string,
+    ) ?? true;
+
+    const hasCapabilities = routeCapabilities?.every((cap: string) =>
+      authStore.hasEventPermission(cap),
+    ) ?? true;
 
     if (!hasRole) {
       unauthorizedReason.value = 'Insufficient role permissions';
@@ -38,6 +54,14 @@ export const useAuth = () => {
 
     return true;
   };
+
+  // ✅ Clear modal when user logs out
+  watch(() => authStore.isAuthenticated, (isAuth) => {
+    if (!isAuth) {
+      isModalOpen.value = false;
+      unauthorizedReason.value = '';
+    }
+  });
 
   return {
     checkAccess,
