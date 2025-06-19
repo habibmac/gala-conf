@@ -276,7 +276,7 @@ onMounted(() => {
 <template>
   <div class="container mx-auto max-w-4xl py-8 pb-20">
     <header class="mb-8">
-      <h1 class="text-3xl font-bold tracking-tight">
+      <h1 class="h2 font-bold tracking-tight">
         Account Settings
       </h1>
       <p class="text-muted-foreground">
