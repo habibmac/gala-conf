@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
 
-import { devImgPath } from '~/utils';
-
 defineProps({
   imgClass: {
     default: 'w-full h-full',
@@ -37,7 +35,7 @@ defineProps({
 
 <template>
   <Avatar :class="wrapperClass" shape="eventLogo">
-    <AvatarImage :src="devImgPath(src)" :alt="title" loading="lazy" />
+    <AvatarImage :src="src" :alt="title" loading="lazy" />
     <AvatarFallback class="flex size-full items-center justify-center bg-muted p-1">
       <Icon icon="heroicons-solid:photograph" class="size-10 text-muted-foreground" />
     </AvatarFallback>

@@ -16,11 +16,6 @@ export const useEvent = (initialEventId?: string) => {
     if (!eventId.value)
       return null;
 
-    // If we already have the correct event loaded, return it
-    if (authStore.selectedEvent?.id === eventId.value) {
-      return authStore.selectedEvent;
-    }
-
     try {
       const response = await useNuxtApp().$galantisApi.get(`/event/${eventId.value}`, {
         signal,

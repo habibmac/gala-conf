@@ -45,7 +45,7 @@ useHead({
   <div class="flex h-full">
     <SubmenuSidebar />
     <div class="flex-1 overflow-y-auto">
-      <div class="container mx-auto p-6 2xl:mx-0">
+      <div class="container mx-auto mb-20 p-6 2xl:mx-0">
         <section>
           <header class="pt-10">
             <h1 class="h2">
