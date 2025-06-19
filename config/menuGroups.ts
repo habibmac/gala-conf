@@ -5,4 +5,5 @@ export const menuGroups = [
   { id: 'settings', label: 'Settings', order: 4 },
   { id: 'tools', label: 'Tools', order: 5 },
   { id: 'other', label: 'Other', order: 6 },
+  { id: 'admin', label: 'Admin', order: 7 },
 ];

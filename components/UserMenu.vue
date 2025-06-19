@@ -1,14 +1,62 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 const { user } = useUserProfile();
 const config = useRuntimeConfig();
-
 const backendUrl = `${config.public.apiUrl}/backend`;
-
 const dropdownOpen = ref(false);
 const trigger = ref<HTMLElement | null>(null);
 const dropdown = ref<HTMLElement | null>(null);
+
+// Computed property to get user's display name
+const userDisplayName = computed(() => {
+  if (!user.value)
+    return '';
+
+  // Option 1: Use first_name + last_name if available
+  const firstName = user.value.first_name?.trim();
+  const lastName = user.value.last_name?.trim();
+
+  if (firstName && lastName) {
+    return `${firstName} ${lastName}`;
+  }
+
+  // Option 2: Fallback to first_name only
+  if (firstName) {
+    return firstName;
+  }
+
+  // Option 3: Fallback to display_name if no first/last name
+  if (user.value.display_name) {
+    return user.value.display_name;
+  }
+
+  // Option 4: Final fallback to username
+  return user.value.user_login || 'User';
+});
+
+// Get user initials for avatar fallback
+const userInitials = computed(() => {
+  if (!user.value)
+    return 'U';
+
+  const firstName = user.value.first_name?.trim();
+  const lastName = user.value.last_name?.trim();
+
+  if (firstName && lastName) {
+    return `${firstName[0]}${lastName[0]}`.toUpperCase();
+  }
+
+  if (firstName) {
+    return firstName[0].toUpperCase();
+  }
+
+  if (user.value.display_name) {
+    return user.value.display_name[0].toUpperCase();
+  }
+
+  return 'U';
+});
 
 // Close on click outside
 const clickHandler = (event: MouseEvent) => {
@@ -51,14 +99,19 @@ onUnmounted(() => {
       @click.prevent="dropdownOpen = !dropdownOpen"
     >
       <img
-        v-if="user"
+        v-if="user?.avatar"
         class="pointer-events-none size-8 rounded-full"
         :src="user.avatar"
         width="32"
         height="32"
         alt="User"
       >
-      <div v-else class="size-8 rounded-full bg-slate-100 dark:bg-slate-700" />
+      <div
+        v-else
+        class="flex size-8 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+      >
+        {{ userInitials }}
+      </div>
     </button>
     <Transition
       enter-active-class="transition ease-out duration-200 transform"
@@ -81,7 +134,7 @@ onUnmounted(() => {
           <template v-if="user">
             <li class="mb-1 border-b border-slate-200 px-3 pb-2 pt-0.5 dark:border-slate-900">
               <div class="text-sm font-medium text-slate-800 dark:text-slate-100">
-                {{ user.display_name }}
+                {{ userDisplayName }}
               </div>
               <div class="text-xs text-slate-500 dark:text-slate-400">
                 {{ user.user_email }}
@@ -95,15 +148,14 @@ onUnmounted(() => {
               </NuxtLink>
               <hr class="h-1 dark:border-slate-900">
             </template>
-
             <NuxtLink v-slot="{ href, navigate }" to="/my-events" custom>
               <li>
                 <a :href="href" class="dropdown-item" @click="navigate">My Events</a>
               </li>
             </NuxtLink>
-            <NuxtLink v-slot="{ href, navigate }" to="/my-events" custom>
+            <NuxtLink v-slot="{ href, navigate }" to="/my-account" custom>
               <li>
-                <a :href="href" class="dropdown-item" @click="navigate">Settings</a>
+                <a :href="href" class="dropdown-item" @click="navigate">My Account</a>
               </li>
             </NuxtLink>
             <hr class="h-1 dark:border-slate-900">

@@ -1,9 +1,10 @@
 export interface UserPreferences {
-  theme: 'dark' | 'light' | 'system'
+  language: string
   locale: string
-  itemsPerPage: number
-  sidebarExpanded: boolean
   timezone: string
+  theme: 'dark' | 'light' | 'system'
+  itemsPerPage?: number
+  sidebarExpanded?: boolean
 }
 
 export interface PreferencesResponse {

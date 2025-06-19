@@ -9,6 +9,9 @@ export interface UserProfile {
   user_roles: string[]
   capabilities: Record<string, boolean>
   avatar: string
+  first_name?: string
+  last_name?: string
+  google_linked?: boolean
 }
 
 interface AuthResponse {

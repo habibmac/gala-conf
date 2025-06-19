@@ -11,3 +11,4 @@ export * from './regs';
 export * from './scanner';
 export * from './seat-bookings';
 export * from './stats';
+export * from './user-profile';
