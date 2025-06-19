@@ -12,8 +12,7 @@
   ],
   "ignore": {
     "customPatterns": [
-      "utils/country-codes.ts",
-      "components/**"
+      "utils/country-codes.ts"
     ]
   }
 }
