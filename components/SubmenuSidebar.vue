@@ -38,12 +38,12 @@ const isActiveSubmenu = (path: string) => route.path === path;
 <template>
   <aside
     v-if="subMenuItems.length > 0"
-    class="absolute inset-y-0 z-20 -mr-px hidden w-full translate-x-0 transition-transform duration-200 ease-in-out md:static md:inset-y-auto md:block md:w-auto md:translate-x-0"
+    class="static w-full md:w-auto"
   >
     <div
-      class="no-scrollbar sticky top-16 h-[calc(100dvh-64px)] shrink-0 overflow-y-auto overflow-x-hidden md:w-52 xl:w-64 2xl:w-80"
+      class="md:no-scrollbar shrink-0 overflow-y-auto overflow-x-hidden md:sticky md:top-16 md:h-[calc(100dvh-64px)] md:w-52 xl:w-64 2xl:w-80"
     >
-      <div class="flex h-full flex-col gap-4 p-4">
+      <div class="flex flex-col gap-4 p-4 md:h-full">
         <h2 class="text-lg font-semibold">
           Settings
         </h2>
