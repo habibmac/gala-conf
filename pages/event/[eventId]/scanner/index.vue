@@ -32,7 +32,7 @@ type CapabilityKey = keyof ScannerSettings['capabilities'];
 definePageMeta({
   capabilities: ['ee_read_checkins'],
   group: 'tools',
-  icon: 'solar:code-scan-line-duotone',
+  icon: 'solar:qr-code-bold-duotone',
   layout: 'dashboard-with-sidebar',
   packages: ['optima'],
   requiresSelectedEvent: true,
