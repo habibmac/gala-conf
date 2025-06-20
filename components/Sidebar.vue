@@ -68,7 +68,9 @@ function clickHandler(event: MouseEvent) {
       return;
     }
 
-    if (target.closest('a')) {
+    // Only close sidebar if clicking on an actual NuxtLink (not menu items with submenus)
+    const clickedLink = target.closest('a[href]:not([href="#0"])');
+    if (clickedLink) {
       emit('close-sidebar');
     }
   }

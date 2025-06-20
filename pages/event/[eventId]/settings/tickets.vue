@@ -6,7 +6,7 @@ import TicketSettings from '~/components/partials/settings/TicketSettings.vue';
 definePageMeta({
   capabilities: ['ee_edit_events'],
   group: 'admin',
-  icon: 'mdi:ticket',
+  icon: 'solar:ticket-bold-duotone',
   layout: 'dashboard-with-sidebar',
   packages: ['starter', 'smart', 'optima'],
   requiresSelectedEvent: true,

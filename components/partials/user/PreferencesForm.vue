@@ -124,7 +124,8 @@ const onSubmit = handleSubmit((values) => {
 
     <div class="flex justify-end">
       <Button type="submit" :disabled="loading">
-        <Icon v-if="loading" icon="heroicons:arrow-path" class="mr-2 size-4 animate-spin" />
+        <Icon v-if="loading" icon="svg-spinners:ring-resize" class="mr-2 size-4" />
+        <Icon v-else icon="tabler:check" class="mr-2 size-4" />
         {{ loading ? 'Saving...' : 'Save Preferences' }}
       </Button>
     </div>

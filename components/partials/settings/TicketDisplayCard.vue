@@ -176,8 +176,8 @@ const getStatusClasses = (color: string) => {
             <div class="">
               <DropdownMenu>
                 <DropdownMenuTrigger as-child>
-                  <Button variant="ghost" size="icon" class="size-8">
-                    <Icon icon="heroicons:ellipsis-vertical" class="size-4" />
+                  <Button variant="ghost" size="icon">
+                    <Icon icon="tabler:dots-vertical" class="size-4" />
                     <span class="sr-only">Open menu</span>
                   </Button>
                 </DropdownMenuTrigger>

@@ -208,7 +208,7 @@ const { fields, push, remove, insert } = useFieldArray('sessions');
     <!-- Loading State -->
     <div v-if="isLoadingSessions" class="flex items-center justify-center py-8">
       <div class="flex items-center gap-2">
-        <Icon icon="mdi:loading" class="size-4 animate-spin" />
+        <Icon icon="svg-spinners:ring-resize" class="mx-auto mb-2 size-8 text-muted-foreground" />
         <span class="text-sm text-muted-foreground">Loading sessions...</span>
       </div>
     </div>
@@ -223,38 +223,33 @@ const { fields, push, remove, insert } = useFieldArray('sessions');
             </h4>
 
             <div class="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                :disabled="isSaving"
-                @click="duplicateSession(index)"
-              >
-                <Icon icon="mdi:content-copy" class="size-4" />
-              </Button>
-
-              <Button
-                v-if="form.values.sessions?.[index]?.id"
-                type="button"
-                variant="ghost"
-                size="sm"
-                :disabled="isSaving"
-                class="text-destructive hover:text-destructive"
-                @click="deleteSession(form.values.sessions[index].id!, index)"
-              >
-                <Icon icon="mdi:delete" class="size-4" />
-              </Button>
-
-              <Button
-                v-else
-                type="button"
-                variant="ghost"
-                size="sm"
-                :disabled="isSaving || fields.length <= 1"
-                @click="remove(index)"
-              >
-                <Icon icon="mdi:close" class="size-4" />
-              </Button>
+              <!-- Dropdown -->
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <Button variant="ghost" size="icon" :disabled="isSaving">
+                    <Icon icon="tabler:dots-vertical" class="size-4" />
+                    <span class="sr-only">Actions</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem @click="duplicateSession(index)">
+                    <Icon icon="tabler:copy" class="mr-2 size-4" />
+                    Duplicate
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    v-if="form.values.sessions?.[index]?.id"
+                    class="text-destructive focus:text-destructive"
+                    @click="deleteSession(form.values.sessions[index].id!, index)"
+                  >
+                    <Icon icon="tabler:trash" class="mr-2 size-4" />
+                    Delete
+                  </DropdownMenuItem>
+                  <DropdownMenuItem v-else class="text-destructive focus:text-destructive" @click="remove(index)">
+                    <Icon icon="tabler:trash" class="mr-2 size-4" />
+                    Remove
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </CardHeader>
@@ -342,15 +337,12 @@ const { fields, push, remove, insert } = useFieldArray('sessions');
             </FormField>
           </div>
 
-          <div
-            v-if="form.values.sessions?.[index]?.sold"
-            class="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-2 dark:border-amber-800 dark:bg-amber-950/20"
-          >
-            <Icon icon="mdi:alert" class="mt-0.5 size-3 shrink-0 text-amber-600" />
-            <span class="text-xs text-amber-800 dark:text-amber-200">
+          <Alert v-if="form.values.sessions?.[index]?.sold" variant="destructive">
+            <AlertDescription class="flex items-center gap-1 text-xs">
+              <Icon icon="tabler:alert-triangle-filled" class="mr-2 size-4" />
               This session has {{ form.values.sessions[index].sold }} registrations. Changes may be restricted.
-            </span>
-          </div>
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
 
@@ -366,7 +358,7 @@ const { fields, push, remove, insert } = useFieldArray('sessions');
               Add your first session to get started
             </p>
             <Button type="button" @click="addSession">
-              <Icon icon="mdi:plus" class="mr-2 size-4" />
+              <Icon icon="tabler:plus" class="mr-2 size-4" />
               Add Session
             </Button>
           </div>
@@ -380,7 +372,7 @@ const { fields, push, remove, insert } = useFieldArray('sessions');
         :disabled="isLoadingSessions || isSaving"
         @click="addSession"
       >
-        <Icon icon="mdi:plus" class="mr-2 size-4" />
+        <Icon icon="tabler:plus" class="mr-2 size-4" />
         Add Session
       </Button>
     </div>
@@ -388,8 +380,8 @@ const { fields, push, remove, insert } = useFieldArray('sessions');
     <!-- Submit Button -->
     <div class="flex justify-end border-t pt-4">
       <Button type="submit" :disabled="isLoadingSessions || isSaving || fields.length === 0" class="min-w-[120px]">
-        <Icon v-if="isSaving" icon="mdi:loading" class="mr-2 size-4 animate-spin" />
-        <Icon v-else icon="mdi:content-save" class="mr-2 size-4" />
+        <Icon v-if="isSaving" icon="svg-spinners:ring-resize" class="mr-2 size-4" />
+        <Icon v-else-if="fields.length > 0" icon="tabler:check" class="mr-2 size-4" />
         {{ isSaving ? 'Saving...' : 'Save Changes' }}
       </Button>
     </div>

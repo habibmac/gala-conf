@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Icon } from '@iconify/vue';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { z } from 'zod';
@@ -82,6 +83,7 @@ const onSubmit = handleSubmit((formData) => {
 
     <div class="flex justify-end">
       <Button type="submit" :disabled="isLoading">
+        <Icon icon="tabler:check" class="mr-2 size-4" />
         Save Changes
       </Button>
     </div>

@@ -533,6 +533,7 @@ onMounted(() => {
             class="min-w-[120px]"
             @click="emit('save', visualSettings)"
           >
+            <Icon icon="tabler:check" class="mr-2 size-4" />
             {{ 'Save Changes' }}
           </Button>
         </div>

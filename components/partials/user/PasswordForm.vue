@@ -79,7 +79,8 @@ defineExpose({ resetForm });
 
       <div class="flex justify-end">
         <Button type="submit" :disabled="loading">
-          <Icon v-if="loading" icon="heroicons:arrow-path" class="mr-2 size-4 animate-spin" />
+          <Icon v-if="loading" icon="svg-spinners:ring-resize" class="mr-2 size-4" />
+          <Icon v-else icon="tabler:lock-check" class="mr-2 size-4" />
           {{ loading ? 'Changing...' : 'Change Password' }}
         </Button>
       </div>
@@ -88,8 +89,8 @@ defineExpose({ resetForm });
     <Separator />
 
     <!-- Google Account Linking -->
-    <div class="flex items-center justify-between rounded-lg border p-4">
-      <div class="space-y-0.5">
+    <div class="flex flex-col justify-between rounded-lg border p-4 sm:flex-row sm:items-center">
+      <div class="mb-5 space-y-0.5">
         <Label class="text-base">Google Account</Label>
         <p class="text-sm text-muted-foreground">
           Link your Google account for easier sign-in

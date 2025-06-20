@@ -131,13 +131,13 @@ const getFieldWarning = (field: string) => {
       <!-- Warning Message -->
       <Alert v-if="editWarning && !canEdit" class="mb-3" variant="destructive">
         <AlertDescription class="flex items-center gap-1 text-xs">
-          <Icon icon="mdi:alert" class="size-4" />
+          <Icon icon="tabler:alert-triangle-filled" class="size-4" />
           <span>{{ editWarning }}</span>
         </AlertDescription>
       </Alert>
       <Alert v-else-if="editWarning" class="mb-3">
         <AlertDescription class="flex items-center gap-1 text-xs">
-          <Icon icon="mdi:information" class="size-4" />
+          <Icon icon="tabler:info-circle" class="size-4" />
           <span>{{ editWarning }}</span>
         </AlertDescription>
       </Alert>
@@ -195,7 +195,7 @@ const getFieldWarning = (field: string) => {
         <!-- Quantity -->
         <FormField v-slot="{ componentField }" name="quantity">
           <FormItem>
-            <FormLabel>Available Quantity</FormLabel>
+            <FormLabel>Quota</FormLabel>
             <FormControl>
               <Input
                 v-bind="componentField"
@@ -206,11 +206,11 @@ const getFieldWarning = (field: string) => {
               />
             </FormControl>
             <FormDescription>
-              <span v-if="ticket.constraints?.min_allowed_quantity">
+              <span v-if="ticket.constraints?.min_allowed_quantity && ticket.constraints.total_registrations">
                 Minimum: {{ ticket.constraints.min_allowed_quantity }} (due to {{ ticket.constraints.total_registrations
                 }} existing registrations)
               </span>
-              <span v-else>Set to 0 for unlimited tickets</span>
+              <span v-else>Set to 0 for unlimited quota</span>
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -294,10 +294,10 @@ const getFieldWarning = (field: string) => {
           <Button
             v-if="!ticket.id?.startsWith('temp-')"
             type="button"
-            variant="destructive"
+            variant="outline"
             @click="$emit('delete', ticket)"
           >
-            <Icon icon="mdi:delete" class="mr-2 size-4" />
+            <Icon icon="tabler:trash" class="mr-2 size-4" />
             Delete
           </Button>
           <div v-else />
@@ -307,7 +307,7 @@ const getFieldWarning = (field: string) => {
               Cancel
             </Button>
             <Button type="submit">
-              <Icon icon="mdi:content-save" class="mr-2 size-4" />
+              <Icon icon="tabler:check" class="mr-2 size-4" />
               Save
             </Button>
           </div>

@@ -385,7 +385,7 @@ const getStatusConfig = (ticket: Ticket) => {
       color: 'border-l-gray-500',
       bgColor: 'dark:bg-gray-950/20',
       textColor: 'text-gray-700 dark:text-gray-300',
-      icon: 'mdi:archive',
+      icon: 'tabler:clock-x',
       label: 'Expired',
     };
   }
@@ -395,7 +395,7 @@ const getStatusConfig = (ticket: Ticket) => {
       color: 'border-l-emerald-400',
       bgColor: 'dark:bg-emerald-950/20',
       textColor: 'text-emerald-700 dark:text-emerald-300',
-      icon: 'mdi:check-circle',
+      icon: 'tabler:tag',
       label: 'On Sale',
     };
   }
@@ -404,7 +404,7 @@ const getStatusConfig = (ticket: Ticket) => {
     color: 'border-l-blue-500',
     bgColor: 'dark:bg-blue-950/20',
     textColor: 'text-blue-700 dark:text-blue-300',
-    icon: 'mdi:clock',
+    icon: 'tabler:clock',
     label: 'Upcoming',
   };
 };
@@ -470,8 +470,9 @@ watch(tickets, async (newTickets) => {
       <!-- Loading State -->
       <div v-if="isLoadingTickets" class="flex items-center justify-center py-8">
         <div class="flex items-center gap-2">
-          <Icon icon="mdi:loading" class="size-4 animate-spin" />
-          <span class="text-sm text-muted-foreground">Loading tickets...</span>
+          <Icon icon="svg-spinners:ring-resize" class="mx-auto mb-2 size-8 text-muted-foreground" /> <span
+            class="text-sm text-muted-foreground"
+          >Loading tickets...</span>
         </div>
       </div>
 
@@ -521,7 +522,7 @@ watch(tickets, async (newTickets) => {
             :disabled="isLoadingTickets || isUpdatingOrder || editingTicketId !== null"
             @click="addTicket"
           >
-            <Icon icon="mdi:plus" class="mr-2 size-4" />
+            <Icon icon="tabler:plus" class="mr-2 size-4" />
             Add Ticket
           </Button>
         </div>
@@ -530,7 +531,7 @@ watch(tickets, async (newTickets) => {
         <Card v-if="tickets.length === 0" class="border-dashed">
           <CardContent class="flex items-center justify-center py-12">
             <div class="text-center">
-              <Icon icon="mdi:ticket" class="mx-auto mb-4 size-12 text-muted-foreground" />
+              <Icon icon="solar:ticket-bold-duotone" class="mx-auto mb-4 size-12 text-muted-foreground" />
               <h3 class="mb-2 font-medium">
                 No tickets configured
               </h3>
@@ -538,7 +539,7 @@ watch(tickets, async (newTickets) => {
                 Add your first ticket to get started
               </p>
               <Button @click="addTicket">
-                <Icon icon="mdi:plus" class="mr-2 size-4" />
+                <Icon icon="tabler:plus" class="mr-2 size-4" />
                 Add Ticket
               </Button>
             </div>
