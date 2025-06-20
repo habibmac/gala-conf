@@ -1,5 +1,6 @@
 // Export all types from all files in this directory
 export * from './api';
+export * from './api-error';
 export * from './auth';
 export * from './billings';
 export * from './checkins';
