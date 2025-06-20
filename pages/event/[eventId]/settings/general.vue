@@ -30,9 +30,11 @@ const handleSave = async (formData: any) => {
     await $galantisApi.put(`/event/${eventId}`, formData);
     toast.success('General settings saved successfully');
   }
-  catch (error: unknown) {
-    console.warn('Error saving general settings:', error);
-    toast.error('Failed to save settings');
+  catch (error) {
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to save settings');
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
   }
 };
 

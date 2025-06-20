@@ -25,12 +25,12 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-const statusEntries = computed(() => {
+const regStatusEntries = computed(() => {
   if (!props.ticket.sales_stats?.by_status)
     return [];
 
   // Define the desired order using status codes
-  const statusOrder = ['RAP', 'RPP', 'RCN', 'TIN', 'TCM', 'TAB']; // Approved, Pending, Cancelled, Incomplete, etc.
+  const statusOrder = ['RAP', 'RPP', 'RCN', 'RIC']; // Approved, Pending, Cancelled, Incomplete, etc.
 
   const entries = Object.entries(props.ticket.sales_stats.by_status).map(([status, count]) => ({
     status: String(status),
@@ -88,7 +88,7 @@ const getStatusClasses = (color: string) => {
             :disabled="isUpdatingOrder"
             alt="Drag to reorder ticket"
           >
-            <Icon icon="tabler:arrows-transfer-up-down" class="size-4" />
+            <Icon icon="mdi:drag" class="size-6" />
           </Button>
         </div>
 
@@ -97,13 +97,13 @@ const getStatusClasses = (color: string) => {
           <div class="flex items-start justify-between">
             <div class="flex-1 pr-4 md:pr-0">
               <div class="mb-2 flex flex-wrap items-center gap-2">
+                <Badge :class="statusConfig.bgBadgeClass" variant="outline" class="flex items-center gap-1 text-xs">
+                  <Icon :icon="statusConfig.icon" class="size-3" />
+                  {{ statusConfig.label }}
+                </Badge>
                 <h4 class="max-w-xs text-base font-semibold sm:max-w-none">
                   {{ ticket.name }}
                 </h4>
-                <Badge :class="statusConfig.textColor" variant="secondary" class="text-xs">
-                  <Icon :icon="statusConfig.icon" class="mr-1 size-3" />
-                  {{ statusConfig.label }}
-                </Badge>
               </div>
 
               <p v-if="ticket.description" class="mb-3 line-clamp-2 text-sm text-muted-foreground">
@@ -143,7 +143,7 @@ const getStatusClasses = (color: string) => {
                 <div v-if="ticket.sales_stats?.by_status" class="mb-3">
                   <div class="flex flex-wrap gap-2">
                     <Badge
-                      v-for="item in statusEntries"
+                      v-for="item in regStatusEntries"
                       :key="item.status"
                       variant="outline"
                       class="text-xs"

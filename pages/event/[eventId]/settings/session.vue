@@ -1,7 +1,4 @@
-<!-- pages/event/[eventId]/settings/sessions.vue -->
 <script setup lang="ts">
-import { toast } from 'vue-sonner';
-
 import DatetimeSettings from '~/components/partials/settings/DatetimeSettings.vue';
 
 definePageMeta({
@@ -19,23 +16,7 @@ definePageMeta({
   parentPath: '/event/:eventId/settings',
 });
 
-const route = useRoute();
-const eventId = route.params.eventId as string;
-
 const { event: eventData, isLoading } = useEvent();
-
-const { $galantisApi } = useNuxtApp();
-
-const handleSave = async (formData: any) => {
-  try {
-    await $galantisApi.put(`/event/${eventId}`, formData);
-    toast.success('Session settings saved successfully');
-  }
-  catch (error: unknown) {
-    console.warn('Error saving session settings:', error);
-    toast.error('Failed to save settings');
-  }
-};
 
 useHead({
   title: 'Session Settings',
@@ -56,7 +37,7 @@ useHead({
               Configure session dates, times, and other related settings for your event.
             </p>
           </header>
-          <DatetimeSettings :event-data="eventData" :is-loading="isLoading" @save="handleSave" />
+          <DatetimeSettings :event-data="eventData" :is-loading="isLoading" />
         </section>
       </div>
     </div>

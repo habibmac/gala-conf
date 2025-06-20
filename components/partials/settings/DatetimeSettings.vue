@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
 import { toTypedSchema } from '@vee-validate/zod';
-import VueDatePicker from '@vuepic/vue-datepicker';
 import { useForm } from 'vee-validate';
 import { toast } from 'vue-sonner';
 import { z } from 'zod';
+
+import DatetimeDisplayCard from './DatetimeDisplayCard.vue';
+import DatetimeEditCard from './DatetimeEditCard.vue';
 
 interface Props {
   eventData: any
@@ -12,10 +14,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-
-const emit = defineEmits<{
-  save: [data: any]
-}>();
 
 const { $galantisApi } = useNuxtApp();
 const route = useRoute();
@@ -25,8 +23,8 @@ const eventId = route.params.eventId as string;
 const sessionSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, 'Session name is required'),
-  date_start: z.string().min(1, 'Start date is required'),
-  date_end: z.string().min(1, 'End date is required'),
+  date_start: z.union([z.string(), z.date()]).optional(),
+  date_end: z.union([z.string(), z.date()]).optional(),
   reg_limit: z.number().min(0).optional(),
   description: z.string().optional(),
   sold: z.number().min(0).optional(),
@@ -39,13 +37,12 @@ const formSchema = z.object({
 const form = useForm({
   validationSchema: toTypedSchema(formSchema),
   initialValues: {
-    sessions: [],
+    sessions: [] as z.infer<typeof formSchema>['sessions'],
   },
 });
 
 // Simple state
 const isLoadingSessions = ref(true);
-const isSaving = ref(false);
 
 // Load sessions on mount
 onMounted(async () => {
@@ -75,8 +72,11 @@ const loadSessions = async () => {
     }
   }
   catch (error) {
-    console.error('Error loading sessions:', error);
-    toast.error('Failed to load sessions');
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to load sessions');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
   }
   finally {
     isLoadingSessions.value = false;
@@ -99,21 +99,6 @@ const updateSessionsFromEventData = (eventDatetimes: any[]) => {
   form.setValues({ sessions: formattedSessions });
 };
 
-const addSession = () => {
-  const now = new Date();
-  const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
-
-  const newSession = {
-    name: `Session ${(form.values.sessions?.length || 0) + 1}`,
-    date_start: now.toISOString().slice(0, 16),
-    date_end: twoHoursLater.toISOString().slice(0, 16),
-    reg_limit: 0,
-    description: '',
-  };
-
-  push(newSession);
-};
-
 const duplicateSession = (index: number) => {
   const sessions = form.values.sessions;
   if (!sessions || !sessions[index])
@@ -129,61 +114,81 @@ const duplicateSession = (index: number) => {
   insert(index + 1, duplicatedSession);
 };
 
-const onSubmit = form.handleSubmit(async (values) => {
+const { remove, insert } = useFieldArray('sessions');
+
+const editingSessionId = ref<string | null>(null);
+
+const addSession = () => {
+  const newSession = {
+    id: `temp-${Date.now()}`, // Temporary ID for new session
+    name: '',
+    date_start: '',
+    date_end: '',
+    reg_limit: 0,
+    description: '',
+  };
+
+  insert(0, newSession); // Insert at the top
+  editingSessionId.value = newSession.id; // Set editing mode
+};
+
+const editSession = (sessionId: string) => {
+  editingSessionId.value = sessionId;
+};
+
+const cancelEdit = () => {
+  if (editingSessionId.value?.startsWith('temp-')) {
+    const sessions = form.values.sessions || [];
+    const index = sessions.findIndex(s => s.id === editingSessionId.value);
+    if (index !== -1)
+      remove(index);
+  }
+  editingSessionId.value = null;
+};
+
+const saveSession = async (_sessionData: any) => {
   try {
-    isSaving.value = true;
+    const sessionData = {
+      ..._sessionData,
+      date_start: formatDateForSubmission(_sessionData.date_start),
+      date_end: formatDateForSubmission(_sessionData.date_end),
+    };
 
-    const newSessions = values.sessions.filter(session => !session.id);
-    const existingSessions = values.sessions.filter(session => session.id);
-
-    const promises = [];
-
-    if (newSessions.length > 0) {
-      promises.push(
-        $galantisApi.post(`/event/${eventId}/datetimes/bulk`, {
-          datetimes: newSessions,
-        }),
-      );
-    }
-
-    if (existingSessions.length > 0) {
-      promises.push(
-        $galantisApi.put(`/event/${eventId}/datetimes/bulk`, {
-          datetimes: existingSessions,
-        }),
-      );
-    }
-
-    const results = await Promise.all(promises);
-    const hasErrors = results.some(result => !result.data.success);
-
-    if (hasErrors) {
-      const errors = results
-        .filter(result => !result.data.success)
-        .map(result => result.data.errors || [result.data.message])
-        .flat();
-
-      toast.error('Some sessions failed to save', {
-        description: errors.join(', '),
-      });
+    if (editingSessionId.value) {
+      // Update existing session
+      await $galantisApi.put(`/event/${eventId}/datetime/${editingSessionId.value}`, sessionData);
+      toast.success('Session updated successfully');
     }
     else {
-      toast.success('Session settings saved successfully');
-      emit('save', values);
+      // Create new session
+      const response = await $galantisApi.post(`/event/${eventId}/datetime`, sessionData);
+      sessionData.id = response.data.id; // Set the new ID
+      insert(0, sessionData); // Insert at the top
+      toast.success('Session created successfully');
     }
 
+    editingSessionId.value = null;
     await loadSessions();
   }
-  catch (error: any) {
-    console.error('Error saving sessions:', error);
-    toast.error('Failed to save sessions', {
-      description: error?.response?.data?.message || 'Please check your information and try again',
+  catch (error) {
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to save session');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
     });
   }
-  finally {
-    isSaving.value = false;
+};
+
+const getEditWarning = (session: any) => {
+  if (session.sold > 0) {
+    return `This session has ${session.sold} registrations. Some changes may be restricted.`;
   }
-});
+  return null;
+};
+
+const canEdit = (session: any) => {
+  return session.sold === 0;
+};
 
 const deleteSession = async (sessionId: string, index: number) => {
   try {
@@ -192,198 +197,60 @@ const deleteSession = async (sessionId: string, index: number) => {
     toast.success('Session deleted successfully');
     await loadSessions();
   }
-  catch (error: any) {
-    console.error('Error deleting session:', error);
-    toast.error('Failed to delete session', {
-      description: error?.response?.data?.message || 'Session may have registrations',
+  catch (error) {
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to delete session');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
     });
   }
 };
-
-const { fields, push, remove, insert } = useFieldArray('sessions');
 </script>
 
 <template>
-  <form class="space-y-6" @submit="onSubmit">
-    <!-- Loading State -->
+  <div class="space-y-4">
     <div v-if="isLoadingSessions" class="flex items-center justify-center py-8">
       <div class="flex items-center gap-2">
-        <Icon icon="svg-spinners:ring-resize" class="mx-auto mb-2 size-8 text-muted-foreground" />
-        <span class="text-sm text-muted-foreground">Loading sessions...</span>
+        <Icon icon="svg-spinners:ring-resize" class="mx-auto mb-2 size-8 text-muted-foreground" /> <span
+          class="text-sm text-muted-foreground"
+        >Loading tickets...</span>
       </div>
     </div>
 
-    <!-- Sessions List -->
     <div v-else class="space-y-4">
-      <Card v-for="(field, index) in fields" :key="`session-${index}`">
-        <CardHeader class="pb-4">
-          <div class="flex items-center justify-between">
-            <h4 class="font-medium">
-              Session {{ index + 1 }}
-            </h4>
+      <div v-for="(session, index) in form.values.sessions" :key="session.id || index">
+        <!-- Editing Mode -->
+        <DatetimeEditCard
+          v-if="editingSessionId === session.id"
+          :session="session"
+          :can-edit="canEdit(session)"
+          :edit-warning="getEditWarning(session)"
+          @save="saveSession"
+          @cancel="cancelEdit"
+          @delete="(session) => deleteSession(session.id, index)"
+        />
+        <!-- Display Mode -->
+        <DatetimeDisplayCard
+          v-else
+          :session="session"
+          :can-edit="canEdit(session)"
+          :edit-warning="getEditWarning(session)"
+          @edit="editSession"
+          @duplicate="duplicateSession"
+          @delete="(session) => deleteSession(session.id, index)"
+        />
+      </div>
+    </div>
 
-            <div class="flex items-center gap-2">
-              <!-- Dropdown -->
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <Button variant="ghost" size="icon" :disabled="isSaving">
-                    <Icon icon="tabler:dots-vertical" class="size-4" />
-                    <span class="sr-only">Actions</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem @click="duplicateSession(index)">
-                    <Icon icon="tabler:copy" class="mr-2 size-4" />
-                    Duplicate
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    v-if="form.values.sessions?.[index]?.id"
-                    class="text-destructive focus:text-destructive"
-                    @click="deleteSession(form.values.sessions[index].id!, index)"
-                  >
-                    <Icon icon="tabler:trash" class="mr-2 size-4" />
-                    Delete
-                  </DropdownMenuItem>
-                  <DropdownMenuItem v-else class="text-destructive focus:text-destructive" @click="remove(index)">
-                    <Icon icon="tabler:trash" class="mr-2 size-4" />
-                    Remove
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent class="space-y-4">
-          <!-- Session Name -->
-          <FormField v-slot="{ componentField }" :name="`sessions[${index}].name`">
-            <FormItem>
-              <FormLabel>Session Name</FormLabel>
-              <FormControl>
-                <Input v-bind="componentField" placeholder="Enter session name" :disabled="isSaving" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
-          <!-- Date and Time Row -->
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <FormField v-slot="{ componentField }" :name="`sessions[${index}].date_start`">
-              <FormItem>
-                <FormLabel>Start Date & Time</FormLabel>
-                <FormControl>
-                  <VueDatePicker
-                    v-bind="componentField"
-                    :enable-time-picker="true"
-                    format="yyyy-MM-dd HH:mm"
-                    preview-format="dd MMM yyyy, HH:mm"
-                    auto-apply
-                    :disabled="isSaving"
-                    placeholder="Select start date and time"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-
-            <FormField v-slot="{ componentField }" :name="`sessions[${index}].date_end`">
-              <FormItem>
-                <FormLabel>End Date & Time</FormLabel>
-                <FormControl>
-                  <VueDatePicker
-                    v-bind="componentField"
-                    :enable-time-picker="true"
-                    format="yyyy-MM-dd HH:mm"
-                    preview-format="dd MMM yyyy, HH:mm"
-                    auto-apply
-                    :disabled="isSaving"
-                    placeholder="Select end date and time"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-          </div>
-
-          <!-- Limit and Description Row -->
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <FormField v-slot="{ componentField }" :name="`sessions[${index}].reg_limit`">
-              <FormItem>
-                <FormLabel>Registration Limit</FormLabel>
-                <FormControl>
-                  <Input
-                    v-bind="componentField"
-                    type="number"
-                    min="0"
-                    placeholder="0 = No limit"
-                    :disabled="isSaving"
-                  />
-                </FormControl>
-                <FormDescription>
-                  Set to 0 for unlimited registrations
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-
-            <FormField v-slot="{ componentField }" :name="`sessions[${index}].description`">
-              <FormItem>
-                <FormLabel>Description (Optional)</FormLabel>
-                <FormControl>
-                  <Input v-bind="componentField" placeholder="Session description" :disabled="isSaving" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-          </div>
-
-          <Alert v-if="form.values.sessions?.[index]?.sold" variant="destructive">
-            <AlertDescription class="flex items-center gap-1 text-xs">
-              <Icon icon="tabler:alert-triangle-filled" class="mr-2 size-4" />
-              This session has {{ form.values.sessions[index].sold }} registrations. Changes may be restricted.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-
-      <!-- Empty State -->
-      <Card v-if="fields.length === 0" class="border-dashed">
-        <CardContent class="flex items-center justify-center py-12">
-          <div class="text-center">
-            <Icon icon="solar:calendar-bold-duotone" class="mx-auto mb-4 size-12 text-muted-foreground" />
-            <h3 class="mb-2 font-medium">
-              No sessions configured
-            </h3>
-            <p class="mb-4 text-sm text-muted-foreground">
-              Add your first session to get started
-            </p>
-            <Button type="button" @click="addSession">
-              <Icon icon="tabler:plus" class="mr-2 size-4" />
-              Add Session
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
+    <div class="mt-4 flex items-center justify-between">
       <Button
-        v-else
-        type="button"
-        variant="outline"
-        :disabled="isLoadingSessions || isSaving"
+        variant="default"
+        :disabled="isLoadingSessions || editingSessionId"
         @click="addSession"
       >
         <Icon icon="tabler:plus" class="mr-2 size-4" />
-        Add Session
+        Add Ticket
       </Button>
     </div>
-
-    <!-- Submit Button -->
-    <div class="flex justify-end border-t pt-4">
-      <Button type="submit" :disabled="isLoadingSessions || isSaving || fields.length === 0" class="min-w-[120px]">
-        <Icon v-if="isSaving" icon="svg-spinners:ring-resize" class="mr-2 size-4" />
-        <Icon v-else-if="fields.length > 0" icon="tabler:check" class="mr-2 size-4" />
-        {{ isSaving ? 'Saving...' : 'Save Changes' }}
-      </Button>
-    </div>
-  </form>
+  </div>
 </template>

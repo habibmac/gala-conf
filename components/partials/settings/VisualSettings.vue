@@ -88,8 +88,11 @@ const loadVisualSettings = async () => {
     }
   }
   catch (error) {
-    console.error('Failed to load visual settings:', error);
-    toast.error('Failed to load visual settings');
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to load visual settings');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
   }
   finally {
     isLoadingVisual.value = false;
@@ -118,8 +121,11 @@ const handleLogoUpload = async (event: Event) => {
     }
   }
   catch (error) {
-    console.error('Failed to upload logo:', error);
-    toast.error('Failed to upload logo');
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to upload logo');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
   }
   finally {
     isUploadingBg.value = false;
@@ -144,8 +150,11 @@ const confirmRemoveLogo = async () => {
     }
   }
   catch (error) {
-    console.error('Failed to remove logo:', error);
-    toast.error('Failed to remove logo');
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to delete session');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
   }
   finally {
     showDeleteDialog.value = false;
@@ -184,8 +193,11 @@ const handleBgImageUpload = async (event: Event) => {
     }
   }
   catch (error) {
-    console.error('Failed to upload background image:', error);
-    toast.error('Failed to upload background image');
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to upload background image');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
   }
   finally {
     isUploadingBg.value = false;
@@ -228,8 +240,11 @@ const handleGalleryUpload = async (event: Event) => {
     toast.success('Gallery images uploaded successfully');
   }
   catch (error) {
-    console.error('Failed to upload gallery images:', error);
-    toast.error('Failed to upload gallery images');
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to upload gallery images');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
   }
   finally {
     isUploadingGallery.value = false;
@@ -247,8 +262,10 @@ const removeGalleryImage = async (imageId: string) => {
     toast.success('Image removed successfully');
   }
   catch (error) {
-    console.error('Failed to remove image:', error);
-    toast.error('Failed to remove image');
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to remove image');
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
   }
 };
 

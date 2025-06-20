@@ -200,8 +200,11 @@ const loadTickets = async () => {
     }
   }
   catch (error) {
-    console.error('Error loading tickets:', error);
-    toast.error('Failed to load tickets');
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to load tickets');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
   }
   finally {
     isLoadingTickets.value = false;
@@ -216,7 +219,11 @@ const loadDatetimes = async () => {
     }
   }
   catch (error) {
-    console.error('Error loading datetimes:', error);
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to load datetimes');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
   }
 };
 
@@ -248,9 +255,12 @@ const updateTicketOrder = async () => {
       }
     }
   }
-  catch (error: any) {
-    console.error('Error updating order:', error);
-    toast.error('Failed to update order');
+  catch (error) {
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to update order');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
 
     // Restore original order on error
     restoreOriginalOrder();
@@ -326,10 +336,11 @@ const saveTicket = async (ticketData: Ticket) => {
       throw new Error(response.data.message || 'Failed to save ticket');
     }
   }
-  catch (error: any) {
-    console.error('Error saving ticket:', error);
-    toast.error('Failed to save ticket', {
-      description: error?.response?.data?.message || 'Please check your information and try again',
+  catch (error) {
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to save ticket');
+
+    toast.error(errorMessage, {
+      description: errorDescription || 'Please check your information and try again',
     });
   }
 };
@@ -349,10 +360,11 @@ const deleteTicket = async (ticket: Ticket) => {
     toast.success('Ticket deleted successfully');
     await loadTickets();
   }
-  catch (error: any) {
-    console.error('Error deleting ticket:', error);
-    toast.error('Failed to delete ticket', {
-      description: error?.response?.data?.message || 'Ticket may have sales',
+  catch (error) {
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to delete ticket');
+
+    toast.error(errorMessage, {
+      description: errorDescription,
     });
   }
 };
@@ -384,6 +396,7 @@ const getStatusConfig = (ticket: Ticket) => {
       bodyClass: 'opacity-50 hover:opacity-100',
       color: 'border-l-gray-500',
       bgColor: 'dark:bg-gray-950/20',
+      bgBadgeClass: 'text-white bg-gray-500 dark:bg-gray-600',
       textColor: 'text-gray-700 dark:text-gray-300',
       icon: 'tabler:clock-x',
       label: 'Expired',
@@ -393,8 +406,9 @@ const getStatusConfig = (ticket: Ticket) => {
   if (ticket.is_on_sale) {
     return {
       color: 'border-l-emerald-400',
-      bgColor: 'dark:bg-emerald-950/20',
-      textColor: 'text-emerald-700 dark:text-emerald-300',
+      bgColor: 'bg-emerald-50/50 dark:bg-emerald-950/30',
+      textColor: 'text-emerald-500 dark:text-emerald-300',
+      bgBadgeClass: 'text-white bg-emerald-500 dark:bg-emerald-600',
       icon: 'tabler:tag',
       label: 'On Sale',
     };

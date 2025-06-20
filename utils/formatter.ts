@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow, fromUnixTime } from 'date-fns';
+import { format, formatDistanceToNow, fromUnixTime, parseISO } from 'date-fns';
 import { format as formatTz, toZonedTime } from 'date-fns-tz';
 import { id } from 'date-fns/locale/id';
 
@@ -163,5 +163,44 @@ export const formatDateRange = (
   catch (error) {
     console.error('Error formatting date range:', error);
     return '-';
+  }
+};
+
+// Helper functions for date conversion
+export const formatDateForPicker = (dateValue: string | Date | null) => {
+  if (!dateValue)
+    return null;
+
+  try {
+    if (typeof dateValue === 'string') {
+      // If it's ISO string, parse it
+      if (dateValue.includes('T') || dateValue.includes('+')) {
+        return parseISO(dateValue);
+      }
+      // If it's datetime-local format, convert to Date
+      return new Date(dateValue);
+    }
+    return dateValue;
+  }
+  catch (error) {
+    console.warn('Error parsing date:', error);
+    return null;
+  }
+};
+
+export const formatDateForSubmission = (dateValue: Date | string | null) => {
+  if (!dateValue)
+    return '';
+
+  try {
+    if (dateValue instanceof Date) {
+      // Convert to ISO string format that your backend expects
+      return dateValue.toISOString();
+    }
+    return dateValue;
+  }
+  catch (error) {
+    console.warn('Error formatting date for submission:', error);
+    return '';
   }
 };
