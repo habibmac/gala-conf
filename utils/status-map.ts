@@ -17,6 +17,18 @@ export const allRegStatuses = [
     label: 'Cancelled',
     value: 'RCN',
   },
+  {
+    color: 'gray',
+    id: 'RAB',
+    label: 'Abandoned',
+    value: 'RAB',
+  },
+  {
+    color: 'gray',
+    id: 'RIC',
+    label: 'Incomplete',
+    value: 'RIC',
+  },
 ];
 
 export const allTransStatuses = [

@@ -14,7 +14,7 @@ definePageMeta({
   roles: ['administrator', 'ee_event_organizer'],
   showInMenu: true,
   title: 'Sessions',
-  order: 2,
+  order: 3,
   isSubMenu: true,
   parentPath: '/event/:eventId/settings',
 });
