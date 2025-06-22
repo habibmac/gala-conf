@@ -524,22 +524,6 @@ watch(
                 <Icon icon="tabler:ticket" class="size-4 text-slate-500 dark:text-slate-400" />
                 <span>{{ ticket.name }}</span>
               </li>
-              <li
-                v-for="ticket in currentGroupTickets"
-                :key="ticket.id"
-                class="inline-flex items-center gap-x-1 rounded-lg border border-slate-300 px-2 py-1 text-sm font-medium dark:border-slate-600 dark:text-slate-300"
-              >
-                <Icon icon="tabler:ticket" class="size-4 text-slate-500 dark:text-slate-400" />
-                <span>{{ ticket.name }}</span>
-              </li>
-              <li
-                v-for="ticket in currentGroupTickets"
-                :key="ticket.id"
-                class="inline-flex items-center gap-x-1 rounded-lg border border-slate-300 px-2 py-1 text-sm font-medium dark:border-slate-600 dark:text-slate-300"
-              >
-                <Icon icon="tabler:ticket" class="size-4 text-slate-500 dark:text-slate-400" />
-                <span>{{ ticket.name }}</span>
-              </li>
             </ul>
             <!-- Fallback when no tickets -->
             <li
