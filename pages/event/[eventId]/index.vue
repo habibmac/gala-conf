@@ -1,6 +1,14 @@
 <script setup lang="ts">
-import CongratulationsBanner from '~/components/CongratulationsBanner.vue';
+import confetti from 'canvas-confetti';
+
 import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
+import EventCountdown from '~/components/partials/dashboard/EventCountdown.vue';
+import EventPackage from '~/components/partials/dashboard/EventPackage.vue';
+import EventTimeline from '~/components/partials/dashboard/EventTimeline.vue';
+import RecentRegistrations from '~/components/partials/dashboard/RecentRegistrations.vue';
+import SessionsCapacity from '~/components/partials/dashboard/SessionsCapacity.vue';
+import TicketsCapacity from '~/components/partials/dashboard/TicketsCapacity.vue';
+import TransactionChart from '~/components/partials/dashboard/TransactionChart.vue';
 import RegCards from '~/components/partials/registrations/RegCards.vue';
 import SeatBookings from '~/components/partials/registrations/SeatBookings.vue';
 
@@ -22,18 +30,17 @@ definePageMeta({
 
 const { hasEventEnded, hasSeating } = useEventStatus();
 
-// Function to trigger confetti
 const triggerConfetti = () => {
-  useConfetti({
-    origin: { y: 0.6 },
+  // Since we're importing confetti directly, use it directly
+  confetti({
     particleCount: 100,
     spread: 70,
+    origin: { y: 0.6 },
   });
 };
 
 onMounted(() => {
   if (hasEventEnded.value) {
-    // wait for 1 second before triggering confetti
     setTimeout(() => {
       triggerConfetti();
     }, 1000);
@@ -50,8 +57,20 @@ onMounted(() => {
     </header>
     <div class="mb-40 flex flex-col gap-4">
       <ClientOnly>
-        <CongratulationsBanner v-if="hasEventEnded" />
-        <RegCards v-else />
+        <div class="flex flex-col gap-4">
+          <div class="grid grid-cols-1 items-start gap-4 sm:grid-cols-12">
+            <RegCards class="sm:col-span-12 md:col-span-6" :for-dashboard="true" />
+            <EventCountdown class="sm:col-span-6 md:col-span-3" />
+            <EventTimeline class="sm:col-span-6 md:col-span-3" />
+            <EventPackage v-if="!hasEventEnded" class="sm:col-span-6 md:col-span-3" />
+            <TransactionChart v-if="!hasEventEnded" class="sm:col-span-9" />
+            <div class="space-y-4 sm:col-span-6">
+              <SessionsCapacity />
+              <TicketsCapacity />
+            </div>
+            <RecentRegistrations class="sm:col-span-6" />
+          </div>
+        </div>
         <CheckinStats :show-detailed-stats="false" :show-recent-checkins="true" />
         <SeatBookings v-if="hasSeating" />
       </ClientOnly>
