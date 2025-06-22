@@ -29,13 +29,19 @@ export const useStats = (eventId: Ref<string>, filters?: Ref<StatsFilters>) => {
   const {
     data: transactionStats,
     error: transactionError,
+    isError: isTransactionError,
     isLoading: isTransactionLoading,
   } = useQuery({
     enabled: !!eventId.value,
     queryFn: ({ signal }) =>
       nuxtApp.$galantisApi
         .get(`/event/${eventId.value}/stats/transaction`, {
-          params: filters?.value,
+          params: {
+            time_frame: filters?.value?.time_frame,
+            days: filters?.value?.days,
+            date_start: filters?.value?.date_start,
+            date_end: filters?.value?.date_end,
+          },
           signal,
         })
         .then(response => response.data as TransactionStats),
@@ -60,17 +66,15 @@ export const useStats = (eventId: Ref<string>, filters?: Ref<StatsFilters>) => {
   });
 
   return {
-    // Errors
     attendeeError,
-    // Stats data
     attendeeStats,
     customFieldError,
     customFieldStats,
-    // Loading states
     isAttendeeLoading,
     isCustomFieldLoading,
     isTransactionLoading,
     transactionError,
+    isTransactionError,
     transactionStats,
   };
 };

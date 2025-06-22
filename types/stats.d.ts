@@ -16,6 +16,32 @@ export interface TransactionStats {
     gross_sales: number
     nett_sales: number
   }
+  summary: {
+    total_approved: number
+    total_pending: number
+    total_registrations: number
+    avg_daily_approved: number
+    avg_daily_pending: number
+    avg_daily_total: number
+    peak_day: string | null
+    peak_count: number
+    conversion_rate: number
+  }
+  time_frame: {
+    type: string
+    start_date: string | null
+    end_date: string | null
+    days_count: number
+    label: string
+  }
+}
+
+export interface StatsFilters {
+  date_start?: string
+  date_end?: string
+  time_frame?: 'today' | 'yesterday' | 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'last_7_days' | 'last_30_days' | 'last_90_days' | 'all_time' | 'custom'
+  days?: number
+  group?: string
 }
 
 interface RegistrationChartData {
@@ -33,12 +59,6 @@ export interface CustomFieldStats {
     label: string
     values: CustomFieldValue[]
   }
-}
-
-export interface StatsFilters {
-  date_start?: string
-  date_end?: string
-  group?: string
 }
 
 interface ChartDataItem {
