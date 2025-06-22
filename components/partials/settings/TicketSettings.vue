@@ -173,8 +173,8 @@ const loadTickets = async () => {
     isLoadingTickets.value = true;
     const response = await $galantisApi.get(`/event/${eventId}/tickets?include_sales=true&include_datetimes=true`);
 
-    if (response.data.success) {
-      tickets.value = response.data.data.map((ticket: any, index: number): Ticket => ({
+    if (response.data) {
+      tickets.value = response.data.map((ticket: any, index: number): Ticket => ({
         // Ensure id is always a string
         id: ticket.id || `ticket-${index}`,
         name: ticket.name || '',

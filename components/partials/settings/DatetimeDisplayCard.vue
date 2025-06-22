@@ -27,16 +27,6 @@ const formatDate = (dateString: string) => {
 };
 
 const getStatusConfig = (session: any) => {
-  if (session.sold > 0) {
-    return {
-      color: 'border-l-red-500',
-      bgColor: 'bg-red-50 dark:bg-red-950/20',
-      textColor: 'text-red-700 dark:text-red-300',
-      icon: 'mdi:account-group',
-      label: 'Has Registrations',
-    };
-  }
-
   const now = new Date();
   const startDate = new Date(session.date_start);
   const endDate = new Date(session.date_end);
@@ -76,7 +66,6 @@ const getStatusConfig = (session: any) => {
     class="group relative border-l-4 transition-all duration-200 hover:shadow-md"
     :class="[
       getStatusConfig(session).color,
-      getStatusConfig(session).bgColor,
     ]"
   >
     <CardContent class="p-4">

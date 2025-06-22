@@ -213,7 +213,7 @@ const deleteSession = async (sessionId: string, index: number) => {
       <div class="flex items-center gap-2">
         <Icon icon="svg-spinners:ring-resize" class="mx-auto mb-2 size-8 text-muted-foreground" /> <span
           class="text-sm text-muted-foreground"
-        >Loading tickets...</span>
+        >Loading sessions...</span>
       </div>
     </div>
 
