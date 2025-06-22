@@ -27,7 +27,7 @@ defineProps({
       <p class="text-sm font-medium text-white/90">
         {{ title }}
       </p>
-      <p class="text-3xl font-semibold text-white">
+      <p class="text-2xl font-semibold text-white 2xl:text-3xl">
         {{ formatThousands(Number(value)) }}
       </p>
       <p v-if="subtitle" class="text-xs text-white/70">

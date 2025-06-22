@@ -73,7 +73,7 @@ const chartData = computed(() => {
     </h2>
     <div>
       <Select :model-value="selectedTimeFrame" @update:model-value="handleTimeFrameChange">
-        <SelectTrigger class="w-48">
+        <SelectTrigger class="w-48 bg-card">
           <SelectValue placeholder="Select time frame" />
         </SelectTrigger>
         <SelectContent>

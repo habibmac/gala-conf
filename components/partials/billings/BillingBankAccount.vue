@@ -28,7 +28,7 @@ const { data: bankAccount, isError, isLoading, isRefetching } = useQuery({
 
 <template>
   <div v-if="isLoading || isRefetching">
-    <Skeleton class="h-28 rounded-xl bg-muted-foreground/10 sm:col-span-6 md:col-span-3" />
+    <Skeleton class="h-60 rounded-xl bg-muted-foreground/10 sm:col-span-6 md:col-span-3" />
   </div>
   <div v-else-if="isError" class="py-16">
     <div class="flex h-32 items-center justify-center">
@@ -37,7 +37,7 @@ const { data: bankAccount, isError, isLoading, isRefetching } = useQuery({
   </div>
   <template v-else-if="bankAccount">
     <Card
-      class="group relative overflow-hidden border-l-4 border-l-blue-500 transition-all duration-200 hover:shadow-md"
+      class="group relative overflow-hidden border-l-4 border-l-blue-500"
     >
       <CardHeader>
         <div class="flex items-center justify-between">
@@ -57,11 +57,12 @@ const { data: bankAccount, isError, isLoading, isRefetching } = useQuery({
         >
           <div class="flex items-center justify-between space-x-2">
             <div class="space-y-1">
-              <p class="font-mono text-lg tracking-wider">
+              <span class="text-xs text-muted-foreground">Account Number</span>
+              <p class="font-mono text-lg font-medium tracking-wider">
                 {{ bankAccount.bank_account }}
               </p>
-              <span class="text-sm">
-                {{ bankAccount.account_holder || 'Account Holder Not Specified' }}
+              <span v-if="bankAccount.account_holder" class="font-mono text-sm font-medium">
+                {{ bankAccount.account_holder }}
               </span>
             </div>
             <img
