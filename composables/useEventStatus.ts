@@ -1,10 +1,11 @@
+// composables/useEventStatus.ts
 export function useEventStatus() {
   const { event } = useEvent();
 
   const hasEventEnded = computed(() => {
-    if (!event.value?.end_date)
+    if (!event.value?.date_end) // Changed from 'end_date' to 'date_end'
       return false;
-    return new Date(event.value.end_date) < new Date();
+    return new Date(event.value.date_end) < new Date();
   });
 
   const eventStatus = computed(() => {
@@ -13,7 +14,7 @@ export function useEventStatus() {
 
     const now = new Date();
     const startDate = new Date(event.value.date_start);
-    const endDate = new Date(event.value.end_date);
+    const endDate = new Date(event.value.date_end);
     const regDate = new Date(event.value.reg_begins);
 
     if (now < regDate)
@@ -32,7 +33,7 @@ export function useEventStatus() {
   });
 
   const timeUntilEnd = computed(() => {
-    if (!event.value?.date_end)
+    if (!event.value?.date_end) // Also fix this one
       return '';
     return formatTimeAgo(event.value.date_end);
   });
