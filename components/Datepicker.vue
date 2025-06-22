@@ -81,7 +81,7 @@ function formatDateRange(dateRange: Date[] | null) {
       <Button
         v-else
         variant="outline"
-        class="w-full justify-start text-left font-normal"
+        class="w-full justify-start bg-card text-left font-normal"
         @click="isSheetOpen = true"
       >
         <Icon icon="heroicons:calendar-days" class="mr-2 size-4" />

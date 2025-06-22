@@ -18,10 +18,11 @@ defineEmits<{
         <!-- Header: Left side -->
         <div class="flex items-center">
           <!-- Hamburger button -->
-          <button
+          <Button
             v-if="showEvents"
             id="sidebar-trigger"
-            class="icon-btn mr-3 lg:!hidden"
+            class="mr-3 hover:bg-card lg:!hidden"
+            variant="ghost"
             aria-controls="sidebar"
             :aria-expanded="sidebarOpen"
             size="icon"
@@ -29,7 +30,7 @@ defineEmits<{
           >
             <span class="sr-only">Open sidebar</span>
             <Icon icon="material-symbols-light:menu" class="size-8 fill-current" />
-          </button>
+          </Button>
           <NuxtLink
             v-else
             to="/my-events"

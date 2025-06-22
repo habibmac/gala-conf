@@ -33,7 +33,7 @@ const currentThemeIcon = computed(() => {
   <ClientOnly>
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" class="hover:bg-card">
           <Icon :icon="currentThemeIcon" class="size-5" />
           <span class="sr-only">Toggle theme</span>
         </Button>

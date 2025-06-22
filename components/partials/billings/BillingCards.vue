@@ -104,8 +104,8 @@ const cards = computed(() => {
           </p>
         </CardContent>
       </Card>
-      <BillingBankAccount class="col-span-2" />
-      <WithdrawalInfo class="col-span-2" />
+      <BillingBankAccount class="lg:col-span-2" />
+      <WithdrawalInfo class="lg:col-span-2" />
     </div>
   </template>
   <template v-else>
