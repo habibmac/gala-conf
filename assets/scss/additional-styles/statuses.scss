@@ -7,11 +7,11 @@
   }
 
   &.smart {
-    @apply bg-gradient-to-tr from-blue-500 to-blue-500 text-blue-50 dark:from-blue-600 dark:to-blue-600;
+    @apply bg-gradient-to-r from-sky-500 via-sky-400 to-sky-500 text-sky-50 dark:from-sky-600 dark:via-sky-400 dark:to-sky-600;
   }
 
   &.optima {
-    @apply bg-gradient-to-r from-sky-500 via-sky-400 to-sky-500 text-sky-50 dark:from-sky-600 dark:via-sky-400 dark:to-sky-600;
+    @apply bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-amber-50 dark:from-amber-600 dark:via-amber-400 dark:to-amber-600;
   }
 }
 

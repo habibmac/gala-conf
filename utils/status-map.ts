@@ -1,87 +1,100 @@
 export const allRegStatuses = [
   {
-    color: 'emerald',
     id: 'RAP',
     label: 'Approved',
     value: 'RAP',
+    color: 'emerald',
+    variant: 'registration-approved',
   },
   {
-    color: 'sky',
     id: 'RPP',
     label: 'Pending',
     value: 'RPP',
+    color: 'sky',
+    variant: 'registration-pending',
   },
   {
-    color: 'red',
     id: 'RCN',
     label: 'Cancelled',
     value: 'RCN',
+    color: 'red',
+    variant: 'registration-cancelled',
   },
   {
-    color: 'gray',
     id: 'RAB',
     label: 'Abandoned',
     value: 'RAB',
+    color: 'gray',
+    variant: 'registration-abandoned',
   },
   {
-    color: 'gray',
     id: 'RIC',
     label: 'Incomplete',
     value: 'RIC',
+    color: 'gray',
+    variant: 'registration-incomplete',
   },
 ];
 
 export const allTransStatuses = [
   {
-    color: 'emerald',
     id: 'TCM',
     label: 'Completed',
     value: 'TCM',
+    color: 'emerald',
+    variant: 'transaction-completed',
   },
   {
-    color: 'blue',
     id: 'TIN',
     label: 'Incomplete',
     value: 'TIN',
+    color: 'blue',
+    variant: 'transaction-incomplete',
   },
   {
-    color: 'gray',
     id: 'TAB',
     label: 'Abandoned',
     value: 'TAB',
+    color: 'gray',
+    variant: 'transaction-abandoned',
   },
 ];
 
 export const allTicketStatuses = [
   {
-    color: 'purple',
     id: 'TKS',
     label: 'Sold Out',
     value: 'TKS',
+    color: 'purple',
+    variant: 'ticket-sold-out',
   },
   {
-    color: 'gray',
     id: 'TKE',
     label: 'Expired',
     value: 'TKE',
+    color: 'gray',
+    variant: 'ticket-expired',
   },
   {
-    color: 'slate',
     id: 'TKA',
     label: 'Archived',
     value: 'TKA',
+    color: 'slate',
+    variant: 'ticket-archived',
   },
   {
-    color: 'sky',
     id: 'TKP',
     label: 'Pending',
     value: 'TKP',
+    color: 'sky',
+    variant: 'ticket-pending',
   },
   {
-    color: 'emerald',
     id: 'TKO',
     label: 'On Sale',
     value: 'TKO',
+    color: 'emerald',
+    variant: 'ticket-on-sale',
   },
 ];
 
@@ -91,13 +104,13 @@ const allStatuses = [...allRegStatuses, ...allTransStatuses, ...allTicketStatuse
 // Convert the array into an object for quick access
 export const statusMap = allStatuses.reduce(
   (acc, status) => {
-    acc[status.id] = { color: status.color, label: status.label };
+    acc[status.id] = { color: status.color, label: status.label, variant: status.variant };
     return acc;
   },
-  {} as Record<string, { label: string, color: string }>,
+  {} as Record<string, { label: string, color: string, variant: string }>,
 );
 
 // Universal function to get status color and label
 export const getStatusInfo = (statusId: string) => {
-  return statusMap[statusId] || { color: 'default', label: 'Default' };
+  return statusMap[statusId] || { color: 'default', label: 'Default', variant: 'default' };
 };
