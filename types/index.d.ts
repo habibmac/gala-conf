@@ -1,4 +1,5 @@
 // Export all types from all files in this directory
+export * from './agenda';
 export * from './api';
 export * from './api-error';
 export * from './auth';
