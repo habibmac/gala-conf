@@ -447,7 +447,7 @@ watch(
 </script>
 
 <template>
-  <div class="container mx-auto 2xl:mx-0">
+  <div class="container mx-auto">
     <header class="pt-5">
       <NuxtLink
         :to="`/event/${eventId}/insights`"
@@ -467,7 +467,7 @@ watch(
   </div>
 
   <section>
-    <div class="container relative mx-auto 2xl:mx-0">
+    <div class="container relative mx-auto">
       <div v-if="isMetaLoading" class="grid grid-cols-12 gap-4">
         <Skeleton v-for="i in 2" :key="i" class="col-span-12 h-28 rounded-xl bg-muted-foreground/10 md:col-span-6" />
       </div>
@@ -501,7 +501,7 @@ watch(
     </div>
   </section>
 
-  <section>
+  <section class="container mx-auto ">
     <div class="flex flex-col gap-2 p-4 sm:flex-row sm:items-end sm:justify-between sm:px-8">
       <div class="w-full grow sm:w-auto">
         <h3>

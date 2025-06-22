@@ -413,7 +413,7 @@ watch(
 
 <!-- Add the template section from the next message due to length -->
 <template>
-  <div class="container mx-auto flex flex-col gap-5 2xl:mx-0">
+  <div class="container mx-auto flex flex-col gap-5">
     <div class="flex flex-col">
       <header class="mb-5 flex flex-col gap-2 pt-10 sm:flex-row sm:items-start sm:justify-between">
         <h1 class="h2">
@@ -425,7 +425,7 @@ watch(
   </div>
 
   <section>
-    <div class="container py-4 2xl:mx-0">
+    <div class="container mx-auto py-4">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex flex-col space-y-2 sm:grid sm:grid-flow-col sm:gap-2 sm:space-y-0">
           <TableSearchForm v-model="filters.search" placeholder="Search by name, reg code, or ticket..." />

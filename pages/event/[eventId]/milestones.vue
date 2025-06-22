@@ -150,7 +150,7 @@ const getStatusColor = (status: string) => {
 </script>
 
 <template>
-  <div class="container mx-auto 2xl:mx-0">
+  <div class="container mx-auto mb-20">
     <header class="mb-6 flex flex-col gap-2 pt-10 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <h1 class="h2 mb-2">

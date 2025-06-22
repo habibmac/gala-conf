@@ -44,7 +44,7 @@ useHead({
 </script>
 
 <template>
-  <div class="relative flex h-full flex-col md:flex-row">
+  <div class="container relative mx-auto flex h-full flex-col md:flex-row">
     <SubmenuSidebar />
     <div class="flex-1 overflow-y-auto">
       <div class="container mx-auto mb-20 p-6 2xl:mx-0">

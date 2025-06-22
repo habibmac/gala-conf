@@ -231,7 +231,7 @@ const downloadCustomFieldData = (field: any) => {
 </script>
 
 <template>
-  <div class="container mx-auto mb-20 2xl:mx-0">
+  <div class="container mx-auto mb-20">
     <header class="mb-6 flex flex-col gap-4 pt-10 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h1 class="h2 mb-2">
@@ -280,7 +280,7 @@ const downloadCustomFieldData = (field: any) => {
             <p class="text-sm font-medium text-white/90">
               Total Revenue
             </p>
-            <p class="text-3xl font-semibold text-white">
+            <p class="text-2xl font-semibold text-white 2xl:text-3xl">
               {{ formatCurrency(transactionStats.total_revenue.gross_sales) }}
             </p>
             <p class="text-xs text-white/70">
