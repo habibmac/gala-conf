@@ -62,7 +62,7 @@ const progressPercentage = computed(() => {
   <Card
     class="relative h-full overflow-hidden border-emerald-200 bg-gradient-to-b from-emerald-200 to-emerald-400 dark:border-emerald-800 dark:from-emerald-600"
   >
-    <CardHeader>
+    <CardHeader class="pb-0">
       <NuxtLink :to="`/event/${eventId}/milestones`" class="flex flex-row items-center justify-between hover:underline">
         <CardTitle class="text-sm font-medium tracking-normal">
           Milestone
@@ -72,8 +72,8 @@ const progressPercentage = computed(() => {
     </CardHeader>
     <CardContent>
       <div v-if="isAgendaLoading" class="space-y-3">
-        <Skeleton class="h-8 w-20" />
-        <Skeleton class="h-4 w-32" />
+        <Skeleton class="mx-auto size-16 rounded-full" />
+        <Skeleton class="mx-auto h-4 w-32" />
         <Skeleton class="h-2 w-full" />
       </div>
 
@@ -85,7 +85,7 @@ const progressPercentage = computed(() => {
         No progress data available
       </div>
 
-      <div v-else class="space-y-4 ">
+      <div v-else class="space-y-4">
         <!-- Status section -->
         <div v-if="statusConfig" class="text-center">
           <div class="mb-3 inline-flex size-16 items-center justify-center rounded-full" :class="statusConfig.bgColor">

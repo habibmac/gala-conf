@@ -43,7 +43,6 @@ const {
 } = useQuery<CheckinStats>({
   queryFn: () => getStats(eventId),
   queryKey: ['checkin-stats', eventId],
-  refetchInterval: hasEventEnded.value ? false : 30000,
   staleTime: hasEventEnded.value ? Infinity : 30000,
 });
 
@@ -129,7 +128,7 @@ const statsCards = computed(() => [
       <!-- Card Value -->
       <div class="flex items-end justify-between">
         <div>
-          <div class="text-2xl font-bold text-slate-800 dark:text-white">
+          <div class="text-2xl font-semibold text-slate-800 dark:text-white">
             <template v-if="isLoading || isRefetching">
               <Skeleton class="h-8 w-16" />
             </template>

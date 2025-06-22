@@ -141,7 +141,8 @@ const getStatCards = computed(() => {
       value: attendeeStats.value.total_approved,
       icon: 'heroicons:user-group',
       bgColor: 'bg-green-500',
-      gradient: 'from-green-500 to-green-200 dark:from-green-400/80 dark:to-green-400/10',
+      gradient: 'from-green-500 to-green-200 dark:from-green-400/60 dark:to-green-400/10',
+      borderColor: 'border-green-200 dark:border-green-800',
     },
     {
       title: 'Pending',
@@ -149,6 +150,7 @@ const getStatCards = computed(() => {
       icon: 'heroicons:clock',
       bgColor: 'bg-blue-500',
       gradient: 'from-blue-500 to-blue-200 dark:from-blue-400/80 dark:to-blue-400/10',
+      borderColor: 'border-blue-200 dark:border-blue-800',
     },
     {
       title: 'Total Registrations',
@@ -156,6 +158,7 @@ const getStatCards = computed(() => {
       icon: 'heroicons:users',
       bgColor: 'bg-purple-500',
       gradient: 'from-purple-500 to-purple-200 dark:from-purple-400/80 dark:to-purple-400/10',
+      borderColor: 'border-purple-200 dark:border-purple-800',
     },
   ];
 });
@@ -264,13 +267,13 @@ const downloadCustomFieldData = (field: any) => {
           :value="card.value"
           :icon="card.icon"
           :gradient="card.gradient"
+          :border-color="card.borderColor"
         />
 
         <!-- Revenue Card -->
         <div
           v-if="transactionStats"
-          class="relative overflow-hidden rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-200 p-6 text-white dark:from-emerald-400/60
-           dark:to-emerald-400/10"
+          class="relative overflow-hidden rounded-lg border border-emerald-200 bg-gradient-to-tr from-emerald-500 to-emerald-200 p-6 text-white transition-shadow duration-200 hover:shadow-lg dark:border-emerald-800 dark:from-emerald-400/60 dark:to-emerald-400/10"
         >
           <Icon icon="heroicons:currency-dollar" class="absolute right-4 top-4 size-8 text-white/20" />
           <div class="space-y-2">
