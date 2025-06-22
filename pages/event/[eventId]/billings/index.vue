@@ -58,12 +58,11 @@ definePageMeta({
   title: 'Billings',
 });
 
-const { event } = useEvent();
-const eventId = computed(() => event.value?.id);
-
 // Add route and router
 const route = useRoute();
 const router = useRouter();
+
+const eventId = ref(route.params.eventId as string) || ref('');
 
 // Pagination configs
 const INITIAL_PAGE_SIZE = 10;

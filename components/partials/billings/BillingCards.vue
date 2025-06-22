@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/vue-query';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatThousands } from '@/utils';
+import BillingBankAccount from '~/components/partials/billings/BillingBankAccount.vue';
+import WithdrawalInfo from '~/components/partials/billings/WithdrawalInfo.vue';
 
 const route = useRoute();
 const eventId = ref(route.params.eventId as string) || ref('');
@@ -102,6 +104,8 @@ const cards = computed(() => {
           </p>
         </CardContent>
       </Card>
+      <BillingBankAccount class="col-span-2" />
+      <WithdrawalInfo class="col-span-2" />
     </div>
   </template>
   <template v-else>
