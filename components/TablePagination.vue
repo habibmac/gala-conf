@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { cn } from '~/lib/utils';
 
 const props = defineProps({
   currentPage: { default: 1, type: Number },
@@ -10,6 +11,7 @@ const props = defineProps({
   pageSize: { default: 10, type: Number },
   pageSizes: { default: () => [10, 20, 50, 100], type: Array },
   totalData: { default: 0, type: Number },
+  activePageStyle: { default: '', type: String },
 });
 
 const emits = defineEmits(['update:pageSize', 'update:currentPage']);
@@ -56,7 +58,7 @@ const shouldShowPage = (page: number) => {
 
 <template>
   <div
-    class="mb-20 mt-5 grid grid-cols-2 items-center gap-5 p-4 pt-0 sm:grid-cols-3 sm:justify-between sm:p-6 sm:pt-0"
+    class="mt-5 grid w-full grid-cols-2 items-center gap-5 p-4 pt-0 sm:grid-cols-3 sm:justify-between sm:p-6 sm:pt-0"
   >
     <div class="order-2 flex items-center space-x-2 sm:order-1">
       <Select :model-value="String(pageSize)" @update:model-value="handlePageSizeChange">
@@ -75,7 +77,7 @@ const shouldShowPage = (page: number) => {
       </Label>
     </div>
     <nav role="navigation" aria-label="Pagination" class="order-3 col-span-2 sm:order-2 sm:col-span-1">
-      <ul class="flex flex-wrap items-center justify-center space-x-1 sm:flex-nowrap">
+      <ul class="flex select-none flex-wrap items-center justify-center space-x-1 sm:flex-nowrap">
         <li class="hidden sm:block">
           <RouterLink
             :to="createLink(1)"
@@ -111,7 +113,9 @@ const shouldShowPage = (page: number) => {
             <RouterLink
               :to="createLink(page)"
               class="page-link"
-              :class="{ active: currentPage === page }"
+              :class="cn(
+                currentPage === page ? activePageStyle ? `bg-pink-300 ${activePageStyle}` : 'active' : '',
+              )"
               @click="navigateToPage(page)"
             >
               {{ page }}

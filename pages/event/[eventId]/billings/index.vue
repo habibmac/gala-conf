@@ -12,7 +12,7 @@ import {
 import { format } from 'date-fns';
 import { computed, ref } from 'vue';
 
-import type { Billing, BillingFilters, ColumnConfig, StatusConfig } from '@/types';
+import type { Billing, BillingFilters, ColumnConfig } from '@/types';
 
 import { calculateMinWidth, formatThousands } from '@/utils';
 import BillingCards from '~/components/partials/billings/BillingCards.vue';
@@ -141,17 +141,37 @@ const columnConfigs = ref<ColumnConfig[]>([
 ]);
 
 // Add status config
-const statusConfig: StatusConfig = {
-  completed: {
-    bgColor: 'bg-green-50',
-    color: 'text-green-500',
-    icon: 'material-symbols:check-circle',
-  },
-  pending: {
-    bgColor: 'bg-orange-50',
-    color: 'text-orange-500',
-    icon: 'material-symbols:pending',
-  },
+const statusConfig = (status: string) => {
+  switch (status) {
+    case 'pending':
+      return {
+        bgColor: 'bg-yellow-50',
+        borderColor: 'border-yellow-200',
+        color: 'text-yellow-600',
+        icon: 'material-symbols:pending',
+      };
+    case 'completed':
+      return {
+        bgColor: 'bg-green-50',
+        borderColor: 'border-green-200',
+        color: 'text-green-600',
+        icon: 'tabler:circle-check-filled',
+      };
+    case 'rejected':
+      return {
+        bgColor: 'bg-red-50',
+        borderColor: 'border-red-200',
+        color: 'text-red-600',
+        icon: 'material-symbols:error',
+      };
+    default:
+      return {
+        bgColor: 'bg-gray-50',
+        borderColor: 'border-gray-200',
+        color: 'text-gray-500',
+        icon: 'material-symbols:help',
+      };
+  }
 };
 
 // Define columns
@@ -169,25 +189,26 @@ const columns = computed(() => {
             case 'transferred_date': {
               if (!value)
                 return '-';
-              return format(new Date(value), 'dd MMM yyyy HH:mm');
+              return h('div', {
+                class: 'whitespace-nowrap',
+              }, format(new Date(value), 'dd MMM yyyy HH:mm'));
             }
             case 'amount':
-              return formatThousands(Number(value));
+              return h('div', {
+                class: 'md:pr-8 font-medium text-right tabular-nums',
+              }, formatThousands(Number(value)));
+              formatThousands(Number(value));
             case 'status': {
               const status = value as string;
-              const config = statusConfig[status] || {
-                bgColor: 'bg-gray-50',
-                color: 'text-gray-500',
-                icon: 'material-symbols:help',
-              };
+              const config = statusConfig(status);
               return h(
                 'div',
                 {
-                  class: 'flex items-center gap-2',
+                  class: `inline-flex font-medium border rounded-md items-center gap-1 rounded px-2 py-1 ${config.bgColor} ${config.color} ${config.borderColor} text-xs`,
                 },
                 [
                   h(Icon, {
-                    class: config.color,
+                    class: `size-3 ${config.color}`,
                     icon: config.icon,
                   }),
                   h('span', {}, status.charAt(0).toUpperCase() + status.slice(1)),
@@ -345,7 +366,7 @@ watch(
 </script>
 
 <template>
-  <div class="container mx-auto flex flex-col gap-5 2xl:mx-0">
+  <div class="container mx-auto flex flex-col gap-5">
     <div class="flex flex-col">
       <header class="mb-5 flex flex-col gap-2 pt-10 sm:flex-row sm:items-start sm:justify-between">
         <h1 class="h2">
@@ -357,7 +378,7 @@ watch(
   </div>
 
   <section>
-    <div class="container py-4 2xl:mx-0">
+    <div class="container py-4">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex flex-col space-y-2 sm:grid sm:grid-flow-col sm:gap-2 sm:space-y-0">
           <TableSearchForm v-model="filters.search" placeholder="Search billings..." />
@@ -368,68 +389,77 @@ watch(
     </div>
   </section>
 
-  <section class="relative" :class="{ 'scroll-area overflow-x-auto': !isDataLoading }">
-    <div class="w-full">
-      <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs), totalData)}px` }">
-        <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
-          <thead
-            class="border-y border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
-          >
-            <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-              <th
-                v-for="header in headerGroup.headers"
-                :key="header.id"
-                :colSpan="header.colSpan"
-                :style="{ width: `${header.column.columnDef.size}px` }"
-                class="whitespace-nowrap px-2 py-3 text-xs text-slate-500 first:pl-5 last:pr-5 dark:text-slate-400"
-              >
-                <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-200 text-sm dark:divide-slate-800">
-            <template v-if="!table.getRowModel().rows.length">
-              <template v-if="isDataLoading || isRefetching">
-                <tr v-for="index in 10" :key="index">
-                  <td v-for="(column, index2) in columns" :key="index2" class="p-2">
-                    <Skeleton class="h-6 w-full rounded" />
+  <section class="container relative mx-auto mb-20" :class="{ 'scroll-area overflow-x-auto': !isDataLoading }">
+    <Card class="w-full">
+      <CardHeader class="flex flex-row items-center justify-between space-y-0">
+        <CardTitle class="font-medium tracking-normal">
+          Withdrawal Requests
+        </CardTitle>
+      </CardHeader>
+      <CardContent class="scroll-area overflow-x-auto p-0">
+        <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs), totalData)}px` }">
+          <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
+            <thead
+              class="border-y border-slate-200 bg-slate-100 dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
+            >
+              <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+                <th
+                  v-for="header in headerGroup.headers"
+                  :key="header.id"
+                  :colSpan="header.colSpan"
+                  :style="{ width: `${header.column.columnDef.size}px` }"
+                  class="whitespace-nowrap px-2 py-3 text-sm font-normal  text-slate-400 first:pl-5 last:pr-5 dark:text-slate-400"
+                >
+                  <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-sm dark:divide-slate-800">
+              <template v-if="!table.getRowModel().rows.length">
+                <template v-if="isDataLoading || isRefetching">
+                  <tr v-for="index in 10" :key="index">
+                    <td v-for="(column, index2) in columns" :key="index2" class="p-2">
+                      <Skeleton class="h-6 w-full rounded" />
+                    </td>
+                  </tr>
+                </template>
+                <tr v-else>
+                  <td colspan="10" class="py-10 text-center">
+                    <EmptyState
+                      title="No data found"
+                      description="There are no data matching your criteria."
+                      :img="{ src: '/images/empty-state/empty-c.svg', alt: 'No data found', class: 'w-20' }"
+                      :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
+                    />
                   </td>
                 </tr>
               </template>
-              <tr v-else>
-                <td colspan="10" class="py-10 text-center">
-                  <EmptyState
-                    title="No data found"
-                    description="There are no data matching your criteria."
-                    :img="{ src: '/images/empty-state/empty-c.svg', alt: 'No data found', class: 'w-20' }"
-                    :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
-                  />
+              <tr
+                v-for="row in table.getRowModel().rows"
+                :key="row.id"
+                class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
+              >
+                <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="px-2 py-4 first:pl-5 last:pr-5">
+                  <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                 </td>
               </tr>
-            </template>
-            <tr
-              v-for="row in table.getRowModel().rows"
-              :key="row.id"
-              class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
-            >
-              <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="px-2 py-3 first:pl-5 last:pr-5">
-                <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+      <CardFooter class="border-t p-0">
+        <TablePagination
+          v-if="table.getRowModel().rows.length > 0"
+          :current-page="pagination.pageIndex + 1"
+          :page-count="totalPages"
+          :page-sizes="pageSizes"
+          :page-size="pagination.pageSize"
+          :total-data="totalData"
+          active-page-style="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          @update:page-size="handlePageSizeChange"
+          @update:current-page="handleNavigation"
+        />
+      </CardFooter>
+    </Card>
   </section>
-
-  <TablePagination
-    v-if="table.getRowModel().rows.length > 0"
-    :current-page="pagination.pageIndex + 1"
-    :page-count="totalPages"
-    :page-sizes="pageSizes"
-    :page-size="pagination.pageSize"
-    :total-data="totalData"
-    @update:page-size="handlePageSizeChange"
-    @update:current-page="handleNavigation"
-  />
 </template>
