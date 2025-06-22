@@ -10,9 +10,22 @@ import { formatThousands } from '@/utils';
 const route = useRoute();
 const eventId = ref(route.params.eventId as string);
 
-const getTicketsCapacity = async (evtId: Ref<string>) => {
+const onlyOnSale = ref(true);
+
+const getTicketsCapacity = async (evtId: Ref<string>, onlyOnSale: Ref<boolean>) => {
   const { $galantisApi } = useNuxtApp();
-  const response = await $galantisApi.get(`/event/${evtId.value}/tickets?include_sales=true`);
+
+  const params: Record<string, any> = {
+    include_sales: true,
+  };
+
+  if (onlyOnSale.value) {
+    params.only_on_sale = true;
+  }
+  const response = await $galantisApi.get(`/event/${evtId.value}/tickets`, {
+    params,
+  });
+
   // Sort tickets by order
   response.data.sort((a: any, b: any) => a.order - b.order);
   return response.data;
@@ -20,8 +33,8 @@ const getTicketsCapacity = async (evtId: Ref<string>) => {
 
 const { data: tickets, isLoading, isError } = useQuery({
   enabled: !!eventId.value,
-  queryFn: () => getTicketsCapacity(eventId),
-  queryKey: ['ticketsCapacity', eventId],
+  queryFn: () => getTicketsCapacity(eventId, onlyOnSale),
+  queryKey: ['ticketsCapacity', eventId, onlyOnSale],
 });
 
 const ticketsWithCapacity = computed(() => {
@@ -33,6 +46,11 @@ const ticketsWithCapacity = computed(() => {
     const quantity = ticket.quantity || 0;
     const percentage = quantity > 0 ? Math.round((sold / quantity) * 100) : 0;
     const isSoldOut = quantity > 0 && sold >= quantity;
+
+    // Filter out tickets that are not on sale if onlyOnSale is true
+    if (onlyOnSale.value && !ticket.is_on_sale) {
+      return null;
+    }
 
     return {
       id: ticket.id,
@@ -126,9 +144,14 @@ const getProgressFillColor = (percentage: number) => {
   <Card class="relative overflow-hidden">
     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle class="text-sm font-medium tracking-normal">
-        Tickets Capacity
+        <span>Tickets Capacity</span>
       </CardTitle>
-      <Icon icon="solar:ticket-bold-duotone" class="size-7 text-purple-500" />
+      <div class="flex items-center space-x-2">
+        <label for="upcoming-filter" class="cursor-pointer text-xs text-muted-foreground">
+          On Sale Only
+        </label>
+        <Switch id="upcoming-filter" v-model:checked="onlyOnSale" class="scale-75" />
+      </div>
     </CardHeader>
     <CardContent class="scroll-area max-h-[570px] overflow-y-auto">
       <div v-if="isLoading" class="space-y-3">
