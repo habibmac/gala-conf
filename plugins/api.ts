@@ -13,7 +13,7 @@ export default defineNuxtPlugin(() => {
   });
 
   // Check if already defined to prevent redefinition
-  if (import.meta.client && '$galantisApi' in useNuxtApp()) {
+  if ('$galantisApi' in useNuxtApp()) {
     return;
   }
 
