@@ -158,8 +158,23 @@ const filteredTickets = computed(() => {
   return filterFunction.value(ticketOptions.value, searchTerm.value);
 });
 
+const shouldShowSelectAll = computed(() => {
+  // Show "Select All" when some but not all statuses are selected
+  return selectedTickets.value.length > 0 && selectedTickets.value.length < filteredTickets.value.length;
+});
+
 const toggleAllSelection = () => {
-  updateValue('all');
+  if (shouldShowSelectAll.value) {
+    // User wants to select all -> set to empty array (which means "All Status")
+    updateValue('all');
+  }
+  else {
+    // Currently showing "All Status", user wants partial selection
+    // Select just the first status to move to partial selection state
+    if (filteredTickets.value.length > 0) {
+      updateValue(filteredTickets.value[0].value);
+    }
+  }
 };
 </script>
 
@@ -188,7 +203,7 @@ const toggleAllSelection = () => {
         <PopoverContent class="p-0" align="center">
           <Command :filter-function="filterFunction">
             <CommandInput v-if="showSearch" v-model="searchTerm" placeholder="Search tickets..." />
-            <CommandList>
+            <CommandList class="scroll-area">
               <CommandEmpty>No tickets found.</CommandEmpty>
               <CommandGroup>
                 <!-- All Tickets Option -->
@@ -255,7 +270,7 @@ const toggleAllSelection = () => {
 
       <!-- Mobile: Sheet/Drawer -->
       <Sheet v-model:open="isSheetOpen">
-        <SheetContent side="bottom" class="flex h-full max-h-[70vh] grow flex-col overflow-y-auto">
+        <SheetContent side="bottom" class="flex h-full max-h-[70vh] grow flex-col">
           <SheetHeader>
             <SheetTitle>Filter by Tickets</SheetTitle>
             <SheetDescription>
@@ -263,33 +278,32 @@ const toggleAllSelection = () => {
             </SheetDescription>
           </SheetHeader>
 
-          <div class="mt-6 flex-1 space-y-4">
-            <!-- Search Input (only show if more than 5 tickets) -->
-            <div v-if="showSearch" class="relative">
-              <Icon
-                icon="heroicons:magnifying-glass"
-                class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input v-model="searchTerm" placeholder="Search tickets..." class="pl-9" />
-            </div>
+          <!-- Search Input (only show if more than 5 tickets) -->
+          <div v-if="showSearch" class="relative">
+            <Icon
+              icon="heroicons:magnifying-glass"
+              class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input v-model="searchTerm" placeholder="Search tickets..." class="pl-9" />
+          </div>
 
-            <!-- Action Buttons -->
-            <div class="flex items-center justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                :disabled="!tickets || tickets.length === 0"
-                @click="toggleAllSelection"
-              >
-                <Icon icon="heroicons:check" class="mr-2 size-4" />
-                Select All
-              </Button>
-            </div>
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              :disabled="filteredTickets.length === 0"
+              @click="toggleAllSelection"
+            >
+              <Icon :icon="shouldShowSelectAll ? 'heroicons:check' : 'heroicons:x-mark'" class="mr-2 size-4" />
+              {{ shouldShowSelectAll ? 'Select All' : 'Clear Selection' }}
+            </Button>
+          </div>
 
-            <Separator />
-
+          <Separator />
+          <div class="scroll-area mt-6 flex-1 space-y-4 overflow-y-auto">
             <!-- Tickets List -->
-            <div class="space-y-2 overflow-y-auto">
+            <div class="space-y-2">
               <!-- All Tickets Option -->
               <div
                 class="flex items-center space-x-3 rounded-md border p-3 transition-colors hover:bg-muted/50"

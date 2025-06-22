@@ -242,7 +242,7 @@ const toggleAllSelection = () => {
             <Separator />
 
             <!-- Status List -->
-            <div class="max-h-60 space-y-2 overflow-y-auto">
+            <div class="scroll-area max-h-60 space-y-2 overflow-y-auto">
               <!-- All Status Option -->
               <div
                 class="flex items-center space-x-3 rounded-md border p-3 transition-colors hover:bg-muted/50"

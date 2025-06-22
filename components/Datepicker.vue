@@ -105,7 +105,7 @@ function formatDateRange(dateRange: Date[] | null) {
           </SheetDescription>
         </SheetHeader>
 
-        <div class="mt-6 max-h-[calc(100vh-200px)] space-y-4 overflow-y-auto">
+        <div class="scroll-area mt-6 max-h-[calc(100vh-200px)] space-y-4 overflow-y-auto">
           <!-- Preset Options -->
           <div class="space-y-2">
             <h4 class="text-sm font-medium">
