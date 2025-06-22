@@ -30,7 +30,7 @@ const packageConfig = computed(() => {
       ],
       limits: {
         attendees: '500',
-        fee: '6%',
+        fee: '6',
       },
     },
     smart: {
@@ -49,7 +49,7 @@ const packageConfig = computed(() => {
       ],
       limits: {
         attendees: '2,000',
-        fee: '7%',
+        fee: '7',
       },
     },
     optima: {
@@ -68,7 +68,7 @@ const packageConfig = computed(() => {
       ],
       limits: {
         attendees: 'Unlimited',
-        fee: '8%',
+        fee: '8',
       },
     },
   };
@@ -127,7 +127,9 @@ const getPackageBadgeClass = computed(() => {
           </div>
           <div class="rounded-lg p-2 text-center" :class="packageConfig.bgColor">
             <div class="text-sm font-semibold" :class="packageConfig.color">
-              {{ packageConfig.limits.fee }}
+              {{ event.fee
+                ? Number(event.fee).toFixed(0)
+                : packageConfig.limits.fee }}%
             </div>
             <div class="text-xs text-muted-foreground">
               Platform Fee
