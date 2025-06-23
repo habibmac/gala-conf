@@ -7,6 +7,7 @@ import { onMounted, onUnmounted, ref, toRef, watchEffect } from 'vue';
 import CopyButton from '@/components/CopyButton.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import PayMethodLogo from '@/components/partials/registrations/PayMethodLogo.vue';
+import StatusBadge from '@/components/statuses/StatusBadge.vue';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDate, getCountryFlagWithName } from '@/utils';
 import { getStatusInfo } from '@/utils/status-map';
@@ -185,12 +186,11 @@ onUnmounted(async () => {
                 <div class="mb-3 text-sm font-medium">
                   {{ data.ticket_name }}
                 </div>
-                <div
-                  class="badge inline-flex rounded-full px-2.5 py-1 text-center text-xs font-medium"
-                  :class="getStatusInfo(data.stt_id).color"
-                >
-                  {{ data.status }}
-                </div>
+                <StatusBadge
+                  :status-id="data.stt_id"
+                  :text="data.status"
+                  class="mb-2 inline-flex items-center justify-center"
+                />
               </div>
               <!-- Divider -->
               <div class="flex items-center justify-between" aria-hidden="true">
@@ -298,12 +298,16 @@ onUnmounted(async () => {
                   </div>
                   <!-- Card status -->
                   <div class="col-span-4 text-right">
-                    <div
+                    <!-- <div
                       class="badge inline-flex rounded-full px-2.5 py-1 text-center text-xs font-medium"
-                      :class="getStatusInfo(data.txn.stt_id).color"
+                      :class="getStatusInfo(data.txn.stt_id).dotClass"
                     >
                       {{ data.txn?.status }}
-                    </div>
+                    </div> -->
+                    <StatusBadge
+                      :status-id="data.txn?.stt_id"
+                      variant="pill"
+                    />
                   </div>
                 </div>
               </div>

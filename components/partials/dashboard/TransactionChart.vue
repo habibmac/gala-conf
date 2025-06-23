@@ -62,7 +62,7 @@ const totalRegistrations = computed(() => stats.value?.summary?.total_registrati
 <template>
   <Card class="relative overflow-hidden">
     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle class="text-sm font-medium tracking-normal">
+      <CardTitle>
         <NuxtLink :to="`/event/${eventId}/stats`" class="hover:underline">
           Registration Trend
         </NuxtLink>
@@ -113,8 +113,8 @@ const totalRegistrations = computed(() => stats.value?.summary?.total_registrati
               Approved
             </div>
           </div>
-          <div class="rounded-lg bg-orange-50 p-2 text-center dark:bg-orange-500/10">
-            <div class="text-lg font-semibold tabular-nums text-orange-600">
+          <div class="rounded-lg bg-sky-50 p-2 text-center dark:bg-sky-500/10">
+            <div class="text-lg font-semibold tabular-nums text-sky-600">
               {{ formatThousands(totalPending) }}
             </div>
             <div class="text-xs text-muted-foreground">
@@ -129,7 +129,7 @@ const totalRegistrations = computed(() => stats.value?.summary?.total_registrati
             :data="chartData"
             index="name"
             :categories="['Approved', 'Pending']"
-            :colors="['#22c55e', '#f97316']"
+            :colors="['#22c55e', '#0ea5e9']"
             :height="180"
             :show-legend="true"
             :show-grid-line="false"

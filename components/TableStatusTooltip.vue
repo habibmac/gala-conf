@@ -19,7 +19,7 @@ const tooltipOpen = ref(false);
     @focusout="tooltipOpen = false"
   >
     <button
-      :class="`dot ${getStatusInfo(status).color} inline-block h-2.5 w-2.5`"
+      :class="`dot ${getStatusInfo(status).dotClass} inline-block h-2.5 w-2.5`"
       aria-haspopup="true"
       tabindex="-1"
       :aria-expanded="tooltipOpen"
@@ -38,7 +38,7 @@ const tooltipOpen = ref(false);
           v-show="tooltipOpen"
           class="right-0 mb-2 overflow-hidden rounded border bg-white px-3 py-1 text-xs text-slate-800 shadow-lg dark:border-slate-700 dark:bg-slate-700 dark:text-slate-200"
           :class="[
-            getStatusInfo(status).color,
+            getStatusInfo(status).dotClass,
           ]"
         >
           <slot />

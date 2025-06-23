@@ -20,12 +20,13 @@ import DropdownStatusFilter from '@/components/DropdownStatusFilter.vue';
 import DropdownTicketFilter from '@/components/DropdownTicketFilter.vue';
 import RegCards from '@/components/partials/registrations/RegCards.vue';
 import RegDetails from '@/components/partials/registrations/RegDetails.vue';
+import RegCode from '@/components/statuses/RegCode.vue';
+import StatusBadge from '@/components/statuses/StatusBadge.vue';
 import TablePagination from '@/components/TablePagination.vue';
 import TableResetBtn from '@/components/TableResetBtn.vue';
 import TableSearchForm from '@/components/TableSearchForm.vue';
-import TableStatusTooltip from '@/components/TableStatusTooltip.vue';
 import { useRegs } from '@/composables/useRegs';
-import { calculateMinWidth, formatThousands, getStatusInfo } from '@/utils';
+import { calculateMinWidth, formatThousands } from '@/utils';
 import DropdownTableFilter from '~/components/DropdownColumnFilter.vue';
 
 const props = defineProps<{
@@ -60,11 +61,11 @@ definePageMeta({
 
 const { dateEnd, dateStart, order, page, perPage, search, sortBy, status, ticketName } = toRefs(props);
 
-const { event } = useEvent();
-const eventId = computed(() => event.value?.id);
-
 const route = useRoute();
 const router = useRouter();
+
+const { event } = useEvent();
+const eventId = ref(route.params.eventId as string || event.value?.id || '');
 
 const endpoint = 'registrations';
 
@@ -205,6 +206,7 @@ const columns = computed(() => {
                 ...route.query,
                 details: cellProps.row.original.id,
               };
+
               return h(
                 'a',
                 {
@@ -216,13 +218,14 @@ const columns = computed(() => {
                     handleOpenDetails(cellProps.row.original.id);
                   },
                 },
-                h(
-                  'span',
-                  {
-                    class: `text-status group-hover:underline ${getStatusInfo(stt_id).color}`,
-                  },
-                  cellProps.getValue(),
-                ),
+                [
+                  h(RegCode, {
+                    code: cellProps.getValue() as string,
+                    statusId: stt_id,
+                    size: 'sm',
+                    class: 'group-hover:underline transition-all duration-200',
+                  }),
+                ],
               );
             }
             case 'fullname':
@@ -250,18 +253,19 @@ const columns = computed(() => {
                 },
                 formatThousands(Number(cellProps.getValue())),
               );
-            case 'status':
-              return h(
-                TableStatusTooltip,
-                {
-                  position: 'top',
-                  size: 'sm',
-                  status: cellProps.row.original.stt_id,
-                },
-                {
-                  default: () => cellProps.getValue(),
-                },
-              );
+            case 'status': {
+              const stt_id = cellProps.row.original.stt_id;
+
+              return h(StatusBadge, {
+                statusId: stt_id,
+                variant: 'dot',
+                size: 'sm',
+                withIcon: false,
+                iconOnly: true,
+                noTooltip: false, // Enable tooltip
+                class: 'justify-center',
+              });
+            }
             default:
               return h('div', { class: 'text-left' }, cellProps.getValue());
           }
@@ -273,7 +277,7 @@ const columns = computed(() => {
 });
 
 // Data fetching
-const { isLoading, regData, totalData, totalPages } = useRegs(eventId, endpoint, pagination, sorting, filters);
+const { isLoading, regData, totalData, totalPages, refetch } = useRegs(eventId, endpoint, pagination, sorting, filters);
 
 // Table setup
 const table = useVueTable({
@@ -383,14 +387,14 @@ const dateRange = computed({
     }
     return [new Date(filters.value.date_start), new Date(filters.value.date_end)];
   },
-  set: (newValue) => {
+  set: (newValue: [Date | null, Date | null] | null) => {
     if (newValue === null) {
       filters.value.date_start = '';
       filters.value.date_end = '';
     }
     else {
       [filters.value.date_start, filters.value.date_end] = newValue.map(date =>
-        format(date, 'yyyy-MM-dd'),
+        date ? format(date, 'yyyy-MM-dd') : '',
       );
     }
   },
@@ -451,6 +455,64 @@ const handleResetFilters = () => {
       id: 'date',
     },
   ];
+};
+
+// Active filters for display
+const activeFilters = computed(() => {
+  const active = [];
+
+  if (filters.value.search) {
+    active.push({
+      type: 'search',
+      label: 'Search',
+      value: filters.value.search,
+    });
+  }
+
+  if (filters.value.date_start && filters.value.date_end) {
+    active.push({
+      type: 'date_range',
+      label: 'Date Range',
+      value: `${format(new Date(filters.value.date_start), 'dd MMM yyyy')} - ${format(new Date(filters.value.date_end), 'dd MMM yyyy')}`,
+    });
+  }
+
+  filters.value.status.forEach((status) => {
+    active.push({
+      type: 'status',
+      label: 'Status',
+      value: status,
+    });
+  });
+
+  filters.value.ticket_name.forEach((ticket) => {
+    active.push({
+      type: 'ticket',
+      label: 'Ticket',
+      value: ticket,
+    });
+  });
+
+  return active;
+});
+
+const handleRemoveFilter = (filterToRemove: any) => {
+  switch (filterToRemove.type) {
+    case 'search':
+      filters.value.search = '';
+      break;
+    case 'date_range':
+      filters.value.date_start = '';
+      filters.value.date_end = '';
+      dateRange.value = null;
+      break;
+    case 'status':
+      filters.value.status = filters.value.status.filter(s => s !== filterToRemove.value);
+      break;
+    case 'ticket':
+      filters.value.ticket_name = filters.value.ticket_name.filter(t => t !== filterToRemove.value);
+      break;
+  }
 };
 
 // Watchers
@@ -530,7 +592,7 @@ watch(
 </script>
 
 <template>
-  <div class="container mx-auto 2xl:mx-0">
+  <div class="container mx-auto">
     <header class="mb-5 flex flex-col gap-2 pt-10 sm:flex-row sm:items-start sm:justify-between">
       <h1 class="h2">
         Registrations
@@ -545,7 +607,7 @@ watch(
   </div>
 
   <section>
-    <div class="container py-4 2xl:mx-0">
+    <div class="container py-4">
       <div class="flex flex-col flex-wrap gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex flex-col space-y-2 sm:grid sm:grid-flow-col sm:gap-2 sm:space-y-0">
           <TableSearchForm v-model="filters.search" placeholder="Search Registrant..." />
@@ -584,19 +646,45 @@ watch(
   </section>
 
   <section class="bg-slate-50 dark:bg-slate-900/60">
-    <div class="2xl:mx container 2xl:max-w-none">
+    <div class="container mx-auto 2xl:max-w-none">
       <div
-        class="flex min-h-12 w-full items-center justify-between gap-2 py-3 sm:flex-row sm:py-3"
-        :class="[isAnyFilterActive ? 'flex-col items-start' : 'flex-row items-center justify-between']"
+        class="flex min-h-12 w-full flex-wrap items-center justify-between gap-2 py-3 sm:flex-row sm:py-3"
+        :class="[isAnyFilterActive ? 'flex-col items-start' : 'flex-row  items-center justify-between']"
       >
-        <h3 class="shrink-0">
-          <span v-if="isAnyFilterActive" class="font-semibold text-slate-950 dark:text-slate-100">Filtered Registrations
-          </span>
+        <div class="flex grow flex-wrap items-center gap-2">
+          <div v-if="activeFilters.length > 0" class="flex flex-wrap items-center gap-2">
+            <h3 class="font-semibold text-slate-950 dark:text-slate-100">
+              Result for:
+            </h3>
+            <Button
+              v-for="(filter, index) in activeFilters"
+              :key="`${filter.type}-${filter.value}-${index}`"
+              variant="outline"
+              size="sm"
+              class="cursor-pointer hover:bg-card hover:text-card-foreground"
+              @click="handleRemoveFilter(filter)"
+            >
+              {{ filter.label }}: {{ filter.value }}
+              <Icon icon="heroicons:x-mark" class="ml-1 size-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              class=" hover:bg-card hover:text-card-foreground"
+              @click="handleResetFilters"
+            >
+              <Icon icon="heroicons:arrow-path" class="mr-1 size-3" />
+              Clear all
+            </Button>
+          </div>
           <span v-else class="font-semibold text-slate-950 dark:text-slate-200">All Registrations</span>
-        </h3>
-        <div v-if="!isLoading" class="number shrink-0 text-sm text-slate-500">
-          <template v-if="totalData">
-            Found
+        </div>
+        <div class="number shrink-0 text-sm text-muted-foreground">
+          <template v-if="isLoading">
+            <span class="text-slate-900 dark:text-slate-100">Loading...</span>
+          </template>
+          <template v-else-if="totalData > 0">
+            {{ isAnyFilterActive ? 'Found' : 'Total' }}
             <span class="font-semibold text-slate-900 dark:text-slate-100">{{ formatThousands(totalData) }}</span>
             results.
           </template>
@@ -661,7 +749,15 @@ watch(
                     title="No data found"
                     description="There are no registrations matching your criteria."
                     :img="{ src: '/images/empty-state/empty-c.svg' }"
-                    :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
+                    :cta="{
+                      label: 'Retry',
+                      action: () => {
+                        table.setPageIndex(0);
+                        refetch();
+                      },
+                      icon: 'tabler:refresh',
+                    }"
+                    :cta2="{ label: 'Clear Filters', action: handleResetFilters, icon: 'tabler:filter-x' }"
                   />
                 </td>
               </tr>
@@ -670,7 +766,6 @@ watch(
               v-for="row in table.getRowModel().rows"
               :key="row.id"
               class="hover:bg-slate-50 dark:hover:bg-slate-600/20"
-              @click.stop="handleOpenDetails(row.original.id)"
             >
               <td
                 v-for="cell in row.getVisibleCells()"

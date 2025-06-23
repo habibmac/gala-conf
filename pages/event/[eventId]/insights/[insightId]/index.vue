@@ -181,7 +181,7 @@ const columns = computed(() => {
                 return h(
                   'span',
                   {
-                    class: `text-status ${getStatusInfo(stt_id).color}`,
+                    class: `text-status ${getStatusInfo(stt_id).dotClass}`,
                   },
                   cellProps.getValue(),
                 );

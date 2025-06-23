@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/vue-query';
 
 import type { RecentCheckin } from '~/types';
 
+import RegCode from '~/components/statuses/RegCode.vue';
+
 const route = useRoute();
 const eventId = ref(route.params.eventId as string);
 const { hasEventEnded } = useEventStatus();
@@ -28,8 +30,10 @@ const getRegDetailsUrl = (regId: string) => {
 <template>
   <Card class="relative rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
     <CardHeader>
-      <CardTitle class="text-base font-semibold">
-        Recent Check-ins
+      <CardTitle class="text-base font-medium">
+        <NuxtLink :to="`/event/${eventId}/checkins`" class="hover:underline">
+          Recent Check-ins
+        </NuxtLink>
       </CardTitle>
     </CardHeader>
 
@@ -38,20 +42,20 @@ const getRegDetailsUrl = (regId: string) => {
         <table class="w-full">
           <thead class="sticky top-0 bg-white dark:bg-slate-900">
             <tr class="border-b border-slate-200 text-xs uppercase dark:border-slate-700">
-              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">
+              <th class="px-4 py-2 text-left font-medium text-muted-foreground">
                 Time
               </th>
-              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">
+              <th class="px-4 py-2 text-left font-medium text-muted-foreground">
+                Session
+              </th>
+              <th class="px-4 py-2 text-left font-medium text-muted-foreground">
                 Name
               </th>
-              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">
+              <th class="px-4 py-2 text-left font-medium text-muted-foreground">
                 Reg Code
               </th>
-              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">
+              <th class="px-4 py-2 text-left font-medium text-muted-foreground">
                 Ticket
-              </th>
-              <th class="px-4 py-2 text-left font-medium text-slate-500 dark:text-slate-400">
-                City
               </th>
             </tr>
           </thead>
@@ -73,6 +77,9 @@ const getRegDetailsUrl = (regId: string) => {
                   {{ formatDate(checkin.check_time, 'dd MMM yyyy HH:mm') }}
                 </td>
                 <td class="px-4 py-2">
+                  {{ checkin.session }}
+                </td>
+                <td class="px-4 py-2">
                   {{ checkin.name }}
                 </td>
                 <td class="px-4 py-2">
@@ -80,14 +87,11 @@ const getRegDetailsUrl = (regId: string) => {
                     :to="getRegDetailsUrl(checkin.id)"
                     class="number group inline-block whitespace-nowrap text-center"
                   >
-                    <span :class="`text-status group-hover:underline ${getStatusInfo(checkin.id)}`">{{ checkin.code }}</span>
+                    <RegCode :code="checkin.code" :status-id="checkin.stt_id" size="xs" />
                   </NuxtLink>
                 </td>
-                <td class="px-4 py-2">
+                <td class="px-4 py-2 font-medium">
                   {{ checkin.ticket }}
-                </td>
-                <td class="px-4 py-2">
-                  {{ checkin.city }}
                 </td>
               </tr>
             </template>

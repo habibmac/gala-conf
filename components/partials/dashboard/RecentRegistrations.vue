@@ -1,8 +1,9 @@
-<!-- components/partials/dashboard/RecentRegistrations.vue -->
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
 import { useQuery } from '@tanstack/vue-query';
 
+import RegCode from '@/components/statuses/RegCode.vue';
+import StatusBadge from '@/components/statuses/StatusBadge.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate } from '@/utils';
@@ -33,6 +34,7 @@ const recentRegs = computed(() => {
     ticket_name: reg.ticket_name,
     date: reg.date,
     status: reg.status,
+    stt_id: reg.stt_id,
   }));
 });
 </script>
@@ -40,12 +42,14 @@ const recentRegs = computed(() => {
 <template>
   <Card class="relative overflow-hidden">
     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle class="text-sm font-medium tracking-normal">
-        Recent Registrations
+      <CardTitle>
+        <NuxtLink :to="`/event/${eventId}/registrations`" class="hover:underline">
+          Recent Registrations
+        </NuxtLink>
       </CardTitle>
       <Icon icon="solar:users-group-rounded-bold-duotone" class="size-7 text-indigo-500" />
     </CardHeader>
-    <CardContent>
+    <CardContent class="p-0">
       <div v-if="isLoading" class="space-y-3">
         <Skeleton v-for="i in 5" :key="i" class="h-12 w-full" />
       </div>
@@ -56,27 +60,58 @@ const recentRegs = computed(() => {
         No registrations yet
       </div>
       <div v-else class="space-y-3">
-        <div
-          v-for="reg in recentRegs"
-          :key="reg.id"
-          class="flex items-center justify-between border-b py-2 last:border-b-0"
-        >
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center space-x-2">
-              <h4 class="truncate text-sm font-medium">
-                {{ reg.fullname }}
-              </h4>
-            </div>
-            <div class="mt-1 flex items-center space-x-2">
-              <span class="text-xs text-muted-foreground">{{ formatDate(reg.date) }}</span>
-              <span class="text-xs text-muted-foreground">•</span>
-              <span class="text-xs text-muted-foreground">{{ reg.code }}</span>
-            </div>
-          </div>
-          <div class="text-sm">
-            {{ reg.ticket_name }}
-          </div>
-        </div>
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b border-slate-200 text-xs uppercase dark:border-slate-700">
+              <th class="px-4 py-2 font-normal text-muted-foreground">
+                Date
+              </th>
+              <th class="px-4 py-2 font-normal text-muted-foreground">
+                Name
+              </th>
+              <th class="px-4 py-2 font-normal text-muted-foreground">
+                Ticket
+              </th>
+              <th class="px-4 py-2 text-center font-normal text-muted-foreground">
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="reg in recentRegs"
+              :key="reg.id"
+              class="border-b border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50"
+            >
+              <td class="px-4 py-2 text-right">
+                <div class="whitespace-nowrap">
+                  {{ formatDate(reg.date, 'dd MMM yyyy') }}
+                </div>
+                <div class="block text-xs text-muted-foreground">
+                  {{ formatDate(reg.date, 'HH:mm') }}
+                </div>
+              </td>
+              <td class="px-4 py-2">
+                <div>{{ reg.fullname }}</div>
+                <NuxtLink :to="`/event/${eventId}/registrations/${reg.id}`">
+                  <RegCode :code="reg.code" :status-id="reg.stt_id" size="xs" />
+                </NuxtLink>
+              </td>
+              <td class="px-4 py-2">
+                <div>{{ reg.ticket_name }}</div>
+              </td>
+              <td class="text-center">
+                <StatusBadge
+                  :status="reg.status"
+                  variant="dot"
+                  size="default"
+                  :icon-only="true"
+                  :tooltip="reg.status"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </CardContent>
   </Card>
