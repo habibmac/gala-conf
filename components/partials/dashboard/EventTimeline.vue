@@ -64,7 +64,7 @@ const progressPercentage = computed(() => {
   >
     <CardHeader class="pb-0">
       <NuxtLink :to="`/event/${eventId}/milestones`" class="flex flex-row items-center justify-between hover:underline">
-        <CardTitle class="text-sm font-medium tracking-normal">
+        <CardTitle>
           Milestone
         </CardTitle>
         <Icon icon="solar:checklist-minimalistic-bold-duotone" class="size-7 text-emerald-500" />

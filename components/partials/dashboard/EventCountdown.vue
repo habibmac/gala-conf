@@ -137,7 +137,7 @@ watch(event, () => {
 <template>
   <Card class="relative h-full overflow-hidden border bg-gradient-to-br from-slate-900 to-slate-800">
     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle class="text-sm font-medium tracking-normal text-white">
+      <CardTitle class="text-white">
         {{ statusConfig.title }}
       </CardTitle>
       <Icon :icon="statusConfig.icon" class="size-7" :class="statusConfig.color" />

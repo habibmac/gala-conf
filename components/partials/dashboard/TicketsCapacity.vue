@@ -143,8 +143,8 @@ const getProgressFillColor = (percentage: number) => {
 <template>
   <Card class="relative overflow-hidden">
     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle class="text-sm font-medium tracking-normal">
-        <span>Tickets Capacity</span>
+      <CardTitle>
+        Tickets Capacity
       </CardTitle>
       <div class="flex items-center space-x-2">
         <label for="upcoming-filter" class="cursor-pointer text-xs text-muted-foreground">

@@ -147,7 +147,7 @@ const getSessionBorderColor = (session: any) => {
 <template>
   <Card class="relative overflow-hidden">
     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle class="text-sm font-medium tracking-normal">
+      <CardTitle>
         Sessions Capacity
       </CardTitle>
       <Icon icon="solar:calendar-search-bold-duotone" class="size-7 text-orange-500" />

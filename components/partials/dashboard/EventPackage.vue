@@ -96,7 +96,7 @@ const getPackageBadgeClass = computed(() => {
 <template>
   <Card v-if="packageConfig" class="relative h-full overflow-hidden bg-gradient-to-b via-card to-card" :class="[packageConfig.borderColor, packageConfig.bgColor]">
     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle class="text-sm font-medium tracking-normal">
+      <CardTitle>
         Event Package
       </CardTitle>
       <Icon :icon="packageConfig.icon" class="size-7" :class="packageConfig.color" />
