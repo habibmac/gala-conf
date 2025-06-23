@@ -63,10 +63,11 @@ export const useRegs = (
       });
   };
 
-  const { data, error, isLoading } = useQuery({
+  const { data, error, isLoading, refetch } = useQuery({
     queryFn: ({ signal }) => getData(requestParams, signal),
     queryKey: [endpoint, requestParams, eventId],
     // staleTime: 1000 * 60 * 2, // 2 minutes
+    retry: 1,
   });
 
   const totalData = computed(() => data.value?.pagination.total_data || DEFAULT_RESULT_COUNT);
@@ -80,5 +81,6 @@ export const useRegs = (
     regData,
     totalData,
     totalPages,
+    refetch,
   };
 };
