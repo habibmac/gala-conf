@@ -73,7 +73,7 @@ function formatDateRange(dateRange: Date[] | null) {
         :preset-dates="presetDates"
         :max-date="props.maxDate || undefined"
         :min-date="props.minDate || undefined"
-        format="d MMM yyyy"
+        :format="props.format"
         :dark="colorMode.value === 'dark'"
         @update:model-value="updateDateRange"
       />

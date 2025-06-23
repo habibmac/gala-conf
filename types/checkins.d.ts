@@ -10,7 +10,7 @@ export interface CheckinItem {
   stt_id: string
   name: string
   address: string
-  city: string
+  session: string
   ticket: string
   first_check_time: string
   checkin_data: CheckinData[]
@@ -37,6 +37,8 @@ export interface TicketCheckinStats {
 export interface RecentCheckin {
   id: string
   code: string
+  session: string
+  stt_id: string
   name: string
   address: string
   city: string

@@ -17,8 +17,8 @@ import { toast } from 'vue-sonner';
 import type { CheckinColumnConfig, CheckinData, CheckinItem } from '@/types';
 
 import RegDetails from '@/components/partials/registrations/RegDetails.vue';
+import RegCode from '@/components/statuses/RegCode.vue';
 import { formatDate } from '@/utils';
-import { getStatusInfo } from '@/utils/status-map';
 import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
 import { useCheckins } from '~/composables/useCheckins';
 
@@ -117,6 +117,13 @@ const columnConfigs = ref<CheckinColumnConfig[]>([
     width: 15,
   },
   {
+    header: 'Session',
+    isHideable: true,
+    isVisible: true,
+    key: 'session',
+    width: 15,
+  },
+  {
     header: 'Name',
     isHideable: true,
     isVisible: true,
@@ -135,13 +142,6 @@ const columnConfigs = ref<CheckinColumnConfig[]>([
     isHideable: true,
     isVisible: true,
     key: 'ticket',
-    width: 15,
-  },
-  {
-    header: 'City',
-    isHideable: true,
-    isVisible: true,
-    key: 'city',
     width: 15,
   },
   {
@@ -173,7 +173,7 @@ const columns = computed(() => {
                 return h(
                   'div',
                   {
-                    class: 'text-right text-slate-900 dark:text-slate-300 text-xs xl:text-sm',
+                    class: 'text-right text-slate-900 dark:text-slate-300  text-sm',
                   },
                   [
                     h('div', { class: 'whitespace-nowrap' }, formatDate(value, 'd MMM yyyy')),
@@ -191,6 +191,45 @@ const columns = computed(() => {
                 console.error('Error formatting first_check_time:', value, error);
                 return h('div', { class: 'text-right text-slate-400' }, 'Format error');
               }
+            }
+            case 'code': {
+              const stt_id = cellProps.row.original.stt_id;
+              const newParams = {
+                ...route.query,
+                details: cellProps.row.original.id,
+              };
+
+              return h(
+                'a',
+                {
+                  class: 'block number text-center group whitespace-nowrap',
+                  href: `/event/${eventId.value}/${endpoint}?${new URLSearchParams(newParams).toString()}`,
+                  onClick: (e: Event) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleOpenDetails(cellProps.row.original.id);
+                  },
+                },
+                [
+                  h(RegCode, {
+                    code: cellProps.getValue() as string,
+                    statusId: stt_id,
+                    size: 'sm',
+                    class: 'group-hover:underline',
+                  }),
+                ],
+              );
+            }
+            case 'ticket': {
+              const value = cellProps.getValue() as string;
+
+              return h(
+                'div',
+                {
+                  class: 'font-medium text-slate-900 dark:text-slate-300',
+                },
+                value || '-',
+              );
             }
             case 'checkin_data': {
               const value = cellProps.getValue() as CheckinData[];
@@ -231,32 +270,6 @@ const columns = computed(() => {
                 'div',
                 { class: 'space-y-1' },
                 historyItems,
-              );
-            }
-            case 'code': {
-              const stt_id = cellProps.row.original.stt_id;
-              const newParams = {
-                ...route.query,
-                details: cellProps.row.original.id,
-              };
-              return h(
-                'a',
-                {
-                  class: 'number text-center group inline-block whitespace-nowrap',
-                  href: `/event/${eventId.value}/${endpoint}?${new URLSearchParams(newParams).toString()}`,
-                  onClick: (e: Event) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleOpenDetails(cellProps.row.original.id);
-                  },
-                },
-                h(
-                  'span',
-                  {
-                    class: `text-status group-hover:underline ${getStatusInfo(stt_id).color}`,
-                  },
-                  cellProps.getValue() as string,
-                ),
               );
             }
             default:
@@ -340,8 +353,8 @@ const handleSetDateRange = (dateRange: [Date | null, Date | null] | null) => {
       filters.value.date_end = '';
     }
     else {
-      filters.value.date_start = format(start, 'yyyy-MM-dd');
-      filters.value.date_end = format(end, 'yyyy-MM-dd');
+      filters.value.date_start = format(start, 'yyyy-MM-dd HH:mm');
+      filters.value.date_end = format(end, 'yyyy-MM-dd HH:mm');
     }
   }
 };
@@ -429,7 +442,12 @@ watch(
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex flex-col space-y-2 sm:grid sm:grid-flow-col sm:gap-2 sm:space-y-0">
           <TableSearchForm v-model="filters.search" placeholder="Search by name, reg code, or ticket..." />
-          <Datepicker :date-range="dateRange" @update:date-range="handleSetDateRange" />
+          <Datepicker
+            :date-range="dateRange"
+            :enable-time-picker="true"
+            format="d MMM yyyy HH:mm"
+            @update:date-range="handleSetDateRange"
+          />
           <TableResetBtn v-if="isAnyFilterActive" @reset-filters="handleResetFilters" />
         </div>
         <div>
@@ -460,78 +478,87 @@ watch(
     </div>
   </section>
 
-  <section class="relative" :class="{ 'scroll-area overflow-x-auto': !isDataLoading }">
-    <div class="w-full">
-      <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs), totalData)}px` }">
-        <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
-          <thead
-            class="border-y border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
-          >
-            <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-              <th
-                v-for="header in headerGroup.headers"
-                :key="header.id"
-                :colSpan="header.colSpan"
-                :style="{ width: `${header.column.columnDef.size}px` }"
-                class="whitespace-nowrap px-2 py-3 text-xs text-slate-500 first:pl-5 last:pr-5 dark:text-slate-400"
-              >
-                <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-200 text-sm dark:divide-slate-800">
-            <template v-if="!table.getRowModel().rows.length">
-              <template v-if="isDataLoading">
-                <tr v-for="index in 3" :key="index">
-                  <td v-for="(column, index2) in columns" :key="index2" class="p-2">
-                    <Skeleton class="h-6 w-full rounded" />
+  <section class="container relative mx-auto mb-20" :class="{ 'scroll-area overflow-x-auto': !isDataLoading }">
+    <Card>
+      <CardHeader class="flex justify-between">
+        <CardTitle class="text-sm font-medium tracking-normal">
+          Check-in Records
+        </CardTitle>
+      </CardHeader>
+      <CardContent class="p-0">
+        <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs), totalData)}px` }">
+          <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
+            <thead
+              class="border-y border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
+            >
+              <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+                <th
+                  v-for="header in headerGroup.headers"
+                  :key="header.id"
+                  :colSpan="header.colSpan"
+                  :style="{ width: `${header.column.columnDef.size}px` }"
+                  class="whitespace-nowrap px-2 py-3 text-xs text-slate-500 first:pl-5 last:pr-5 dark:text-slate-400"
+                >
+                  <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-sm dark:divide-slate-800">
+              <template v-if="!table.getRowModel().rows.length">
+                <template v-if="isDataLoading">
+                  <tr v-for="index in 3" :key="index">
+                    <td v-for="(column, index2) in columns" :key="index2" class="p-2">
+                      <Skeleton class="h-6 w-full rounded" />
+                    </td>
+                  </tr>
+                </template>
+                <tr v-else>
+                  <td :colspan="columns.length" class="py-10 text-center">
+                    <EmptyState
+                      title="No check-ins found"
+                      description="There are no check-ins matching your criteria."
+                      :img="{
+                        src: '/images/empty-state/empty-c.svg',
+                        alt: 'No check-ins found',
+                        class: 'w-20',
+                      }"
+                      :cta="{
+                        label: 'Clear Filters',
+                        action: handleResetFilters,
+                        icon: 'heroicons:arrow-path-solid',
+                      }"
+                    />
                   </td>
                 </tr>
               </template>
-              <tr v-else>
-                <td :colspan="columns.length" class="py-10 text-center">
-                  <EmptyState
-                    title="No check-ins found"
-                    description="There are no check-ins matching your criteria."
-                    :img="{
-                      src: '/images/empty-state/empty-c.svg',
-                      alt: 'No check-ins found',
-                      class: 'w-20',
-                    }"
-                    :cta="{
-                      label: 'Clear Filters',
-                      action: handleResetFilters,
-                      icon: 'heroicons:arrow-path-solid',
-                    }"
-                  />
+              <tr
+                v-for="row in table.getRowModel().rows"
+                :key="row.id"
+                class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
+              >
+                <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="px-2 py-3 first:pl-5 last:pr-5">
+                  <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                 </td>
               </tr>
-            </template>
-            <tr
-              v-for="row in table.getRowModel().rows"
-              :key="row.id"
-              class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
-            >
-              <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="px-2 py-3 first:pl-5 last:pr-5">
-                <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+      <CardFooter v-if="!isDataLoading" class="border-t p-0">
+        <TablePagination
+          v-if="table.getRowModel().rows.length > 0"
+          :current-page="pagination.pageIndex + 1"
+          :page-count="totalPages"
+          :page-sizes="pageSizes"
+          :page-size="pagination.pageSize"
+          :total-data="totalData"
+          active-page-style="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          @update:page-size="handlePageSizeChange"
+          @update:current-page="handleNavigation"
+        />
+      </CardFooter>
+    </Card>
   </section>
-  <TablePagination
-    v-if="table.getRowModel().rows.length > 0"
-    :current-page="pagination.pageIndex + 1"
-    :page-count="totalPages"
-    :page-sizes="pageSizes"
-    :page-size="pagination.pageSize"
-    :total-data="totalData"
-    @update:page-size="handlePageSizeChange"
-    @update:current-page="handleNavigation"
-  />
-  <div v-else class="h-40" />
   <RegDetails
     :reg-details-open="selectedRegId !== ''"
     :evt-id="eventId"
