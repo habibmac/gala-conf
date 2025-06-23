@@ -18,6 +18,12 @@ interface BillingSummary {
   fee_percentage: string
 }
 
+// Round percentage to 0 decimal places
+const roundPercentage = (value: string): string => {
+  const num = Number.parseFloat(value);
+  return Number.isNaN(num) ? '0' : Math.round(num).toString();
+};
+
 // Define the cards data structure
 const getCardData = (summaryData: BillingSummary) => [
   {
@@ -31,7 +37,7 @@ const getCardData = (summaryData: BillingSummary) => [
     color: 'text-blue-500',
     icon: 'solar:wallet-money-bold-duotone',
     is_currency: true,
-    subtitle: `After ${summaryData.fee_percentage}% fee`,
+    subtitle: `After ${roundPercentage(summaryData.fee_percentage)}% fee`,
     title: 'Nett Sales',
     value: summaryData.nett_sales,
   },

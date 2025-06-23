@@ -145,30 +145,30 @@ const statusConfig = (status: string) => {
   switch (status) {
     case 'pending':
       return {
-        bgColor: 'bg-yellow-50',
-        borderColor: 'border-yellow-200',
-        color: 'text-yellow-600',
+        bgColor: 'bg-yellow-50 dark:bg-yellow-950',
+        borderColor: 'border-yellow-200 dark:border-yellow-800',
+        color: 'text-yellow-600 dark:text-yellow-400',
         icon: 'material-symbols:pending',
       };
     case 'completed':
       return {
-        bgColor: 'bg-green-50',
-        borderColor: 'border-green-200',
-        color: 'text-green-600',
+        bgColor: 'bg-green-50 dark:bg-green-950',
+        borderColor: 'border-green-200 dark:border-green-800',
+        color: 'text-green-600 dark:text-green-400',
         icon: 'tabler:circle-check-filled',
       };
     case 'rejected':
       return {
-        bgColor: 'bg-red-50',
-        borderColor: 'border-red-200',
-        color: 'text-red-600',
+        bgColor: 'bg-red-50 dark:bg-red-950',
+        borderColor: 'border-red-200 dark:border-red-800',
+        color: 'text-red-600 dark:text-red-400',
         icon: 'material-symbols:error',
       };
     default:
       return {
-        bgColor: 'bg-gray-50',
-        borderColor: 'border-gray-200',
-        color: 'text-gray-500',
+        bgColor: 'bg-gray-50 dark:bg-gray-950',
+        borderColor: 'border-gray-200 dark:border-gray-800',
+        color: 'text-gray-500 dark:text-gray-400',
         icon: 'material-symbols:help',
       };
   }
@@ -190,28 +190,37 @@ const columns = computed(() => {
               if (!value)
                 return '-';
               return h('div', {
-                class: 'whitespace-nowrap',
-              }, format(new Date(value), 'dd MMM yyyy HH:mm'));
+                class: 'whitespace-nowrap text-right',
+              }, [
+                format(new Date(value), 'dd MMM yyyy'),
+                h('div', {
+                  class: 'text-xs text-right text-slate-500 dark:text-slate-400',
+                }, format(new Date(value), 'HH:mm')),
+              ]);
             }
             case 'amount':
               return h('div', {
                 class: 'md:pr-8 font-medium text-right tabular-nums',
               }, formatThousands(Number(value)));
-              formatThousands(Number(value));
             case 'status': {
               const status = value as string;
               const config = statusConfig(status);
               return h(
                 'div',
                 {
-                  class: `inline-flex font-medium border rounded-md items-center gap-1 rounded px-2 py-1 ${config.bgColor} ${config.color} ${config.borderColor} text-xs`,
+                  class: 'text-center whitespace-nowrap',
                 },
                 [
-                  h(Icon, {
-                    class: `size-3 ${config.color}`,
-                    icon: config.icon,
-                  }),
-                  h('span', {}, status.charAt(0).toUpperCase() + status.slice(1)),
+                  h(
+                    'span',
+                    {
+                      class: `inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs border font-medium ${config.bgColor} ${config.borderColor} ${config.color}`,
+                    },
+                    [
+                      h(Icon, { icon: config.icon, class: 'size-4' }),
+                      status.charAt(0).toUpperCase() + status.slice(1),
+                    ],
+                  ),
                 ],
               );
             }
@@ -439,7 +448,7 @@ watch(
                 :key="row.id"
                 class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
               >
-                <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="px-2 py-4 first:pl-5 last:pr-5">
+                <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="px-2 py-3 first:pl-5 last:pr-5">
                   <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                 </td>
               </tr>
