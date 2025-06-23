@@ -10,7 +10,6 @@ import PayMethodLogo from '@/components/partials/registrations/PayMethodLogo.vue
 import StatusBadge from '@/components/statuses/StatusBadge.vue';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDate, getCountryFlagWithName } from '@/utils';
-import { getStatusInfo } from '@/utils/status-map';
 
 const props = defineProps({
   evtId: {
