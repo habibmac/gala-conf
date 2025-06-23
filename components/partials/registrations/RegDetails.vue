@@ -187,8 +187,6 @@ onUnmounted(async () => {
                 </div>
                 <StatusBadge
                   :status-id="data.stt_id"
-                  :text="data.status"
-                  class="mb-2 inline-flex items-center justify-center"
                 />
               </div>
               <!-- Divider -->
