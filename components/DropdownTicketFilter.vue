@@ -36,7 +36,6 @@ const eventId = ref<string>(
 
 const selectedTickets = ref<string[]>(props.modelValue);
 
-// Keep the exact same API logic
 const getData = async (eventId: Ref<string>, signal: AbortSignal) => {
   const { $galantisApi } = useNuxtApp();
   return $galantisApi
@@ -69,34 +68,17 @@ watch(
   },
 );
 
-// Fixed: Simple dropdown logic
+// Just toggle individual tickets
 function updateValue(value: string) {
   let updatedTickets: string[];
 
-  if (value === 'all') {
-    // User clicked "All Tickets" - select everything (empty array represents "all")
-    updatedTickets = [];
+  if (selectedTickets.value.includes(value)) {
+    // This ticket is currently selected - remove it
+    updatedTickets = selectedTickets.value.filter(ticket => ticket !== value);
   }
   else {
-    // User clicked a specific ticket
-    if (selectedTickets.value.length === 0) {
-      // Currently "All" is selected, user wants only this specific ticket
-      updatedTickets = [value];
-    }
-    else if (selectedTickets.value.includes(value)) {
-      // This ticket is currently selected - remove it
-      updatedTickets = selectedTickets.value.filter(ticket => ticket !== value);
-    }
-    else {
-      // This ticket is not selected - add it
-      updatedTickets = [...selectedTickets.value, value];
-
-      // Check if we now have all tickets selected
-      if (updatedTickets.length === ticketOptions.value.length) {
-        // All individual tickets are selected, so convert to "All" (empty array)
-        updatedTickets = [];
-      }
-    }
+    // This ticket is not selected - add it
+    updatedTickets = [...selectedTickets.value, value];
   }
 
   emits('update:modelValue', updatedTickets);
@@ -107,28 +89,20 @@ const buttonLabel = computed(() => {
   if (!tickets.value || tickets.value.length === 0)
     return 'No Tickets';
 
-  // When no specific tickets are selected = "All Tickets"
+  // No filter active - show "Ticket Filter"
   if (selectedTickets.value.length === 0)
-    return 'All Tickets';
-  // Single selection
+    return 'Ticket Filter';
+
+  // Single selection - show the ticket name
   if (selectedTickets.value.length === 1)
     return selectedTickets.value[0];
-  // Multiple but not all
-  return `${selectedTickets.value.length} tickets selected`;
+
+  // Multiple selections - show count
+  return `${selectedTickets.value.length} selected`;
 });
 
-// Fixed: Check if option is selected - this shows the ACTUAL state
+// Just check if individual ticket is selected
 const isChecked = (value: string) => {
-  if (value === 'all') {
-    // "All" is checked when no specific tickets are selected (empty array = all selected)
-    return selectedTickets.value.length === 0;
-  }
-  // For individual tickets:
-  // - If "All" is selected (empty array), show all individual options as checked
-  // - If specific tickets are selected, only show those as checked
-  if (selectedTickets.value.length === 0) {
-    return true; // When "All" is active, show all individual options as checked
-  }
   return selectedTickets.value.includes(value);
 };
 
@@ -158,23 +132,10 @@ const filteredTickets = computed(() => {
   return filterFunction.value(ticketOptions.value, searchTerm.value);
 });
 
-const shouldShowSelectAll = computed(() => {
-  // Show "Select All" when some but not all statuses are selected
-  return selectedTickets.value.length > 0 && selectedTickets.value.length < filteredTickets.value.length;
-});
-
-const toggleAllSelection = () => {
-  if (shouldShowSelectAll.value) {
-    // User wants to select all -> set to empty array (which means "All Status")
-    updateValue('all');
-  }
-  else {
-    // Currently showing "All Status", user wants partial selection
-    // Select just the first status to move to partial selection state
-    if (filteredTickets.value.length > 0) {
-      updateValue(filteredTickets.value[0].value);
-    }
-  }
+// Simplified mobile clear logic
+const clearAllSelections = () => {
+  emits('update:modelValue', []);
+  selectedTickets.value = [];
 };
 </script>
 
@@ -185,17 +146,21 @@ const toggleAllSelection = () => {
       <Popover v-if="!isMobile">
         <PopoverTrigger as-child>
           <Button variant="outline" class="relative h-[42px] bg-card dark:bg-background">
-            <!-- Only show "Ticket" label and indicator when partial selection -->
-            <span
-              v-if="selectedTickets.length > 0 && selectedTickets.length < (tickets?.length || 0)"
-              class="border-r pr-2 text-xs text-slate-500"
-            >Ticket</span>
-            <span class="ml-2 truncate font-medium">
+            <!-- Show ticket icon when no filter active -->
+            <Icon
+              v-if="selectedTickets.length === 0"
+              icon="heroicons:ticket"
+              class="mr-2 size-4 text-slate-600 dark:text-slate-400"
+            />
+            <!-- Show "Ticket" label only when there are selections -->
+            <span v-if="selectedTickets.length > 0" class="border-r pr-2 text-xs text-slate-500">Ticket</span>
+            <span class="truncate font-medium" :class="{ 'ml-2': selectedTickets.length > 0 }">
               {{ buttonLabel }}
             </span>
             <Icon icon="heroicons:chevron-down" class="ml-2 size-3.5 text-slate-600 dark:text-slate-400" />
+            <!-- Show indicator dot only when there are selections -->
             <span
-              v-if="selectedTickets.length > 0 && selectedTickets.length < (tickets?.length || 0)"
+              v-if="selectedTickets.length > 0"
               class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500"
             />
           </Button>
@@ -206,22 +171,7 @@ const toggleAllSelection = () => {
             <CommandList class="scroll-area">
               <CommandEmpty>No tickets found.</CommandEmpty>
               <CommandGroup>
-                <!-- All Tickets Option -->
-                <CommandItem :value="{ label: 'All Tickets', value: 'all' }" @select="() => updateValue('all')">
-                  <div
-                    :class="cn(
-                      'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                      isChecked('all')
-                        ? 'bg-primary text-primary-foreground'
-                        : 'opacity-50 [&_svg]:invisible',
-                    )"
-                  >
-                    <Icon icon="radix-icons:check" class="size-4" />
-                  </div>
-                  <span>All Tickets</span>
-                </CommandItem>
-
-                <!-- Individual Ticket Options -->
+                <!-- Individual Ticket Options Only -->
                 <CommandItem
                   v-for="ticket in filteredTickets"
                   :key="ticket.id"
@@ -253,19 +203,20 @@ const toggleAllSelection = () => {
         class="relative h-[42px] w-full bg-card dark:bg-background"
         @click="isSheetOpen = true"
       >
-        <!-- Only show "Ticket" label and indicator when partial selection -->
-        <span
-          v-if="selectedTickets.length > 0 && selectedTickets.length < (tickets?.length || 0)"
-          class="border-r pr-2 text-xs text-slate-500"
-        >Ticket</span>
+        <!-- Show ticket icon when no filter active -->
+        <Icon
+          v-if="selectedTickets.length === 0"
+          icon="heroicons:ticket"
+          class="mr-2 size-4 text-slate-600 dark:text-slate-400"
+        />
+        <!-- Show "Ticket" label only when there are selections -->
+        <span v-if="selectedTickets.length > 0" class="border-r pr-2 text-xs text-slate-500">Ticket</span>
         <span class="ml-2 truncate font-medium">
           {{ buttonLabel }}
         </span>
         <Icon icon="heroicons:chevron-down" class="ml-2 size-3.5 text-slate-600 dark:text-slate-400" />
-        <span
-          v-if="selectedTickets.length > 0 && selectedTickets.length < (tickets?.length || 0)"
-          class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500"
-        />
+        <!-- Show indicator dot only when there are selections -->
+        <span v-if="selectedTickets.length > 0" class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500" />
       </Button>
 
       <!-- Mobile: Sheet/Drawer -->
@@ -287,38 +238,11 @@ const toggleAllSelection = () => {
             <Input v-model="searchTerm" placeholder="Search tickets..." class="pl-9" />
           </div>
 
-          <!-- Action Buttons -->
-          <div class="flex items-center justify-center">
-            <Button
-              variant="outline"
-              size="sm"
-              :disabled="filteredTickets.length === 0"
-              @click="toggleAllSelection"
-            >
-              <Icon :icon="shouldShowSelectAll ? 'heroicons:check' : 'heroicons:x-mark'" class="mr-2 size-4" />
-              {{ shouldShowSelectAll ? 'Select All' : 'Clear Selection' }}
-            </Button>
-          </div>
-
           <Separator />
-          <div class="scroll-area mt-6 flex-1 space-y-4 overflow-y-auto">
+          <div class="scroll-area flex-1 space-y-4 overflow-y-auto">
             <!-- Tickets List -->
             <div class="space-y-2">
-              <!-- All Tickets Option -->
-              <div
-                class="flex items-center space-x-3 rounded-md border p-3 transition-colors hover:bg-muted/50"
-                :class="{ 'bg-muted/50': isChecked('all') }"
-                @click="() => updateValue('all')"
-              >
-                <Checkbox :checked="isChecked('all')" @click.stop @update:checked="() => updateValue('all')" />
-                <div class="min-w-0 flex-1">
-                  <div class="text-sm font-medium">
-                    All Tickets
-                  </div>
-                </div>
-              </div>
-
-              <!-- Individual Tickets -->
+              <!-- Individual Tickets Only -->
               <template v-if="filteredTickets.length > 0">
                 <div
                   v-for="ticket in filteredTickets"
@@ -351,9 +275,16 @@ const toggleAllSelection = () => {
             </div>
           </div>
 
-          <SheetFooter class="mt-6">
+          <SheetFooter class="flex flex-col space-y-4">
+            <!-- Clear Button - Only show if something is selected -->
+            <div v-if="selectedTickets.length > 0" class="flex items-center justify-center">
+              <Button variant="outline" size="sm" @click="clearAllSelections">
+                <Icon icon="heroicons:x-mark" class="mr-2 size-4" />
+                Clear
+              </Button>
+            </div>
             <Button class="w-full" @click="isSheetOpen = false">
-              Apply Filters ({{ selectedTickets.length === 0 ? 'All' : selectedTickets.length }} selected)
+              Apply Filters ({{ selectedTickets.length === 0 ? 'No filter' : selectedTickets.length }} selected)
             </Button>
           </SheetFooter>
         </SheetContent>

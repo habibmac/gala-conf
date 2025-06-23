@@ -34,34 +34,17 @@ watch(
   },
 );
 
-// Fixed: Simple dropdown logic
+// Simplified: Just toggle individual statuses
 function updateValue(value: string) {
   let updatedStatuses: string[];
 
-  if (value === 'all') {
-    // User clicked "All Status" - select everything (empty array represents "all")
-    updatedStatuses = [];
+  if (selectedStatuses.value.includes(value)) {
+    // This status is currently selected - remove it
+    updatedStatuses = selectedStatuses.value.filter(status => status !== value);
   }
   else {
-    // User clicked a specific status
-    if (selectedStatuses.value.length === 0) {
-      // Currently "All" is selected, user wants only this specific status
-      updatedStatuses = [value];
-    }
-    else if (selectedStatuses.value.includes(value)) {
-      // This status is currently selected - remove it
-      updatedStatuses = selectedStatuses.value.filter(status => status !== value);
-    }
-    else {
-      // This status is not selected - add it
-      updatedStatuses = [...selectedStatuses.value, value];
-
-      // Check if we now have all statuses selected
-      if (updatedStatuses.length === filteredStatus.value.length) {
-        // All individual statuses are selected, so convert to "All" (empty array)
-        updatedStatuses = [];
-      }
-    }
+    // This status is not selected - add it
+    updatedStatuses = [...selectedStatuses.value, value];
   }
 
   emits('update:modelValue', updatedStatuses);
@@ -70,58 +53,34 @@ function updateValue(value: string) {
 
 const filteredStatus = computed(() =>
   allRegStatuses.map(status => ({
-    color: status.color,
+    color: status.dotClass,
     label: status.label,
     value: status.label,
   })),
 );
 
 const buttonLabel = computed(() => {
-  // When no specific statuses selected = "All Status" (this represents all are active)
-  if (selectedStatuses.value.length === 0) {
-    return 'All Status';
-  }
-  // Single selection
-  if (selectedStatuses.value.length === 1) {
+  // No filter active - show "Status Filter"
+  if (selectedStatuses.value.length === 0)
+    return 'Status Filter';
+
+  // Single selection - show the status name
+  if (selectedStatuses.value.length === 1)
     return selectedStatuses.value[0];
-  }
-  // Multiple but not all
+
+  // Multiple selections - show count
   return `${selectedStatuses.value.length} selected`;
 });
 
-// Fixed: Check if option is selected - this shows the ACTUAL state
+// Simplified: Just check if individual status is selected
 const isChecked = (value: string) => {
-  if (value === 'all') {
-    // "All" is checked when no specific statuses are selected (empty array = all selected)
-    return selectedStatuses.value.length === 0;
-  }
-  // For individual statuses:
-  // - If "All" is selected (empty array), show all individual options as checked
-  // - If specific statuses are selected, only show those as checked
-  if (selectedStatuses.value.length === 0) {
-    return true; // When "All" is active, show all individual options as checked
-  }
   return selectedStatuses.value.includes(value);
 };
 
-// Mobile-specific functions
-const shouldShowSelectAll = computed(() => {
-  // Show "Select All" when some but not all statuses are selected
-  return selectedStatuses.value.length > 0 && selectedStatuses.value.length < filteredStatus.value.length;
-});
-
-const toggleAllSelection = () => {
-  if (shouldShowSelectAll.value) {
-    // User wants to select all -> set to empty array (which means "All Status")
-    updateValue('all');
-  }
-  else {
-    // Currently showing "All Status", user wants partial selection
-    // Select just the first status to move to partial selection state
-    if (filteredStatus.value.length > 0) {
-      updateValue(filteredStatus.value[0].value);
-    }
-  }
+// Simplified mobile clear logic
+const clearAllSelections = () => {
+  emits('update:modelValue', []);
+  selectedStatuses.value = [];
 };
 </script>
 
@@ -132,17 +91,21 @@ const toggleAllSelection = () => {
       <Popover v-if="!isMobile">
         <PopoverTrigger as-child>
           <Button variant="outline" class="relative h-[42px] bg-card dark:bg-background">
-            <!-- Only show "Status" label and indicator when partial selection -->
-            <span
-              v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
-              class="border-r pr-2 text-xs text-slate-500"
-            >Status</span>
-            <span class="ml-2 font-medium">
+            <!-- Show status icon when no filter active -->
+            <Icon
+              v-if="selectedStatuses.length === 0"
+              icon="heroicons:flag"
+              class="mr-2 size-4 text-slate-600 dark:text-slate-400"
+            />
+            <!-- Show "Status" label only when there are selections -->
+            <span v-if="selectedStatuses.length > 0" class="border-r pr-2 text-xs text-slate-500">Status</span>
+            <span class="font-medium" :class="{ 'ml-2': selectedStatuses.length > 0 }">
               {{ buttonLabel }}
             </span>
             <Icon icon="heroicons:chevron-down" class="ml-2 size-3.5 text-slate-600 dark:text-slate-400" />
+            <!-- Show indicator dot only when there are selections -->
             <span
-              v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
+              v-if="selectedStatuses.length > 0"
               class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500"
             />
           </Button>
@@ -152,22 +115,7 @@ const toggleAllSelection = () => {
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                <!-- All Status Option -->
-                <CommandItem :value="{ label: 'All Status', value: 'all' }" @select="() => updateValue('all')">
-                  <div
-                    :class="cn(
-                      'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                      isChecked('all')
-                        ? 'bg-primary text-primary-foreground'
-                        : 'opacity-50 [&_svg]:invisible',
-                    )"
-                  >
-                    <Icon icon="radix-icons:check" class="size-4" />
-                  </div>
-                  <span>All Status</span>
-                </CommandItem>
-
-                <!-- Individual Status Options -->
+                <!-- Individual Status Options Only -->
                 <CommandItem
                   v-for="item in filteredStatus"
                   :key="item.value"
@@ -200,19 +148,20 @@ const toggleAllSelection = () => {
         class="relative h-[42px] w-full bg-card dark:bg-background"
         @click="isSheetOpen = true"
       >
-        <!-- Only show "Status" label and indicator when partial selection -->
-        <span
-          v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
-          class="border-r pr-2 text-xs text-slate-500"
-        >Status</span>
+        <!-- Show status icon when no filter active -->
+        <Icon
+          v-if="selectedStatuses.length === 0"
+          icon="heroicons:flag"
+          class="mr-2 size-4 text-slate-600 dark:text-slate-400"
+        />
+        <!-- Show "Status" label only when there are selections -->
+        <span v-if="selectedStatuses.length > 0" class="border-r pr-2 text-xs text-slate-500">Status</span>
         <span class="ml-2 font-medium">
           {{ buttonLabel }}
         </span>
         <Icon icon="heroicons:chevron-down" class="ml-2 size-3.5 text-slate-600 dark:text-slate-400" />
-        <span
-          v-if="selectedStatuses.length > 0 && selectedStatuses.length < filteredStatus.length"
-          class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500"
-        />
+        <!-- Show indicator dot only when there are selections -->
+        <span v-if="selectedStatuses.length > 0" class="absolute right-0.5 top-0.5 size-2 rounded-full bg-rose-500" />
       </Button>
 
       <!-- Mobile: Sheet/Drawer -->
@@ -226,16 +175,11 @@ const toggleAllSelection = () => {
           </SheetHeader>
 
           <div class="mt-6 space-y-4">
-            <!-- Action Button -->
-            <div class="flex items-center justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                :disabled="filteredStatus.length === 0"
-                @click="toggleAllSelection"
-              >
-                <Icon :icon="shouldShowSelectAll ? 'heroicons:check' : 'heroicons:x-mark'" class="mr-2 size-4" />
-                {{ shouldShowSelectAll ? 'Select All' : 'Clear Selection' }}
+            <!-- Clear Button - Only show if something is selected -->
+            <div v-if="selectedStatuses.length > 0" class="flex items-center justify-center">
+              <Button variant="outline" size="sm" @click="clearAllSelections">
+                <Icon icon="heroicons:x-mark" class="mr-2 size-4" />
+                Clear
               </Button>
             </div>
 
@@ -243,21 +187,7 @@ const toggleAllSelection = () => {
 
             <!-- Status List -->
             <div class="scroll-area max-h-60 space-y-2 overflow-y-auto">
-              <!-- All Status Option -->
-              <div
-                class="flex items-center space-x-3 rounded-md border p-3 transition-colors hover:bg-muted/50"
-                :class="{ 'bg-muted/50': isChecked('all') }"
-                @click="() => updateValue('all')"
-              >
-                <Checkbox :checked="isChecked('all')" @click.stop @update:checked="() => updateValue('all')" />
-                <div class="flex min-w-0 flex-1 items-center space-x-2">
-                  <div class="text-sm font-medium">
-                    All Status
-                  </div>
-                </div>
-              </div>
-
-              <!-- Individual Statuses -->
+              <!-- Individual Statuses Only -->
               <div
                 v-for="status in filteredStatus"
                 :key="status.value"
@@ -282,7 +212,7 @@ const toggleAllSelection = () => {
 
           <SheetFooter class="mt-6">
             <Button class="w-full" @click="isSheetOpen = false">
-              Apply Filters ({{ selectedStatuses.length === 0 ? 'All' : selectedStatuses.length }} selected)
+              Apply Filters ({{ selectedStatuses.length === 0 ? 'No filter' : selectedStatuses.length }} selected)
             </Button>
           </SheetFooter>
         </SheetContent>
