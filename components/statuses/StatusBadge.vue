@@ -57,7 +57,7 @@ const sizeClasses = computed(() => {
 // Variant-specific classes using hardcoded status classes
 const variantClasses = computed(() => {
   const baseClasses = {
-    badge: 'inline-flex items-center gap-1 rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors',
+    badge: 'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors',
     pill: `inline-flex items-center gap-1 rounded-full font-medium ${sizeClasses.value.padding} ${sizeClasses.value.text}`,
     text: 'font-medium',
     dot: `inline-flex items-center gap-2 ${sizeClasses.value.text} font-medium`,
