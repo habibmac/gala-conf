@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { toast } from 'vue-sonner';
-
 import GeneralSettings from '~/components/partials/settings/GeneralSettings.vue';
 
 definePageMeta({
@@ -18,24 +16,10 @@ definePageMeta({
   parentPath: '/event/:eventId/settings',
 });
 
-const route = useRoute();
-const eventId = route.params.eventId as string;
+const { event: eventData } = useEvent();
 
-const { event: eventData, isLoading } = useEvent();
-
-const { $galantisApi } = useNuxtApp();
-
-const handleSave = async (formData: any) => {
-  try {
-    await $galantisApi.put(`/event/${eventId}`, formData);
-    toast.success('General settings saved successfully');
-  }
-  catch (error) {
-    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to save settings');
-    toast.error(errorMessage, {
-      description: errorDescription,
-    });
-  }
+const handleSave = async () => {
+  // Do nothing
 };
 
 useHead({
@@ -57,7 +41,7 @@ useHead({
               Configure basic event information
             </p>
           </header>
-          <GeneralSettings :event-data="eventData" :is-loading="isLoading" @save="handleSave" />
+          <GeneralSettings :event-data="eventData" @save="handleSave" />
         </section>
       </div>
     </div>
