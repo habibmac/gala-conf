@@ -1,13 +1,6 @@
 import pkg from './package.json';
 
 export default defineNuxtConfig({
-  app: {
-    head: {
-      bodyAttrs: {
-        class: 'font-geist',
-      },
-    },
-  },
   build: {
     transpile: ['@vuepic/vue-datepicker', 'vue-sonner'],
   },
@@ -15,7 +8,11 @@ export default defineNuxtConfig({
     classSuffix: '',
   },
   compatibilityDate: '2024-04-03',
-  css: ['~/assets/scss/main.scss'],
+  css: [
+    '@fontsource-variable/geist/index.css',
+    '@fontsource-variable/geist/wght.css',
+    '~/assets/scss/main.scss',
+  ],
   devtools: {
     enabled: true,
     timeline: {
@@ -25,6 +22,16 @@ export default defineNuxtConfig({
   eslint: {
     config: {
       standalone: false,
+    },
+  },
+  fonts: {
+    fontsource: {
+      geist: {
+        styles: ['normal'],
+        display: 'swap',
+        pkg: '@fontsource/geist',
+        subsets: ['latin'],
+      },
     },
   },
   modules: [

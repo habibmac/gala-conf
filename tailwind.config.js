@@ -1,4 +1,5 @@
 import animate from 'tailwindcss-animate';
+import defaultTheme from 'tailwindcss/defaultTheme';
 import plugin from 'tailwindcss/plugin';
 
 export default {
@@ -72,7 +73,7 @@ export default {
       },
       fontFamily: {
         // inter: ['Inter Variable', 'sans-serif',  'system-ui'],
-        geist: ['Geist Sans', 'sans-serif', 'system-ui'],
+        sans: ['Geist Variable', ...defaultTheme.fontFamily.sans],
       },
       fontSize: {
         tiny: ['0.65rem', { lineHeight: '1.5' }],
