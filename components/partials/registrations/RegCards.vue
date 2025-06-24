@@ -66,7 +66,7 @@ const { data, isError, isLoading, isRefetching, refetch } = useQuery({
       </CardHeader>
       <CardContent class="relative">
         <div
-          :class="cn('text-2xl font-semibold ordinal slashed-zero tabular-nums',
+          :class="cn('text-2xl font-semibold ordinal slashed-zero',
                      item.key === 'approved_total' ? 'text-emerald-500' : 'text-foreground',
           )"
         >

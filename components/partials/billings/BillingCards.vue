@@ -101,7 +101,7 @@ const cards = computed(() => {
           <Icon :icon="item.icon" class="size-7" :class="item.color" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-semibold tabular-nums">
+          <div class="text-2xl font-semibold">
             {{ formatThousands(item.value) }}
             <span v-if="item.is_currency" class="text-xs font-medium text-muted-foreground"> IDR </span>
           </div>
