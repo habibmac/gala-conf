@@ -20,6 +20,10 @@ export const useCheckins = (
     page: (pagination.value.pageIndex + 1).toString(),
     per_page: pagination.value.pageSize.toString(),
     sort_by: sorting.value.length > 0 ? sorting.value[0].id : '',
+    search: filters.value.search || '',
+    datetime_start: filters.value.datetime_start || '',
+    datetime_end: filters.value.datetime_end || '',
+    datetime_id: filters.value.datetime || '',
     ...filters.value,
   }));
 

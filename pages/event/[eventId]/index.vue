@@ -28,10 +28,10 @@ definePageMeta({
   title: 'Dashboard',
 });
 
+const { eventId } = useEvent();
 const { hasEventEnded, hasSeating } = useEventStatus();
 
 const triggerConfetti = () => {
-  // Since we're importing confetti directly, use it directly
   confetti({
     particleCount: 100,
     spread: 70,
@@ -71,7 +71,7 @@ onMounted(() => {
             <RecentRegistrations class="sm:col-span-6" />
           </div>
         </div>
-        <CheckinStats :show-detailed-stats="false" :show-recent-checkins="true" />
+        <CheckinStats :event-id="eventId" />
         <SeatBookings v-if="hasSeating" />
       </ClientOnly>
     </div>

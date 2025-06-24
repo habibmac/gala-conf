@@ -1,4 +1,3 @@
-<!-- pages/[eventId]/checkins/index.vue -->
 <script setup lang="ts">
 import type { PaginationState, SortingState } from '@tanstack/vue-table';
 
@@ -7,7 +6,6 @@ import {
   createColumnHelper,
   FlexRender,
   getCoreRowModel,
-
   useVueTable,
 } from '@tanstack/vue-table';
 import { format } from 'date-fns';
@@ -19,8 +17,11 @@ import type { CheckinColumnConfig, CheckinData, CheckinItem } from '@/types';
 import RegDetails from '@/components/partials/registrations/RegDetails.vue';
 import RegCode from '@/components/statuses/RegCode.vue';
 import { formatDate } from '@/utils';
+import CheckinCustomStats from '~/components/partials/checkins/CheckinCustomStats.vue';
 import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
+import CheckinTicketStats from '~/components/partials/checkins/CheckinTicketStats.vue';
 import { useCheckins } from '~/composables/useCheckins';
+import { useDatetimes } from '~/composables/useDatetimes';
 
 const props = withDefaults(
   defineProps<{
@@ -31,6 +32,7 @@ const props = withDefaults(
     perPage?: string
     sortBy?: string
     order?: string
+    datetime?: string // Add datetime prop
   }>(),
   {
     dateEnd: '',
@@ -40,6 +42,7 @@ const props = withDefaults(
     perPage: '10',
     search: '',
     sortBy: 'check_time',
+    datetime: '', // Default to empty (all sessions)
   },
 );
 
@@ -60,13 +63,28 @@ definePageMeta({
   title: 'Check-ins',
 });
 
-const { event } = useEvent();
-const eventId = computed(() => event.value?.id);
-
 const route = useRoute();
 const router = useRouter();
 
+const eventId = ref<string>(route.params.eventId as string);
+
 const endpoint = 'checkins';
+
+// Add datetime filter using the composable
+const {
+  datetimes,
+  selectedDatetime,
+  selectedDatetimeInfo,
+  setSelectedDatetime,
+  isLoading: isDatetimesLoading,
+} = useDatetimes(eventId);
+
+// Initialize datetime from URL
+onMounted(() => {
+  if (props.datetime) {
+    setSelectedDatetime(props.datetime);
+  }
+});
 
 // Selected registration ID for details modal
 const selectedRegId = ref<string>((route.query.details as string) || '');
@@ -83,11 +101,18 @@ const pagination = ref<PaginationState>({
   pageSize: initialPerPage,
 });
 
-const filters = ref({
-  date_end: props.dateEnd || '',
-  date_start: props.dateStart || '',
-  search: props.search || '',
-});
+// Create separate refs for each filter
+const searchFilter = ref(props.search || '');
+const dateStartFilter = ref(props.dateStart || '');
+const dateEndFilter = ref(props.dateEnd || '');
+
+// Use computed to combine all filters - this automatically updates when selectedDatetime changes
+const filters = computed(() => ({
+  date_end: dateEndFilter.value,
+  date_start: dateStartFilter.value,
+  search: searchFilter.value,
+  datetime: selectedDatetime.value, // Automatically reactive
+}));
 
 const sorting = ref<SortingState>([
   {
@@ -97,11 +122,23 @@ const sorting = ref<SortingState>([
 ]);
 
 const dateRange = computed(() => {
-  if (filters.value.date_start && filters.value.date_end) {
-    return [new Date(filters.value.date_start), new Date(filters.value.date_end)];
+  if (dateStartFilter.value && dateEndFilter.value) {
+    return [new Date(dateStartFilter.value), new Date(dateEndFilter.value)];
   }
   return null;
 });
+
+// Handle datetime filter change
+const handleDatetimeChange = (datetimeId: string) => {
+  setSelectedDatetime(datetimeId); // This automatically updates filters.datetime
+
+  // Update URL
+  const query = { ...route.query, datetime: datetimeId || undefined };
+  if (!datetimeId) {
+    delete query.datetime;
+  }
+  router.push({ query });
+};
 
 // Export state
 const { exportData } = useExport();
@@ -282,7 +319,7 @@ const columns = computed(() => {
     });
 });
 
-// Get checkin data using composable
+// Get checkin data using composable (with updated filters)
 const {
   checkinData,
   isLoading: isDataLoading,
@@ -324,11 +361,11 @@ const handleNavigation = (pageNumber: number) => {
 };
 
 const handleResetFilters = () => {
-  filters.value = {
-    date_end: '',
-    date_start: '',
-    search: '',
-  };
+  searchFilter.value = '';
+  dateStartFilter.value = '';
+  dateEndFilter.value = '';
+  setSelectedDatetime(''); // This automatically updates filters.datetime
+
   pagination.value = {
     pageIndex: 0,
     pageSize: INITIAL_PAGE_SIZE,
@@ -343,18 +380,18 @@ const handleResetFilters = () => {
 
 const handleSetDateRange = (dateRange: [Date | null, Date | null] | null) => {
   if (dateRange === null) {
-    filters.value.date_start = '';
-    filters.value.date_end = '';
+    dateStartFilter.value = '';
+    dateEndFilter.value = '';
   }
   else {
     const [start, end] = dateRange;
     if (!start || !end) {
-      filters.value.date_start = '';
-      filters.value.date_end = '';
+      dateStartFilter.value = '';
+      dateEndFilter.value = '';
     }
     else {
-      filters.value.date_start = format(start, 'yyyy-MM-dd HH:mm');
-      filters.value.date_end = format(end, 'yyyy-MM-dd HH:mm');
+      dateStartFilter.value = format(start, 'yyyy-MM-dd HH:mm');
+      dateEndFilter.value = format(end, 'yyyy-MM-dd HH:mm');
     }
   }
 };
@@ -382,8 +419,9 @@ const handleExport = async (format: 'csv' | 'xlsx') => {
   }
 };
 
+// Update to use computed filters
 const isAnyFilterActive = computed(() => {
-  return filters.value.search || filters.value.date_start || filters.value.date_end;
+  return searchFilter.value || dateStartFilter.value || dateEndFilter.value || selectedDatetime.value;
 });
 
 const handleOpenDetails = (id: string) => {
@@ -396,6 +434,7 @@ const handleCloseDetails = () => {
   delete currentQuery.details;
 };
 
+// Watchers
 watch(selectedRegId, () => {
   const newQuery = { ...route.query };
   if (selectedRegId.value) {
@@ -424,7 +463,6 @@ watch(
 );
 </script>
 
-<!-- Add the template section from the next message due to length -->
 <template>
   <div class="container mx-auto flex flex-col gap-5">
     <div class="flex flex-col">
@@ -432,16 +470,58 @@ watch(
         <h1 class="h2">
           Check-ins
         </h1>
+
+        <!-- Use the new component -->
+        <DropdownDatetimeFilter
+          :datetimes="datetimes"
+          :selected-datetime="selectedDatetime"
+          :is-loading="isDatetimesLoading"
+          @update:selected-datetime="handleDatetimeChange"
+        />
       </header>
-      <CheckinStats />
+
+      <!-- Alert info -->
+      <Card v-if="selectedDatetimeInfo" class="mb-4 border-l-4 border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/50">
+        <CardContent class="pt-6">
+          <div class="flex items-start space-x-4">
+            <div class="rounded-full bg-blue-100 p-2 dark:bg-blue-900">
+              <Icon icon="solar:calendar-mark-bold-duotone" class="size-6 text-blue-600" />
+            </div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-blue-700 dark:text-blue-300">
+                Showing check-ins for
+                <span v-if="selectedDatetimeInfo" class="font-bold">{{ selectedDatetimeInfo.name }}</span>
+                <span v-else class="font-bold">all sessions</span>
+              </h3>
+              <p class="mt-1 text-sm text-blue-600 dark:text-blue-400">
+                {{ formatDate(selectedDatetimeInfo.date_start, 'EEEE, dd MMMM yyyy') }}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <!-- Pass datetime filter to CheckinStats -->
+      <CheckinStats :event-id="eventId" :datetime-filter="selectedDatetime" />
     </div>
   </div>
+
+  <section>
+    <div class="container mx-auto mt-5 flex flex-col gap-5">
+      <!-- Enhanced Ticket Stats -->
+      <CheckinTicketStats :event-id="eventId" :datetime-filter="selectedDatetime" />
+
+      <!-- Custom Field Stats -->
+      <CheckinCustomStats :event-id="eventId" :datetime-filter="selectedDatetime" />
+    </div>
+  </section>
 
   <section>
     <div class="container mx-auto py-4">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex flex-col space-y-2 sm:grid sm:grid-flow-col sm:gap-2 sm:space-y-0">
-          <TableSearchForm v-model="filters.search" placeholder="Search by name, reg code, or ticket..." />
+          <!-- Updated to use searchFilter ref -->
+          <TableSearchForm v-model="searchFilter" placeholder="Search by name, reg code, or ticket..." />
           <Datepicker
             :date-range="dateRange"
             :enable-time-picker="true"
@@ -478,14 +558,18 @@ watch(
     </div>
   </section>
 
-  <section class="container relative mx-auto mb-20" :class="{ 'scroll-area overflow-x-auto': !isDataLoading }">
+  <!-- Table section -->
+  <section class="container relative mx-auto mb-20" :class="{ 'scroll-area overflow-auto': !isDataLoading }">
     <Card>
       <CardHeader class="flex justify-between">
         <CardTitle class="text-sm font-medium tracking-normal">
           Check-in Records
+          <span v-if="selectedDatetimeInfo" class="text-muted-foreground">
+            - {{ selectedDatetimeInfo.name }}
+          </span>
         </CardTitle>
       </CardHeader>
-      <CardContent class="p-0">
+      <CardContent class="overflow-x-auto p-0">
         <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs), totalData)}px` }">
           <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
             <thead

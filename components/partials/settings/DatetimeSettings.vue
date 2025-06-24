@@ -120,7 +120,7 @@ const editingSessionId = ref<string | null>(null);
 
 const addSession = () => {
   const newSession = {
-    id: `temp-${Date.now()}`, // Temporary ID for new session
+    id: `temp-${Date.now()}`, // This temp ID should not be sent to the server
     name: '',
     date_start: '',
     date_end: '',
@@ -140,8 +140,9 @@ const cancelEdit = () => {
   if (editingSessionId.value?.startsWith('temp-')) {
     const sessions = form.values.sessions || [];
     const index = sessions.findIndex(s => s.id === editingSessionId.value);
-    if (index !== -1)
+    if (index !== -1) {
       remove(index);
+    }
   }
   editingSessionId.value = null;
 };
@@ -154,21 +155,35 @@ const saveSession = async (_sessionData: any) => {
       date_end: formatDateForSubmission(_sessionData.date_end),
     };
 
-    if (editingSessionId.value) {
-      // Update existing session
+    // Check if this is a new session (temp ID) or existing session
+    const isNewSession = !editingSessionId.value || editingSessionId.value.startsWith('temp-');
+
+    if (isNewSession) {
+      // Create new session - POST to /datetimes (note the plural)
+      const response = await $galantisApi.post(`/event/${eventId}/datetimes`, sessionData);
+
+      if (response.data && response.data.id) {
+        // Update the session with the real ID from server
+        const sessions = form.values.sessions || [];
+        const sessionIndex = sessions.findIndex(s => s.id === editingSessionId.value);
+        if (sessionIndex !== -1) {
+          sessions[sessionIndex] = {
+            ...sessionData,
+            id: response.data.id,
+          };
+          form.setValues({ sessions });
+        }
+        toast.success('Session created successfully');
+      }
+    }
+    else {
+      // Update existing session - PUT to /datetime/:id (note the singular)
       await $galantisApi.put(`/event/${eventId}/datetime/${editingSessionId.value}`, sessionData);
       toast.success('Session updated successfully');
     }
-    else {
-      // Create new session
-      const response = await $galantisApi.post(`/event/${eventId}/datetime`, sessionData);
-      sessionData.id = response.data.id; // Set the new ID
-      insert(0, sessionData); // Insert at the top
-      toast.success('Session created successfully');
-    }
 
     editingSessionId.value = null;
-    await loadSessions();
+    await loadSessions(); // Refresh the list
   }
   catch (error) {
     const { errorMessage, errorDescription } = handleApiError(error, 'Failed to save session');

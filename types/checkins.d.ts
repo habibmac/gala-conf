@@ -1,77 +1,73 @@
-export interface CheckinFilters {
-  search?: string
-  date_start?: string
-  date_end?: string
+// Base stats interface that all stats share
+export interface BaseCheckinStats {
+  total_registrations: number
+  unique_checkins: number
+  checkin_rate: number
 }
 
-export interface CheckinItem {
-  id: string
-  code: string
-  stt_id: string
-  name: string
-  address: string
-  session: string
-  ticket: string
-  first_check_time: string
-  checkin_data: CheckinData[]
+// Extended for global stats API
+export interface GlobalCheckinStats extends BaseCheckinStats {
+  total_checkins: number // Total checkin events
+  total_checkouts: number // Total checkout events
+  never_checked_in: number // People who haven't checked in
+  currently_present: number // Currently at venue
+}
+
+// Ticket stats API response
+export interface TicketCheckinStats extends BaseCheckinStats {
+  ticket_name: string
+}
+
+// Custom field option (single answer option)
+export interface CustomStatsOption extends BaseCheckinStats {
+  answer: string
+  total_checkouts: number
+  currently_present: number
+}
+
+// Custom field stats API response
+export interface CustomCheckinStats {
+  title: string
+  data: CustomStatsOption[]
 }
 
 export interface CheckinColumnConfig extends ColumnConfig {
-  key: keyof CheckinItem | 'checkin_data' // explicitly include 'checkin_data' since it's a special case
+  key: keyof CheckinItem | 'checkin_data'
   header: string
   isVisible?: boolean
   isHideable?: boolean
   width?: columnWidth
 }
 
-export interface TicketCheckinStats {
-  TKT_ID: string
-  TKT_name: string
-  total_registrations: string
-  total_checkins: string
-  total_checkouts: string
-  checkin_percentage: string
-  checkout_percentage: string
+export interface CheckinFilters {
+  search?: string
+  datetime_start?: string
+  datetime_end?: string
+  datetime?: string
 }
 
-export interface RecentCheckin {
+export interface CheckinItem {
   id: string
   code: string
   session: string
   stt_id: string
   name: string
   address: string
-  city: string
   ticket: string
-  check_time: string
-}
-
-interface CustomItemCheckinStats {
-  option: string
-  total_registered: number
-  picked_up: number
-  checked_out: number
-  currently_out: number
-  pickup_percentage: number
-}
-
-interface CheckinStats {
-  global: {
-    total_registrations: number
-    total_checkins: number
-    total_checkouts: number
-    total_remaining: number
-  }
-  tickets: TicketCheckinStats[]
-  custom?: CustomStats[]
-}
-
-interface CustomStats {
-  info: Record<string, string>
-  options: CustomItemCheckinStats[]
+  first_check_time: string
+  checkin_data?: CheckinData[]
 }
 
 interface CheckinData {
   time: string
   type: 'checkin' | 'checkout'
+}
+
+export interface StatsCard {
+  bgColor: string
+  color: string
+  icon: string
+  title: string
+  value: number
+  percentage?: string
 }

@@ -2,7 +2,7 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
 
-import type { RecentCheckin } from '~/types';
+import type { CheckinItem } from '~/types';
 
 import RegCode from '~/components/statuses/RegCode.vue';
 
@@ -13,10 +13,10 @@ const { $galantisApi } = useNuxtApp();
 
 const getRecentCheckins = async () => {
   const response = await $galantisApi.get(`/event/${eventId.value}/checkins/recent`);
-  return response.data;
+  return response.data as CheckinItem[];
 };
 
-const { data: recentCheckins, isLoading } = useQuery<RecentCheckin[]>({
+const { data: recentCheckins, isLoading } = useQuery<CheckinItem[]>({
   queryFn: getRecentCheckins,
   queryKey: ['recent-checkins', eventId],
   refetchInterval: hasEventEnded.value ? false : 30000,
@@ -74,7 +74,7 @@ const getRegDetailsUrl = (regId: string) => {
                 class="text-sm hover:bg-slate-50 dark:hover:bg-slate-800/50"
               >
                 <td class="whitespace-nowrap px-4 py-2 text-slate-900 dark:text-slate-300">
-                  {{ formatDate(checkin.check_time, 'dd MMM yyyy HH:mm') }}
+                  {{ formatDate(checkin.first_check_time, 'dd MMM yyyy HH:mm') }}
                 </td>
                 <td class="px-4 py-2">
                   {{ checkin.session }}

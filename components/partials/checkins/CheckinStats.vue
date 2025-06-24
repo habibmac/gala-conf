@@ -1,112 +1,115 @@
-<!-- components/checkins/CheckinStats.vue -->
 <script setup lang="ts">
+import { Icon } from '@iconify/vue';
 import { useQuery } from '@tanstack/vue-query';
 import { computed } from 'vue';
 
-import type { CheckinStats } from '~/types';
+import type { GlobalCheckinStats, StatsCard } from '~/types';
 
 import { formatThousands } from '@/utils';
 import Card from '~/components/ui/card/Card.vue';
 
-import CheckinDistributions from './CheckinDistributions.vue';
-import CheckinRecent from './CheckinRecent.vue';
-
-withDefaults(
+const props = withDefaults(
   defineProps<{
-    showTotalRegs?: boolean
-    showDetailedStats?: boolean
-    showRecentCheckins?: boolean
+    eventId: string
+    datetimeFilter?: string
   }>(),
   {
-    showDetailedStats: true,
-    showRecentCheckins: false,
-    showTotalRegs: true,
+    datetimeFilter: '',
   },
 );
 
-const route = useRoute();
-const eventId = ref(route.params.eventId as string) || ref('');
 const { hasEventEnded } = useEventStatus();
 
 // Fetch stats
 const { $galantisApi } = useNuxtApp();
+const getStats = async (evtId: string, datetimeFilter: string): Promise<GlobalCheckinStats> => {
+  const params: Record<string, string> = {};
+  if (datetimeFilter) {
+    params.datetime_id = datetimeFilter;
+  }
 
-const getStats = async (evtId: Ref) => {
-  const response = await $galantisApi.get(`/event/${evtId.value}/checkins/stats`);
+  const response = await $galantisApi.get(`/event/${evtId}/checkins/stats`, {
+    params,
+  });
   return response.data;
 };
 
+// Use reactive query
 const {
   data: stats,
   isLoading,
-  isRefetching,
-} = useQuery<CheckinStats>({
-  queryFn: () => getStats(eventId),
-  queryKey: ['checkin-stats', eventId],
-  staleTime: hasEventEnded.value ? Infinity : 30000,
+  isError,
+  error,
+} = useQuery({
+  queryKey: ['checkin-stats', props.eventId, computed(() => props.datetimeFilter)],
+  queryFn: () => getStats(props.eventId, props.datetimeFilter),
+  enabled: computed(() => !!props.eventId),
+  staleTime: 1000 * 60 * 2, // 2 minutes
 });
 
-const totalRegs = computed(() =>
-  stats.value?.global.total_registrations ? formatThousands(stats.value.global.total_registrations) : 0,
+// Helper function for safe percentage calculation
+const safePercentage = (numerator: number, denominator: number): string => {
+  if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || denominator === 0) {
+    return '0';
+  }
+
+  const percentage = (numerator / denominator) * 100;
+  const cappedPercentage = Math.min(100, Math.max(0, percentage));
+
+  return Number.isFinite(cappedPercentage) ? cappedPercentage.toFixed(0) : '0';
+};
+
+// Computed values for stats
+const checkinStats = computed(() => stats.value || {
+  total_checkins: 0,
+  unique_checkins: 0,
+  total_registrations: 0,
+  percentage: 0,
+  total_checkouts: 0,
+  currently_present: 0,
+});
+
+// Individual stat values
+const totalRegs = computed(() => checkinStats.value.total_registrations || 0);
+const totalCheckins = computed(() => checkinStats.value.unique_checkins || 0);
+const totalCheckouts = computed(() => checkinStats.value.total_checkouts || 0);
+const currentlyPresent = computed(() => checkinStats.value.currently_present || 0);
+
+// Safe percentage calculations
+const percentageCheckins = computed(() =>
+  safePercentage(totalCheckins.value, totalRegs.value),
 );
 
-const totalCheckins = computed(() =>
-  stats.value?.global.total_checkins ? formatThousands(stats.value.global.total_checkins) : 0,
-);
-const percentageCheckins = computed(
-  () => ((stats.value?.global.total_checkins ?? 0) / (stats.value?.global.total_registrations ?? 1)) * 100,
-);
-
-const totalRemaining = computed(() =>
-  stats.value?.global.total_registrations
-    ? formatThousands(
-        Number.parseInt((stats.value?.global.total_registrations ?? 0).toString())
-        - Number.parseInt((stats.value?.global.total_checkins ?? 0).toString()),
-      )
-    : 0,
-);
-
-const percentageRemaining = computed(
-  () => Number.parseInt(totalRemaining.value.toString()) / (stats.value?.global.total_registrations ?? 1) * 100,
-);
-
-const totalCheckouts = computed(() =>
-  stats.value?.global.total_checkouts ? formatThousands(stats.value.global.total_checkouts) : 0,
-);
-const percentageCheckouts = computed(
-  () => ((stats.value?.global.total_checkouts ?? 0) / (stats.value?.global.total_registrations ?? 1)) * 100,
-);
-
-const statsCards = computed(() => [
-  // if showTotalRegs
+// Stats cards configuration
+const statsCards = computed((): StatsCard[] => [
   {
-    bgColor: 'bg-blue-50',
+    bgColor: 'bg-blue-50 dark:bg-blue-900/20',
     color: 'text-blue-500',
     icon: 'solar:users-group-rounded-linear',
     title: 'Total Registrations',
     value: totalRegs.value,
   },
   {
-    bgColor: 'bg-green-50',
+    bgColor: 'bg-green-50 dark:bg-green-900/20',
     color: 'text-green-500',
     icon: 'solar:login-2-linear',
-    percentage: percentageCheckins.value.toFixed(0),
+    percentage: percentageCheckins.value,
     title: 'Total Check-ins',
     value: totalCheckins.value,
   },
   {
-    bgColor: 'bg-red-50',
-    color: 'text-red-500',
+    bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+    color: 'text-orange-500',
     icon: 'solar:users-group-rounded-linear',
-    percentage: percentageRemaining.value.toFixed(0),
-    title: 'Remaining',
-    value: totalRemaining.value,
+    percentage: safePercentage(currentlyPresent.value, totalRegs.value),
+    title: 'Currently Present',
+    value: currentlyPresent.value,
   },
   {
-    bgColor: 'bg-orange-50',
-    color: 'text-orange-500',
+    bgColor: 'bg-red-50 dark:bg-red-900/20',
+    color: 'text-red-500',
     icon: 'solar:logout-2-linear',
-    percentage: percentageCheckouts.value.toFixed(0),
+    percentage: safePercentage(totalCheckouts.value, totalRegs.value),
     title: 'Total Check-outs',
     value: totalCheckouts.value,
   },
@@ -114,43 +117,84 @@ const statsCards = computed(() => [
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    <Card
-      v-for="(card, index) in statsCards"
-      :key="index"
-      class="relative rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
-    >
-      <!-- Card Header -->
-      <CardTitle class="text-sm font-medium tracking-normal">
-        {{ card.title }}
-      </CardTitle>
+  <div class="space-y-6">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <Card v-for="i in 4" :key="i">
+        <CardContent class="p-6">
+          <div class="flex items-center">
+            <div class="shrink-0">
+              <Skeleton class="size-10 rounded-lg" />
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <Skeleton class="mb-2 h-4 w-20" />
+              <Skeleton class="h-6 w-16" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
 
-      <!-- Card Value -->
-      <div class="flex items-end justify-between">
-        <div>
-          <div class="text-2xl font-semibold text-slate-800 dark:text-white">
-            <template v-if="isLoading || isRefetching">
-              <Skeleton class="h-8 w-16" />
-            </template>
-            <template v-else>
-              {{ card.value.toLocaleString() }}
-            </template>
+    <!-- Error State -->
+    <div v-else-if="isError" class="rounded-md bg-red-50 p-4">
+      <div class="flex">
+        <Icon icon="heroicons:exclamation-triangle" class="size-5 text-red-400" />
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            Error loading check-in statistics
+          </h3>
+          <div class="mt-2 text-sm text-red-700">
+            <p>{{ error?.message || 'Unable to load statistics. Please try again.' }}</p>
           </div>
         </div>
       </div>
-
-      <!-- Trend Indicator -->
-      <div v-if="card.percentage" class="flex items-center text-sm font-medium" :class="card.color">
-        <span class="mr-1">{{ card.percentage }}%</span>
-      </div>
-    </Card>
-
-    <div v-if="stats && showRecentCheckins" class="col-span-2 lg:col-span-4">
-      <CheckinRecent />
     </div>
 
-    <div v-if="stats && showDetailedStats" class="col-span-2 lg:col-span-4">
-      <CheckinDistributions :tickets="stats.tickets" :custom="stats.custom" />
+    <!-- Stats Cards -->
+    <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <Card v-for="card in statsCards" :key="card.title">
+        <CardContent class="p-6">
+          <div class="flex items-center">
+            <div class="shrink-0">
+              <div :class="`rounded-lg p-3 ${card.bgColor}`">
+                <Icon :icon="card.icon" :class="`h-6 w-6 ${card.color}`" />
+              </div>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-muted-foreground">
+                  {{ card.title }}
+                </dt>
+                <dd class="flex items-baseline">
+                  <div class="text-2xl font-semibold tracking-tight text-foreground">
+                    {{ formatThousands(card.value) }}
+                  </div>
+                  <div v-if="card.percentage" class="ml-2 flex items-baseline text-sm font-semibold">
+                    <span :class="`${card.color}`">
+                      {{ card.percentage }}%
+                    </span>
+                  </div>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    <!-- Event Ended Banner -->
+    <div v-if="hasEventEnded && !isLoading" class="rounded-md border border-yellow-200 bg-yellow-50 p-4">
+      <div class="flex">
+        <Icon icon="heroicons:information-circle" class="size-5 text-yellow-400" />
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-yellow-800">
+            Event has ended
+          </h3>
+          <div class="mt-2 text-sm text-yellow-700">
+            <p>This event has concluded. The statistics shown are final.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
