@@ -8,7 +8,7 @@ import BillingBankAccount from '~/components/partials/billings/BillingBankAccoun
 import WithdrawalInfo from '~/components/partials/billings/WithdrawalInfo.vue';
 
 const route = useRoute();
-const eventId = ref(route.params.eventId as string) || ref('');
+const eventId = computed(() => route.params.eventId as string || '');
 
 interface BillingSummary {
   gross_sales: number
@@ -65,9 +65,9 @@ const getBillingSummary = async (evtId: Ref): Promise<BillingSummary> => {
 };
 
 const { data, isError, isLoading, isRefetching } = useQuery({
-  enabled: !!eventId,
   queryFn: () => getBillingSummary(eventId),
   queryKey: ['billingSummary', eventId],
+  enabled: !!eventId.value,
 });
 
 // Computed property for card data

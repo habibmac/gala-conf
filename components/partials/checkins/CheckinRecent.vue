@@ -7,7 +7,8 @@ import type { CheckinItem } from '~/types';
 import RegCode from '~/components/statuses/RegCode.vue';
 
 const route = useRoute();
-const eventId = ref(route.params.eventId as string);
+const eventId = computed(() => route.params.eventId as string || '');
+
 const { hasEventEnded } = useEventStatus();
 const { $galantisApi } = useNuxtApp();
 

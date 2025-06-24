@@ -58,7 +58,7 @@ const emit = defineEmits<{
 
 const { $galantisApi } = useNuxtApp();
 const route = useRoute();
-const eventId = route.params.eventId as string;
+const eventId = computed(() => route.params.eventId as string || '');
 
 // State with proper types
 const tickets = ref<Ticket[]>([]);
@@ -171,7 +171,7 @@ watch(() => props.eventData, (newEventData) => {
 const loadTickets = async () => {
   try {
     isLoadingTickets.value = true;
-    const response = await $galantisApi.get(`/event/${eventId}/tickets?include_sales=true&include_datetimes=true`);
+    const response = await $galantisApi.get(`/event/${eventId.value}/tickets?include_sales=true&include_datetimes=true`);
 
     if (response.data) {
       tickets.value = response.data.map((ticket: any, index: number): Ticket => ({
@@ -213,7 +213,7 @@ const loadTickets = async () => {
 
 const loadDatetimes = async () => {
   try {
-    const response = await $galantisApi.get(`/event/${eventId}/datetimes`);
+    const response = await $galantisApi.get(`/event/${eventId.value}/datetimes`);
     if (response.data) {
       availableDatetimes.value = response.data;
     }
@@ -244,7 +244,7 @@ const updateTicketOrder = async () => {
       }));
 
     if (ticketOrders.length > 0) {
-      const response = await $galantisApi.put(`/event/${eventId}/tickets/order`, {
+      const response = await $galantisApi.put(`/event/${eventId.value}/tickets/order`, {
         ticket_orders: ticketOrders,
       });
 
@@ -319,11 +319,11 @@ const saveTicket = async (ticketData: Ticket) => {
     if (isNewTicket) {
       // Create new ticket
       const { id, ...createData } = ticketData;
-      response = await $galantisApi.post(`/event/${eventId}/tickets`, createData);
+      response = await $galantisApi.post(`/event/${eventId.value}/tickets`, createData);
     }
     else {
       // Update existing ticket
-      response = await $galantisApi.put(`/event/${eventId}/ticket/${ticketData.id}`, ticketData);
+      response = await $galantisApi.put(`/event/${eventId.value}/ticket/${ticketData.id}`, ticketData);
     }
 
     if (response.data.success) {
@@ -354,7 +354,7 @@ const deleteTicket = async (ticket: Ticket) => {
   }
 
   try {
-    await $galantisApi.delete(`/event/${eventId}/ticket/${ticket.id}`);
+    await $galantisApi.delete(`/event/${eventId.value}/ticket/${ticket.id}`);
     tickets.value = tickets.value.filter(t => t.id !== ticket.id);
     editingTicketId.value = null;
     toast.success('Ticket deleted successfully');

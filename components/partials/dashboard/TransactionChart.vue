@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatThousands } from '@/utils';
 
 const route = useRoute();
-const eventId = ref(route.params.eventId as string);
+const eventId = computed(() => route.params.eventId as string || '');
 
 const timeFrameOptions = [
   { value: 'this_week', label: 'This Week' },

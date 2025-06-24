@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAgenda } from '@/composables/useAgenda';
 
 const route = useRoute();
-const eventId = ref(route.params.eventId as string);
+const eventId = computed(() => route.params.eventId as string || '');
 
 // Only get upcoming items for this simple card
 const agendaParams = ref({ only_upcoming: true });

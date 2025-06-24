@@ -7,11 +7,10 @@ import type { TransactionStats } from '~/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useEvent } from '~/composables/useEvent';
 import { formatDate } from '~/utils';
 
-const { event } = useEvent();
-const eventId = computed(() => event.value?.id);
+const route = useRoute();
+const eventId = computed(() => route.params.eventId as string || '');
 
 const timeFrameOptions = [
   { value: 'today', label: 'Today' },

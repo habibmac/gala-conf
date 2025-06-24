@@ -66,7 +66,7 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 
-const eventId = ref<string>(route.params.eventId as string);
+const eventId = computed(() => route.params.eventId as string || '');
 
 const endpoint = 'checkins';
 

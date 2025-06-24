@@ -23,7 +23,8 @@ const selectedSeat = ref<string | null>(null);
 const openPopoverSeat = ref<string | null>(null);
 
 const route = useRoute();
-const eventId = ref(route.params.eventId as string) || ref('');
+const eventId = computed(() => route.params.eventId as string || '');
+
 const { $galantisApi } = useNuxtApp();
 const selectedDay = ref<string | undefined>('1'); // Initialize with '1' instead of 1
 
@@ -43,6 +44,7 @@ const {
       })
       .then(response => response.data?.data),
   queryKey: ['seat-data', eventId, selectedDay],
+  retry: 0,
 });
 
 // Helper functions

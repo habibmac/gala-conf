@@ -9,12 +9,16 @@ import { useAuthStore } from '@/stores';
 export const useEvent = (initialEventId?: string) => {
   const route = useRoute();
   const authStore = useAuthStore();
-
   const eventId = ref(initialEventId || (route.params.eventId as string) || '');
 
   const getData = async (eventId: Ref<string>, signal: AbortSignal) => {
     if (!eventId.value)
       return null;
+
+    // Check if event is already loaded in store
+    if (authStore.selectedEvent?.id === eventId.value) {
+      return authStore.selectedEvent;
+    }
 
     try {
       const response = await useNuxtApp().$galantisApi.get(`/event/${eventId.value}`, {
@@ -41,6 +45,8 @@ export const useEvent = (initialEventId?: string) => {
     queryFn: ({ signal }) => getData(eventId, signal),
     queryKey: ['event', eventId],
     staleTime: 1000 * 60 * 5, // 5 minutes
+    // Since middleware pre-loads, this should usually return cached data
+    initialData: () => authStore.selectedEvent?.id === eventId.value ? authStore.selectedEvent : undefined,
   });
 
   watch(

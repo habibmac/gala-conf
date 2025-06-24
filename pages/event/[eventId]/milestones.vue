@@ -31,7 +31,7 @@ definePageMeta({
 });
 
 const route = useRoute();
-const eventId = ref(route.params.eventId as string);
+const eventId = computed(() => route.params.eventId as string || '');
 
 // Filter options
 const onlyUpcoming = ref(false);

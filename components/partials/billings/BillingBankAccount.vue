@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/vue-query';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const route = useRoute();
-const eventId = ref(route.params.eventId as string) || ref('');
+const eventId = computed(() => route.params.eventId as string || '');
 
 interface BillingBankAccount {
   bank_name: string
@@ -20,9 +20,9 @@ const getBankAccounts = async (evtId: Ref) => {
 };
 
 const { data: bankAccount, isError, isLoading, isRefetching } = useQuery({
-  enabled: !!eventId,
   queryFn: () => getBankAccounts(eventId),
   queryKey: ['bankAccount', eventId],
+  enabled: !!eventId.value,
 });
 </script>
 

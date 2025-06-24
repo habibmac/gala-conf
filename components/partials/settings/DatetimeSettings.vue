@@ -17,7 +17,7 @@ const props = defineProps<Props>();
 
 const { $galantisApi } = useNuxtApp();
 const route = useRoute();
-const eventId = route.params.eventId as string;
+const eventId = computed(() => route.params.eventId as string || '');
 
 // Simple form schema
 const sessionSchema = z.object({
@@ -59,7 +59,7 @@ watch(() => props.eventData, (newEventData) => {
 const loadSessions = async () => {
   try {
     isLoadingSessions.value = true;
-    const response = await $galantisApi.get(`/event/${eventId}/datetimes`);
+    const response = await $galantisApi.get(`/event/${eventId.value}/datetimes`);
 
     if (response.data) {
       form.setValues({
@@ -160,7 +160,7 @@ const saveSession = async (_sessionData: any) => {
 
     if (isNewSession) {
       // Create new session - POST to /datetimes (note the plural)
-      const response = await $galantisApi.post(`/event/${eventId}/datetimes`, sessionData);
+      const response = await $galantisApi.post(`/event/${eventId.value}/datetimes`, sessionData);
 
       if (response.data && response.data.id) {
         // Update the session with the real ID from server
@@ -178,7 +178,7 @@ const saveSession = async (_sessionData: any) => {
     }
     else {
       // Update existing session - PUT to /datetime/:id (note the singular)
-      await $galantisApi.put(`/event/${eventId}/datetime/${editingSessionId.value}`, sessionData);
+      await $galantisApi.put(`/event/${eventId.value}/datetime/${editingSessionId.value}`, sessionData);
       toast.success('Session updated successfully');
     }
 
@@ -207,7 +207,7 @@ const canEdit = (session: any) => {
 
 const deleteSession = async (sessionId: string, index: number) => {
   try {
-    await $galantisApi.delete(`/event/${eventId}/datetime/${sessionId}`);
+    await $galantisApi.delete(`/event/${eventId.value}/datetime/${sessionId}`);
     remove(index);
     toast.success('Session deleted successfully');
     await loadSessions();

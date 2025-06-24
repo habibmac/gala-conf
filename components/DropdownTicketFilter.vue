@@ -26,13 +26,12 @@ const isMobile = computed(() => !breakpoints.md.value);
 // Sheet state for mobile
 const isSheetOpen = ref(false);
 
-const router = useRouter();
+const route = useRoute();
 
-const eventId = ref<string>(
-  Array.isArray(router.currentRoute.value.params.eventId)
-    ? router.currentRoute.value.params.eventId[0]
-    : router.currentRoute.value.params.eventId || '',
-);
+const eventId = computed(() => {
+  const param = route.params.eventId;
+  return Array.isArray(param) ? param[0] : param || '';
+});
 
 const selectedTickets = ref<string[]>(props.modelValue);
 

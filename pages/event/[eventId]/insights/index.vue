@@ -22,9 +22,8 @@ definePageMeta({
   title: 'Insights',
 });
 
-const { event, isLoading: isEventLoading } = useEvent();
-
-const eventId = computed(() => event.value?.id);
+const route = useRoute();
+const eventId = computed(() => route.params.eventId as string || '');
 
 const getInsights = async (eventId: Ref<string>, signal: AbortSignal) => {
   const { $galantisApi } = useNuxtApp();
@@ -56,7 +55,7 @@ const {
 
     <section>
       <div>
-        <div v-if="isEventLoading || isDataLoading || isRefetching" class="grid grid-cols-12 gap-4">
+        <div v-if="isDataLoading || isRefetching" class="grid grid-cols-12 gap-4">
           <Skeleton v-for="i in 2" :key="i" class="col-span-12 h-28 rounded-xl bg-muted-foreground/10 md:col-span-6" />
         </div>
         <template v-else-if="data">

@@ -62,7 +62,7 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 
-const eventId = ref(route.params.eventId as string) || ref('');
+const eventId = computed(() => route.params.eventId as string || '');
 
 // Pagination configs
 const INITIAL_PAGE_SIZE = 10;

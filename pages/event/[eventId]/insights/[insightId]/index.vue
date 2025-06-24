@@ -51,8 +51,8 @@ const { group, order, page, perPage, search, sortBy } = toRefs(props);
 const route = useRoute();
 const router = useRouter();
 
-const eventId = ref(route.params.eventId as string);
-const insightId = route.params.insightId as string;
+const eventId = computed(() => route.params.eventId as string || '');
+const insightId = computed(() => route.params.insightId as string || '');
 
 const endpoint = 'insights';
 
@@ -85,7 +85,7 @@ const sorting = ref<SortingState>([
 ]);
 
 const { insightData, isDataLoading, isMetaLoading, regData, ticketGroups, totalData, totalPages }
-  = useInsight(eventId, insightId, pagination, sorting, filters);
+  = useInsight(eventId, insightId.value, pagination, sorting, filters);
 
 // Table configuration
 const columnConfigs = computed<ColumnConfig[]>(() => {

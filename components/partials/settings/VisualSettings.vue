@@ -36,7 +36,7 @@ const emit = defineEmits<{
 const { $galantisApi } = useNuxtApp();
 const route = useRoute();
 const { refetch } = useEvent();
-const eventId = route.params.eventId as string;
+const eventId = computed(() => route.params.eventId as string || '');
 
 // Visual settings form data
 const visualSettings = ref<VisualSettings>({
@@ -65,12 +65,12 @@ const layoutOptions = [
 
 // Load visual settings
 const loadVisualSettings = async () => {
-  if (!eventId)
+  if (!eventId.value)
     return;
 
   try {
     isLoadingVisual.value = true;
-    const response = await $galantisApi.get(`/event/${eventId}/visual`);
+    const response = await $galantisApi.get(`/event/${eventId.value}/visual`);
 
     if (response.data) {
       visualSettings.value = {
@@ -108,7 +108,7 @@ const handleLogoUpload = async (event: Event) => {
   try {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await $galantisApi.post(`/event/${eventId}/upload-logo`, formData, {
+    const response = await $galantisApi.post(`/event/${eventId.value}/upload-logo`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
@@ -139,7 +139,7 @@ const removeLogo = async () => {
 
 const confirmRemoveLogo = async () => {
   try {
-    const response = await $galantisApi.delete(`/event/${eventId}/logo`);
+    const response = await $galantisApi.delete(`/event/${eventId.value}/logo`);
     if (response.data?.success) {
       visualSettings.value.logo = '';
       toast.success('Logo removed successfully');
@@ -183,7 +183,7 @@ const handleBgImageUpload = async (event: Event) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await $galantisApi.post(`/event/${eventId}/upload-cover`, formData, {
+    const response = await $galantisApi.post(`/event/${eventId.value}/upload-cover`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
@@ -219,7 +219,7 @@ const handleGalleryUpload = async (event: Event) => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await $galantisApi.post(`/event/${eventId}/upload-gallery`, formData, {
+      const response = await $galantisApi.post(`/event/${eventId.value}/upload-gallery`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -254,7 +254,7 @@ const handleGalleryUpload = async (event: Event) => {
 // Remove gallery image
 const removeGalleryImage = async (imageId: string) => {
   try {
-    await $galantisApi.delete(`/event/${eventId}/gallery/${imageId}`);
+    await $galantisApi.delete(`/event/${eventId.value}/gallery/${imageId}`);
 
     if (visualSettings.value.event_gallery) {
       delete visualSettings.value.event_gallery[imageId];

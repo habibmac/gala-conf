@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatDate } from '@/utils';
 
 const route = useRoute();
-const eventId = ref(route.params.eventId as string);
+const eventId = computed(() => route.params.eventId as string || '');
 
 const getRecentRegistrations = async (evtId: Ref<string>) => {
   const { $galantisApi } = useNuxtApp();

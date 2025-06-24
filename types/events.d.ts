@@ -1,3 +1,11 @@
+export interface Event {
+  id: string
+  title: string
+  logo: string
+  package: string
+  capabilities?: string[]
+}
+
 export interface EvtRequestParams {
   search?: Ref<string>
   evtStatus?: Ref<string>

@@ -19,14 +19,14 @@ definePageMeta({
 });
 
 const route = useRoute();
-const eventId = route.params.eventId as string;
+const eventId = computed(() => route.params.eventId as string || '');
 
 const { event: eventData, isLoading } = useEvent();
 
 const handleSave = async (formData: any) => {
   try {
     const { $galantisApi } = useNuxtApp();
-    await $galantisApi.put(`/event/${eventId}/visual`, formData);
+    await $galantisApi.put(`/event/${eventId.value}/visual`, formData);
     toast.success('Visual settings saved successfully');
   }
   catch (error) {

@@ -28,7 +28,9 @@ definePageMeta({
   title: 'Dashboard',
 });
 
-const { eventId } = useEvent();
+const route = useRoute();
+const eventId = computed(() => route.params.eventId as string || '');
+
 const { hasEventEnded, hasSeating } = useEventStatus();
 
 const triggerConfetti = () => {

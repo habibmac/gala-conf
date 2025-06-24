@@ -9,7 +9,7 @@ import { useAgenda } from '@/composables/useAgenda';
 import { formatDate } from '@/utils';
 
 const route = useRoute();
-const eventId = ref(route.params.eventId as string);
+const eventId = computed(() => route.params.eventId as string || '');
 
 // Only get upcoming items for this simple card
 const agendaParams = ref({ only_upcoming: true });

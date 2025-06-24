@@ -64,8 +64,7 @@ const { dateEnd, dateStart, order, page, perPage, search, sortBy, status, ticket
 const route = useRoute();
 const router = useRouter();
 
-const { event } = useEvent();
-const eventId = ref(route.params.eventId as string || event.value?.id || '');
+const eventId = computed(() => route.params.eventId as string || '');
 
 const endpoint = 'registrations';
 

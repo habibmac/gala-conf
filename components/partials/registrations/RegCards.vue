@@ -11,7 +11,7 @@ defineProps<{
 }>();
 
 const route = useRoute();
-const eventId = ref(route.params.eventId as string) || ref('');
+const eventId = computed(() => route.params.eventId as string || '');
 
 // Use queryClient to fetch data
 const getEventSummary = async (evtId: Ref) => {
@@ -21,7 +21,7 @@ const getEventSummary = async (evtId: Ref) => {
 };
 
 const { data, isError, isLoading, isRefetching, refetch } = useQuery({
-  enabled: !!eventId,
+  enabled: !!eventId.value,
   queryFn: () => getEventSummary(eventId),
   queryKey: ['eventSummary', eventId],
 });

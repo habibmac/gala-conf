@@ -21,8 +21,7 @@ definePageMeta({
 
 const route = useRoute();
 
-const { event } = useEvent();
-const eventId = computed(() => event.value?.id);
+const eventId = computed(() => route.params.eventId as string || '');
 const insightId = route.params.insightId as string;
 
 const { insightData } = useInsight(eventId, insightId);

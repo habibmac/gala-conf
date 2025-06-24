@@ -13,13 +13,14 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 
 const router = useRouter();
+const authStore = useAuthStore();
+
 const selectedEventId = ref<string | null>(null);
 const search = ref<string>(''); // Provide a default value for search
 const isDropdownOpen = ref(false);
 
 // Fetch events
-const { error, event, isError, isLoading } = useEvent();
-const { events, isRefetching, maxPage, nextPage, page, prevPage, refetch } = useEvents({
+const { events, isLoading, error, isError, isRefetching, maxPage, nextPage, page, prevPage, refetch } = useEvents({
   search,
 });
 
@@ -30,7 +31,7 @@ const handleselectEvent = (newEventId: string) => {
 };
 
 const isSelected = (eventId: string) => {
-  return event?.value.id === eventId;
+  return authStore.selectedEvent?.id === eventId;
 };
 
 // Handle search with debounce
@@ -89,22 +90,22 @@ onUnmounted(() => {
           <ListboxButton
             class="relative flex h-11 w-full cursor-default items-center space-x-2 rounded-lg border bg-white text-left text-sm text-slate-900 transition-colors duration-200 hover:border-blue-600 group-focus-within:bg-white dark:border-slate-800 dark:bg-transparent dark:text-slate-300 dark:hover:border-blue-600 dark:focus:bg-slate-800 dark:focus:ring-offset-slate-800 dark:group-focus-within:border-slate-700 dark:group-focus-within:bg-slate-700/40 2xl:text-sm"
           >
-            <div v-if="isLoading" class="flex w-full justify-center px-5">
-              <SpinnerDots class="size-8 text-blue-700" />
+            <div v-if="!authStore.selectedEvent" class="flex w-full justify-center px-5 text-xs">
+              No event selected
             </div>
-            <div v-else-if="isError" class="flex w-auto justify-center px-5 text-xs">
-              ⚠️ Cannot fetch events, please try again later.
-            </div>
-            <div v-else-if="event" class="flex w-full items-center justify-between space-x-1 pl-4 pr-10 md:pl-2">
+            <div
+              v-else
+              class="flex w-full items-center justify-between space-x-1 pl-4 pr-10 md:pl-2"
+            >
               <div class="flex items-center space-x-2 sm:space-x-3">
-                <EventCover class="size-6" :src="event.logo" :title="event.title" />
+                <EventCover class="size-6" :src="authStore.selectedEvent?.logo" :title="authStore.selectedEvent?.title" />
                 <div class="hidden w-px items-center font-medium leading-tight sm:flex sm:w-auto">
-                  <span class="line-clamp-2">{{ event.title }}</span>
+                  <span class="line-clamp-2">{{ authStore.selectedEvent?.title }}</span>
                 </div>
               </div>
               <div class="shrink-0">
-                <Badge :class="`event-package ${event.package}`">
-                  {{ event.package }}
+                <Badge :class="`event-package ${authStore.selectedEvent?.package}`">
+                  {{ authStore.selectedEvent?.package }}
                 </Badge>
               </div>
               <div class="pointer-events-none absolute inset-y-0 right-0 flex shrink-0 items-center pr-2">
