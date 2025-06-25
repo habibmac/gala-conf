@@ -509,17 +509,17 @@ watch(
 
   <div class="container mx-auto mt-8">
     <Tabs default-value="data" class="space-y-6">
-      <TabsList class="grid h-14 max-w-lg grid-cols-2 bg-muted-foreground/10">
+      <TabsList class="grid max-w-lg grid-cols-2 bg-muted-foreground/10 md:h-14">
         <TabsTrigger
           value="data"
-          class="flex h-10 items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          class="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-card-foreground md:h-10"
         >
           <Icon icon="heroicons:user" class="size-4" />
           Data
         </TabsTrigger>
         <TabsTrigger
           value="stats"
-          class="flex h-10 items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          class="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-card-foreground md:h-10"
         >
           <Icon icon="heroicons:information-circle" class="size-4" />
           Stats
@@ -591,7 +591,7 @@ watch(
                     {{ totalData }} record{{ totalData !== 1 ? 's' : '' }}
                   </span>
                   <span v-else class="text-xs text-slate-500 dark:text-slate-400">
-                    (Loading...)
+                    Loading...
                   </span>
                 </div>
               </CardTitle>

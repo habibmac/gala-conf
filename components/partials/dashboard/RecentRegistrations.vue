@@ -59,7 +59,7 @@ const recentRegs = computed(() => {
       <div v-else-if="recentRegs.length === 0" class="py-4 text-center text-sm text-muted-foreground">
         No registrations yet
       </div>
-      <div v-else class="space-y-3">
+      <div v-else class="scroll-area space-y-3 overflow-x-auto">
         <table class="w-full text-left text-sm">
           <thead>
             <tr class="border-b border-slate-200 text-xs uppercase dark:border-slate-700">
@@ -94,7 +94,12 @@ const recentRegs = computed(() => {
               <td class="px-4 py-2">
                 <div>{{ reg.fullname }}</div>
                 <NuxtLink :to="`/event/${eventId}/registrations/${reg.id}`">
-                  <RegCode :code="reg.code" :status-id="reg.stt_id" size="xs" />
+                  <RegCode
+                    :code="reg.code"
+                    :status-id="reg.stt_id"
+                    size="xs"
+                    class="whitespace-nowrap"
+                  />
                 </NuxtLink>
               </td>
               <td class="px-4 py-2">

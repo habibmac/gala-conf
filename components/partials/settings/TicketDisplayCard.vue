@@ -64,7 +64,7 @@ const regStatusEntries = computed(() => {
     :class="[
       ticketStatusConfig.borderColor]"
   >
-    <CardContent class=" p-4">
+    <CardContent class="relative p-4 pl-6">
       <div class="flex items-start justify-between">
         <!-- Drag Handle, only on hover -->
         <div
@@ -73,7 +73,7 @@ const regStatusEntries = computed(() => {
           <Button
             variant="ghost"
             size="icon"
-            class="drag-handle cursor-grab hover:cursor-grabbing"
+            class="drag-handle absolute left-1 top-2 cursor-grab hover:cursor-grabbing hover:bg-transparent"
             :disabled="isUpdatingOrder"
             alt="Drag to reorder ticket"
           >

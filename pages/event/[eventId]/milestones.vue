@@ -162,13 +162,11 @@ const getStatusColor = (status: string) => {
       </div>
 
       <!-- Filter Controls -->
-      <div class="flex items-center space-x-4">
-        <div class="flex items-center space-x-2">
-          <Switch id="upcoming-filter" v-model:checked="onlyUpcoming" class="scale-75" />
-          <label for="upcoming-filter" class="cursor-pointer text-sm text-muted-foreground">
-            Show upcoming only
-          </label>
-        </div>
+      <div class="flex items-center space-x-2">
+        <Switch id="upcoming-filter" v-model:checked="onlyUpcoming" class="sm:scale-75" />
+        <label for="upcoming-filter" class="cursor-pointer text-sm text-muted-foreground">
+          Show upcoming only
+        </label>
       </div>
     </header>
 
@@ -310,7 +308,7 @@ const getStatusColor = (status: string) => {
       <!-- Milestone Timeline -->
       <Card class="relative overflow-hidden">
         <CardHeader>
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center space-x-3">
               <Icon icon="solar:calendar-search-bold-duotone" class="size-7 text-indigo-500" />
               <div>

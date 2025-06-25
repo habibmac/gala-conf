@@ -84,7 +84,7 @@ useHead({
             @click="goBack"
           >
             <Icon icon="heroicons:arrow-left" class="mr-2 size-4" />
-            Back to Registrations
+            Go Back
           </Button>
           <div class="mx-auto max-w-[400px]">
             <template v-if="isLoading">
@@ -134,23 +134,23 @@ useHead({
             <Tabs default-value="overview" class="space-y-6">
               <TabsList class="grid w-full grid-cols-4 bg-muted-foreground/10">
                 <TabsTrigger value="overview" class="flex items-center gap-2">
-                  <Icon icon="heroicons:user" class="size-4" />
-                  Overview
+                  <Icon icon="tabler:user" class="size-4" />
+                  <span class="hidden sm:block">Overview</span>
                 </TabsTrigger>
                 <TabsTrigger value="details" class="flex items-center gap-2">
-                  <Icon icon="heroicons:information-circle" class="size-4" />
-                  Details
-                  <Badge v-if="tabCounts.answers" variant="secondary" class="ml-1">
+                  <Icon icon="tabler:info-circle" class="size-4" />
+                  <span class="hidden sm:block">Details</span>
+                  <Badge v-if="tabCounts.answers" variant="secondary" class="ml-1 hidden sm:inline">
                     {{ tabCounts.answers }}
                   </Badge>
                 </TabsTrigger>
                 <TabsTrigger value="transaction" class="flex items-center gap-2">
-                  <Icon icon="heroicons:credit-card" class="size-4" />
-                  Transaction
+                  <Icon icon="tabler:credit-card" class="size-4" />
+                  <span class="hidden sm:block">Transaction</span>
                 </TabsTrigger>
                 <TabsTrigger value="payments" class="flex items-center gap-2">
-                  <Icon icon="heroicons:banknotes" class="size-4" />
-                  Payments
+                  <Icon icon="tabler:wallet" class="size-4" />
+                  <span class="hidden sm:block">Payments</span>
                   <Badge v-if="tabCounts.payments" variant="secondary" class="ml-1">
                     {{ tabCounts.payments }}
                   </Badge>

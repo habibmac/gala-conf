@@ -9,7 +9,6 @@ import RegCode from '~/components/statuses/RegCode.vue';
 const route = useRoute();
 const eventId = computed(() => route.params.eventId as string || '');
 
-const { hasEventEnded } = useEventStatus();
 const { $galantisApi } = useNuxtApp();
 
 const getRecentCheckins = async () => {
@@ -20,7 +19,6 @@ const getRecentCheckins = async () => {
 const { data: recentCheckins, isLoading } = useQuery<CheckinItem[]>({
   queryFn: getRecentCheckins,
   queryKey: ['recent-checkins', eventId],
-  refetchInterval: hasEventEnded.value ? false : 30000,
 });
 
 const getRegDetailsUrl = (regId: string) => {
