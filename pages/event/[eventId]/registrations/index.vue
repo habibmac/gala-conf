@@ -609,9 +609,13 @@ watch(
     <div class="container py-4">
       <div class="flex flex-col flex-wrap gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex flex-col space-y-2 sm:grid sm:grid-flow-col sm:gap-2 sm:space-y-0">
-          <TableSearchForm v-model="filters.search" placeholder="Search Registrant..." />
-          <DropdownTicketFilter v-model="filters.ticket_name" />
-          <DropdownStatusFilter v-model="filters.status" />
+          <TableSearchForm
+            v-model="filters.search"
+            placeholder="Search Registrant..."
+            @update:model-value="pagination.pageIndex = 0"
+          />
+          <DropdownTicketFilter v-model="filters.ticket_name" @update:model-value="pagination.pageIndex = 0" />
+          <DropdownStatusFilter v-model="filters.status" @update:model-value="pagination.pageIndex = 0" />
 
           <TableResetBtn v-if="isAnyFilterActive" @click.prevent="handleResetFilters" />
         </div>
@@ -745,9 +749,9 @@ watch(
               <tr v-else>
                 <td colspan="10" class="py-10 text-center">
                   <EmptyState
-                    title="No data found"
-                    description="There are no registrations matching your criteria."
-                    :img="{ src: '/images/empty-state/empty-c.svg' }"
+                    icon="solar:sleeping-square-bold-duotone"
+                    title="No results found"
+                    description="Try adjusting your search criteria"
                     :cta="{
                       label: 'Retry',
                       action: () => {

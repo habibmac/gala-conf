@@ -437,7 +437,7 @@ watch(
                     <EmptyState
                       title="No data found"
                       description="There are no data matching your criteria."
-                      :img="{ src: '/images/empty-state/empty-c.svg', alt: 'No data found', class: 'w-20' }"
+                      icon="solar:sleeping-square-bold-duotone"
                       :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
                     />
                   </td>

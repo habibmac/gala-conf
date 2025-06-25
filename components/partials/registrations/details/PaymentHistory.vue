@@ -29,13 +29,12 @@ const isExpanded = ref(true);
       </CardTitle>
     </CardHeader>
     <CardContent>
-      <div v-if="!registration.pmt.length" class="text-center text-sm text-muted-foreground">
-        <EmptyState
-          icon="solar:wallet-money-bold-duotone"
-          title="No Payments Found"
-          description="This registration has no payment history."
-        />
-      </div>
+      <EmptyStateSimple
+        v-if="!registration.pmt.length"
+        icon="solar:wallet-money-bold-duotone"
+        title="No Payments Found"
+        description="This registration has no payment history."
+      />
       <div class="space-y-4">
         <div v-for="(payment, index) in registration.pmt" :key="index" class="rounded-lg border p-4">
           <div class="mb-3 flex items-center justify-between">

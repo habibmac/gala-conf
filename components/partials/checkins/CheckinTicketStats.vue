@@ -219,29 +219,12 @@ const getBadgeVariant = (percentage: number) => {
       </div>
 
       <!-- Empty State -->
-      <div v-else class="rounded-lg border border-dashed border-gray-300 p-12 text-center dark:border-gray-700">
-        <div class="mx-auto flex size-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-          <Icon icon="heroicons:ticket" class="size-8 text-gray-400" />
-        </div>
-        <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
-          No ticket data
-        </h3>
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          Ticket statistics will appear here when tickets are configured for this event.
-        </p>
-        <div class="mt-4">
-          <div class="rounded-md bg-blue-50 p-4 dark:bg-blue-950/20">
-            <div class="flex">
-              <Icon icon="heroicons:information-circle" class="size-5 text-blue-400" />
-              <div class="ml-3">
-                <p class="text-sm text-blue-700 dark:text-blue-300">
-                  Create tickets for your event to see detailed check-in statistics by ticket type.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <EmptyStateSimple
+        v-else
+        icon="solar:ticket-bold-duotone"
+        title="No Ticket Data"
+        description="No check-in data available for this event. Please ensure tickets have been checked in."
+      />
     </CardContent>
   </Card>
 </template>

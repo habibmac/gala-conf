@@ -3,11 +3,13 @@ import { Icon } from '@iconify/vue';
 
 import { cn } from '~/lib/utils';
 
+import IllustCircle from './svg/IllustCircleSvg.vue';
+
 interface Image {
-  src: string // required
-  alt?: string // required
-  class?: string // optional
-  loading?: 'lazy' | 'eager' // optional
+  src: string | object
+  alt?: string
+  class?: string
+  loading?: 'lazy' | 'eager'
 }
 
 interface CtaButton {
@@ -23,6 +25,7 @@ interface Props {
   description?: string
   cta?: CtaButton
   cta2?: CtaButton
+  icon?: string // Add this
   iconClass?: string
   img?: Image
 }
@@ -38,7 +41,7 @@ const props = withDefaults(defineProps<Props>(), {
   iconClass: '',
   img: () => ({
     alt: 'No data found',
-    src: '/images/empty-state/no-data.svg',
+    src: IllustCircle,
   }),
   title: 'No data found',
 });
@@ -64,7 +67,19 @@ const hasActions = computed(() => Boolean(props.cta?.label || props.cta2?.label)
     <div class="px-4 text-center">
       <!-- Icon Section -->
       <div class="mb-4 inline-flex">
+        <!-- Render icon if provided -->
+        <div v-if="props.icon" class="mx-auto flex size-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+          <Icon :icon="props.icon" :class="cn('text-slate-400 dark:text-muted-foreground size-8', props.iconClass)" />
+        </div>
+        <!-- Render Vue component if src is an object/component -->
+        <component
+          :is="props.img.src"
+          v-else-if="typeof props.img.src === 'object'"
+          :class="cn('pointer-events-none select-none w-32', props.img.class)"
+        />
+        <!-- Render NuxtImg if src is a string -->
         <NuxtImg
+          v-else
           :src="props.img.src"
           :alt="props.img.alt"
           :class="cn('pointer-events-none select-none w-32', props.img.class)"
@@ -72,7 +87,7 @@ const hasActions = computed(() => Boolean(props.cta?.label || props.cta2?.label)
       </div>
 
       <!-- Content Section -->
-      <h2 class="mb-2 text-xl font-bold">
+      <h2 class="h4 mb-2 ">
         {{ title }}
       </h2>
       <p v-if="description" class="mb-5 text-sm text-muted-foreground">

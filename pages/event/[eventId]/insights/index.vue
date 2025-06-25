@@ -4,6 +4,7 @@ import { formatTimeAgo } from '@vueuse/core';
 
 import { Separator } from '@/components/ui/separator';
 import { getInitials } from '@/utils';
+import IllustSvg from '~/components/svg/IllustSvg.vue';
 
 useHead({
   title: 'Insights',
@@ -46,7 +47,7 @@ const {
 </script>
 
 <template>
-  <div class="container mx-auto 2xl:mx-0">
+  <div class="container mx-auto">
     <header class="pt-10">
       <h1 class="h2 mb-5">
         Insights
@@ -133,13 +134,12 @@ const {
               title="No Insights Found"
               description="Create your first insight to get started."
               :img="{
-                src: '/images/empty-state/no-insight.svg',
+                src: IllustSvg,
                 alt: 'No Insights Found',
-                class: 'w-28',
+                class: 'w-32',
               }"
               :cta="{
                 label: 'Create Insight',
-                to: `/event/${eventId}/insights/create`,
                 icon: 'heroicons-outline:plus',
               }"
               :cta2="{ label: 'Refresh', action: refetch }"

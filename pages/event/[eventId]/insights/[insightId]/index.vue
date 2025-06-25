@@ -651,7 +651,7 @@ watch(
                   <EmptyState
                     title="No data found"
                     description="There are no registrations matching your criteria."
-                    :img="{ src: '/images/empty-state/empty-c.svg' }"
+                    icon="solar:sleeping-square-bold-duotone"
                     :cta="{ label: 'Clear Filters', action: handleResetFilters, icon: 'heroicons:arrow-path-solid' }"
                   />
                 </td>
