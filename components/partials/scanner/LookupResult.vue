@@ -169,8 +169,13 @@ watch(() => props.lookupResult, () => {
           />
           Registration Found
         </div>
-        <Button variant="ghost" size="sm" @click="handleClose">
-          <Icon icon="heroicons:x-mark" class="size-4" />
+        <Button
+          variant="ghost"
+          size="icon"
+          class="hover:bg-blue-100 dark:hover:bg-blue-800"
+          @click="handleClose"
+        >
+          <Icon icon="tabler:x" class="size-4" />
         </Button>
       </CardTitle>
     </CardHeader>

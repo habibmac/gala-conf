@@ -27,7 +27,7 @@ const datetimesRef = ref<EvtDatetime[] | null>(props.datetimes);
       @update:model-value="$emit('update:selectedDatetime', $event)"
     >
       <SelectTrigger class="h-14 bg-card dark:bg-background md:h-12">
-        <SelectValue placeholder="Select a session" />
+        <SelectValue placeholder="Please select a session to start" />
       </SelectTrigger>
       <SelectContent align="end">
         <SelectItem

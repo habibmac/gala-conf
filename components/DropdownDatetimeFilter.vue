@@ -48,7 +48,7 @@ const handleDatetimeChange = (value: string) => {
 <template>
   <div class="flex items-center gap-2">
     <Select :model-value="selectedDatetime || 'all'" :disabled="isLoading" @update:model-value="handleDatetimeChange">
-      <SelectTrigger class="bg-card">
+      <SelectTrigger class="h-10 bg-card">
         <SelectValue>
           <span v-if="isLoading">Loading...</span>
           <div v-else class="flex items-center gap-2">

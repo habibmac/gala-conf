@@ -834,7 +834,6 @@ useHead({
           <ScannerStats
             v-if="selectedDatetime"
             :selected-datetime="selectedDatetime"
-            :scanner-settings="scannerSettings"
             :successful-scans="successfulScans"
             :failed-scans="failedScans"
           />
