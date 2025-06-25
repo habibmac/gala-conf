@@ -44,7 +44,8 @@ const {
   queryKey: ['checkin-stats', props.eventId, computed(() => props.datetimeFilter)],
   queryFn: () => getStats(props.eventId, props.datetimeFilter),
   enabled: computed(() => !!props.eventId),
-  staleTime: 1000 * 60 * 2, // 2 minutes
+  staleTime: 1000 * 60 * 1, // 1 minutes
+  refetchOnWindowFocus: true,
 });
 
 // Helper function for safe percentage calculation

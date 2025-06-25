@@ -132,6 +132,8 @@ const dateRange = computed(() => {
 const handleDatetimeChange = (datetimeId: string) => {
   setSelectedDatetime(datetimeId); // This automatically updates filters.datetime
 
+  pagination.value.pageIndex = 0; // Reset pagination
+
   // Update URL
   const query = { ...route.query, datetime: datetimeId || undefined };
   if (!datetimeId) {
@@ -505,144 +507,182 @@ watch(
     </div>
   </div>
 
-  <section>
-    <div class="container mx-auto">
-      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <!-- Enhanced Ticket Stats -->
-        <CheckinTicketStats :event-id="eventId" :datetime-filter="selectedDatetime" />
-        <!-- Custom Field Stats -->
-        <CheckinCustomStats :event-id="eventId" :datetime-filter="selectedDatetime" />
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="container mx-auto py-4">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex flex-col space-y-2 sm:grid sm:grid-flow-col sm:gap-2 sm:space-y-0">
-          <!-- Updated to use searchFilter ref -->
-          <TableSearchForm v-model="searchFilter" placeholder="Search by name, reg code, or ticket..." />
-          <Datepicker
-            :date-range="dateRange"
-            :enable-time-picker="true"
-            format="d MMM yyyy HH:mm"
-            @update:date-range="handleSetDateRange"
-          />
-          <TableResetBtn v-if="isAnyFilterActive" @reset-filters="handleResetFilters" />
-        </div>
-        <div>
-          <!-- Export Dropdown -->
-          <DropdownMenu v-if="!isDataLoading">
-            <DropdownMenuTrigger as-child>
-              <Button variant="outline" class="h-[42px] bg-card dark:bg-background" :disabled="isExporting">
-                <Icon
-                  :icon="isExporting ? 'svg-spinners:ring-resize' : 'heroicons:arrow-down-tray'"
-                  class="mr-2 size-4 text-muted-foreground"
-                />
-                {{ isExporting ? 'Exporting...' : 'Export' }}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="center">
-              <DropdownMenuItem :disabled="isExporting" @click="handleExport('csv')">
-                <Icon icon="ph:file-csv" class="mr-2 size-4 text-muted-foreground" />
-                Export to CSV
-              </DropdownMenuItem>
-              <DropdownMenuItem :disabled="isExporting" @click="handleExport('xlsx')">
-                <Icon icon="ph:file-xls" class="mr-2 size-4 text-muted-foreground" />
-                Export to XLSX
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Table section -->
-  <section class="container relative mx-auto mb-20" :class="{ 'scroll-area overflow-auto': !isDataLoading }">
-    <Card>
-      <CardHeader class="flex justify-between">
-        <CardTitle class="text-sm font-medium tracking-normal">
-          Check-in Records
-          <span v-if="selectedDatetimeInfo" class="text-muted-foreground">
-            - {{ selectedDatetimeInfo.name }}
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent class="overflow-x-auto p-0">
-        <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs), totalData)}px` }">
-          <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
-            <thead
-              class="border-y border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
-            >
-              <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-                <th
-                  v-for="header in headerGroup.headers"
-                  :key="header.id"
-                  :colSpan="header.colSpan"
-                  :style="{ width: `${header.column.columnDef.size}px` }"
-                  class="whitespace-nowrap px-2 py-3 text-xs text-slate-500 first:pl-5 last:pr-5 dark:text-slate-400"
-                >
-                  <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200 text-sm dark:divide-slate-800">
-              <template v-if="!table.getRowModel().rows.length">
-                <template v-if="isDataLoading">
-                  <tr v-for="index in 3" :key="index">
-                    <td v-for="(column, index2) in columns" :key="index2" class="p-2">
-                      <Skeleton class="h-6 w-full rounded" />
-                    </td>
-                  </tr>
-                </template>
-                <tr v-else>
-                  <td :colspan="columns.length" class="py-10 text-center">
-                    <EmptyState
-                      title="No check-ins found"
-                      description="There are no check-ins matching your criteria."
-                      :img="{
-                        src: '/images/empty-state/empty-c.svg',
-                        alt: 'No check-ins found',
-                        class: 'w-20',
-                      }"
-                      :cta="{
-                        label: 'Clear Filters',
-                        action: handleResetFilters,
-                        icon: 'heroicons:arrow-path-solid',
-                      }"
+  <div class="container mx-auto mt-8">
+    <Tabs default-value="data" class="space-y-6">
+      <TabsList class="grid h-14 max-w-lg grid-cols-2 bg-muted-foreground/10">
+        <TabsTrigger
+          value="data"
+          class="flex h-10 items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+        >
+          <Icon icon="heroicons:user" class="size-4" />
+          Data
+        </TabsTrigger>
+        <TabsTrigger
+          value="stats"
+          class="flex h-10 items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+        >
+          <Icon icon="heroicons:information-circle" class="size-4" />
+          Stats
+        </TabsTrigger>
+      </TabsList>
+      <!-- Data Tab -->
+      <TabsContent value="data" class="space-y-6">
+        <section>
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div class="flex flex-col space-y-2 sm:grid sm:grid-flow-col sm:gap-2 sm:space-y-0">
+              <!-- Updated to use searchFilter ref -->
+              <TableSearchForm
+                v-model="searchFilter"
+                placeholder="Search by name, reg code, or ticket..."
+                @update:model-value="pagination.pageIndex = 0"
+              />
+              <Datepicker
+                :date-range="dateRange"
+                :enable-time-picker="true"
+                format="d MMM yyyy HH:mm"
+                class="w-full sm:min-w-[320px]"
+                @update:date-range="handleSetDateRange"
+                @update:model-value="pagination.pageIndex = 0"
+              />
+              <TableResetBtn v-if="isAnyFilterActive" @reset-filters="handleResetFilters" />
+            </div>
+            <div>
+              <!-- Export Dropdown -->
+              <DropdownMenu v-if="!isDataLoading">
+                <DropdownMenuTrigger as-child>
+                  <Button variant="outline" class="h-[42px] bg-card dark:bg-background" :disabled="isExporting">
+                    <Icon
+                      :icon="isExporting ? 'svg-spinners:ring-resize' : 'heroicons:arrow-down-tray'"
+                      class="mr-2 size-4 text-muted-foreground"
                     />
-                  </td>
-                </tr>
-              </template>
-              <tr
-                v-for="row in table.getRowModel().rows"
-                :key="row.id"
-                class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
-              >
-                <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="px-2 py-3 first:pl-5 last:pr-5">
-                  <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-      <CardFooter v-if="!isDataLoading" class="border-t p-0">
-        <TablePagination
-          v-if="table.getRowModel().rows.length > 0"
-          :current-page="pagination.pageIndex + 1"
-          :page-count="totalPages"
-          :page-sizes="pageSizes"
-          :page-size="pagination.pageSize"
-          :total-data="totalData"
-          active-page-style="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-          @update:page-size="handlePageSizeChange"
-          @update:current-page="handleNavigation"
-        />
-      </CardFooter>
-    </Card>
-  </section>
+                    {{ isExporting ? 'Exporting...' : 'Export' }}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center">
+                  <DropdownMenuItem :disabled="isExporting" @click="handleExport('csv')">
+                    <Icon icon="ph:file-csv" class="mr-2 size-4 text-muted-foreground" />
+                    Export to CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem :disabled="isExporting" @click="handleExport('xlsx')">
+                    <Icon icon="ph:file-xls" class="mr-2 size-4 text-muted-foreground" />
+                    Export to XLSX
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </section>
+        <!-- Table section -->
+        <section class=" relative mb-20" :class="{ 'scroll-area overflow-auto': !isDataLoading }">
+          <Card>
+            <CardHeader class="flex justify-between">
+              <CardTitle class="flex items-center justify-between gap-2 text-sm">
+                <div class="flex items-center gap-2">
+                  <h2 class=" font-medium tracking-normal ">
+                    Check-in Records
+                  </h2>
+                  <span v-if="selectedDatetimeInfo" class="text-muted-foreground">
+                    - {{ selectedDatetimeInfo.name }}
+                  </span>
+                </div>
+                <!-- Total records -->
+                <div>
+                  <span v-if="!isDataLoading" class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ totalData }} record{{ totalData !== 1 ? 's' : '' }}
+                  </span>
+                  <span v-else class="text-xs text-slate-500 dark:text-slate-400">
+                    (Loading...)
+                  </span>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent class="overflow-x-auto p-0">
+              <div :style="{ minWidth: `${calculateMinWidth(toRef(columnConfigs), totalData)}px` }">
+                <table class="w-full bg-white dark:bg-transparent dark:text-slate-300/90">
+                  <thead
+                    class="border-y border-slate-200 bg-slate-100 text-xs uppercase dark:border-slate-900/50 dark:bg-slate-800/50 dark:text-slate-400"
+                  >
+                    <tr v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+                      <th
+                        v-for="header in headerGroup.headers"
+                        :key="header.id"
+                        :colSpan="header.colSpan"
+                        :style="{ width: `${header.column.columnDef.size}px` }"
+                        class="whitespace-nowrap px-2 py-3 text-xs text-slate-500 first:pl-5 last:pr-5 dark:text-slate-400"
+                      >
+                        <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-200 text-sm dark:divide-slate-800">
+                    <template v-if="!table.getRowModel().rows.length">
+                      <template v-if="isDataLoading">
+                        <tr v-for="index in 3" :key="index">
+                          <td v-for="(column, index2) in columns" :key="index2" class="p-2">
+                            <Skeleton class="h-6 w-full rounded" />
+                          </td>
+                        </tr>
+                      </template>
+                      <tr v-else>
+                        <td :colspan="columns.length" class="py-10 text-center">
+                          <EmptyState
+                            title="No check-ins found"
+                            description="There are no check-ins matching your criteria."
+                            icon="solar:sleeping-square-bold-duotone"
+                            :cta="{
+                              label: 'Clear Filters',
+                              action: handleResetFilters,
+                              icon: 'heroicons:arrow-path-solid',
+                            }"
+                          />
+                        </td>
+                      </tr>
+                    </template>
+                    <tr
+                      v-for="row in table.getRowModel().rows"
+                      :key="row.id"
+                      class="hover:bg-slate-50 dark:hover:bg-slate-950/20"
+                    >
+                      <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="px-2 py-3 first:pl-5 last:pr-5">
+                        <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+            <CardFooter v-if="!isDataLoading" class="border-t p-0">
+              <TablePagination
+                v-if="table.getRowModel().rows.length > 0"
+                :current-page="pagination.pageIndex + 1"
+                :page-count="totalPages"
+                :page-sizes="pageSizes"
+                :page-size="pagination.pageSize"
+                :total-data="totalData"
+                active-page-style="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                @update:page-size="handlePageSizeChange"
+                @update:current-page="handleNavigation"
+              />
+            </CardFooter>
+          </Card>
+        </section>
+      </TabsContent>
+      <!-- Details Tab -->
+      <TabsContent value="stats" class="space-y-6">
+        <section>
+          <div class="container mx-auto">
+            <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <!-- Enhanced Ticket Stats -->
+              <CheckinTicketStats :event-id="eventId" :datetime-filter="selectedDatetime" />
+              <!-- Custom Field Stats -->
+              <CheckinCustomStats :event-id="eventId" :datetime-filter="selectedDatetime" />
+            </div>
+          </div>
+        </section>
+      </TabsContent>
+    </Tabs>
+  </div>
+
   <RegPanel
     :reg-details-open="selectedRegId !== ''"
     :evt-id="eventId"
