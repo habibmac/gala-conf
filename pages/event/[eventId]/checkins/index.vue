@@ -494,7 +494,7 @@ watch(
                 <span v-else class="font-bold">all sessions</span>
               </h3>
               <p class="mt-1 text-sm text-blue-600 dark:text-blue-400">
-                {{ formatDate(selectedDatetimeInfo.date_start, 'EEEE, dd MMMM yyyy') }}
+                {{ formatDateRange(selectedDatetimeInfo.date_start, selectedDatetimeInfo.date_end) }}
               </p>
             </div>
           </div>

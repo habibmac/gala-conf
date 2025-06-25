@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
-import { computed } from 'vue';
 
 import {
   Select,
@@ -29,7 +28,7 @@ interface Props {
   allOptionLabel?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   placeholder: 'Select session...',
   showAllOption: true,
   allOptionLabel: 'All Sessions',
@@ -39,17 +38,6 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   'update:selectedDatetime': [value: string]
 }>();
-
-const displayValue = computed(() => {
-  if (!props.selectedDatetime)
-    return props.allOptionLabel;
-
-  const datetime = props.datetimes.find(dt => dt.id === props.selectedDatetime);
-  if (!datetime)
-    return props.allOptionLabel;
-
-  return `${datetime.name} (${formatDate(datetime.date_start, 'dd MMM yyyy HH:mm')} - ${formatDate(datetime.date_end, 'HH:mm')})`;
-});
 
 const handleDatetimeChange = (value: string) => {
   const actualDatetimeId = value === 'all' ? '' : value;
@@ -65,7 +53,22 @@ const handleDatetimeChange = (value: string) => {
           <span v-if="isLoading">Loading...</span>
           <div v-else class="flex items-center gap-2">
             <Icon icon="tabler:calendar" class="size-4 text-muted-foreground" />
-            <span>{{ displayValue }}</span>
+
+            <div v-if="selectedDatetime" class="space-x-1">
+              <span class="font-medium">
+                {{ datetimes.find(dt => dt.id === selectedDatetime)?.name || 'Unknown Session' }}
+              </span>
+
+              <span class="text-xs text-muted-foreground">
+                {{ formatDateRange(
+                  datetimes.find(dt => dt.id === selectedDatetime)?.date_start,
+                  datetimes.find(dt => dt.id === selectedDatetime)?.date_end,
+                ) }}
+              </span>
+            </div>
+            <div v-else class="min-w-[150px]">
+              {{ allOptionLabel }}
+            </div>
           </div>
         </SelectValue>
       </SelectTrigger>
@@ -81,10 +84,10 @@ const handleDatetimeChange = (value: string) => {
             <span class="font-medium">{{ datetime.name }}</span>
             <span class="text-xs text-muted-foreground">
               {{ formatDate(datetime.date_start, 'dd MMM yyyy HH:mm') }} -
-              {{ formatDate(datetime.date_end, 'HH:mm') }}
+              {{ formatDate(datetime.date_end, 'dd MMM yyyy HH:mm') }}
             </span>
             <span v-if="datetime.sold !== undefined" class="text-xs text-muted-foreground">
-              {{ datetime.sold }} registered
+              <span class="font-semibold">{{ datetime.sold }}</span> registered
               <span v-if="datetime.reg_limit && datetime.reg_limit !== Infinity">
                 of {{ datetime.reg_limit }}
               </span>
