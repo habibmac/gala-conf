@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import confetti from 'canvas-confetti';
 
-import CheckinStats from '~/components/partials/checkins/CheckinStats.vue';
 import EventCountdown from '~/components/partials/dashboard/EventCountdown.vue';
 import EventPackage from '~/components/partials/dashboard/EventPackage.vue';
 import EventTimeline from '~/components/partials/dashboard/EventTimeline.vue';
@@ -27,9 +26,6 @@ definePageMeta({
   showInMenu: true,
   title: 'Dashboard',
 });
-
-const route = useRoute();
-const eventId = computed(() => route.params.eventId as string || '');
 
 const { hasEventEnded, hasSeating } = useEventStatus();
 
@@ -73,7 +69,6 @@ onMounted(() => {
             <RecentRegistrations class="sm:col-span-6" />
           </div>
         </div>
-        <CheckinStats :event-id="eventId" />
         <SeatBookings v-if="hasSeating" />
       </ClientOnly>
     </div>

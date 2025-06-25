@@ -19,7 +19,7 @@ export const allRegStatuses: StatusConfig[] = [
     textClass: 'text-emerald-600 dark:text-emerald-300',
     badgeClass: 'border-emerald-500 text-emerald-700 bg-emerald-50 dark:border-emerald-400 dark:text-emerald-300 dark:bg-emerald-950/20',
     pillClass: 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white',
-    dotClass: 'bg-emerald-500 ring-2 ring-emerald-500/20 border border-emerald-500/20 ring-offset-2',
+    dotClass: 'bg-emerald-500',
     badgeVariant: 'outline',
   },
   {
@@ -41,16 +41,6 @@ export const allRegStatuses: StatusConfig[] = [
     pillClass: 'bg-red-600 text-white dark:bg-red-500 dark:text-white',
     dotClass: 'bg-red-500',
     badgeVariant: 'destructive',
-  },
-  {
-    id: 'RAB',
-    label: 'Abandoned',
-    icon: 'heroicons:archive-box-x-mark',
-    textClass: 'text-gray-600 dark:text-gray-300',
-    badgeClass: 'border-gray-500 text-gray-700 bg-gray-50 dark:border-gray-400 dark:text-gray-300 dark:bg-gray-950/20',
-    pillClass: 'bg-gray-600 text-white dark:bg-gray-500 dark:text-white',
-    dotClass: 'bg-gray-500',
-    badgeVariant: 'outline',
   },
   {
     id: 'RIC',

@@ -9,6 +9,7 @@ export * from './city';
 export * from './events';
 export * from './menu';
 export * from './preferences';
+export * from './reg-details';
 export * from './regs';
 export * from './scanner';
 export * from './seat-bookings';

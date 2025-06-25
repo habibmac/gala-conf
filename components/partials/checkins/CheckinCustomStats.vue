@@ -107,7 +107,7 @@ const isNoAnswer = (answer: string) => {
     </div>
 
     <!-- Data Display -->
-    <div v-else-if="customStats && customStats.length > 0" class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <template v-else-if="customStats && customStats.length > 0">
       <div v-for="field, index in customStats" :key="index">
         <Card class="overflow-hidden">
           <CardHeader class="pb-4">
@@ -196,31 +196,6 @@ const isNoAnswer = (answer: string) => {
           </CardContent>
         </Card>
       </div>
-    </div>
-
-    <!-- Empty State -->
-    <div v-else class="rounded-lg border border-dashed border-gray-300 p-12 text-center dark:border-gray-700">
-      <div class="mx-auto flex size-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-        <Icon icon="heroicons:chart-pie" class="size-8 text-gray-400" />
-      </div>
-      <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
-        No custom field data
-      </h3>
-      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-        Custom field statistics will appear here when questions are configured for this event.
-      </p>
-      <div class="mt-4">
-        <div class="rounded-md bg-blue-50 p-4 dark:bg-blue-950/20">
-          <div class="flex">
-            <Icon icon="heroicons:information-circle" class="size-5 text-blue-400" />
-            <div class="ml-3">
-              <p class="text-sm text-blue-700 dark:text-blue-300">
-                Configure custom questions in your event insights to see demographic breakdowns and check-in patterns.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </template>
   </div>
 </template>

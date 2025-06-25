@@ -14,7 +14,7 @@ import { toast } from 'vue-sonner';
 
 import type { CheckinColumnConfig, CheckinData, CheckinItem } from '@/types';
 
-import RegDetails from '@/components/partials/registrations/RegDetails.vue';
+import RegPanel from '@/components/partials/registrations/RegPanel.vue';
 import RegCode from '@/components/statuses/RegCode.vue';
 import { formatDate } from '@/utils';
 import CheckinCustomStats from '~/components/partials/checkins/CheckinCustomStats.vue';
@@ -66,7 +66,7 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 
-const eventId = computed(() => route.params.eventId as string || '');
+const eventId = ref<string>(route.params.eventId as string);
 
 const endpoint = 'checkins';
 
@@ -500,19 +500,19 @@ watch(
           </div>
         </CardContent>
       </Card>
-
       <!-- Pass datetime filter to CheckinStats -->
       <CheckinStats :event-id="eventId" :datetime-filter="selectedDatetime" />
     </div>
   </div>
 
   <section>
-    <div class="container mx-auto mt-5 flex flex-col gap-5">
-      <!-- Enhanced Ticket Stats -->
-      <CheckinTicketStats :event-id="eventId" :datetime-filter="selectedDatetime" />
-
-      <!-- Custom Field Stats -->
-      <CheckinCustomStats :event-id="eventId" :datetime-filter="selectedDatetime" />
+    <div class="container mx-auto">
+      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <!-- Enhanced Ticket Stats -->
+        <CheckinTicketStats :event-id="eventId" :datetime-filter="selectedDatetime" />
+        <!-- Custom Field Stats -->
+        <CheckinCustomStats :event-id="eventId" :datetime-filter="selectedDatetime" />
+      </div>
     </div>
   </section>
 
@@ -643,7 +643,7 @@ watch(
       </CardFooter>
     </Card>
   </section>
-  <RegDetails
+  <RegPanel
     :reg-details-open="selectedRegId !== ''"
     :evt-id="eventId"
     :reg-id="selectedRegId ? selectedRegId : undefined"

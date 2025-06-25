@@ -173,10 +173,7 @@ onUnmounted(async () => {
               {{ data.date ? formatDate(data.date, 'd MMM yyyy HH:mm') : '-' }}
             </div>
             <!-- Details -->
-            <RegDetailsSummary
-              :data="data"
-              class="mt-4"
-            />
+            <RegDetailsSummary :data="data" class="mt-4" />
 
             <!-- Payments -->
             <div class="mt-6">
@@ -222,10 +219,7 @@ onUnmounted(async () => {
                   </div>
                   <!-- Card status -->
                   <div class="col-span-4 text-right">
-                    <StatusBadge
-                      :status-id="data.txn?.stt_id"
-                      variant="pill"
-                    />
+                    <StatusBadge :status-id="data.txn?.stt_id" variant="pill" />
                   </div>
                 </div>
               </div>
@@ -237,18 +231,7 @@ onUnmounted(async () => {
                   target="_blank"
                   class="btn w-full border border-slate-100 bg-white text-sm font-medium text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 shrink-0" viewBox="0 0 24 24">
-                    <path
-                      fill="currentColor"
-                      d="M13.5 9.75a.75.75 0 0 0-.75-.75h-6a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 .75-.75m-1 3a.75.75 0 0 0-.75-.75h-5a.75.75 0 1 0 0 1.5h5a.75.75 0 0 0 .75-.75m.25 2.25a.75.75 0 1 1 0 1.5h-6a.75.75 0 0 1 0-1.5z"
-                    />
-                    <path
-                      fill="currentColor"
-                      fill-rule="evenodd"
-                      d="M6 21.75h13A2.75 2.75 0 0 0 21.75 19v-5.5a.75.75 0 0 0-.75-.75h-3.25V4.943c0-1.423-1.609-2.251-2.767-1.424l-.175.125a2.26 2.26 0 0 1-2.622-.004a3.77 3.77 0 0 0-4.372 0a2.26 2.26 0 0 1-2.622.004l-.175-.125c-1.158-.827-2.767 0-2.767 1.424V18A3.75 3.75 0 0 0 6 21.75M8.686 4.86a2.27 2.27 0 0 1 2.628 0a3.76 3.76 0 0 0 4.366.005l.175-.125a.25.25 0 0 1 .395.203V19c0 .45.108.875.3 1.25H6A2.25 2.25 0 0 1 3.75 18V4.943a.25.25 0 0 1 .395-.203l.175.125a3.76 3.76 0 0 0 4.366-.005M17.75 19v-4.75h2.5V19a1.25 1.25 0 0 1-2.5 0"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
+                  <Icon icon="tabler:receipt" class="size-4 shrink-0" />
                   <span class="ml-2">Invoice</span>
                 </a>
               </div>
@@ -258,16 +241,7 @@ onUnmounted(async () => {
                   target="_blank"
                   class="btn border-emerald-border w-full bg-emerald-400 text-sm font-medium text-white hover:border-slate-300 hover:bg-emerald-500 dark:border-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 shrink-0" viewBox="0 0 24 24">
-                    <path
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="1.5"
-                      d="M19 19a2 2 0 0 0 2-2v-3a2 2 0 1 1 0-4V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3a2 2 0 1 1 0 4v3a2 2 0 0 0 2 2zm-7-7.25v.5M12 8v.5m0 7v.5"
-                    />
-                  </svg>
+                  <Icon icon="tabler:ticket" class="size-4 shrink-0" />
                   <span class="ml-2">Ticket</span>
                 </a>
               </div>
@@ -277,7 +251,7 @@ onUnmounted(async () => {
                   target="_blank"
                   class="btn w-full border border-slate-100 bg-white text-sm font-medium text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                 >
-                  <Icon icon="solar:registration" class="mr-2 size-4" />
+                  <Icon icon="tabler:link" class="size-4 shrink-0" />
                   <span class="ml-2">Reg URL</span>
                 </a>
               </div>
@@ -285,13 +259,12 @@ onUnmounted(async () => {
 
             <!-- Link to registration details page -->
             <div>
-              <NuxtLink
-                :to="`/event/${eventId}/registrations/${regId}`"
-                class="mt-4 flex items-center justify-center rounded-lg border border-sky-200 bg-sky-100 px-4 py-2 text-sm font-medium text-slate-800 hover:bg-sky-200 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-              >
-                <Icon icon="tabler:external-link" class="mr-2 size-4" />
-                <span>View Registration Details</span>
-              </NuxtLink>
+              <Button as-child class="mt-4 w-full">
+                <NuxtLink :to="`/event/${eventId}/registrations/${regId}`">
+                  <Icon icon="solar:clipboard-list-bold-duotone" class="mr-2 size-4" />
+                  View Details
+                </NuxtLink>
+              </Button>
             </div>
 
             <!-- Answers -->

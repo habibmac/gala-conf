@@ -19,7 +19,7 @@ import Datepicker from '@/components/Datepicker.vue';
 import DropdownStatusFilter from '@/components/DropdownStatusFilter.vue';
 import DropdownTicketFilter from '@/components/DropdownTicketFilter.vue';
 import RegCards from '@/components/partials/registrations/RegCards.vue';
-import RegDetails from '@/components/partials/registrations/RegDetails.vue';
+import RegPanel from '@/components/partials/registrations/RegPanel.vue';
 import RegCode from '@/components/statuses/RegCode.vue';
 import StatusBadge from '@/components/statuses/StatusBadge.vue';
 import TablePagination from '@/components/TablePagination.vue';
@@ -793,7 +793,7 @@ watch(
     @update:current-page="handleNavigation"
   />
   <div v-else class="h-40" />
-  <RegDetails
+  <RegPanel
     :reg-details-open="selectedRegId !== ''"
     :evt-id="eventId"
     :reg-id="selectedRegId ? selectedRegId : undefined"
