@@ -133,7 +133,12 @@ onMounted(() => {
     <div class="lg:p-8">
       <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
         <div class="flex flex-col space-y-2 text-center">
-          <h1 class="text-2xl font-semibold tracking-tight">
+          <img
+            src="https://galanesia.com/cdn/logo/galanesia-app-icon.svg"
+            alt="Galanesia Logo"
+            class="mx-auto size-12"
+          >
+          <h1 class="mx-auto max-w-60 text-2xl font-semibold tracking-tight md:max-w-none">
             Event Organizer's Dashboard
           </h1>
           <p class="text-sm text-muted-foreground">
