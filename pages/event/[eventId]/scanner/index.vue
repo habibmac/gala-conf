@@ -45,7 +45,7 @@ const route = useRoute();
 const { $galantisApi } = useNuxtApp();
 
 // Get datetime id from route params
-const selectedDatetime = ref<string>(route.params.datetimeId as string || '');
+const selectedDatetime = ref('');
 
 const isLoading = ref(true);
 const scannerSettings = ref<ScannerSettings | null>(null);
@@ -152,14 +152,6 @@ const loadScannerSettings = async () => {
       scannerSettings.value = scannerData;
 
       if (scannerSettings.value?.datetimes) {
-        const activeDateTime = scannerSettings.value.datetimes.find(dt => dt.is_active);
-        if (activeDateTime) {
-          selectedDatetime.value = activeDateTime.id;
-        }
-        else if (scannerSettings.value.datetimes.length > 0) {
-          selectedDatetime.value = scannerSettings.value.datetimes[0].id;
-        }
-
         // Set supported formats
         supportedFormats.value = scannerSettings.value.supported_formats || [];
       }
@@ -823,208 +815,184 @@ useHead({
     </div>
 
     <!-- Loading State -->
-    <div
-      v-if="isLoading"
-      class="mt-8"
-    >
+    <div v-if="isLoading" class="mt-8">
       <div class="grid grid-cols-12 gap-4">
-        <Skeleton
-          v-for="i in 3"
-          :key="i"
-          class="col-span-12 h-32 rounded-xl  bg-muted-foreground/10 md:col-span-4"
-        />
+        <Skeleton v-for="i in 3" :key="i" class="col-span-12 h-32 rounded-xl  bg-muted-foreground/10 md:col-span-4" />
       </div>
     </div>
 
-    <div
-      v-else-if="scannerSettings"
-      class="mt-8 space-y-6"
-    >
+    <div v-else-if="scannerSettings" class="mt-8 space-y-6">
       <!-- Session Selection -->
-      <ScannerDatetimes
-        v-model:selected-datetime="selectedDatetime"
-        :datetimes="scannerSettings.datetimes"
-      />
-
-      <!-- Scanner Stats -->
-      <ScannerStats
-        v-if="selectedDatetime"
-        :selected-datetime="selectedDatetime"
-        :scanner-settings="scannerSettings"
-        :successful-scans="successfulScans"
-        :failed-scans="failedScans"
-      />
-
-      <!-- Scanner Input -->
-      <ScannerInput
-        v-model:selected-datetime="selectedDatetime"
-        v-model:scanner-mode="scannerMode"
-        v-model:unified-input="unifiedInput"
-        v-model:is-scanner-open="isScannerOpen"
-        :scanner-settings="scannerSettings"
-        :is-processing="isProcessing"
-        :is-searching="isSearching"
-        :can-scan="canScan"
-        :available-modes="availableModes"
-        :mode-config="modeConfig"
-        @unified-action="handleUnifiedAction"
-        @toggle-scanner="toggleScanner"
-      />
-
-      <!-- Mobile Layout (Sheet) -->
-      <Sheet
-        v-if="isMobile && isScannerOpen"
-        v-model:open="isScannerOpen"
+      <ScannerDatetimes v-model:selected-datetime="selectedDatetime" :datetimes="scannerSettings.datetimes" />
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 translate-y-4"
+        enter-to-class="opacity-100 translate-y-0"
       >
-        <SheetContent
-          side="bottom"
-          class=""
-        >
-          <SheetHeader>
-            <SheetTitle>
-              <div class="flex items-center gap-2">
-                <Icon
-                  :icon="modeConfig[scannerMode].icon"
-                  class="size-5"
-                  :style="{ color: modeConfig[scannerMode].color }"
-                />
-                {{ modeConfig[scannerMode].title }}
-              </div>
-            </SheetTitle>
-            <SheetDescription>Point the camera at a barcode or QR code</SheetDescription>
-          </SheetHeader>
-          <div class="flex h-[60vh] w-full items-center justify-center overflow-y-auto">
-            <TicketScanner
-              ref="TicketScannerRef"
-              :formats="codeFormat"
-              :auto-resume="scannerMode === 'continuous'"
-              @detect="handleScanResult"
-              @error="handleScannerError"
-              @checkin="handleScannerCheckin"
-              @checkout="handleScannerCheckout"
-              @save-note="handleSaveNoteOnly"
-            />
-          </div>
-          <SheetFooter>
-            <Button
-              variant="outline"
-              class="w-full"
-              @click="toggleScanner"
-            >
-              Close Camera
-            </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-
-      <!-- Desktop Layout (Grid) -->
-      <div
-        v-if="!isMobile"
-        class="grid grid-cols-12 gap-4"
-      >
-        <!-- Scanner Column -->
-        <div class="order-last col-span-4">
-          <Card v-if="isScannerOpen">
-            <CardHeader>
-              <CardTitle>Camera Scanner</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TicketScanner
-                ref="TicketScannerRef"
-                :formats="codeFormat"
-                :auto-resume="scannerMode === 'continuous'"
-                @detect="handleScanResult"
-                @error="handleScannerError"
-                @checkin="handleScannerCheckin"
-                @checkout="handleScannerCheckout"
-                @save-note="handleSaveNoteOnly"
-              />
-              <div class="mt-4 space-y-2">
-                <Button
-                  v-if="!TicketScannerRef?.isScanning && !isProcessing"
-                  class="w-full"
-                  @click="resumeScanning"
-                >
-                  Continue Scanning
-                </Button>
-                <Button
-                  variant="outline"
-                  class="w-full"
-                  @click="toggleScanner"
-                >
-                  Close Camera
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <!-- Results Column -->
-        <div
-          class="space-y-4"
-          :class="{
-            'col-span-8': isScannerOpen, 'col-span-12': !isScannerOpen,
-          }"
-        >
-          <!-- Lookup Result (Desktop) -->
-          <LookupResult
-            v-if="lookupResult && (scannerMode === 'lookup' || scannerMode === 'search')"
-            :lookup-result="lookupResult"
-            :scanner-mode="scannerMode"
-            :is-mobile="false"
-            @registration-action="handleRegistrationAction"
-            @continue-scanning="resumeScanning"
-            @close-result="clearLookupResult"
+        <div v-if="selectedDatetime" class="space-y-6">
+          <!-- Scanner Stats -->
+          <ScannerStats
+            v-if="selectedDatetime"
+            :selected-datetime="selectedDatetime"
+            :scanner-settings="scannerSettings"
+            :successful-scans="successfulScans"
+            :failed-scans="failedScans"
           />
 
-          <!-- Search Results (Desktop) -->
-          <SearchResults
-            v-if="scannerMode === 'search'"
-            :search-results="searchResults"
-            :unified-input="unifiedInput"
+          <!-- Scanner Input -->
+          <ScannerInput
+            v-model:selected-datetime="selectedDatetime"
+            v-model:scanner-mode="scannerMode"
+            v-model:unified-input="unifiedInput"
+            v-model:is-scanner-open="isScannerOpen"
+            :scanner-settings="scannerSettings"
             :is-processing="isProcessing"
             :is-searching="isSearching"
-            @select-result="handleClickSearchResultOnDesktop($event)"
+            :can-scan="canScan"
+            :available-modes="availableModes"
+            :mode-config="modeConfig"
+            @unified-action="handleUnifiedAction"
+            @toggle-scanner="toggleScanner"
+          />
+
+          <!-- Mobile Layout (Sheet) -->
+          <Sheet v-if="isMobile && isScannerOpen" v-model:open="isScannerOpen">
+            <SheetContent side="bottom" class="">
+              <SheetHeader>
+                <SheetTitle>
+                  <div class="flex items-center gap-2">
+                    <Icon
+                      :icon="modeConfig[scannerMode].icon"
+                      class="size-5"
+                      :style="{ color: modeConfig[scannerMode].color }"
+                    />
+                    {{ modeConfig[scannerMode].title }}
+                  </div>
+                </SheetTitle>
+                <SheetDescription>Point the camera at a barcode or QR code</SheetDescription>
+              </SheetHeader>
+              <div class="flex h-[60vh] w-full items-center justify-center overflow-y-auto">
+                <TicketScanner
+                  ref="TicketScannerRef"
+                  :formats="codeFormat"
+                  :auto-resume="scannerMode === 'continuous'"
+                  @detect="handleScanResult"
+                  @error="handleScannerError"
+                  @checkin="handleScannerCheckin"
+                  @checkout="handleScannerCheckout"
+                  @save-note="handleSaveNoteOnly"
+                />
+              </div>
+              <SheetFooter>
+                <Button variant="outline" class="w-full" @click="toggleScanner">
+                  Close Camera
+                </Button>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
+
+          <!-- Desktop Layout (Grid) -->
+          <div v-if="!isMobile" class="grid grid-cols-12 gap-4">
+            <!-- Scanner Column -->
+            <div class="order-last col-span-4">
+              <Card v-if="isScannerOpen">
+                <CardHeader>
+                  <CardTitle>Camera Scanner</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TicketScanner
+                    ref="TicketScannerRef"
+                    :formats="codeFormat"
+                    :auto-resume="scannerMode === 'continuous'"
+                    @detect="handleScanResult"
+                    @error="handleScannerError"
+                    @checkin="handleScannerCheckin"
+                    @checkout="handleScannerCheckout"
+                    @save-note="handleSaveNoteOnly"
+                  />
+                  <div class="mt-4 space-y-2">
+                    <Button
+                      v-if="!TicketScannerRef?.isScanning && !isProcessing"
+                      class="w-full"
+                      @click="resumeScanning"
+                    >
+                      Continue Scanning
+                    </Button>
+                    <Button variant="outline" class="w-full" @click="toggleScanner">
+                      Close Camera
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <!-- Results Column -->
+            <div
+              class="space-y-4"
+              :class="{
+                'col-span-8': isScannerOpen, 'col-span-12': !isScannerOpen,
+              }"
+            >
+              <!-- Lookup Result (Desktop) -->
+              <LookupResult
+                v-if="lookupResult && (scannerMode === 'lookup' || scannerMode === 'search')"
+                :lookup-result="lookupResult"
+                :scanner-mode="scannerMode"
+                :is-mobile="false"
+                @registration-action="handleRegistrationAction"
+                @continue-scanning="resumeScanning"
+                @close-result="clearLookupResult"
+              />
+
+              <!-- Search Results (Desktop) -->
+              <SearchResults
+                v-if="scannerMode === 'search'"
+                :search-results="searchResults"
+                :unified-input="unifiedInput"
+                :is-processing="isProcessing"
+                :is-searching="isSearching"
+                @select-result="handleClickSearchResultOnDesktop($event)"
+              />
+            </div>
+          </div>
+
+          <!-- Mobile Results (Outside Scanner Sheet) -->
+          <template v-if="isMobile">
+            <!-- Lookup Result (Mobile) -->
+            <LookupResult
+              v-if="lookupResult && (scannerMode === 'lookup' || scannerMode === 'search')"
+              :lookup-result="lookupResult"
+              :scanner-mode="scannerMode"
+              :is-mobile="true"
+              @registration-action="handleRegistrationAction"
+              @continue-scanning="resumeScanning"
+              @close-result="clearLookupResult"
+            />
+
+            <!-- Search Results (Mobile) -->
+            <SearchResults
+              v-if="scannerMode === 'search'"
+              :search-results="searchResults"
+              :unified-input="unifiedInput"
+              :is-processing="isProcessing"
+              :is-searching="isSearching"
+              @select-result="lookupResult = $event"
+            />
+          </template>
+
+          <!-- Scan History (Always shown outside scanner) -->
+          <ScanHistory
+            v-if="scanHistory.length > 0"
+            :scan-history="scanHistory"
+            :recent-scans="recentScans"
+            :successful-scans="successfulScans"
+            :failed-scans="failedScans"
+            @export-history="exportHistory"
+            @clear-history="confirmClearHistory"
+            @registration-action="handleRegistrationAction"
           />
         </div>
-      </div>
-
-      <!-- Mobile Results (Outside Scanner Sheet) -->
-      <template v-if="isMobile">
-        <!-- Lookup Result (Mobile) -->
-        <LookupResult
-          v-if="lookupResult && (scannerMode === 'lookup' || scannerMode === 'search')"
-          :lookup-result="lookupResult"
-          :scanner-mode="scannerMode"
-          :is-mobile="true"
-          @registration-action="handleRegistrationAction"
-          @continue-scanning="resumeScanning"
-          @close-result="clearLookupResult"
-        />
-
-        <!-- Search Results (Mobile) -->
-        <SearchResults
-          v-if="scannerMode === 'search'"
-          :search-results="searchResults"
-          :unified-input="unifiedInput"
-          :is-processing="isProcessing"
-          :is-searching="isSearching"
-          @select-result="lookupResult = $event"
-        />
-      </template>
-
-      <!-- Scan History (Always shown outside scanner) -->
-      <ScanHistory
-        v-if="scanHistory.length > 0"
-        :scan-history="scanHistory"
-        :recent-scans="recentScans"
-        :successful-scans="successfulScans"
-        :failed-scans="failedScans"
-        @export-history="exportHistory"
-        @clear-history="confirmClearHistory"
-        @registration-action="handleRegistrationAction"
-      />
-
+      </Transition>
       <!-- Scanner Instructions -->
       <ScannerInstructions
         v-if="!isScannerOpen"
@@ -1034,16 +1002,10 @@ useHead({
     </div>
 
     <!-- Error state -->
-    <div
-      v-else
-      class="mt-8"
-    >
+    <div v-else class="mt-8">
       <Card>
         <CardContent class="p-8 text-center">
-          <Icon
-            icon="heroicons:exclamation-triangle"
-            class="mx-auto mb-4 size-12 text-yellow-500"
-          />
+          <Icon icon="heroicons:exclamation-triangle" class="mx-auto mb-4 size-12 text-yellow-500" />
           <h3 class="mb-2 text-lg font-semibold">
             Unable to Load Scanner
           </h3>
@@ -1051,10 +1013,7 @@ useHead({
             Failed to load scanner settings. Please check your permissions and try again.
           </p>
           <Button @click="loadScannerSettings">
-            <Icon
-              icon="heroicons:arrow-path"
-              class="mr-2 size-4"
-            />
+            <Icon icon="heroicons:arrow-path" class="mr-2 size-4" />
             Retry
           </Button>
         </CardContent>
@@ -1067,10 +1026,7 @@ useHead({
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
-          <Icon
-            icon="heroicons:exclamation-triangle"
-            class="size-5 text-amber-500"
-          />
+          <Icon icon="heroicons:exclamation-triangle" class="size-5 text-amber-500" />
           Clear Scan History
         </DialogTitle>
         <DialogDescription>
@@ -1089,19 +1045,13 @@ useHead({
           </div>
           <div class="mb-2 flex items-center justify-between">
             <span>Successful scans:</span>
-            <Badge
-              variant="outline"
-              class="bg-green-50 text-green-700"
-            >
+            <Badge variant="outline" class="bg-green-50 text-green-700">
               {{ successfulScans }}
             </Badge>
           </div>
           <div class="flex items-center justify-between">
             <span>Failed scans:</span>
-            <Badge
-              variant="outline"
-              class="bg-red-50 text-red-700"
-            >
+            <Badge variant="outline" class="bg-red-50 text-red-700">
               {{ failedScans }}
             </Badge>
           </div>
@@ -1109,20 +1059,11 @@ useHead({
       </div>
 
       <DialogFooter class="gap-2">
-        <Button
-          variant="outline"
-          @click="showClearConfirmDialog = false"
-        >
+        <Button variant="outline" @click="showClearConfirmDialog = false">
           Cancel
         </Button>
-        <Button
-          variant="destructive"
-          @click="clearHistory"
-        >
-          <Icon
-            icon="heroicons:trash"
-            class="mr-2 size-4"
-          />
+        <Button variant="destructive" @click="clearHistory">
+          <Icon icon="heroicons:trash" class="mr-2 size-4" />
           Clear History
         </Button>
       </DialogFooter>

@@ -10,27 +10,11 @@ const props = defineProps<{
   selectedDatetime: string
 }>();
 
-const emit = defineEmits<{
+defineEmits<{
   'update:selectedDatetime': [value: string]
 }>();
 
 const datetimesRef = ref<EvtDatetime[] | null>(props.datetimes);
-
-watch(() => props.datetimes, (newDatetime) => {
-  datetimesRef.value = newDatetime;
-  nextTick(() => {
-    if (datetimesRef.value && datetimesRef.value.length > 0
-    ) {
-      emit('update:selectedDatetime', datetimesRef.value[0].id);
-    }
-  });
-}, { immediate: true });
-
-const selectedDatetimeRef = ref(props.selectedDatetime);
-
-watch(selectedDatetimeRef, (newValue) => {
-  emit('update:selectedDatetime', newValue);
-});
 </script>
 
 <template>
@@ -39,7 +23,7 @@ watch(selectedDatetimeRef, (newValue) => {
       <span class="text-sm font-medium">Select Session</span>
     </Label>
     <Select
-      :model-value="selectedDatetimeRef"
+      :model-value="selectedDatetime"
       @update:model-value="$emit('update:selectedDatetime', $event)"
     >
       <SelectTrigger class="h-14 bg-card dark:bg-background md:h-12">
@@ -54,16 +38,9 @@ watch(selectedDatetimeRef, (newValue) => {
           <div class="flex flex-row items-center gap-1">
             <span class="font-medium">{{ datetime.name }}</span>
             <span
-              v-if="datetime.date_start"
               class="text-sm text-muted-foreground"
             >
-              {{ formatDate(datetime.date_start, 'dd MMM yyyy HH:mm') }}
-            </span>
-            <span
-              v-if="datetime.date_end"
-              class="text-sm text-muted-foreground"
-            >
-              - {{ formatDate(datetime.date_end, 'dd MMM yyyy HH:mm') }}
+              {{ formatDateRange(datetime.date_start, datetime.date_end) }}
             </span>
             <span
               v-if="datetime.available !== null"
