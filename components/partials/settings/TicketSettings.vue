@@ -23,6 +23,7 @@ interface Ticket {
   reserved: number
   available: number
   status: string
+  status_code?: string
   is_on_sale: boolean
   is_expired: boolean
   start_date?: string
@@ -33,7 +34,7 @@ interface Ticket {
     sold: number
     reserved: number
     total_registrations: number
-    registrations_by_status: Record<string, number> // Updated: now uses status codes
+    registrations_by_status: Record<string, number>
     min_allowed_quantity: number
     is_sold_out: boolean
   }
@@ -67,7 +68,7 @@ const isLoadingTickets = ref(true);
 const editingTicketId = ref<string | null>(null);
 const isUpdatingOrder = ref(false);
 const isDragging = ref(false);
-const isAllExpanded = ref(false);
+const isAllExpanded = ref(true);
 
 // Track original order for cancellation
 const originalOrder = ref<string[]>([]);
@@ -81,24 +82,19 @@ const draggableOptions: UseDraggableOptions<Ticket> = {
   chosenClass: 'chosen-item',
   dragClass: 'drag-item',
   handle: '.drag-handle',
-  // Remove computed() wrapper - use reactive getter instead
   get disabled() {
     return editingTicketId.value !== null || isUpdatingOrder.value;
   },
   onStart(_evt) {
     isDragging.value = true;
-    // Store original order before dragging starts
     originalOrder.value = tickets.value.map(ticket => ticket.id);
   },
   onEnd(evt) {
     isDragging.value = false;
-
-    // Check if the order actually changed
     const newOrder = tickets.value.map(ticket => ticket.id);
     const orderChanged = JSON.stringify(originalOrder.value) !== JSON.stringify(newOrder);
 
     if (orderChanged && evt.oldIndex !== evt.newIndex) {
-      // Small delay to ensure DOM is updated
       setTimeout(() => {
         updateTicketOrder();
       }, 100);
@@ -107,9 +103,7 @@ const draggableOptions: UseDraggableOptions<Ticket> = {
   onUpdate(_evt) {
     console.warn('Order updated in DOM');
   },
-  // Handle cancellation (escape key or invalid drop)
   onSort(evt) {
-    // This fires when the sort is cancelled or invalid
     if (evt.oldIndex === evt.newIndex) {
       toast.info('No changes made to ticket order');
     }
@@ -119,14 +113,12 @@ const draggableOptions: UseDraggableOptions<Ticket> = {
 // Keyboard event handler for escape key
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && isDragging.value) {
-    // Restore original order if escape is pressed during drag
     restoreOriginalOrder();
   }
 };
 
 const restoreOriginalOrder = () => {
   if (originalOrder.value.length > 0) {
-    // Restore the original order
     const orderedTickets = originalOrder.value
       .map(id => tickets.value.find(ticket => ticket.id === id))
       .filter(Boolean) as Ticket[];
@@ -140,7 +132,6 @@ const restoreOriginalOrder = () => {
 onMounted(async () => {
   await Promise.all([loadTickets(), loadDatetimes()]);
 
-  // Initialize draggable after data is loaded and DOM is ready
   await nextTick();
 
   if (dragContainer.value && tickets.value.length > 0) {
@@ -152,7 +143,6 @@ onMounted(async () => {
     startDraggable();
   }
 
-  // Add keyboard event listener
   document.addEventListener('keydown', handleKeyDown);
 });
 
@@ -175,7 +165,6 @@ const loadTickets = async () => {
 
     if (response.data) {
       tickets.value = response.data.map((ticket: any, index: number): Ticket => ({
-        // Ensure id is always a string
         id: ticket.id || `ticket-${index}`,
         name: ticket.name || '',
         description: ticket.description || '',
@@ -185,6 +174,7 @@ const loadTickets = async () => {
         reserved: ticket.reserved || 0,
         available: ticket.available || 0,
         status: ticket.status || 'upcoming',
+        status_code: ticket.status_code || 'TKO',
         is_on_sale: Boolean(ticket.is_on_sale),
         is_expired: Boolean(ticket.is_expired),
         start_date: ticket.start_date,
@@ -195,7 +185,6 @@ const loadTickets = async () => {
         datetimes: ticket.datetimes,
       }));
 
-      // Store initial order
       originalOrder.value = tickets.value.map(ticket => ticket.id);
     }
   }
@@ -235,9 +224,8 @@ const updateTicketOrder = async () => {
   try {
     isUpdatingOrder.value = true;
 
-    // Update order in backend - fix payload structure
     const ticketOrders = tickets.value
-      .filter(ticket => ticket.id && !ticket.id.startsWith('temp-')) // Only existing tickets
+      .filter(ticket => ticket.id && !ticket.id.startsWith('temp-'))
       .map((ticket, index) => ({
         ticket_id: ticket.id,
         order: index + 1,
@@ -250,7 +238,6 @@ const updateTicketOrder = async () => {
 
       if (response.data.success) {
         toast.success('Ticket order updated');
-        // Update original order after successful save
         originalOrder.value = tickets.value.map(ticket => ticket.id);
       }
     }
@@ -262,10 +249,7 @@ const updateTicketOrder = async () => {
       description: errorDescription,
     });
 
-    // Restore original order on error
     restoreOriginalOrder();
-
-    // Optionally reload to get correct order from server
     await loadTickets();
   }
   finally {
@@ -287,6 +271,7 @@ const addTicket = () => {
     reserved: 0,
     available: 100,
     status: 'upcoming',
+    status_code: 'TKO',
     is_on_sale: false,
     is_expired: false,
     datetime_ids: [],
@@ -304,7 +289,6 @@ const editTicket = (ticketId: string) => {
 };
 
 const cancelEdit = () => {
-  // If it's a new ticket (temp ID), remove it
   if (editingTicketId.value?.startsWith('temp-')) {
     tickets.value = tickets.value.filter(t => t.id !== editingTicketId.value);
   }
@@ -317,12 +301,10 @@ const saveTicket = async (ticketData: Ticket) => {
     let response;
 
     if (isNewTicket) {
-      // Create new ticket
       const { id, ...createData } = ticketData;
       response = await $galantisApi.post(`/event/${eventId.value}/tickets`, createData);
     }
     else {
-      // Update existing ticket
       response = await $galantisApi.put(`/event/${eventId.value}/ticket/${ticketData.id}`, ticketData);
     }
 
@@ -347,7 +329,6 @@ const saveTicket = async (ticketData: Ticket) => {
 
 const deleteTicket = async (ticket: Ticket) => {
   if (ticket.id.startsWith('temp-')) {
-    // Remove unsaved ticket
     tickets.value = tickets.value.filter(t => t.id !== ticket.id);
     editingTicketId.value = null;
     return;
@@ -379,48 +360,15 @@ const duplicateTicket = (ticket: Ticket) => {
     reserved: 0,
     available: ticket.quantity,
     status: 'upcoming',
+    status_code: 'TKO',
     is_on_sale: false,
     is_expired: false,
-    constraints: undefined, // Reset constraints for new ticket
-    sales_stats: undefined, // Reset sales stats for new ticket
+    constraints: undefined,
+    sales_stats: undefined,
   };
 
   tickets.value.push(duplicatedTicket);
   editingTicketId.value = newTicketId;
-};
-
-// Status helpers
-const getStatusConfig = (ticket: Ticket) => {
-  if (ticket.is_expired) {
-    return {
-      bodyClass: 'opacity-50 hover:opacity-100',
-      color: 'border-l-gray-500',
-      bgColor: 'dark:bg-gray-950/20',
-      bgBadgeClass: 'text-white bg-gray-500 dark:bg-gray-600',
-      textColor: 'text-gray-700 dark:text-gray-300',
-      icon: 'tabler:clock-x',
-      label: 'Expired',
-    };
-  }
-
-  if (ticket.is_on_sale) {
-    return {
-      color: 'border-l-emerald-400',
-      bgColor: 'bg-emerald-50/50 dark:bg-emerald-950/30',
-      textColor: 'text-emerald-500 dark:text-emerald-300',
-      bgBadgeClass: 'text-white bg-emerald-500 dark:bg-emerald-600',
-      icon: 'tabler:tag',
-      label: 'On Sale',
-    };
-  }
-
-  return {
-    color: 'border-l-blue-500',
-    bgColor: 'dark:bg-blue-950/20',
-    textColor: 'text-blue-700 dark:text-blue-300',
-    icon: 'tabler:clock',
-    label: 'Upcoming',
-  };
 };
 
 const canEdit = (ticket: Ticket) => {
@@ -441,13 +389,6 @@ const getEditWarning = (ticket: Ticket) => {
 
   return null;
 };
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(amount);
-};
 
 watch(tickets, async (newTickets) => {
   if (newTickets.length > 0 && dragContainer.value) {
@@ -465,13 +406,13 @@ watch(tickets, async (newTickets) => {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-
     <div class="space-y-4">
       <div class="flex items-center justify-end">
         <Button
           v-if="tickets.length > 0"
           variant="ghost"
           size="sm"
+          class="hover:bg-slate-200 dark:hover:bg-slate-800"
           :disabled="isLoadingTickets || isUpdatingOrder || editingTicketId !== null"
           @click="expandAllTickets"
         >
@@ -484,9 +425,8 @@ watch(tickets, async (newTickets) => {
       <!-- Loading State -->
       <div v-if="isLoadingTickets" class="flex items-center justify-center py-8">
         <div class="flex items-center gap-2">
-          <Icon icon="svg-spinners:ring-resize" class="mx-auto mb-2 size-8 text-muted-foreground" /> <span
-            class="text-sm text-muted-foreground"
-          >Loading tickets...</span>
+          <Icon icon="svg-spinners:ring-resize" class="mx-auto mb-2 size-8 text-muted-foreground" />
+          <span class="text-sm text-muted-foreground">Loading tickets...</span>
         </div>
       </div>
 
@@ -519,10 +459,8 @@ watch(tickets, async (newTickets) => {
             <TicketDisplayCard
               v-else
               :ticket="ticket"
-              :status-config="getStatusConfig(ticket)"
               :is-updating-order="isUpdatingOrder"
               :is-expanded="isAllExpanded"
-              :format-currency="formatCurrency"
               @edit="editTicket"
               @duplicate="duplicateTicket"
               @delete="deleteTicket"

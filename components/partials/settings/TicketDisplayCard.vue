@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
 
-import { getStatusInfo } from '@/utils';
+import { getStatusInfo } from '@/utils/status-map';
+import StatusBadge from '~/components/statuses/StatusBadge.vue';
 
 interface Props {
   ticket: any
-  statusConfig: any
   isUpdatingOrder: boolean
   isExpanded: boolean
 }
@@ -24,6 +24,12 @@ const formatCurrency = (amount: number) => {
     minimumFractionDigits: 0,
   }).format(amount);
 };
+
+// Get ticket status configuration from centralized utility
+const ticketStatusConfig = computed(() => {
+  const statusCode = props.ticket.status_code || 'TKO'; // Default to 'On Sale'
+  return getStatusInfo(statusCode);
+});
 
 const regStatusEntries = computed(() => {
   if (!props.ticket.sales_stats?.by_status)
@@ -50,32 +56,15 @@ const regStatusEntries = computed(() => {
     return orderA - orderB;
   });
 });
-
-const getStatusClasses = (color: string) => {
-  const colorMap: Record<string, string> = {
-    emerald: 'border-emerald-500 text-emerald-700 dark:text-emerald-300',
-    sky: 'border-sky-500 text-sky-700 dark:text-sky-300',
-    red: 'border-red-500 text-red-700 dark:text-red-300',
-    blue: 'border-blue-500 text-blue-700 dark:text-blue-300',
-    gray: 'border-gray-500 text-gray-700 dark:text-gray-300',
-    slate: 'border-slate-500 text-slate-700 dark:text-slate-300',
-    purple: 'border-purple-500 text-purple-700 dark:text-purple-300',
-  };
-
-  return colorMap[color] || 'border-gray-500 text-gray-700';
-};
 </script>
 
 <template>
   <Card
     class="group relative border-l-4 transition-all duration-200 hover:shadow-md"
     :class="[
-      statusConfig.color,
-      statusConfig.bgColor,
-      statusConfig.bodyClass,
-    ]"
+      ticketStatusConfig.borderColor]"
   >
-    <CardContent class="p-4">
+    <CardContent class=" p-4">
       <div class="flex items-start justify-between">
         <!-- Drag Handle, only on hover -->
         <div
@@ -97,10 +86,7 @@ const getStatusClasses = (color: string) => {
           <div class="flex items-start justify-between">
             <div class="flex-1 pr-4 md:pr-0">
               <div class="mb-2 flex flex-wrap items-center gap-2">
-                <Badge :class="statusConfig.bgBadgeClass" variant="outline" class="flex items-center gap-1 text-xs">
-                  <Icon :icon="statusConfig.icon" class="size-3" />
-                  {{ statusConfig.label }}
-                </Badge>
+                <StatusBadge :status-id="ticket.status_code || 'TKO'" variant="badge" size="sm" />
                 <h4 class="max-w-xs text-base font-semibold sm:max-w-none">
                   {{ ticket.name }}
                 </h4>
@@ -122,7 +108,7 @@ const getStatusClasses = (color: string) => {
                 </div>
                 <div class="text-center">
                   <div class="text-lg font-bold">
-                    {{ ticket.quantity === null ? '∞' : ticket.quantity }}
+                    {{ ticket.quantity === null ? '∞' : formatThousands(ticket.quantity) }}
                   </div>
                   <div class="text-xs text-muted-foreground">
                     Quota
@@ -142,15 +128,16 @@ const getStatusClasses = (color: string) => {
                 <!-- Registration Status Breakdown -->
                 <div v-if="ticket.sales_stats?.by_status" class="mb-3">
                   <div class="flex flex-wrap gap-2">
-                    <Badge
+                    <StatusBadge
                       v-for="item in regStatusEntries"
                       :key="item.status"
-                      variant="outline"
-                      class="text-xs"
-                      :class="getStatusClasses(item.info.color)"
+                      :status-id="item.status"
+                      variant="pill"
+                      size="sm"
+                      :custom-content="true"
                     >
                       {{ item.info.label }}: {{ item.count }}
-                    </Badge>
+                    </StatusBadge>
                   </div>
                 </div>
                 <!-- Associated Sessions -->

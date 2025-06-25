@@ -9,6 +9,7 @@ interface StatusConfig {
   dotClass: string
   // Shadcn badge variant fallback
   badgeVariant: 'default' | 'secondary' | 'destructive' | 'outline'
+  borderColor?: string // Optional for ticket statuses
 }
 
 export const allRegStatuses: StatusConfig[] = [
@@ -106,6 +107,7 @@ export const allTicketStatuses: StatusConfig[] = [
     badgeClass: 'border-purple-500 text-purple-700 bg-purple-50 dark:border-purple-400 dark:text-purple-300 dark:bg-purple-950/20',
     pillClass: 'bg-purple-600 text-white dark:bg-purple-500 dark:text-white',
     dotClass: 'bg-purple-500',
+    borderColor: 'border-l-purple-500',
     badgeVariant: 'secondary',
   },
   {
@@ -116,6 +118,7 @@ export const allTicketStatuses: StatusConfig[] = [
     badgeClass: 'border-gray-500 text-gray-700 bg-gray-50 dark:border-gray-400 dark:text-gray-300 dark:bg-gray-950/20',
     pillClass: 'bg-gray-600 text-white dark:bg-gray-500 dark:text-white',
     dotClass: 'bg-gray-500',
+    borderColor: 'border-l-gray-500',
     badgeVariant: 'outline',
   },
   {
@@ -126,6 +129,7 @@ export const allTicketStatuses: StatusConfig[] = [
     badgeClass: 'border-slate-500 text-slate-700 bg-slate-50 dark:border-slate-400 dark:text-slate-300 dark:bg-slate-950/20',
     pillClass: 'bg-slate-600 text-white dark:bg-slate-500 dark:text-white',
     dotClass: 'bg-slate-500',
+    borderColor: 'border-l-slate-500',
     badgeVariant: 'outline',
   },
   {
@@ -136,6 +140,7 @@ export const allTicketStatuses: StatusConfig[] = [
     badgeClass: 'border-sky-500 text-sky-700 bg-sky-50 dark:border-sky-400 dark:text-sky-300 dark:bg-sky-950/20',
     pillClass: 'bg-sky-600 text-white dark:bg-sky-500 dark:text-white',
     dotClass: 'bg-sky-500',
+    borderColor: 'border-l-sky-500',
     badgeVariant: 'secondary',
   },
   {
@@ -146,12 +151,49 @@ export const allTicketStatuses: StatusConfig[] = [
     badgeClass: 'border-emerald-500 text-emerald-700 bg-emerald-50 dark:border-emerald-400 dark:text-emerald-300 dark:bg-emerald-950/20',
     pillClass: 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white',
     dotClass: 'bg-emerald-500',
+    borderColor: 'border-l-emerald-500',
     badgeVariant: 'default',
   },
 ];
 
+export const allDatetimeStatuses: StatusConfig[] = [
+  {
+    id: 'DTC',
+    label: 'Completed',
+    icon: 'mdi:check-circle',
+    textClass: 'text-gray-700 dark:text-gray-300',
+    badgeClass: 'border-gray-500 text-gray-700 bg-gray-50 dark:border-gray-400 dark:text-gray-300 dark:bg-gray-950/20',
+    pillClass: 'bg-gray-600 text-white dark:bg-gray-500 dark:text-white',
+    dotClass: 'bg-gray-500',
+    borderColor: 'border-l-gray-500',
+    badgeVariant: 'outline',
+  },
+  {
+    id: 'DTA',
+    label: 'Active',
+    icon: 'mdi:play-circle',
+    textClass: 'text-green-700 dark:text-green-300',
+    badgeClass: 'border-green-500 text-green-700 bg-green-50 dark:border-green-400 dark:text-green-300 dark:bg-green-950/20',
+    pillClass: 'bg-green-600 text-white dark:bg-green-500 dark:text-white',
+    dotClass: 'bg-green-500',
+    borderColor: 'border-l-green-500',
+    badgeVariant: 'default',
+  },
+  {
+    id: 'DTU',
+    label: 'Upcoming',
+    icon: 'mdi:clock',
+    textClass: 'text-blue-700 dark:text-blue-300',
+    badgeClass: 'border-blue-500 text-blue-700 bg-blue-50 dark:border-blue-400 dark:text-blue-300 dark:bg-blue-950/20',
+    pillClass: 'bg-blue-600 text-white dark:bg-blue-500 dark:text-white',
+    dotClass: 'bg-blue-500',
+    borderColor: 'border-l-blue-500',
+    badgeVariant: 'secondary',
+  },
+];
+
 // Combine all statuses
-const allStatuses: StatusConfig[] = [...allRegStatuses, ...allTransStatuses, ...allTicketStatuses];
+const allStatuses: StatusConfig[] = [...allRegStatuses, ...allTransStatuses, ...allTicketStatuses, ...allDatetimeStatuses];
 
 // Default/unknown status
 const defaultStatus: StatusConfig = {

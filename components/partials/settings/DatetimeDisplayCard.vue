@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
-import { format } from 'date-fns';
+
+import { getStatusInfo } from '@/utils/status-map';
+import StatusBadge from '~/components/statuses/StatusBadge.vue';
 
 interface Props {
   session: any
@@ -9,7 +11,7 @@ interface Props {
   isUpdatingOrder?: boolean
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 defineEmits<{
   edit: [sessionId: string]
@@ -17,55 +19,34 @@ defineEmits<{
   delete: [session: any]
 }>();
 
-const formatDate = (dateString: string) => {
-  try {
-    return format(new Date(dateString), 'dd MMM yyyy, HH:mm');
-  }
-  catch {
-    return dateString;
-  }
-};
-
-const getStatusConfig = (session: any) => {
+// Get datetime status from centralized utility
+const getDatetimeStatusCode = (session: any) => {
   const now = new Date();
   const startDate = new Date(session.date_start);
   const endDate = new Date(session.date_end);
 
   if (endDate < now) {
-    return {
-      color: 'border-l-gray-500',
-      bgColor: 'bg-gray-50 dark:bg-gray-950/20',
-      textColor: 'text-gray-700 dark:text-gray-300',
-      icon: 'mdi:check-circle',
-      label: 'Completed',
-    };
+    return 'DTC'; // Completed
   }
 
   if (startDate <= now && endDate >= now) {
-    return {
-      color: 'border-l-green-500',
-      bgColor: 'bg-green-50 dark:bg-green-950/20',
-      textColor: 'text-green-700 dark:text-green-300',
-      icon: 'mdi:play-circle',
-      label: 'Active',
-    };
+    return 'DTA'; // Active
   }
 
-  return {
-    color: 'border-l-blue-500',
-    bgColor: 'bg-blue-50 dark:bg-blue-950/20',
-    textColor: 'text-blue-700 dark:text-blue-300',
-    icon: 'mdi:clock',
-    label: 'Upcoming',
-  };
+  return 'DTU'; // Upcoming
 };
+
+const datetimeStatusConfig = computed(() => {
+  const statusCode = getDatetimeStatusCode(props.session);
+  return getStatusInfo(statusCode);
+});
 </script>
 
 <template>
   <Card
     class="group relative border-l-4 transition-all duration-200 hover:shadow-md"
     :class="[
-      getStatusConfig(session).color,
+      datetimeStatusConfig.borderColor || `border-l-${datetimeStatusConfig.dotClass.replace('bg-', '')}`,
     ]"
   >
     <CardContent class="p-4">
@@ -76,64 +57,56 @@ const getStatusConfig = (session: any) => {
             <h4 class="truncate text-base font-semibold">
               {{ session.name }}
             </h4>
-            <Badge :class="getStatusConfig(session).textColor" variant="secondary" class="text-xs">
-              <Icon :icon="getStatusConfig(session).icon" class="mr-1 size-3" />
-              {{ getStatusConfig(session).label }}
-            </Badge>
+            <StatusBadge :status-id="getDatetimeStatusCode(session)" variant="badge" size="sm" />
           </div>
 
-          <div class="mb-3 text-sm text-muted-foreground">
+          <div class="space-y-2 text-sm text-muted-foreground">
             <div class="flex items-center gap-2">
               <Icon icon="mdi:calendar" class="size-4" />
-              <span>{{ formatDate(session.date_start) }} - {{ formatDate(session.date_end) }}</span>
+              <span>{{ formatDateRange(session.date_start, session.date_end) }}</span>
             </div>
-          </div>
 
-          <!-- Stats -->
-          <div class="grid grid-cols-2 gap-4">
-            <div v-if="session.sold">
-              <div class="text-lg font-bold text-green-600">
-                {{ session.sold }}
-              </div>
-              <div class="text-xs text-muted-foreground">
-                Registrations
-              </div>
+            <div v-if="session.description" class="flex items-start gap-2">
+              <Icon icon="mdi:text" class="mt-0.5 size-4" />
+              <span class="line-clamp-2">{{ session.description }}</span>
             </div>
-            <div v-if="session.reg_limit">
-              <div class="text-lg font-bold">
-                {{ session.reg_limit }}
-              </div>
-              <div class="text-xs text-muted-foreground">
-                Limit
+
+            <div class="flex items-center gap-4">
+              <div class="flex items-center gap-2">
+                <Icon icon="mdi:account-group" class="size-4" />
+                <span>{{ session.sold || 0 }} registered</span>
+                <span v-if="session.reg_limit" class="text-muted-foreground">
+                  / {{ session.reg_limit }} max
+                </span>
               </div>
             </div>
           </div>
-
-          <p v-if="session.description" class="mt-2 text-sm text-muted-foreground">
-            {{ session.description }}
-          </p>
         </div>
 
         <!-- Actions -->
-        <div>
+        <div class="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <Button variant="ghost" size="icon" class="size-8">
-                <Icon icon="heroicons:ellipsis-vertical" class="size-4" />
+              <Button variant="ghost" size="icon">
+                <Icon icon="mdi:dots-vertical" class="size-4" />
                 <span class="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" class="w-40">
               <DropdownMenuItem @click="$emit('edit', session.id)">
-                <Icon icon="tabler:pencil" class="mr-2 size-4" />
+                <Icon icon="mdi:pencil" class="mr-2 size-4" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem @click="$emit('duplicate', session)">
-                <Icon icon="tabler:copy" class="mr-2 size-4" />
+                <Icon icon="mdi:content-copy" class="mr-2 size-4" />
                 Duplicate
               </DropdownMenuItem>
-              <DropdownMenuItem class="text-destructive focus:text-destructive" @click="$emit('delete', session)">
-                <Icon icon="tabler:trash" class="mr-2 size-4" />
+              <DropdownMenuItem
+                class="text-destructive focus:text-destructive"
+                :disabled="!canEdit"
+                @click="$emit('delete', session)"
+              >
+                <Icon icon="mdi:delete" class="mr-2 size-4" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
