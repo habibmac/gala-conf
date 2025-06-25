@@ -381,14 +381,14 @@ const getStatusColor = (status: string) => {
                 v-if="dayIndex < agenda.data.length - 1"
                 :class="cn(
                   'absolute left-10 top-14 h-[calc(100%-56px)] w-0.5',
-                  day.status === 'completed' ? 'bg-green-200' : 'bg-gray-200 dark:bg-gray-700',
+                  day.status === 'completed' ? 'bg-green-200 dark:bg-green-500' : 'bg-gray-200 dark:bg-gray-700',
                 )"
               />
 
               <Collapsible :open="openDays.has(day.date)" @update:open="() => toggleDay(day.date)">
                 <div class="relative">
                   <CollapsibleTrigger
-                    class="flex w-full items-center gap-4 rounded-lg bg-card p-4 transition-colors hover:bg-accent/50"
+                    class="flex w-full items-center gap-4 rounded-lg bg-card p-4 transition-colors hover:bg-accent/50 dark:bg-slate-900"
                   >
                     <!-- Status Icon -->
                     <div
@@ -405,7 +405,7 @@ const getStatusColor = (status: string) => {
                     <!-- Day Info -->
                     <div class="flex-1 text-left">
                       <div class="flex items-center justify-between gap-2">
-                        <h3 class="text-lg font-semibold">
+                        <h3 class="text-base font-semibold">
                           {{ day.formatted_date }}
                         </h3>
                       </div>
@@ -426,7 +426,7 @@ const getStatusColor = (status: string) => {
                     <div
                       v-for="(item, itemIndex) in day.items"
                       :key="itemIndex"
-                      class="rounded-lg border bg-card/50 p-4"
+                      class="rounded-lg border bg-card/50 p-4 dark:bg-transparent"
                     >
                       <div class="space-y-3">
                         <!-- Item Header -->

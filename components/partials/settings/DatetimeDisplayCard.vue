@@ -115,7 +115,7 @@ const getStatusConfig = (session: any) => {
         </div>
 
         <!-- Actions -->
-        <div class="opacity-100 transition-opacity duration-200 md:opacity-0 md:group-hover:opacity-100">
+        <div>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <Button variant="ghost" size="icon" class="size-8">

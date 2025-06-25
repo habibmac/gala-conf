@@ -255,7 +255,7 @@ const downloadCustomFieldData = (field: any) => {
       </h2>
 
       <div v-if="isAttendeeLoading" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Skeleton v-for="i in 4" :key="i" class="h-32 rounded-lg" />
+        <Skeleton v-for="i in 4" :key="i" class="h-32 rounded-lg bg-muted-foreground/10" />
       </div>
 
       <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -394,7 +394,7 @@ const downloadCustomFieldData = (field: any) => {
             />
 
             <!-- Legend with scroll for many tickets -->
-            <div class="max-h-40 space-y-2 overflow-y-auto">
+            <div class="scroll-area max-h-40 space-y-2 overflow-y-auto">
               <div
                 v-for="(item) in ticketChartData"
                 :key="item.name"

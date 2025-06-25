@@ -74,10 +74,10 @@ defineProps({
     <div
       class="order-1 flex shrink-0 flex-col items-center justify-center space-x-2 border-t p-4 text-center sm:w-1/5 sm:border-none"
     >
-      <div class="ordinal slashed-zero lining-nums tabular-nums" :class="[isPast ? 'text-xl' : 'text-3xl text-green-500 ']">
+      <div class="ordinal slashed-zero lining-nums" :class="[isPast ? 'text-xl' : 'text-3xl text-green-500 ']">
         {{ event.regs }}
       </div>
-      <div class="text-muted-foreground" :class="[isPast ? 'text-xs' : 'text-sm']">
+      <div class="font-medium text-muted-foreground" :class="[isPast ? 'text-xs' : 'text-sm']">
         Regs
       </div>
     </div>
