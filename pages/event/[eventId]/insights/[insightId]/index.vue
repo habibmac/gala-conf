@@ -15,6 +15,7 @@ import { toast } from 'vue-sonner';
 
 import type { Answer, ColumnConfig, CustomField, RegItem, TicketGroup } from '@/types';
 
+import RegCode from '@/components/statuses/RegCode.vue';
 import TablePagination from '@/components/TablePagination.vue';
 import { Badge } from '@/components/ui/badge';
 import { useInsight } from '@/composables/useInsight';
@@ -178,12 +179,26 @@ const columns = computed(() => {
               }
               case 'code': {
                 const stt_id = cellProps.row.original.stt_id;
+                const regId = cellProps.row.original.id;
+
                 return h(
-                  'span',
+                  'a',
                   {
-                    class: `text-status ${getStatusInfo(stt_id).dotClass}`,
+                    class: 'number text-center group inline-block whitespace-nowrap',
+                    href: `/event/${eventId.value}/registrations/${regId}`,
+                    onClick: (e: MouseEvent) => {
+                      e.preventDefault();
+                      router.push(`/event/${eventId.value}/registrations/${regId}`);
+                    },
                   },
-                  cellProps.getValue(),
+                  [
+                    h(RegCode, {
+                      code: cellProps.getValue() as string,
+                      statusId: stt_id,
+                      size: 'sm',
+                      class: 'group-hover:underline transition-all duration-200',
+                    }),
+                  ],
                 );
               }
               case 'fullname':
