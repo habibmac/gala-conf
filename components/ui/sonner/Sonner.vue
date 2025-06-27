@@ -6,17 +6,14 @@ const props = defineProps<ToasterProps>()
 </script>
 
 <template>
-  <Sonner 
-    class="group toaster" 
-    v-bind="props" 
-    theme="system" 
-    :toast-options="{
+  <Sonner class="group toaster" v-bind="props" theme="system" richColors :toast-options="{
       classes: {
         toast: 'group toast border shadow-lg',
-        description: 'text-xs !text-slate-200',
+        description: 'text-xs',
+        success: 'bg-emerald-500 !text-white',
+        error: 'bg-red-500 !text-white',
         actionButton: 'bg-primary text-primary-foreground',
         cancelButton: 'bg-muted text-muted-foreground',
       },
-    }"
-  />
+    }" />
 </template>
