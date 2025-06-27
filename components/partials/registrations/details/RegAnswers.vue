@@ -75,8 +75,8 @@ const groupedAnswers = computed(() => {
               <h4 class="border-b pb-1 text-sm font-semibold text-muted-foreground">
                 {{ groupName }}
               </h4>
-              <div class="space-y-2">
-                <div v-for="answer in answers" :key="answer.qst_id" class="flex items-start justify-between">
+              <div class="space-y-0.5">
+                <div v-for="answer in answers" :key="answer.qst_id" class="flex items-start justify-between rounded-md p-2 hover:bg-muted/50">
                   <span class="flex-1 pr-4 text-sm text-muted-foreground">{{ answer.qst }}</span>
                   <span class="text-right text-sm font-medium">{{ answer.ans || 'Not provided' }}</span>
                 </div>
