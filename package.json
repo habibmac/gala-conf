@@ -72,6 +72,7 @@
     "@nuxtjs/color-mode": "^3.5.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/eslint-plugin-tailwindcss": "^3.17.0",
+    "@vite-pwa/nuxt": "^1.0.4",
     "eslint": "^9.28.0",
     "eslint-plugin-format": "^1.0.1",
     "eslint-plugin-perfectionist": "^4.14.0",
