@@ -177,7 +177,7 @@ onUnmounted(() => {
           </Button>
 
           <NuxtLink to="/my-events" class="mx-auto">
-            <Logo svg-class="h-12 w-12 fill-white" />
+            <Logo class="size-12 fill-white" />
           </NuxtLink>
         </div>
 

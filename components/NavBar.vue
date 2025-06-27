@@ -36,7 +36,7 @@ defineEmits<{
             to="/my-events"
             class="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
-            <Logo svg-class="size-12" :colored="true" />
+            <Logo class="size-12" :colored="true" />
             <span class="sr-only">Galanesia ID</span>
           </NuxtLink>
           <!-- <EventSwitcher v-if="showEvents" /> -->
