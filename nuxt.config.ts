@@ -63,6 +63,7 @@ export default defineNuxtConfig({
       oauthClientId: '',
       oauthRedirectUri: '',
       oauthUrl: '',
+      backendUrl: '',
     },
     typesenseApiKey: '',
     typesenseHost: '',

@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 const { user } = useUserProfile();
 const config = useRuntimeConfig();
-const backendUrl = `${config.public.apiUrl}/backend`;
+const backendUrl = `${config.public.backendUrl}`;
 const dropdownOpen = ref(false);
 const trigger = ref<HTMLElement | null>(null);
 const dropdown = ref<HTMLElement | null>(null);
