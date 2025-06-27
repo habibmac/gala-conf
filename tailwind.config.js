@@ -73,7 +73,7 @@ export default {
       },
       fontFamily: {
         // inter: ['Inter Variable', 'sans-serif',  'system-ui'],
-        sans: ['Geist Variable', ...defaultTheme.fontFamily.sans],
+        geist: ['Geist Variable', ...defaultTheme.fontFamily.sans],
       },
       fontSize: {
         tiny: ['0.65rem', { lineHeight: '1.5' }],

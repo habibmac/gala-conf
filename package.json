@@ -16,7 +16,6 @@
   "dependencies": {
     "@e965/xlsx": "^0.20.3",
     "@floating-ui/vue": "^1.1.6",
-    "@fontsource-variable/geist": "^5.2.6",
     "@formkit/auto-animate": "^0.8.2",
     "@nuxt/eslint": "^0.5.7",
     "@nuxt/fonts": "^0.7.2",

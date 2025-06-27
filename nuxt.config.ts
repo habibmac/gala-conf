@@ -9,8 +9,6 @@ export default defineNuxtConfig({
   },
   compatibilityDate: '2024-04-03',
   css: [
-    '@fontsource-variable/geist/index.css',
-    '@fontsource-variable/geist/wght.css',
     '~/assets/scss/main.scss',
   ],
   devtools: {
@@ -25,14 +23,20 @@ export default defineNuxtConfig({
     },
   },
   fonts: {
-    fontsource: {
-      geist: {
-        styles: ['normal'],
-        display: 'swap',
-        pkg: '@fontsource/geist',
-        subsets: ['latin'],
+    families: [
+      // Use local provider for full-featured Geist
+      {
+        name: 'Geist Variable',
+        provider: 'local',
+        src: [
+          {
+            path: '/fonts/Geist-Variable.woff2',
+            weight: '100 900',
+            style: 'normal',
+          },
+        ],
       },
-    },
+    ],
   },
   modules: [
     '@pinia/nuxt',
