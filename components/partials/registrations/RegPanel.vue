@@ -252,7 +252,7 @@ onUnmounted(async () => {
                   class="btn w-full border border-slate-100 bg-white text-sm font-medium text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                 >
                   <Icon icon="tabler:link" class="size-4 shrink-0" />
-                  <span class="ml-2">Reg URL</span>
+                  <span class="ml-2">Reg Link</span>
                 </a>
               </div>
             </div>
