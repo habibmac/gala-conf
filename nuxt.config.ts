@@ -56,22 +56,37 @@ export default defineNuxtConfig({
       name: 'Gala Dashboard',
       short_name: 'GalaDash',
       description: 'Real-time event registration and management dashboard',
-      theme_color: '#ffffff',
-      background_color: '#ffffff',
+      theme_color: '#3B82F6',
+      background_color: '#F1F5F9',
       display: 'standalone',
       orientation: 'portrait',
       scope: '/',
       start_url: '/',
+      lang: 'en',
       icons: [
         {
           src: '/pwa-192x192.png',
           sizes: '192x192',
           type: 'image/png',
+          purpose: 'any',
         },
         {
           src: '/pwa-512x512.png',
           sizes: '512x512',
           type: 'image/png',
+          purpose: 'any',
+        },
+        {
+          src: '/pwa-192x192.png',
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'maskable',
+        },
+        {
+          src: '/pwa-512x512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable',
         },
       ],
     },
@@ -84,6 +99,17 @@ export default defineNuxtConfig({
           handler: 'CacheFirst',
           options: {
             cacheName: 'google-fonts-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+            },
+          },
+        },
+        {
+          urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'google-fonts-stylesheets',
             expiration: {
               maxEntries: 10,
               maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year

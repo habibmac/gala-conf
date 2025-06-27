@@ -7,6 +7,7 @@ useHead({
 </script>
 
 <template>
+  <NuxtPwaManifest />
   <div class="flex h-dvh bg-background">
     <NuxtLoadingIndicator color="#34d399" />
     <NuxtLayout>
