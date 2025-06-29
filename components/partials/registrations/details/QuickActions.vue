@@ -18,9 +18,9 @@ const openUrl = (url: string) => {
 
 // Create computed actions that access the actual registration properties
 const actionList = computed(() => [
+  { icon: 'tabler:link', label: 'Registration Link', url: registration.reg_url },
   { icon: 'tabler:receipt', label: 'View Invoice', url: registration.invoice_url },
   { icon: 'tabler:receipt-tax', label: 'View Receipt', url: registration.receipt_url },
-  { icon: 'tabler:ticket', label: 'Download Ticket', url: registration.ticket_url },
 ]);
 </script>
 
@@ -44,12 +44,20 @@ const actionList = computed(() => [
         <Icon :icon="action.icon" class="mr-2 size-4" />
         {{ action.label }}
       </Button>
-      <Separator />
       <div class="space-y-2">
-        <Button variant="default" class="w-full">
-          <Icon icon="tabler:send" class="mr-2 size-4" />
-          Resend Email
-        </Button>
+        <template v-if="registration.stt_id === 'RAP' && registration.ticket_url">
+          <Separator />
+          <NuxtLink :to="registration.ticket_url" target="_blank">
+            <Button
+              variant="default"
+              class="w-full"
+              @click="openUrl(registration.ticket_url)"
+            >
+              <Icon icon="tabler:ticket" class="mr-2 size-4" />
+              Download Ticket
+            </Button>
+          </NuxtLink>
+        </template>
       </div>
     </CardContent>
   </Card>

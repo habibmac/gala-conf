@@ -292,7 +292,7 @@ const downloadCustomFieldData = (field: any) => {
     </section>
 
     <!-- Charts Section -->
-    <section class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <section class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
       <!-- Status Distribution -->
       <Card>
         <CardHeader>
