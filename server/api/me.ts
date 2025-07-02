@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const response = await $fetch(`${config.public.oauthUrl}/me`, {
+    const response = await $fetch(`${config.public.oauthUrl}/me/`, {
       credentials: 'include',
       headers: {
         Authorization: authHeader,

@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   try {
-    const response = await $fetch(`${config.public.oauthUrl}/token`, {
+    const response = await $fetch(`${config.public.oauthUrl}/token/`, {
       body: new URLSearchParams({
         client_id: config.public.oauthClientId,
         client_secret: config.oauthClientSecret,
