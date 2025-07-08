@@ -393,7 +393,7 @@ const handleExport = async (format: 'csv' | 'xlsx') => {
       format,
       {
         ...filters.value,
-        insight_id: insightId, // Include the insight ID
+        insight_id: insightId.value, // Include the insight ID
       },
     );
 
