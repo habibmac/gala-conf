@@ -136,7 +136,7 @@ export default defineNuxtConfig({
     '~/plugins/auth.ts',
   ],
   runtimeConfig: {
-    oauthClientSecret: '',
+    oauthClientSecret: import.meta.env.NUXT_OAUTH_CLIENT_SECRET || '',
     public: {
       apiUrl: import.meta.env.NUXT_PUBLIC_API_URL || '',
       oauthUrl: import.meta.env.NUXT_PUBLIC_OAUTH_URL || '',
