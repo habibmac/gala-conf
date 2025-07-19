@@ -488,7 +488,7 @@ watch(
       </div>
       <div
         v-else-if="ticketGroups"
-        class="relative mx-auto flex w-full max-w-sm rounded-md bg-slate-200 p-1 dark:bg-slate-700/40 sm:mx-0"
+        class="relative mx-auto flex w-full max-w-xl rounded-md bg-slate-200 p-1 dark:bg-slate-700/40 sm:mx-0"
       >
         <span class="pointer-events-none absolute inset-0 m-1" aria-hidden="true">
           <span
