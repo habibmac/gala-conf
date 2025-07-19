@@ -2,7 +2,7 @@ import pkg from './package.json';
 
 export default defineNuxtConfig({
   build: {
-    transpile: ['@vuepic/vue-datepicker', 'vue-sonner'],
+    transpile: ['@vuepic/vue-datepicker', 'vue-sonner', 'form-data'],
   },
   colorMode: {
     classSuffix: '',
@@ -138,13 +138,12 @@ export default defineNuxtConfig({
   runtimeConfig: {
     oauthClientSecret: '',
     public: {
-      apiUrl: '',
-      clientVersion: pkg.version,
-      oauthAccessTokenTest: '',
-      oauthClientId: '',
-      oauthRedirectUri: '',
-      oauthUrl: '',
-      backendUrl: '',
+      apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+      oauthUrl: import.meta.env.VITE_OAUTH_URL || 'http://localhost:3000/oauth',
+      oauthRedirectUri: import.meta.env.VITE_OAUTH_REDIRECT_URI || 'http://localhost:3000/auth/callback',
+      oauthClientId: import.meta.env.VITE_OAUTH_CLIENT_ID || '',
+      oauthAccessTokenTest: import.meta.env.VITE_OAUTH_ACCESS_TOKEN_TEST || '',
+      backendUrl: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000',
     },
     typesenseApiKey: '',
     typesenseHost: '',
