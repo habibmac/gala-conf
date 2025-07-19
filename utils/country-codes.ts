@@ -1560,3 +1560,8 @@ export function getCountryFlagWithName(countryCode: string) {
   const country = countries[countryCode];
   return country ? `${country.emoji} ${country.name}` : '';
 }
+
+export function getCountryName(countryCode: string) {
+  const country = countries[countryCode];
+  return country ? country.name : countryCode; // Return the original code if not found
+}
