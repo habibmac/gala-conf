@@ -11,6 +11,7 @@ import PaymentHistoryCard from '@/components/partials/registrations/details/Paym
 import QuickActionsCard from '@/components/partials/registrations/details/QuickActions.vue';
 import RegistrationAnswersCard from '@/components/partials/registrations/details/RegAnswers.vue';
 import RegistrationInfoCard from '@/components/partials/registrations/details/RegInfo.vue';
+import SpecialAttendeeCard from '@/components/partials/registrations/details/SpecialAttendeeCard.vue';
 import TransactionInfoCard from '@/components/partials/registrations/details/TransactionInfo.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -60,6 +61,12 @@ const goBack = () => {
   router.back();
 };
 
+// Handle notes update from SpecialAttendeeCard
+const handleNotesUpdate = async () => {
+  // Refetch the registration data to get the latest from backend
+  await refetch();
+};
+
 // Head
 useHead({
   title: computed(() =>
@@ -93,6 +100,10 @@ useHead({
             <div v-else-if="registration" class="space-y-4 ">
               <!-- Details -->
               <RegistrationInfoCard :registration="registration" />
+              <SpecialAttendeeCard
+                :registration="registration"
+                @update-notes="handleNotesUpdate"
+              />
               <QuickActionsCard :registration="registration" />
             </div>
           </div>

@@ -116,19 +116,47 @@ watch(() => props.lookupResult, () => {
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
           <Icon
+            v-if="lookupResult.special_attendee?.is_vip"
+            icon="solar:crown-bold"
+            class="size-5 text-amber-500"
+          />
+          <Icon
+            v-else
             :icon="registrationStatusInfo.isCheckedIn ? 'heroicons:check-circle' : 'heroicons:user-circle'"
             class="size-5"
             :class="registrationStatusInfo.isCheckedIn ? 'text-green-500' : 'text-blue-500'"
           />
-          Registration Details
+          <span v-if="lookupResult.special_attendee?.is_vip" class="text-amber-600">VIP Registration</span>
+          <span v-else>Registration Details</span>
         </DialogTitle>
-        <DialogDescription>
-          {{ lookupResult.code }}
+        <DialogDescription class="flex items-center gap-2">
+          <span>{{ lookupResult.code }}</span>
+          <Badge 
+            v-if="lookupResult.special_attendee?.is_vip" 
+            class="bg-amber-500 text-white"
+          >
+            <Icon icon="solar:crown-bold" class="mr-1 size-3" />
+            VIP
+          </Badge>
         </DialogDescription>
       </DialogHeader>
 
       <!-- Registration Details -->
       <div class="space-y-4 overflow-y-auto">
+        <!-- Staff Notes Alert (if present) -->
+        <div 
+          v-if="lookupResult.special_attendee?.notes" 
+          class="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20"
+        >
+          <div class="flex items-start gap-2">
+            <Icon icon="solar:note-bold" class="mt-0.5 size-4 text-amber-600" />
+            <div class="flex-1">
+              <h4 class="text-sm font-semibold text-amber-800 dark:text-amber-200">Staff Note</h4>
+              <p class="text-sm text-amber-700 dark:text-amber-300">{{ lookupResult.special_attendee.notes }}</p>
+            </div>
+          </div>
+        </div>
+
         <AttendeeDetailsCard :lookup-result="lookupResult" />
         <RegStatusCard :registration-status-info="registrationStatusInfo" :payment-status="paymentStatus" />
         <CheckinHistoryCard :lookup-result="lookupResult" />
@@ -163,11 +191,25 @@ watch(() => props.lookupResult, () => {
       <CardTitle class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <Icon
+            v-if="lookupResult.special_attendee?.is_vip"
+            icon="solar:crown-bold"
+            class="size-5 text-amber-500"
+          />
+          <Icon
+            v-else
             :icon="registrationStatusInfo.isCheckedIn ? 'heroicons:check-circle' : 'heroicons:user-circle'"
             class="size-5"
             :class="registrationStatusInfo.isCheckedIn ? 'text-green-500' : 'text-blue-500'"
           />
-          Registration Found
+          <span v-if="lookupResult.special_attendee?.is_vip" class="text-amber-600">VIP Registration Found</span>
+          <span v-else>Registration Found</span>
+          <Badge 
+            v-if="lookupResult.special_attendee?.is_vip" 
+            class="ml-2 bg-amber-500 text-white"
+          >
+            <Icon icon="solar:crown-bold" class="mr-1 size-3" />
+            VIP
+          </Badge>
         </div>
         <Button
           variant="ghost"
@@ -181,6 +223,20 @@ watch(() => props.lookupResult, () => {
     </CardHeader>
 
     <CardContent class="space-y-4">
+      <!-- Staff Notes Alert (if present) -->
+      <div 
+        v-if="lookupResult.special_attendee?.notes" 
+        class="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20"
+      >
+        <div class="flex items-start gap-3">
+          <Icon icon="solar:note-bold" class="mt-0.5 size-5 text-amber-600" />
+          <div class="flex-1">
+            <h4 class="font-semibold text-amber-800 dark:text-amber-200">Staff Note</h4>
+            <p class="text-amber-700 dark:text-amber-300">{{ lookupResult.special_attendee.notes }}</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Attendee Details -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_310px]">
         <div>

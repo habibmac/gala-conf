@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Icon } from '@iconify/vue';
+
 import type { RegistrationData } from '~/types';
 
 interface Props {
@@ -9,7 +11,9 @@ const props = defineProps<Props>();
 
 const attendeeCardValue = computed(() => {
   const attendee = props.lookupResult.attendee;
-  return [
+  const specialAttendee = props.lookupResult.special_attendee;
+  
+  const baseData = [
     { field: 'Full Name', value: attendee.fullname },
     { field: 'Email', value: attendee.email },
     { field: 'Phone', value: attendee.phone || 'N/A' },
@@ -17,6 +21,28 @@ const attendeeCardValue = computed(() => {
     { field: 'Code', value: props.lookupResult.code },
     { field: 'Price', value: formatCurrency(props.lookupResult.ticket.price) },
   ];
+
+  // Add VIP status and notes if special attendee data exists
+  if (specialAttendee) {
+    // Only show VIP status if actually VIP
+    if (specialAttendee.is_vip) {
+      baseData.splice(2, 0, { 
+        field: 'VIP Status', 
+        value: 'VIP',
+        isVip: true
+      });
+    }
+    
+    if (specialAttendee.notes) {
+      baseData.push({ 
+        field: 'Staff Notes', 
+        value: specialAttendee.notes,
+        isNotes: true
+      });
+    }
+  }
+
+  return baseData;
 });
 
 const attendeeCardColumns = [
@@ -59,6 +85,25 @@ const attendeeCardColumns = [
       <Badge v-else-if="item.field === 'Status'" :variant="value === 'Approved' ? 'default' : 'secondary'">
         {{ value }}
       </Badge>
+      <div v-else-if="item.field === 'VIP Status'" class="flex items-center gap-2">
+        <Badge 
+          :variant="item.isVip ? 'default' : 'secondary'"
+          :class="item.isVip ? 'bg-amber-500 text-white' : ''"
+        >
+          <Icon 
+            v-if="item.isVip" 
+            icon="solar:crown-bold" 
+            class="mr-1 size-3" 
+          />
+          {{ value }}
+        </Badge>
+      </div>
+      <div v-else-if="item.field === 'Staff Notes'" class="max-w-xs">
+        <div class="rounded-md bg-blue-50 p-2 text-sm text-blue-800 dark:bg-blue-900/20 dark:text-blue-200">
+          <Icon icon="solar:note-bold" class="mr-1 inline size-3" />
+          {{ value }}
+        </div>
+      </div>
       <span v-else class="font-medium">{{ value }}</span>
     </template>
   </TableCard>

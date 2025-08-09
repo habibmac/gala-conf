@@ -74,6 +74,12 @@ export interface RegistrationData {
     can_checkin_payment: boolean
     payment_message: string
   }
+  special_attendee?: {
+    is_vip: boolean
+    display_priority: boolean
+    special_treatment: boolean
+    notes: string | null
+  }
   group_registrations?: Array<{
     code: string
     attendee_name: string
