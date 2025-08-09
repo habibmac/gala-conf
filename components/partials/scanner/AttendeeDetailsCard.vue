@@ -12,7 +12,7 @@ const props = defineProps<Props>();
 const attendeeCardValue = computed(() => {
   const attendee = props.lookupResult.attendee;
   const specialAttendee = props.lookupResult.special_attendee;
-  
+
   const baseData = [
     { field: 'Full Name', value: attendee.fullname },
     { field: 'Email', value: attendee.email },
@@ -26,18 +26,18 @@ const attendeeCardValue = computed(() => {
   if (specialAttendee) {
     // Only show VIP status if actually VIP
     if (specialAttendee.is_vip) {
-      baseData.splice(2, 0, { 
-        field: 'VIP Status', 
+      baseData.splice(2, 0, {
+        field: 'VIP Status',
         value: 'VIP',
-        isVip: true
+        isVip: true,
       });
     }
-    
+
     if (specialAttendee.notes) {
-      baseData.push({ 
-        field: 'Staff Notes', 
+      baseData.push({
+        field: 'Staff Notes',
         value: specialAttendee.notes,
-        isNotes: true
+        isNotes: true,
       });
     }
   }
@@ -86,14 +86,14 @@ const attendeeCardColumns = [
         {{ value }}
       </Badge>
       <div v-else-if="item.field === 'VIP Status'" class="flex items-center gap-2">
-        <Badge 
+        <Badge
           :variant="item.isVip ? 'default' : 'secondary'"
           :class="item.isVip ? 'bg-amber-500 text-white' : ''"
         >
-          <Icon 
-            v-if="item.isVip" 
-            icon="solar:crown-bold" 
-            class="mr-1 size-3" 
+          <Icon
+            v-if="item.isVip"
+            icon="solar:crown-bold"
+            class="mr-1 size-3"
           />
           {{ value }}
         </Badge>

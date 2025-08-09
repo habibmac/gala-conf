@@ -3,6 +3,7 @@ import { Icon } from '@iconify/vue';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { useScrollLock } from '@vueuse/core';
 import { onMounted, onUnmounted, ref, watchEffect } from 'vue';
+import { toast } from 'vue-sonner';
 
 import EmptyState from '@/components/EmptyState.vue';
 import PayMethodLogo from '@/components/partials/registrations/PayMethodLogo.vue';
@@ -39,6 +40,98 @@ const panelContent = ref<HTMLElement | null>(null);
 const closeBtn = ref<HTMLElement | null>(null);
 
 const isLocked = ref(false);
+
+// VIP and notes functionality
+const isTogglingVip = ref(false);
+const isEditingNotes = ref(false);
+const notesValue = ref('');
+const isSaving = ref(false);
+
+const { $galantisApi } = useNuxtApp();
+
+// Find registration notes as fallback
+const registrationNotes = computed(() => {
+  const notesAnswer = data.value?.ans?.find((answer: any) =>
+    answer.qst.toLowerCase().includes('notes')
+    || answer.qst.toLowerCase().includes('note'),
+  );
+  return notesAnswer?.ans || '';
+});
+
+const specialAttendee = computed(() => data.value?.special_attendee);
+
+// VIP toggle functionality
+const toggleVipStatus = async () => {
+  if (isTogglingVip.value || !data.value)
+    return;
+
+  try {
+    isTogglingVip.value = true;
+    const currentVipStatus = specialAttendee.value?.is_vip || false;
+
+    await $galantisApi.put(`/event/${eventId.value}/registrations/${data.value.id}/vip`, {
+      is_vip: !currentVipStatus,
+    });
+
+    // Refetch data to get latest state
+    await refetch();
+
+    toast.success(
+      currentVipStatus ? 'VIP status removed' : '👑 Marked as VIP! 👑',
+      {
+        description: `${data.value.fullname} is now ${!currentVipStatus ? 'a VIP attendee ✨' : 'a regular attendee'}`,
+      },
+    );
+  }
+  catch (error) {
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to update VIP status');
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
+  }
+  finally {
+    isTogglingVip.value = false;
+  }
+};
+
+// Notes editing functionality
+const startEditingNotes = () => {
+  notesValue.value = specialAttendee.value?.notes || registrationNotes.value || '';
+  isEditingNotes.value = true;
+};
+
+const cancelEditingNotes = () => {
+  notesValue.value = '';
+  isEditingNotes.value = false;
+};
+
+const saveNotes = async () => {
+  if (isSaving.value || !data.value)
+    return;
+
+  try {
+    isSaving.value = true;
+
+    await $galantisApi.put(`/event/${eventId.value}/registrations/${data.value.id}/notes`, {
+      notes: notesValue.value.trim(),
+    });
+
+    // Refetch data to get latest state
+    await refetch();
+
+    isEditingNotes.value = false;
+    toast.success('Notes saved successfully');
+  }
+  catch (error) {
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to save notes');
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
+  }
+  finally {
+    isSaving.value = false;
+  }
+};
 
 // close on click outside
 const clickHandler = (event: MouseEvent) => {
@@ -174,6 +267,118 @@ onUnmounted(async () => {
             </div>
             <!-- Details -->
             <RegDetailsSummary :data="data" class="mt-4" />
+
+            <!-- VIP Status & Notes -->
+            <div
+              class="mt-4 rounded-lg border p-4 shadow-sm duration-150 ease-in-out"
+              :class="specialAttendee?.is_vip
+                ? 'border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20'
+                : 'border-slate-200 dark:border-slate-700'"
+            >
+              <div class="mb-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <Icon icon="solar:crown-bold-duotone" class="size-4 text-amber-500" />
+                  <span class="text-sm font-semibold">Special Attendee</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  :disabled="isTogglingVip"
+                  @click.stop="toggleVipStatus"
+                >
+                  <Icon
+                    v-if="isTogglingVip"
+                    icon="svg-spinners:ring-resize"
+                    class="mr-1 size-3"
+                  />
+                  <Icon
+                    v-else-if="specialAttendee?.is_vip"
+                    icon="solar:crown-minimalistic-bold"
+                    class="mr-1 size-3 text-amber-500"
+                  />
+                  <Icon
+                    v-else
+                    icon="solar:crown-line-duotone"
+                    class="mr-1 size-3"
+                  />
+                  {{ isTogglingVip ? 'Updating...' : (specialAttendee?.is_vip ? 'Remove VIP' : 'Mark VIP') }}
+                </Button>
+              </div>
+
+              <!-- VIP Status Display -->
+              <div v-if="specialAttendee?.is_vip" class="mb-3">
+                <Badge class="bg-amber-500 text-white">
+                  <Icon icon="solar:crown-bold" class="mr-1 size-3" />
+                  VIP
+                </Badge>
+              </div>
+
+              <!-- Notes Section -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-medium text-slate-600 dark:text-slate-400">Notes</span>
+                  <Button
+                    v-if="!isEditingNotes"
+                    variant="ghost"
+                    size="sm"
+                    @click.stop="startEditingNotes"
+                  >
+                    <Icon icon="solar:pen-bold" class="mr-1 size-3" />
+                    Edit
+                  </Button>
+                </div>
+
+                <!-- Notes Display -->
+                <div v-if="!isEditingNotes">
+                  <div
+                    v-if="specialAttendee?.notes || registrationNotes"
+                    class="rounded-md bg-slate-100 p-2 text-xs dark:bg-slate-700"
+                  >
+                    {{ specialAttendee?.notes || registrationNotes }}
+                  </div>
+                  <div v-else class="text-xs italic text-slate-500">
+                    No notes available
+                  </div>
+                </div>
+
+                <!-- Notes Editor -->
+                <div v-else class="space-y-2">
+                  <Textarea
+                    v-model="notesValue"
+                    placeholder="Add notes for this attendee"
+                    class="min-h-[60px] text-xs"
+                    :disabled="isSaving"
+                  />
+                  <div class="flex gap-2">
+                    <Button
+                      size="sm"
+                      :disabled="isSaving"
+                      @click.stop="saveNotes"
+                    >
+                      <Icon
+                        v-if="isSaving"
+                        icon="svg-spinners:ring-resize"
+                        class="mr-1 size-3"
+                      />
+                      <Icon
+                        v-else
+                        icon="tabler:check"
+                        class="mr-1 size-3"
+                      />
+                      {{ isSaving ? 'Saving...' : 'Save' }}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      :disabled="isSaving"
+                      @click.stop="cancelEditingNotes"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <!-- Payments -->
             <div class="mt-6">

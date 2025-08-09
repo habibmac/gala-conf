@@ -255,7 +255,7 @@ const performCheckin = async (code: string, action = 'checkin') => {
     });
 
     if (response.data.success) {
-      const registrationData = response.data.registration as RegistrationData;
+      const registrationData = response.data.data as RegistrationData;
 
       const scanEntry: ScanHistoryItem = {
         action: response.data.action_taken,
@@ -675,16 +675,23 @@ const handleRegistrationAction = async (
 
       scanHistory.value.unshift(scanEntry);
 
-      toast.success(`${action} Successful ✅`, {
-        description: `${updatedRegistration?.attendee?.fullname || 'Attendee'} ${action} completed${note ? ' with note' : ''}`,
+      // Enhanced toast for VIP attendees
+      const isVip = updatedRegistration?.special_attendee?.is_vip;
+      const vipPrefix = isVip ? '👑 VIP ' : '';
+      const vipSuffix = isVip ? ' 👑' : '';
+
+      toast.success(`${vipPrefix}${action} Successful${vipSuffix} ✅`, {
+        description: `${updatedRegistration?.attendee?.fullname || 'Attendee'} ${action} completed${note ? ' (with note)' : ''}${updatedRegistration?.special_attendee?.notes ? ` - ${updatedRegistration.special_attendee.notes}` : ''}`,
+        duration: isVip ? 6000 : 3000, // Longer duration for VIPs
       });
 
-      // Resume scanning after action
+      // Resume scanning after action (longer delay for VIPs)
+      const resumeDelay = isVip ? 2000 : 1000; // 2s for VIP, 1s for regular
       setTimeout(() => {
         if (TicketScannerRef.value) {
           TicketScannerRef.value.resumeScanning();
         }
-      }, 1000);
+      }, resumeDelay);
 
       return response.data;
     }

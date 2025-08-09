@@ -131,8 +131,8 @@ watch(() => props.lookupResult, () => {
         </DialogTitle>
         <DialogDescription class="flex items-center gap-2">
           <span>{{ lookupResult.code }}</span>
-          <Badge 
-            v-if="lookupResult.special_attendee?.is_vip" 
+          <Badge
+            v-if="lookupResult.special_attendee?.is_vip"
             class="bg-amber-500 text-white"
           >
             <Icon icon="solar:crown-bold" class="mr-1 size-3" />
@@ -144,15 +144,19 @@ watch(() => props.lookupResult, () => {
       <!-- Registration Details -->
       <div class="space-y-4 overflow-y-auto">
         <!-- Staff Notes Alert (if present) -->
-        <div 
-          v-if="lookupResult.special_attendee?.notes" 
+        <div
+          v-if="lookupResult.special_attendee?.notes"
           class="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20"
         >
           <div class="flex items-start gap-2">
             <Icon icon="solar:note-bold" class="mt-0.5 size-4 text-amber-600" />
             <div class="flex-1">
-              <h4 class="text-sm font-semibold text-amber-800 dark:text-amber-200">Staff Note</h4>
-              <p class="text-sm text-amber-700 dark:text-amber-300">{{ lookupResult.special_attendee.notes }}</p>
+              <h4 class="text-sm font-semibold text-amber-800 dark:text-amber-200">
+                Staff Note
+              </h4>
+              <p class="text-sm text-amber-700 dark:text-amber-300">
+                {{ lookupResult.special_attendee.notes }}
+              </p>
             </div>
           </div>
         </div>
@@ -203,8 +207,8 @@ watch(() => props.lookupResult, () => {
           />
           <span v-if="lookupResult.special_attendee?.is_vip" class="text-amber-600">VIP Registration Found</span>
           <span v-else>Registration Found</span>
-          <Badge 
-            v-if="lookupResult.special_attendee?.is_vip" 
+          <Badge
+            v-if="lookupResult.special_attendee?.is_vip"
             class="ml-2 bg-amber-500 text-white"
           >
             <Icon icon="solar:crown-bold" class="mr-1 size-3" />
@@ -224,15 +228,19 @@ watch(() => props.lookupResult, () => {
 
     <CardContent class="space-y-4">
       <!-- Staff Notes Alert (if present) -->
-      <div 
-        v-if="lookupResult.special_attendee?.notes" 
+      <div
+        v-if="lookupResult.special_attendee?.notes"
         class="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20"
       >
         <div class="flex items-start gap-3">
           <Icon icon="solar:note-bold" class="mt-0.5 size-5 text-amber-600" />
           <div class="flex-1">
-            <h4 class="font-semibold text-amber-800 dark:text-amber-200">Staff Note</h4>
-            <p class="text-amber-700 dark:text-amber-300">{{ lookupResult.special_attendee.notes }}</p>
+            <h4 class="font-semibold text-amber-800 dark:text-amber-200">
+              Staff Note
+            </h4>
+            <p class="text-amber-700 dark:text-amber-300">
+              {{ lookupResult.special_attendee.notes }}
+            </p>
           </div>
         </div>
       </div>

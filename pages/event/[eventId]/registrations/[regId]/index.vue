@@ -103,6 +103,7 @@ useHead({
               <SpecialAttendeeCard
                 :registration="registration"
                 @update-notes="handleNotesUpdate"
+                @vip-updated="handleNotesUpdate"
               />
               <QuickActionsCard :registration="registration" />
             </div>

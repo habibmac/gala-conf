@@ -3,6 +3,8 @@ import { Icon } from '@iconify/vue';
 
 import type { RegistrationData, ScanHistoryItem } from '~/types';
 
+import RegPanel from '@/components/partials/registrations/RegPanel.vue';
+
 interface Props {
   scanHistory: ScanHistoryItem[]
   recentScans: ScanHistoryItem[]
@@ -18,6 +20,20 @@ defineEmits<{
   'registration-action': [registration: RegistrationData, action: 'checkin' | 'checkout']
 }>();
 
+// RegPanel state
+const selectedRegId = ref<string>('');
+
+const route = useRoute();
+const eventId = computed(() => route.params.eventId as string);
+
+const openRegistrationDetails = (registration: RegistrationData) => {
+  selectedRegId.value = registration.id;
+};
+
+const closeRegPanel = () => {
+  selectedRegId.value = '';
+};
+
 const formatTimestamp = (timestamp: number) => {
   return new Date(timestamp).toLocaleString('id-ID', {
     dateStyle: 'medium',
@@ -32,7 +48,7 @@ const formatTimestamp = (timestamp: number) => {
       <div>
         <CardTitle>Scan History</CardTitle>
         <CardDescription>
-          Recent scans and their results ({{ scanHistory.length }} total)
+          Recent scans ({{ scanHistory.length }} total)
         </CardDescription>
       </div>
       <div class="flex gap-2">
@@ -79,9 +95,17 @@ const formatTimestamp = (timestamp: number) => {
             <p class="text-xs text-muted-foreground">
               {{ formatTimestamp(scan.timestamp) }}
             </p>
-            <p v-if="scan.attendeeName" class="mt-1 text-sm font-medium">
-              {{ scan.attendeeName }}
-            </p>
+            <div v-if="scan.attendeeName" class="mt-1 flex items-center gap-2">
+              <span class="text-sm font-medium">{{ scan.attendeeName }}</span>
+              <!-- VIP Badge -->
+              <Badge
+                v-if="scan.registrationData?.special_attendee?.is_vip"
+                class="bg-amber-500 text-xs text-white"
+              >
+                <Icon icon="solar:crown-bold" class="mr-1 size-2" />
+                VIP
+              </Badge>
+            </div>
             <p
               v-if="scan.message"
               class="mt-1 text-xs"
@@ -94,9 +118,23 @@ const formatTimestamp = (timestamp: number) => {
               {{ scan.message }}
             </p>
 
-            <!-- Note display -->
+            <!-- Staff Notes display -->
             <div
-              v-if="scan.note"
+              v-if="scan.registrationData?.special_attendee?.notes"
+              class="mt-2 rounded border-l-2 border-blue-300 bg-blue-50 p-2 text-xs dark:bg-blue-900/20"
+            >
+              <div class="mb-1 flex items-center gap-1">
+                <Icon icon="solar:note-bold" class="size-3 text-blue-600" />
+                <span class="font-medium text-blue-700 dark:text-blue-400">Staff Note:</span>
+              </div>
+              <p class="text-blue-800 dark:text-blue-300">
+                {{ scan.registrationData.special_attendee.notes }}
+              </p>
+            </div>
+
+            <!-- Legacy Note display (fallback) -->
+            <div
+              v-else-if="scan.note"
               class="mt-2 rounded border-l-2 border-amber-300 bg-amber-50 p-2 text-xs dark:bg-amber-900/20"
             >
               <div class="mb-1 flex items-center gap-1">
@@ -115,23 +153,46 @@ const formatTimestamp = (timestamp: number) => {
             </Badge>
           </div>
 
-          <div v-if="scan.status === 'lookup' && scan.registrationData" class="flex items-center gap-1">
+          <div v-if="scan.registrationData" class="flex items-center gap-1">
+            <!-- View Details Button -->
             <Button
-              v-if="scan.registrationData.can_checkin"
-              @click="$emit('registration-action', scan.registrationData, 'checkin')"
+              variant="ghost"
+              size="sm"
+              title="View registration details"
+              @click.stop="openRegistrationDetails(scan.registrationData!)"
             >
-              <Icon icon="ph:sign-in" class="size-5" />
+              <Icon icon="heroicons:eye" class="size-4" />
             </Button>
-            <Button
-              v-if="scan.registrationData.can_checkout"
-              variant="destructive"
-              @click="$emit('registration-action', scan.registrationData, 'checkout')"
-            >
-              <Icon icon="ph:sign-out" class="size-5" />
-            </Button>
+
+            <!-- Check-in/out Actions -->
+            <div v-if="scan.status === 'lookup'" class="flex items-center gap-1">
+              <Button
+                v-if="scan.registrationData.can_checkin"
+                size="sm"
+                @click="$emit('registration-action', scan.registrationData, 'checkin')"
+              >
+                <Icon icon="ph:sign-in" class="size-4" />
+              </Button>
+              <Button
+                v-if="scan.registrationData.can_checkout"
+                variant="destructive"
+                size="sm"
+                @click="$emit('registration-action', scan.registrationData, 'checkout')"
+              >
+                <Icon icon="ph:sign-out" class="size-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
     </CardContent>
   </Card>
+
+  <!-- Registration Details Panel -->
+  <RegPanel
+    :reg-details-open="selectedRegId !== ''"
+    :evt-id="eventId"
+    :reg-id="selectedRegId || undefined"
+    @close-reg-details="closeRegPanel"
+  />
 </template>

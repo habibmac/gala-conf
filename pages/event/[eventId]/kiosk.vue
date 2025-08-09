@@ -6,16 +6,18 @@ import type { RegistrationData } from '~/types';
 definePageMeta({
   capabilities: ['ee_read_checkins'],
   group: 'tools',
-  icon: 'solar:tablet-bold-duotone',
+  icon: 'solar:monitor-smartphone-bold-duotone',
   layout: false, // Keep full-screen for kiosk mode
   packages: ['optima'],
   requiresSelectedEvent: true,
   roles: ['administrator', 'ee_event_organizer'],
   showInMenu: true,
-  title: 'Self Check-in',
+  title: 'Kiosk',
   order: 11,
-  // Only show if event allows self check-in
-  condition: (event: any) => event?.allow_self_checkin === true,
+  condition: (event: any) => {
+    // Only show if allow_self_checkin is explicitly set to true
+    return event?.allow_self_checkin === true;
+  },
 });
 
 const route = useRoute();
@@ -51,17 +53,18 @@ const welcomeText = computed(() => {
 // Dynamic styling based on event configuration
 const backgroundStyle = computed(() => {
   const styles: Record<string, string> = {};
-  
+
   if (event.value?.bg) {
     // Custom background image
     styles.backgroundImage = `url(${event.value.bg})`;
     styles.backgroundSize = 'cover';
     styles.backgroundPosition = 'center';
-  } else if (event.value?.bg_color) {
+  }
+  else if (event.value?.bg_color) {
     // Custom background color
     styles.backgroundColor = event.value.bg_color;
   }
-  
+
   return styles;
 });
 
@@ -78,7 +81,7 @@ const loadEventData = async () => {
     isLoading.value = true;
     const response = await $galantisApi.get(`/event/${eventId.value}`);
     event.value = response.data;
-    
+
     // Check if self check-in is disabled for this event
     if (event.value?.allow_self_checkin === false) {
       error.value = 'Self check-in is not enabled for this event';
@@ -212,7 +215,7 @@ useHead({
 </script>
 
 <template>
-  <div 
+  <div
     class="relative min-h-screen w-full overflow-hidden"
     :class="!event?.bg && !event?.bg_color ? 'bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900' : ''"
     :style="backgroundStyle"
@@ -225,7 +228,7 @@ useHead({
     />
 
     <!-- Background Overlay - darker for images, lighter for solid colors -->
-    <div 
+    <div
       class="absolute inset-0"
       :class="event?.bg ? 'bg-black/40' : 'bg-black/30'"
     />
@@ -243,13 +246,13 @@ useHead({
     >
 
     <!-- Content -->
-    <div 
+    <div
       class="relative z-10 flex min-h-screen flex-col items-center justify-center p-8"
       :style="textColorStyle"
     >
       <!-- Loading State -->
       <div v-if="isLoading" class="text-center">
-        <div 
+        <div
           class="mx-auto mb-4 size-16 animate-spin rounded-full border-4 border-t-transparent"
           :style="{ borderColor: textColorStyle.color, borderTopColor: 'transparent' }"
         />
@@ -367,7 +370,7 @@ useHead({
 
         <!-- Scanner Icon -->
         <div class="mb-8">
-          <div 
+          <div
             class="mx-auto inline-flex items-center justify-center rounded-full p-6"
             :style="{ backgroundColor: `${textColorStyle.color}20` }"
           >

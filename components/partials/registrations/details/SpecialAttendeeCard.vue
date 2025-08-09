@@ -15,6 +15,7 @@ interface Props {
 
 interface Emits {
   (e: 'update-notes', notes: string | null): void
+  (e: 'vip-updated'): void
 }
 
 const props = defineProps<Props>();
@@ -24,9 +25,9 @@ const { $galantisApi } = useNuxtApp();
 
 // Find "Notes" from registration answers as fallback
 const registrationNotes = computed(() => {
-  const notesAnswer = props.registration.ans?.find(answer => 
-    answer.qst.toLowerCase().includes('notes') || 
-    answer.qst.toLowerCase().includes('note')
+  const notesAnswer = props.registration.ans?.find(answer =>
+    answer.qst.toLowerCase().includes('notes')
+    || answer.qst.toLowerCase().includes('note'),
   );
   return notesAnswer?.ans || '';
 });
@@ -35,6 +36,9 @@ const registrationNotes = computed(() => {
 const isEditingNotes = ref(false);
 const notesValue = ref(props.registration.special_attendee?.notes || '');
 const isSaving = ref(false);
+
+// Local state for VIP toggle
+const isTogglingVip = ref(false);
 
 // Watch for changes in registration data
 watch(() => props.registration.special_attendee?.notes, (newNotes) => {
@@ -64,7 +68,7 @@ const saveNotes = async () => {
     isSaving.value = true;
     const route = useRoute();
     const eventId = route.params.eventId as string;
-    
+
     const response = await $galantisApi.put(`/event/${eventId}/registrations/${props.registration.id}/notes`, {
       notes: notesValue.value.trim(),
     });
@@ -72,7 +76,8 @@ const saveNotes = async () => {
     // Use the returned special_attendee data from API response
     if (response.data.special_attendee) {
       emit('update-notes', response.data.special_attendee.notes);
-    } else {
+    }
+    else {
       // Fallback to local value
       const updatedNotes = notesValue.value.trim() || null;
       emit('update-notes', updatedNotes);
@@ -91,14 +96,76 @@ const saveNotes = async () => {
     isSaving.value = false;
   }
 };
+
+const toggleVipStatus = async () => {
+  if (isTogglingVip.value)
+    return;
+
+  try {
+    isTogglingVip.value = true;
+    const route = useRoute();
+    const eventId = route.params.eventId as string;
+    const currentVipStatus = specialAttendee.value?.is_vip || false;
+
+    await $galantisApi.put(`/event/${eventId}/registrations/${props.registration.id}/vip`, {
+      is_vip: !currentVipStatus,
+    });
+
+    // Emit event to parent to refetch registration data
+    emit('vip-updated');
+
+    toast.success(
+      currentVipStatus ? 'VIP status removed' : '👑 Marked as VIP! 👑',
+      {
+        description: `${props.registration.fullname} is now ${!currentVipStatus ? 'a VIP attendee ✨' : 'a regular attendee'}`,
+      },
+    );
+  }
+  catch (error) {
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to update VIP status');
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
+  }
+  finally {
+    isTogglingVip.value = false;
+  }
+};
 </script>
 
 <template>
-  <Card>
+  <Card
+    :class="specialAttendee?.is_vip ? 'border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20' : ''"
+  >
     <CardHeader>
-      <CardTitle class="flex items-center gap-2">
-        <Icon icon="solar:crown-bold-duotone" class="size-5 text-amber-500" />
-        Special Attendee
+      <CardTitle class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <Icon icon="solar:crown-bold-duotone" class="size-5 text-amber-500" />
+          Special Attendee
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="isTogglingVip"
+          @click="toggleVipStatus"
+        >
+          <Icon
+            v-if="isTogglingVip"
+            icon="svg-spinners:ring-resize"
+            class="mr-2 size-3"
+          />
+          <Icon
+            v-else-if="specialAttendee?.is_vip"
+            icon="solar:crown-minimalistic-bold"
+            class="mr-2 size-3 text-amber-500"
+          />
+          <Icon
+            v-else
+            icon="solar:crown-line-duotone"
+            class="mr-2 size-3"
+          />
+          {{ isTogglingVip ? 'Updating...' : (specialAttendee?.is_vip ? 'Remove VIP' : 'Mark VIP') }}
+        </Button>
       </CardTitle>
     </CardHeader>
     <CardContent class="space-y-4">
@@ -156,7 +223,7 @@ const saveNotes = async () => {
         <div v-else class="space-y-3">
           <Textarea
             v-model="notesValue"
-            placeholder="Add or edit notes (table assignments, dietary needs, appointments, etc.)"
+            placeholder="Add or edit notes for this attendee"
             class="min-h-[100px]"
             :disabled="isSaving"
           />
@@ -173,7 +240,7 @@ const saveNotes = async () => {
               />
               <Icon
                 v-else
-                icon="solar:check-bold"
+                icon="tabler:check"
                 class="mr-1 size-3"
               />
               {{ isSaving ? 'Saving...' : 'Save' }}
