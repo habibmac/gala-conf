@@ -98,6 +98,11 @@ export interface RegistrationData {
   checkin_history?: CheckinHistoryItem[] | null | undefined
   can_checkin: boolean
   can_checkout: boolean
+  ans?: Array<{
+    id: number
+    qst: string
+    ans: string
+  }>
 }
 
 export interface RegistrationValidation {

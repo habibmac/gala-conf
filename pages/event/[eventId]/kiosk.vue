@@ -75,6 +75,15 @@ const textColorStyle = computed(() => {
   return { color: 'white' }; // Default
 });
 
+// Show all answers that have values (limited for kiosk display)
+const getKeyAnswers = (answers: any[] | undefined) => {
+  if (!answers) return [];
+  
+  return answers.filter((answer: any) => {
+    return answer.ans && answer.ans !== '' && answer.ans !== '-';
+  }).slice(0, 2); // Limit to 2 for kiosk display
+};
+
 // Load event data
 const loadEventData = async () => {
   try {
@@ -327,6 +336,28 @@ useHead({
                     Staff Note:
                   </div>
                   <div>{{ scanResult.special_attendee.notes }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Information -->
+          <div v-if="getKeyAnswers(scanResult.ans).length > 0" class="mt-4">
+            <div class="rounded-lg bg-green-500/20 p-4 text-green-100">
+              <div class="flex items-start gap-2">
+                <Icon icon="solar:info-circle-bold" class="mt-0.5 size-5 shrink-0" />
+                <div class="text-sm">
+                  <div class="mb-2 font-medium">Key Information:</div>
+                  <div class="space-y-1">
+                    <div 
+                      v-for="keyAnswer in getKeyAnswers(scanResult.ans)" 
+                      :key="keyAnswer.id"
+                      class="flex justify-between"
+                    >
+                      <span class="font-medium">{{ keyAnswer.qst }}:</span>
+                      <span>{{ keyAnswer.ans }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

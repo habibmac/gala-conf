@@ -7,6 +7,7 @@ import type { RegistrationData, ScannerMode } from '~/types';
 
 import AttendeeDetailsCard from '@/components/partials/scanner/AttendeeDetailsCard.vue';
 import CheckinHistoryCard from '@/components/partials/scanner/CheckinHistoryCard.vue';
+import CustomQuestionsCard from '@/components/partials/scanner/CustomQuestionsCard.vue';
 import RegStatusCard from '@/components/partials/scanner/RegStatusCard.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -162,6 +163,7 @@ watch(() => props.lookupResult, () => {
         </div>
 
         <AttendeeDetailsCard :lookup-result="lookupResult" />
+        <CustomQuestionsCard :lookup-result="lookupResult" />
         <RegStatusCard :registration-status-info="registrationStatusInfo" :payment-status="paymentStatus" />
         <CheckinHistoryCard :lookup-result="lookupResult" />
       </div>
@@ -247,8 +249,9 @@ watch(() => props.lookupResult, () => {
 
       <!-- Attendee Details -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_310px]">
-        <div>
-          <AttendeeDetailsCard :lookup-result="lookupResult" class="grow" />
+        <div class="space-y-4">
+          <AttendeeDetailsCard :lookup-result="lookupResult" />
+          <CustomQuestionsCard :lookup-result="lookupResult" />
         </div>
 
         <CheckinHistoryCard :lookup-result="lookupResult" />

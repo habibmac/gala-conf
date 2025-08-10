@@ -34,6 +34,15 @@ const closeRegPanel = () => {
   selectedRegId.value = '';
 };
 
+// Show all answers that have values (limited for compact display)
+const getKeyAnswers = (answers: any[] | undefined) => {
+  if (!answers) return [];
+  
+  return answers.filter((answer: any) => {
+    return answer.ans && answer.ans !== '' && answer.ans !== '-';
+  }).slice(0, 3); // Limit to 3 for compact display
+};
+
 const formatTimestamp = (timestamp: number) => {
   return new Date(timestamp).toLocaleString('id-ID', {
     dateStyle: 'medium',
@@ -130,6 +139,21 @@ const formatTimestamp = (timestamp: number) => {
               <p class="text-blue-800 dark:text-blue-300">
                 {{ scan.registrationData.special_attendee.notes }}
               </p>
+            </div>
+
+            <!-- Key Q&A display (compact) -->
+            <div
+              v-if="scan.registrationData && getKeyAnswers(scan.registrationData.ans).length > 0"
+              class="mt-2 flex flex-wrap gap-1"
+            >
+              <Badge
+                v-for="keyAnswer in getKeyAnswers(scan.registrationData.ans)"
+                :key="keyAnswer.id"
+                variant="secondary"
+                class="text-xs"
+              >
+                {{ keyAnswer.qst }}: {{ keyAnswer.ans }}
+              </Badge>
             </div>
 
             <!-- Legacy Note display (fallback) -->

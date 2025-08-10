@@ -9,6 +9,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
+
 const attendeeCardValue = computed(() => {
   const attendee = props.lookupResult.attendee;
   const specialAttendee = props.lookupResult.special_attendee;
