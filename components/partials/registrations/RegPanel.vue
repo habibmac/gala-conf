@@ -268,7 +268,7 @@ onUnmounted(async () => {
             <!-- Details -->
             <RegDetailsSummary :data="data" class="mt-4" />
 
-            <!-- VIP Status & Notes -->
+            <!-- VIP Status -->
             <div
               class="mt-4 rounded-lg border p-4 shadow-sm duration-150 ease-in-out"
               :class="specialAttendee?.is_vip
@@ -306,77 +306,11 @@ onUnmounted(async () => {
               </div>
 
               <!-- VIP Status Display -->
-              <div v-if="specialAttendee?.is_vip" class="mb-3">
+              <div v-if="specialAttendee?.is_vip">
                 <Badge class="bg-amber-500 text-white">
                   <Icon icon="solar:crown-bold" class="mr-1 size-3" />
                   VIP
                 </Badge>
-              </div>
-
-              <!-- Notes Section -->
-              <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-medium text-slate-600 dark:text-slate-400">Notes</span>
-                  <Button
-                    v-if="!isEditingNotes"
-                    variant="ghost"
-                    size="sm"
-                    @click.stop="startEditingNotes"
-                  >
-                    <Icon icon="solar:pen-bold" class="mr-1 size-3" />
-                    Edit
-                  </Button>
-                </div>
-
-                <!-- Notes Display -->
-                <div v-if="!isEditingNotes">
-                  <div
-                    v-if="specialAttendee?.notes || registrationNotes"
-                    class="rounded-md bg-slate-100 p-2 text-xs dark:bg-slate-700"
-                  >
-                    {{ specialAttendee?.notes || registrationNotes }}
-                  </div>
-                  <div v-else class="text-xs italic text-slate-500">
-                    No notes available
-                  </div>
-                </div>
-
-                <!-- Notes Editor -->
-                <div v-else class="space-y-2">
-                  <Textarea
-                    v-model="notesValue"
-                    placeholder="Add notes for this attendee"
-                    class="min-h-[60px] text-xs"
-                    :disabled="isSaving"
-                  />
-                  <div class="flex gap-2">
-                    <Button
-                      size="sm"
-                      :disabled="isSaving"
-                      @click.stop="saveNotes"
-                    >
-                      <Icon
-                        v-if="isSaving"
-                        icon="svg-spinners:ring-resize"
-                        class="mr-1 size-3"
-                      />
-                      <Icon
-                        v-else
-                        icon="tabler:check"
-                        class="mr-1 size-3"
-                      />
-                      {{ isSaving ? 'Saving...' : 'Save' }}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      :disabled="isSaving"
-                      @click.stop="cancelEditingNotes"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -495,19 +429,74 @@ onUnmounted(async () => {
               </div>
             </div>
             <!-- Notes -->
-            <div class="mt-6">
-              <div class="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                Notes
+            <div class="mt-6 rounded-lg border border-slate-200 p-4 shadow-sm dark:border-slate-700">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <Icon icon="solar:note-bold-duotone" class="size-4 text-slate-500" />
+                    <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Notes</span>
+                  </div>
+                  <Button
+                    v-if="!isEditingNotes"
+                    variant="ghost"
+                    size="sm"
+                    @click.stop="startEditingNotes"
+                  >
+                    <Icon icon="solar:pen-bold" class="mr-1 size-3" />
+                    Edit
+                  </Button>
+                </div>
+
+                <!-- Notes Display -->
+                <div v-if="!isEditingNotes">
+                  <div
+                    v-if="specialAttendee?.notes || registrationNotes"
+                    class="rounded-md bg-slate-100 p-2 text-xs dark:bg-slate-700"
+                  >
+                    {{ specialAttendee?.notes || registrationNotes }}
+                  </div>
+                  <div v-else class="text-xs italic text-slate-500">
+                    No notes available
+                  </div>
+                </div>
+
+                <!-- Notes Editor -->
+                <div v-else class="space-y-2">
+                  <Textarea
+                    v-model="notesValue"
+                    placeholder="Add notes for this attendee"
+                    class="min-h-[60px] text-xs"
+                    :disabled="isSaving"
+                  />
+                  <div class="flex gap-2">
+                    <Button
+                      size="sm"
+                      :disabled="isSaving"
+                      @click.stop="saveNotes"
+                    >
+                      <Icon
+                        v-if="isSaving"
+                        icon="svg-spinners:ring-resize"
+                        class="mr-1 size-3"
+                      />
+                      <Icon
+                        v-else
+                        icon="tabler:check"
+                        class="mr-1 size-3"
+                      />
+                      {{ isSaving ? 'Saving...' : 'Save' }}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      :disabled="isSaving"
+                      @click.stop="cancelEditingNotes"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
               </div>
-              <form>
-                <label class="sr-only" for="notes">Write a note</label>
-                <textarea
-                  id="notes"
-                  class="form-textarea w-full focus:border-slate-300"
-                  rows="4"
-                  placeholder="Write a note…"
-                />
-              </form>
             </div>
           </div>
         </div>

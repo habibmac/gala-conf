@@ -3,6 +3,8 @@ import { Icon } from '@iconify/vue';
 
 import type { RegistrationData } from '~/types';
 
+import RegCode from '~/components/statuses/RegCode.vue';
+
 interface Props {
   searchResults: RegistrationData[]
   unifiedInput: string
@@ -19,22 +21,21 @@ defineEmits<{
 
 <template>
   <Card v-if="searchResults.length > 0 || isSearching || (unifiedInput && searchResults.length === 0 && !isProcessing)">
-    <CardHeader>
+    <CardHeader class="flex w-full flex-row items-start justify-between">
       <CardTitle>Search Mode</CardTitle>
+      <div v-if="searchResults.length > 0" class="text-sm  text-muted-foreground">
+        Found {{ searchResults.length }} result{{ searchResults.length === 1 ? '' : 's' }}
+      </div>
     </CardHeader>
-    <CardContent>
-      <div class="space-y-4">
+    <CardContent class="p-0">
+      <div class="space-y-4 p-6 pt-0">
         <!-- Search Results Display -->
         <div v-if="isSearching" class="flex flex-col items-center justify-center space-x-2">
           <Icon icon="svg-spinners:ring-resize" class="mx-auto mb-2 size-8 text-muted-foreground" />
           <span class="text-sm text-muted-foreground">Searching...</span>
         </div>
         <div v-else-if="searchResults.length > 0" class="space-y-2">
-          <div class="text-sm font-medium text-muted-foreground">
-            Found {{ searchResults.length }} result{{ searchResults.length === 1 ? '' : 's' }}
-          </div>
-
-          <div class="max-h-96 space-y-2 overflow-y-auto">
+          <div class="scroll-area -mx-6 -mb-6 max-h-96 space-y-2 overflow-y-auto px-6 pb-6">
             <div
               v-for="result in searchResults"
               :key="result.id"
@@ -46,16 +47,33 @@ defineEmits<{
               @click="$emit('select-result', result)"
             >
               <div class="space-y-6 sm:flex sm:items-center sm:justify-between sm:space-y-0">
-                <div class="flex-1">
-                  <div class="font-medium">
-                    {{ result.attendee.fullname }}
+                <div class="flex-1 space-y-1">
+                  <div class="mt-1 flex items-center gap-2">
+                    <!-- VIP Badge -->
+                    <Badge
+                      v-if="result.special_attendee?.is_vip"
+                      class="bg-amber-500 text-xs text-white"
+                    >
+                      <Icon icon="solar:crown-bold" class="mr-1 size-2.5" />
+                      VIP
+                    </Badge>
+                    <p class="text-sm font-medium">
+                      {{ result.attendee.fullname }}
+                    </p>
                   </div>
-                  <div class="number text-sm text-muted-foreground">
-                    {{ result.code }}
+
+                  <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+                    <RegCode
+                      v-if="result.code"
+                      :code="result.code"
+                      size="xs"
+                      class="w-fit whitespace-nowrap rounded-full border px-2 py-0.5 text-muted-foreground"
+                    />
+                    <p v-if="result.ticket?.name" class="text-sm font-medium">
+                      {{ result.ticket.name }}
+                    </p>
                   </div>
-                  <div class="text-sm font-medium">
-                    {{ result.ticket.name }}
-                  </div>
+
                   <div class="text-xs text-muted-foreground">
                     {{ result.attendee.email }}
                   </div>

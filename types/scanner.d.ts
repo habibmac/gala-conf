@@ -95,7 +95,7 @@ export interface RegistrationData {
     // registrationData.group_registrations[0].id
   }> | null | undefined
   checkin_count: number
-  checkin_history?: CheckinHistoryItem[] | null | undefined
+  checkin_history?: ScanHistoryItem[] | null | undefined
   can_checkin: boolean
   can_checkout: boolean
   ans?: Array<{

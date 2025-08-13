@@ -188,7 +188,14 @@ const columnConfigs = ref<CheckinColumnConfig[]>([
     isHideable: true,
     isVisible: true,
     key: 'checkin_data',
-    width: 20,
+    width: 15,
+  },
+  {
+    header: 'Notes',
+    isHideable: true,
+    isVisible: true,
+    key: 'notes',
+    width: 15,
   },
 ]);
 
@@ -198,7 +205,10 @@ const columns = computed(() => {
   return columnConfigs.value
     .filter(config => config.isVisible)
     .map((config) => {
-      return columnHelper.accessor(config.key, {
+      // Handle special cases for non-direct keys
+      const accessor = config.key === 'notes' ? 'checkin_data' : config.key;
+      
+      return columnHelper.accessor(accessor as keyof CheckinItem, {
         cell: (cellProps) => {
           switch (config.key) {
             case 'first_check_time': {
@@ -309,6 +319,63 @@ const columns = computed(() => {
                 'div',
                 { class: 'space-y-1' },
                 historyItems,
+              );
+            }
+            case 'notes': {
+              // Use the same checkin_data array to extract notes
+              const checkinData = cellProps.row.original.checkin_data as CheckinData[];
+              
+              if (!checkinData || !Array.isArray(checkinData) || checkinData.length === 0) {
+                return h('div', { class: 'text-xs text-slate-400' }, '-');
+              }
+
+              // Extract notes from checkin history
+              const notesItems = checkinData
+                .filter((item: CheckinData) => item.note && item.note !== '')
+                .map((item: CheckinData, index: number) => {
+                  try {
+                    const date = new Date(item.time);
+                    
+                    if (Number.isNaN(date.getTime())) {
+                      throw new TypeError('Invalid date');
+                    }
+
+                    return h(
+                      'div',
+                      {
+                        key: index,
+                        class: 'text-xs text-slate-600 dark:text-slate-400 mb-2 p-2 rounded border-l-2 border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800',
+                      },
+                      [
+                        h('div', { class: 'font-medium text-slate-700 dark:text-slate-300 mb-1' }, item.note),
+                        h('div', { class: 'text-xs text-slate-500 dark:text-slate-500' }, 
+                          `${format(date, 'd MMM yyyy HH:mm')} - ${item.type}`
+                        ),
+                      ]
+                    );
+                  }
+                  catch (error) {
+                    console.error('Error formatting note time:', item.time, item.type, error);
+                    return h(
+                      'div',
+                      {
+                        key: index,
+                        class: 'text-xs text-slate-600 dark:text-slate-400 mb-1 p-2 rounded border-l-2 border-blue-200 bg-blue-50/50 dark:bg-blue-950/20',
+                      },
+                      item.note || ''
+                    );
+                  }
+                })
+                .filter(Boolean);
+
+              if (notesItems.length === 0) {
+                return h('div', { class: 'text-xs text-slate-400' }, '-');
+              }
+
+              return h(
+                'div',
+                { class: 'space-y-1' },
+                notesItems,
               );
             }
             default:

@@ -64,6 +64,7 @@ const searchResults = ref<RegistrationData[]>([]);
 
 // Lookup result
 const lookupResult = ref<RegistrationData | null>(null);
+const showLookupModal = ref(false);
 
 const eventId = computed(() => route.params.eventId as string);
 const canScan = computed(() => !!selectedDatetime.value && !!scannerSettings.value);
@@ -74,6 +75,12 @@ const failedScans = computed(() => scanHistory.value.filter(scan => scan.status 
 const showClearConfirmDialog = ref(false);
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const isMobile = computed(() => !breakpoints.md.value);
+
+// Guide/Instructions visibility
+const showInstructions = ref(false);
+
+// Scanner focus lock mode
+const scannerFocusLocked = ref(false);
 
 // Scanner ref
 const TicketScannerRef = ref<InstanceType<typeof TicketScanner> | null>(null);
@@ -216,6 +223,7 @@ const performLookup = async (code: string) => {
     if (response.data.success) {
       const registrationData = response.data.data as RegistrationData;
       lookupResult.value = registrationData;
+      showLookupModal.value = true;
 
       const scanEntry: ScanHistoryItem = {
         attendeeName: registrationData?.attendee?.fullname,
@@ -269,8 +277,6 @@ const performCheckin = async (code: string, action = 'checkin') => {
       };
 
       scanHistory.value.unshift(scanEntry);
-
-      console.warn('Check-in response:', response.data);
 
       toast.success(
         `${action} Successful ✅`,
@@ -389,6 +395,9 @@ const handleScanResult = async (result: { rawValue: string, format: string, time
       scanHistory.value.unshift(scanEntry);
 
       lookupResult.value = currentScanResult.value || null;
+      if (currentScanResult.value) {
+        showLookupModal.value = true;
+      }
 
       // Determine what action is possible
       const canCheckin = currentScanResult.value?.can_checkin;
@@ -499,6 +508,7 @@ const resumeScanning = () => {
 
 const clearLookupResult = () => {
   lookupResult.value = null;
+  showLookupModal.value = false;
 };
 
 const handleScannerCheckin = async (data: { registration: any, note: string }) => {
@@ -538,6 +548,7 @@ const handleSaveNoteOnly = (data: { registration: any, note: string }) => {
   }
   // Implementation for saving note without action would go here
 };
+
 
 const toggleScanner = () => {
   if (!canScan.value) {
@@ -616,15 +627,6 @@ const exportHistory = () => {
 
 const formatTimestamp = (timestamp: number) => {
   return new Date(timestamp).toLocaleString();
-};
-
-const handleClickSearchResultOnDesktop = (result: any) => {
-  lookupResult.value = result;
-  // Scroll to lookup result
-  const lookupElement = document.getElementById('lookup-result-card');
-  if (lookupElement) {
-    lookupElement.scrollIntoView({ behavior: 'smooth' });
-  }
 };
 
 const handleRegistrationAction = async (
@@ -717,6 +719,8 @@ watch(
   (newValue) => {
     if (scannerMode.value === 'search') {
       debouncedSearch(newValue);
+      // Clear lookup result when search input changes
+      lookupResult.value = null;
     }
   },
 );
@@ -735,6 +739,9 @@ watch(
       // Clear search results when not in search mode
       searchResults.value = [];
     }
+
+    // Clear lookup result when changing modes
+    lookupResult.value = null;
   },
 );
 
@@ -761,6 +768,36 @@ watch(() => isScannerOpen.value, (isOpen) => {
 onMounted(() => {
   loadScannerSettings();
 
+  // Focus lock management for barcode scanners
+  const handleGlobalClick = (event: Event) => {
+    if (scannerFocusLocked.value) {
+      // Find the scanner input and focus it
+      const scannerInput = document.querySelector('input[data-scanner-input="true"]') as HTMLInputElement;
+      if (scannerInput && scannerInput !== event.target) {
+        event.preventDefault();
+        scannerInput.focus();
+      }
+    }
+  };
+
+  const handleGlobalKeydown = (event: KeyboardEvent) => {
+    if (scannerFocusLocked.value) {
+      // Find the scanner input and focus it unless we're in a specific input
+      const target = event.target as HTMLElement;
+      const isInInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+
+      if (!isInInput || target.getAttribute('data-scanner-input') !== 'true') {
+        const scannerInput = document.querySelector('input[data-scanner-input="true"]') as HTMLInputElement;
+        if (scannerInput) {
+          scannerInput.focus();
+        }
+      }
+    }
+  };
+
+  document.addEventListener('click', handleGlobalClick);
+  document.addEventListener('keydown', handleGlobalKeydown);
+
   // Add beforeunload listener
   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
     if (scanHistory.value.length > 0) {
@@ -772,8 +809,10 @@ onMounted(() => {
 
   window.addEventListener('beforeunload', handleBeforeUnload);
 
-  // Clean up the event listener
+  // Clean up the event listeners
   onUnmounted(() => {
+    document.removeEventListener('click', handleGlobalClick);
+    document.removeEventListener('keydown', handleGlobalKeydown);
     window.removeEventListener('beforeunload', handleBeforeUnload);
   });
 });
@@ -809,17 +848,29 @@ useHead({
 
 <template>
   <div class="container mx-auto mb-20">
-    <div class="flex flex-col items-start justify-between gap-5 pt-10 sm:flex-row">
-      <header class="sm:grow">
+    <div class="flex flex-col gap-5 pt-10 sm:flex-row sm:items-start sm:justify-between">
+      <header class="flex grow items-center gap-2">
         <h1 class="h2">
           Ticket Scanner
         </h1>
-        <p class="mt-2 max-w-2xl text-muted-foreground">
-          Use the scanner to check in attendees, search registrations, or look up details by scanning barcodes or
-          entering codes.
-        </p>
+        <Button variant="outline" @click="showInstructions = !showInstructions">
+          <Icon icon="heroicons:question-mark-circle" class="mr-2 size-4" />
+          {{ showInstructions ? 'Hide Guide' : 'Show Guide' }}
+        </Button>
       </header>
+      <div v-if="scannerSettings" class=" min-w-80 shrink-0">
+        <ScannerDatetimes v-model:selected-datetime="selectedDatetime" :datetimes="scannerSettings.datetimes" />
+      </div>
     </div>
+
+    <!-- Scanner Instructions -->
+    <ScannerInstructions
+      :available-modes="availableModes"
+      :supported-formats="supportedFormats"
+      :visible="showInstructions"
+      custom-class="mt-8"
+      @close="showInstructions = false"
+    />
 
     <!-- Loading State -->
     <div v-if="isLoading" class="mt-8">
@@ -828,15 +879,15 @@ useHead({
       </div>
     </div>
 
-    <div v-else-if="scannerSettings" class="mt-8 space-y-6">
-      <!-- Session Selection -->
-      <ScannerDatetimes v-model:selected-datetime="selectedDatetime" :datetimes="scannerSettings.datetimes" />
+    <div v-else-if="scannerSettings" class="space-y-4">
+      <!-- Session Selection & Guide Button -->
+      <div class="flex items-center justify-between gap-4" />
       <Transition
         enter-active-class="transition-all duration-300 ease-out"
         enter-from-class="opacity-0 translate-y-4"
         enter-to-class="opacity-100 translate-y-0"
       >
-        <div v-if="selectedDatetime" class="space-y-6">
+        <div v-if="selectedDatetime" class="space-y-4">
           <!-- Scanner Stats -->
           <ScannerStats
             v-if="selectedDatetime"
@@ -851,6 +902,7 @@ useHead({
             v-model:scanner-mode="scannerMode"
             v-model:unified-input="unifiedInput"
             v-model:is-scanner-open="isScannerOpen"
+            v-model:scanner-focus-locked="scannerFocusLocked"
             :scanner-settings="scannerSettings"
             :is-processing="isProcessing"
             :is-searching="isSearching"
@@ -898,10 +950,10 @@ useHead({
           </Sheet>
 
           <!-- Desktop Layout (Grid) -->
-          <div v-if="!isMobile" class="grid grid-cols-12 gap-4">
+          <div v-if="!isMobile && (isScannerOpen || scannerMode === 'search')" class="grid grid-cols-12 gap-4">
             <!-- Scanner Column -->
-            <div class="order-last col-span-4">
-              <Card v-if="isScannerOpen">
+            <div v-if="isScannerOpen" class="order-last col-span-4">
+              <Card>
                 <CardHeader>
                   <CardTitle>Camera Scanner</CardTitle>
                 </CardHeader>
@@ -932,44 +984,46 @@ useHead({
               </Card>
             </div>
 
-            <!-- Results Column -->
+            <!-- Search Results Column (Desktop) -->
             <div
+              v-if="scannerMode === 'search'"
               class="space-y-4"
               :class="{
                 'col-span-8': isScannerOpen, 'col-span-12': !isScannerOpen,
               }"
             >
-              <!-- Lookup Result (Desktop) -->
-              <LookupResult
-                v-if="lookupResult && (scannerMode === 'lookup' || scannerMode === 'search')"
-                :lookup-result="lookupResult"
-                :scanner-mode="scannerMode"
-                :is-mobile="false"
-                @registration-action="handleRegistrationAction"
-                @continue-scanning="resumeScanning"
-                @close-result="clearLookupResult"
-              />
-
               <!-- Search Results (Desktop) -->
               <SearchResults
-                v-if="scannerMode === 'search'"
                 :search-results="searchResults"
                 :unified-input="unifiedInput"
                 :is-processing="isProcessing"
                 :is-searching="isSearching"
-                @select-result="handleClickSearchResultOnDesktop($event)"
+                @select-result="lookupResult = $event; showLookupModal = true"
               />
             </div>
           </div>
+
+          <!-- Desktop Lookup Result Modal -->
+          <LookupResult
+            v-if="lookupResult && !isMobile"
+            :lookup-result="lookupResult"
+            :scanner-mode="scannerMode"
+            :is-mobile="false"
+            :visible="showLookupModal"
+            @registration-action="handleRegistrationAction"
+            @continue-scanning="resumeScanning"
+            @close-result="clearLookupResult"
+          />
 
           <!-- Mobile Results (Outside Scanner Sheet) -->
           <template v-if="isMobile">
             <!-- Lookup Result (Mobile) -->
             <LookupResult
-              v-if="lookupResult && (scannerMode === 'lookup' || scannerMode === 'search')"
+              v-if="lookupResult"
               :lookup-result="lookupResult"
               :scanner-mode="scannerMode"
               :is-mobile="true"
+              :visible="showLookupModal"
               @registration-action="handleRegistrationAction"
               @continue-scanning="resumeScanning"
               @close-result="clearLookupResult"
@@ -982,7 +1036,7 @@ useHead({
               :unified-input="unifiedInput"
               :is-processing="isProcessing"
               :is-searching="isSearching"
-              @select-result="lookupResult = $event"
+              @select-result="lookupResult = $event; showLookupModal = true"
             />
           </template>
 
@@ -993,18 +1047,13 @@ useHead({
             :recent-scans="recentScans"
             :successful-scans="successfulScans"
             :failed-scans="failedScans"
+            :scanner-focus-locked="scannerFocusLocked"
             @export-history="exportHistory"
             @clear-history="confirmClearHistory"
             @registration-action="handleRegistrationAction"
           />
         </div>
       </Transition>
-      <!-- Scanner Instructions -->
-      <ScannerInstructions
-        v-if="!isScannerOpen"
-        :available-modes="availableModes"
-        :supported-formats="supportedFormats"
-      />
     </div>
 
     <!-- Error state -->

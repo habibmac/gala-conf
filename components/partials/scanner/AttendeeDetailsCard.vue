@@ -3,18 +3,19 @@ import { Icon } from '@iconify/vue';
 
 import type { RegistrationData } from '~/types';
 
+import CopyButton from '@/components/CopyButton.vue';
+
 interface Props {
   lookupResult: RegistrationData
 }
 
 const props = defineProps<Props>();
 
-
 const attendeeCardValue = computed(() => {
   const attendee = props.lookupResult.attendee;
   const specialAttendee = props.lookupResult.special_attendee;
 
-  const baseData = [
+  const baseData: Record<string, any>[] = [
     { field: 'Full Name', value: attendee.fullname },
     { field: 'Email', value: attendee.email },
     { field: 'Phone', value: attendee.phone || 'N/A' },
@@ -66,7 +67,7 @@ const attendeeCardColumns = [
 
     <!-- Style the values (right column) -->
     <template #cell-value="{ item, value }">
-      <div v-if="item.field === 'Code'" class="relative inline-block">
+      <div v-if="item.field === 'Code'" class="relative inline-flex items-center">
         <Badge
           variant="outline"
           class="text-md number select-all rounded-full border border-muted-foreground font-medium tabular-nums"
@@ -76,7 +77,7 @@ const attendeeCardColumns = [
         <CopyButton
           :value="value"
           text="Copy code"
-          button-class="hidden md:absolute -right-8 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-slate-800 dark:hover:text-slate-100"
+          button-class="text-muted-foreground hover:text-slate-800 dark:hover:text-slate-100"
           side="top"
         />
       </div>

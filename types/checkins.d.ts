@@ -32,7 +32,7 @@ export interface CustomCheckinStats {
 }
 
 export interface CheckinColumnConfig extends ColumnConfig {
-  key: keyof CheckinItem | 'checkin_data'
+  key: keyof CheckinItem | 'checkin_data' | 'notes'
   header: string
   isVisible?: boolean
   isHideable?: boolean
@@ -61,6 +61,7 @@ export interface CheckinItem {
 interface CheckinData {
   time: string
   type: 'checkin' | 'checkout'
+  note?: string
 }
 
 export interface StatsCard {

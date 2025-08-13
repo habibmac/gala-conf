@@ -9,8 +9,9 @@ const props = defineProps<Props>();
 
 // Show all answers that have values
 const customAnswers = computed(() => {
-  if (!props.lookupResult.ans) return [];
-  
+  if (!props.lookupResult.ans)
+    return [];
+
   return props.lookupResult.ans.filter((answer: any) => {
     return answer.ans && answer.ans !== '' && answer.ans !== '-';
   });

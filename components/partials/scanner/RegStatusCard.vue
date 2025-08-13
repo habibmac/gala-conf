@@ -48,11 +48,19 @@ const hasPaymentWarning = computed(() => {
 <template>
   <div class="space-y-4">
     <TableCard
-      title="Status"
       :data="statusCardValue"
       :columns="statusCardColumns"
       :show-table-header="false"
     >
+      <template #header>
+        <div class="flex items-center justify-between">
+          <CardTitle>Status</CardTitle>
+          <div v-if="hasPaymentWarning" class="flex items-center gap-1 text-xs text-red-600">
+            <Icon icon="heroicons:exclamation-triangle" class="size-3" />
+            <span class="font-medium">Payment Required</span>
+          </div>
+        </div>
+      </template>
       <!-- Style the field names (left column) -->
       <template #cell-field="{ value }">
         <span class="font-medium text-muted-foreground">{{ value }}</span>
@@ -81,13 +89,6 @@ const hasPaymentWarning = computed(() => {
         </div>
       </template>
 
-      <template v-if="hasPaymentWarning" #tableFooter>
-        <!-- Payment Warning Message (if needed) -->
-        <div class="rounded-lg bg-amber-50 p-3 text-sm text-red-600">
-          <Icon icon="heroicons:exclamation-triangle" class="mr-1 inline-block size-4" />
-          Payment is required for this registration.
-        </div>
-      </template>
     </TableCard>
   </div>
 </template>

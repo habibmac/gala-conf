@@ -77,8 +77,9 @@ const textColorStyle = computed(() => {
 
 // Show all answers that have values (limited for kiosk display)
 const getKeyAnswers = (answers: any[] | undefined) => {
-  if (!answers) return [];
-  
+  if (!answers)
+    return [];
+
   return answers.filter((answer: any) => {
     return answer.ans && answer.ans !== '' && answer.ans !== '-';
   }).slice(0, 2); // Limit to 2 for kiosk display
@@ -347,10 +348,12 @@ useHead({
               <div class="flex items-start gap-2">
                 <Icon icon="solar:info-circle-bold" class="mt-0.5 size-5 shrink-0" />
                 <div class="text-sm">
-                  <div class="mb-2 font-medium">Key Information:</div>
+                  <div class="mb-2 font-medium">
+                    Key Information:
+                  </div>
                   <div class="space-y-1">
-                    <div 
-                      v-for="keyAnswer in getKeyAnswers(scanResult.ans)" 
+                    <div
+                      v-for="keyAnswer in getKeyAnswers(scanResult.ans)"
                       :key="keyAnswer.id"
                       class="flex justify-between"
                     >

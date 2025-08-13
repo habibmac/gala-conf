@@ -10,7 +10,6 @@ import CheckinHistoryCard from '@/components/partials/scanner/CheckinHistoryCard
 import CustomQuestionsCard from '@/components/partials/scanner/CustomQuestionsCard.vue';
 import RegStatusCard from '@/components/partials/scanner/RegStatusCard.vue';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -19,11 +18,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Props {
   lookupResult: RegistrationData
   scannerMode: ScannerMode
   isMobile?: boolean
+  visible?: boolean
 }
 
 interface Emits {
@@ -34,12 +36,10 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   isMobile: false,
+  visible: true,
 });
 
 const emit = defineEmits<Emits>();
-
-// Control dialog visibility for mobile
-const isDialogOpen = ref(true);
 
 const checkinStatusText = (status: number, timestamp: number | null): string => {
   if (status === 1) {
@@ -82,45 +82,42 @@ const paymentStatus = computed(() => {
   };
 });
 
-const handleAction = (action: 'checkin' | 'checkout') => {
-  emit('registration-action', props.lookupResult, action);
+const showActionDialog = ref(false);
+const actionType = ref<'checkin' | 'checkout'>('checkin');
+const noteText = ref('');
 
-  // On mobile, keep dialog open to show updated state
-  // On desktop, no change needed
+const handleAction = (action: 'checkin' | 'checkout') => {
+  actionType.value = action;
+  noteText.value = '';
+  showActionDialog.value = true;
+};
+
+const submitAction = () => {
+  emit('registration-action', props.lookupResult, actionType.value, noteText.value || undefined);
+  showActionDialog.value = false;
+  noteText.value = '';
+};
+
+const cancelAction = () => {
+  showActionDialog.value = false;
+  noteText.value = '';
 };
 
 const handleContinueScanning = () => {
   emit('continue-scanning');
-  if (props.isMobile) {
-    isDialogOpen.value = false;
-  }
 };
 
 const handleClose = () => {
   emit('close-result');
-  if (props.isMobile) {
-    isDialogOpen.value = false;
-  }
 };
-
-// Watch for changes in lookupResult to keep dialog open on updates
-watch(() => props.lookupResult, () => {
-  if (props.isMobile) {
-    isDialogOpen.value = true;
-  }
-}, { deep: true });
 </script>
 
 <template>
-  <Dialog v-if="isMobile" v-model:open="isDialogOpen">
-    <DialogContent class="size-full">
+  <Dialog :open="visible" @update:open="(open) => !open && handleClose()">
+    <DialogContent class="flex size-full max-w-none flex-col">
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
-          <Icon
-            v-if="lookupResult.special_attendee?.is_vip"
-            icon="solar:crown-bold"
-            class="size-5 text-amber-500"
-          />
+          <Icon v-if="lookupResult.special_attendee?.is_vip" icon="solar:crown-bold" class="size-5 text-amber-500" />
           <Icon
             v-else
             :icon="registrationStatusInfo.isCheckedIn ? 'heroicons:check-circle' : 'heroicons:user-circle'"
@@ -132,10 +129,7 @@ watch(() => props.lookupResult, () => {
         </DialogTitle>
         <DialogDescription class="flex items-center gap-2">
           <span>{{ lookupResult.code }}</span>
-          <Badge
-            v-if="lookupResult.special_attendee?.is_vip"
-            class="bg-amber-500 text-white"
-          >
+          <Badge v-if="lookupResult.special_attendee?.is_vip" class="bg-amber-500 text-white">
             <Icon icon="solar:crown-bold" class="mr-1 size-3" />
             VIP
           </Badge>
@@ -143,42 +137,70 @@ watch(() => props.lookupResult, () => {
       </DialogHeader>
 
       <!-- Registration Details -->
-      <div class="space-y-4 overflow-y-auto">
-        <!-- Staff Notes Alert (if present) -->
-        <div
-          v-if="lookupResult.special_attendee?.notes"
-          class="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20"
-        >
-          <div class="flex items-start gap-2">
-            <Icon icon="solar:note-bold" class="mt-0.5 size-4 text-amber-600" />
-            <div class="flex-1">
-              <h4 class="text-sm font-semibold text-amber-800 dark:text-amber-200">
-                Staff Note
-              </h4>
-              <p class="text-sm text-amber-700 dark:text-amber-300">
-                {{ lookupResult.special_attendee.notes }}
-              </p>
+      <div :class="isMobile ? 'flex flex-1 flex-col gap-4 overflow-y-auto' : 'flex flex-1 gap-4 overflow-y-auto'">
+        <!-- Left Column -->
+        <div class="flex flex-1 flex-col gap-4">
+          <!-- Staff Notes Alert (if present) -->
+          <div
+            v-if="lookupResult.special_attendee?.notes"
+            class="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20"
+          >
+            <div class="flex items-start gap-2">
+              <Icon icon="solar:note-bold" class="mt-0.5 size-4 text-amber-600" />
+              <div class="flex-1">
+                <h4 class="text-sm font-semibold text-amber-800 dark:text-amber-200">
+                  Staff Note
+                </h4>
+                <p class="text-sm text-amber-700 dark:text-amber-300">
+                  {{ lookupResult.special_attendee.notes }}
+                </p>
+              </div>
             </div>
           </div>
+
+          <AttendeeDetailsCard :lookup-result="lookupResult" />
+
+          <RegStatusCard
+            v-if="!isMobile"
+            :registration-status-info="registrationStatusInfo"
+            :payment-status="paymentStatus"
+          />
+
+          <!-- Mobile: Include all cards in single column -->
+          <template v-if="isMobile">
+            <CustomQuestionsCard :lookup-result="lookupResult" />
+            <RegStatusCard :registration-status-info="registrationStatusInfo" :payment-status="paymentStatus" />
+            <CheckinHistoryCard :lookup-result="lookupResult" />
+          </template>
         </div>
 
-        <AttendeeDetailsCard :lookup-result="lookupResult" />
-        <CustomQuestionsCard :lookup-result="lookupResult" />
-        <RegStatusCard :registration-status-info="registrationStatusInfo" :payment-status="paymentStatus" />
-        <CheckinHistoryCard :lookup-result="lookupResult" />
+        <!-- Desktop: Right Column -->
+
+        <div v-if="!isMobile" class="flex flex-1 flex-col gap-4">
+          <CustomQuestionsCard :lookup-result="lookupResult" />
+          <CheckinHistoryCard :lookup-result="lookupResult" />
+        </div>
       </div>
 
-      <DialogFooter class="gap-2">
+      <DialogFooter class="mt-auto gap-2">
         <Button variant="outline" @click="handleClose">
           Close
         </Button>
 
-        <Button v-if="registrationStatusInfo.canCheckout" variant="outline" @click="handleAction('checkout')">
+        <Button
+          v-if="registrationStatusInfo.canCheckout"
+          class="border-rose-200 bg-rose-100 text-rose-700 hover:bg-rose-200"
+          @click="handleAction('checkout')"
+        >
           <Icon icon="ph:sign-out" class="mr-2 size-4" />
           Check Out
         </Button>
 
-        <Button v-else-if="registrationStatusInfo.canCheckin" @click="handleAction('checkin')">
+        <Button
+          v-else-if="registrationStatusInfo.canCheckin"
+          class="border-emerald-200 bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+          @click="handleAction('checkin')"
+        >
           <Icon icon="ph:sign-in" class="mr-2 size-4" />
           Check In
         </Button>
@@ -191,99 +213,48 @@ watch(() => props.lookupResult, () => {
     </DialogContent>
   </Dialog>
 
-  <!-- Desktop: Show as Card -->
-  <Card v-else id="lookup-result-card" class="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
-    <CardHeader>
-      <CardTitle class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <Icon
-            v-if="lookupResult.special_attendee?.is_vip"
-            icon="solar:crown-bold"
-            class="size-5 text-amber-500"
-          />
-          <Icon
-            v-else
-            :icon="registrationStatusInfo.isCheckedIn ? 'heroicons:check-circle' : 'heroicons:user-circle'"
+  <!-- Checkin/Checkout with Note Dialog -->
+  <Dialog v-model:open="showActionDialog">
+    <DialogContent class="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle class="flex items-center gap-2">
+          <Icon 
+            :icon="actionType === 'checkin' ? 'ph:sign-in' : 'ph:sign-out'" 
             class="size-5"
-            :class="registrationStatusInfo.isCheckedIn ? 'text-green-500' : 'text-blue-500'"
+            :class="actionType === 'checkin' ? 'text-emerald-600' : 'text-rose-600'"
           />
-          <span v-if="lookupResult.special_attendee?.is_vip" class="text-amber-600">VIP Registration Found</span>
-          <span v-else>Registration Found</span>
-          <Badge
-            v-if="lookupResult.special_attendee?.is_vip"
-            class="ml-2 bg-amber-500 text-white"
-          >
-            <Icon icon="solar:crown-bold" class="mr-1 size-3" />
-            VIP
-          </Badge>
+          {{ actionType === 'checkin' ? 'Check In' : 'Check Out' }}
+        </DialogTitle>
+        <DialogDescription>
+          {{ actionType === 'checkin' ? 'Check in' : 'Check out' }} {{ lookupResult.attendee.fullname }}
+        </DialogDescription>
+      </DialogHeader>
+
+      <div class="grid gap-4 py-4">
+        <div class="grid gap-2">
+          <Label for="note">Note (Optional)</Label>
+          <Textarea
+            id="note"
+            v-model="noteText"
+            placeholder="Add an optional note for this action..."
+            class="min-h-20"
+            @keydown.ctrl.enter="submitAction"
+          />
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          class="hover:bg-blue-100 dark:hover:bg-blue-800"
-          @click="handleClose"
-        >
-          <Icon icon="tabler:x" class="size-4" />
+      </div>
+
+      <DialogFooter class="gap-2">
+        <Button variant="outline" @click="cancelAction">
+          Cancel
         </Button>
-      </CardTitle>
-    </CardHeader>
-
-    <CardContent class="space-y-4">
-      <!-- Staff Notes Alert (if present) -->
-      <div
-        v-if="lookupResult.special_attendee?.notes"
-        class="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20"
-      >
-        <div class="flex items-start gap-3">
-          <Icon icon="solar:note-bold" class="mt-0.5 size-5 text-amber-600" />
-          <div class="flex-1">
-            <h4 class="font-semibold text-amber-800 dark:text-amber-200">
-              Staff Note
-            </h4>
-            <p class="text-amber-700 dark:text-amber-300">
-              {{ lookupResult.special_attendee.notes }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Attendee Details -->
-      <div class="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_310px]">
-        <div class="space-y-4">
-          <AttendeeDetailsCard :lookup-result="lookupResult" />
-          <CustomQuestionsCard :lookup-result="lookupResult" />
-        </div>
-
-        <CheckinHistoryCard :lookup-result="lookupResult" />
-        <RegStatusCard
-          :registration-status-info="registrationStatusInfo"
-          :payment-status="paymentStatus"
-          class="flex-1"
-        />
-      </div>
-      <div class="">
-        <!-- Status and Actions -->
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="flex flex-wrap gap-2" />
-
-          <div class="flex gap-2">
-            <Button
-              v-if="registrationStatusInfo.canCheckout"
-              variant="destructive"
-              size="lg"
-              @click="handleAction('checkout')"
-            >
-              <Icon icon="ph:sign-out" class="mr-2 size-4" />
-              Check Out
-            </Button>
-
-            <Button v-else-if="registrationStatusInfo.canCheckin" size="lg" @click="handleAction('checkin')">
-              <Icon icon="ph:sign-in" class="mr-2 size-4" />
-              Check In
-            </Button>
-          </div>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+        <Button @click="submitAction">
+          <Icon 
+            :icon="actionType === 'checkin' ? 'ph:sign-in' : 'ph:sign-out'" 
+            class="mr-2 size-4" 
+          />
+          {{ actionType === 'checkin' ? 'Check In' : 'Check Out' }}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
