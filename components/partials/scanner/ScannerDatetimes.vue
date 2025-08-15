@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Icon } from '@iconify/vue';
 import { ref } from 'vue';
 
 import type { EvtDatetime } from '~/types';
@@ -18,39 +19,34 @@ const datetimesRef = ref<EvtDatetime[] | null>(props.datetimes);
 </script>
 
 <template>
-  <div class="grid grid-cols-1 items-center gap-2">
-    <Label class="shrink-0">
-      <span class="text-sm font-medium">Select Session</span>
-    </Label>
-    <Select
-      :model-value="selectedDatetime"
-      @update:model-value="$emit('update:selectedDatetime', $event)"
-    >
-      <SelectTrigger class="h-14 bg-card dark:bg-background md:h-12">
-        <SelectValue placeholder="Please select a session to start" />
-      </SelectTrigger>
-      <SelectContent align="end">
-        <SelectItem
-          v-for="datetime in datetimesRef"
-          :key="datetime.id"
-          :value="datetime.id"
-        >
-          <div class="flex flex-row items-center gap-1">
-            <span class="font-medium">{{ datetime.name }}</span>
-            <span
-              class="text-sm text-muted-foreground"
-            >
-              {{ formatDateRange(datetime.date_start, datetime.date_end) }}
-            </span>
-            <span
-              v-if="datetime.available !== null"
-              class="text-sm text-muted-foreground"
-            >
-              ({{ datetime.available }} available)
-            </span>
+  <Select :model-value="selectedDatetime" @update:model-value="$emit('update:selectedDatetime', $event)">
+    <SelectTrigger class="h-10 w-full bg-card dark:bg-background">
+      <SelectValue placeholder="Select a session">
+        <div class="flex items-center gap-2 font-medium">
+          <Icon icon="tabler:calendar" class="size-4 text-muted-foreground" />
+          <span v-if="selectedDatetime">{{ datetimesRef?.find(d => d.id === selectedDatetime)?.name || 'Select Session'
+          }}</span>
+          <span v-else>{{ 'Select Session' }}</span>
+        </div>
+      </SelectValue>
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem
+        v-for="datetime in datetimesRef"
+        :key="datetime.id"
+        :value="datetime.id"
+        class="px-4 py-3"
+      >
+        <div>
+          <div class="font-medium">
+            {{ datetime.name }}
           </div>
-        </SelectItem>
-      </SelectContent>
-    </Select>
-  </div>
+          <div class="mt-1 text-xs text-muted-foreground">
+            {{ formatDateRange(datetime.date_start, datetime.date_end) }}
+            <span v-if="datetime.available !== null"> • {{ datetime.available }} available</span>
+          </div>
+        </div>
+      </SelectItem>
+    </SelectContent>
+  </Select>
 </template>

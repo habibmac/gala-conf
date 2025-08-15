@@ -74,6 +74,12 @@ export interface RegistrationData {
     can_checkin_payment: boolean
     payment_message: string
   }
+  special_attendee?: {
+    is_vip: boolean
+    display_priority: boolean
+    special_treatment: boolean
+    notes: string | null
+  }
   group_registrations?: Array<{
     code: string
     attendee_name: string
@@ -89,9 +95,14 @@ export interface RegistrationData {
     // registrationData.group_registrations[0].id
   }> | null | undefined
   checkin_count: number
-  checkin_history?: CheckinHistoryItem[] | null | undefined
+  checkin_history?: ScanHistoryItem[] | null | undefined
   can_checkin: boolean
   can_checkout: boolean
+  ans?: Array<{
+    id: number
+    qst: string
+    ans: string
+  }>
 }
 
 export interface RegistrationValidation {

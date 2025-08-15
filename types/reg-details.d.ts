@@ -26,6 +26,14 @@ export interface RegistrationDetails {
   txn: TransactionDetails
   pmt: PaymentDetail[]
   ans: RegistrationAnswer[]
+  special_attendee?: SpecialAttendeeData
+}
+
+export interface SpecialAttendeeData {
+  is_vip: boolean
+  display_priority: boolean
+  special_treatment: boolean
+  notes: string | null
 }
 
 export interface TransactionDetails {

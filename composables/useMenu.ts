@@ -52,7 +52,11 @@ export const useMenu = () => {
         const hasPackage = routePackages?.includes(authStore.selectedEvent?.package ?? '') ?? true;
         const hasCapabilities = !routeCapabilities?.length || routeCapabilities.every(cap => authStore.hasEventPermission(cap));
 
-        if (hasRole && hasPackage && hasCapabilities) {
+        // Check condition function if it exists
+        const conditionFn = meta.condition as ((event: any) => boolean) | undefined;
+        const passesCondition = !conditionFn || conditionFn(authStore.selectedEvent);
+
+        if (hasRole && hasPackage && hasCapabilities && passesCondition) {
           const menuItem: MenuItem = {
             capabilities: routeCapabilities,
             group: (meta.group as string) || '',

@@ -14,6 +14,7 @@ const historyCardValue = computed(() => {
   return props.lookupResult.checkin_history.map(item => ({
     action: item.status,
     timestamp: item.timestamp ? formatDate(item.timestamp, 'dd MMM yyyy HH:mm') : 'N/A',
+    note: item.note || null,
   }));
 });
 
@@ -24,6 +25,7 @@ const checkinCount = computed(() => {
 const historyCardColumns = [
   { key: 'action', label: 'Action', class: 'w-32' },
   { key: 'timestamp', label: 'Timestamp' },
+  { key: 'note', label: 'Note' },
 ];
 </script>
 
@@ -50,6 +52,7 @@ const historyCardColumns = [
         :class="{
           'text-green-600': value === 'Checked In',
           'text-red-600': value === 'Checked Out',
+          'text-blue-600': value === 'Note Added',
         }"
       >
         {{ value }}
@@ -59,6 +62,18 @@ const historyCardColumns = [
     <template #cell-timestamp="{ value }">
       <span class="text-sm text-muted-foreground">
         {{ value }}
+      </span>
+    </template>
+
+    <template #cell-note="{ value }">
+      <div v-if="value" class="flex items-start gap-2">
+        <Icon icon="solar:note-bold" class="mt-0.5 size-3 text-blue-500 shrink-0" />
+        <span class="text-sm text-muted-foreground break-words">
+          {{ value }}
+        </span>
+      </div>
+      <span v-else class="text-xs text-muted-foreground/50">
+        -
       </span>
     </template>
 
