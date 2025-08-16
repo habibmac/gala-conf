@@ -9,6 +9,7 @@ export const useExport = () => {
     type: 'checkins' | 'registrations' | 'billings' | 'insights',
     format: 'csv' | 'xlsx' | 'json',
     filters: Record<string, any> = {},
+    customFilename?: string,
   ) => {
     try {
       const params = {
@@ -36,11 +37,11 @@ export const useExport = () => {
         const link = document.createElement('a');
         link.href = downloadUrl;
 
-        // Extract filename from Content-Disposition header
+        // Extract filename from Content-Disposition header or use custom filename
         const contentDisposition = response.headers['content-disposition'];
-        let filename = `${type}-export.${format}`;
+        let filename = customFilename || `${type}-export.${format}`;
 
-        if (contentDisposition) {
+        if (!customFilename && contentDisposition) {
           const filenameMatch = contentDisposition.match(/filename="(.+)"/);
           if (filenameMatch) {
             filename = filenameMatch[1];

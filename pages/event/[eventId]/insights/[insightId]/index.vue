@@ -373,19 +373,29 @@ const handleTabChange = (tab: string) => {
   };
 };
 
-const tabIndicatorClass = computed(() => {
-  const index = ticketGroups.value?.findIndex((group: TicketGroup) => group.name === activeTab.value) ?? 0;
-  return `translate(${index * 100}%)`;
-});
-
-const tabIndicatorWidth = computed(() => {
-  const tabCount = ticketGroups.value?.length ?? 1;
-  return `calc(100% / ${tabCount})`;
-});
-
 const handleExport = async (format: 'csv' | 'xlsx') => {
   try {
     isExporting.value = true;
+
+    // Create a descriptive filename with insight title and group name
+    const insightTitle = insightData.value?.title || 'insight';
+    const groupName = activeTab.value || 'all-groups';
+    const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+
+    // Sanitize filename by removing special characters and limiting length
+    const sanitizeFilename = (str: string) => {
+      return str
+        .replace(/[^\w\s-]/g, '') // Remove special characters except word chars, spaces, hyphens
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+        .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+        .substring(0, 50); // Limit length to avoid overly long filenames
+    };
+    
+    const sanitizedInsightTitle = sanitizeFilename(insightTitle);
+    const sanitizedGroupName = sanitizeFilename(groupName);
+
+    const customFilename = `${sanitizedInsightTitle}-${sanitizedGroupName}-${timestamp}.${format}`;
 
     await exportData(
       eventId.value,
@@ -395,6 +405,7 @@ const handleExport = async (format: 'csv' | 'xlsx') => {
         ...filters.value,
         insight_id: insightId.value, // Include the insight ID
       },
+      customFilename,
     );
 
     toast('Export completed successfully');
@@ -486,32 +497,26 @@ watch(
       <div v-if="isMetaLoading" class="grid grid-cols-12 gap-4">
         <Skeleton v-for="i in 2" :key="i" class="col-span-12 h-28 rounded-xl bg-muted-foreground/10 md:col-span-6" />
       </div>
-      <div
-        v-else-if="ticketGroups"
-        class="relative mx-auto flex w-full max-w-xl rounded-md bg-slate-200 p-1 dark:bg-slate-700/40 sm:mx-0"
-      >
-        <span class="pointer-events-none absolute inset-0 m-1" aria-hidden="true">
-          <span
-            class="absolute inset-0 rounded-md bg-white transition-transform duration-150 ease-in-out dark:bg-primary"
-            :style="{ width: tabIndicatorWidth, transform: tabIndicatorClass }"
-          />
-        </span>
-        <button
-          v-for="(tab, index) in ticketGroups"
-          :key="index"
-          class="relative z-10 flex flex-1 items-center justify-center p-1 text-sm font-medium duration-150 ease-in-out"
-          :class="tab.name === activeTab && 'text-slate-900 dark:text-slate-100'"
-          @click.prevent="handleTabChange(tab.name)"
-        >
-          {{ tab.name }}
-          <Badge
-            v-if="tab.count"
-            :variant="tab.name === activeTab ? 'default' : 'outline'"
-            class="ml-2 flex h-6 min-w-6 shrink-0 scale-90 items-center justify-center rounded-full px-1.5 text-xs"
+      <div v-else-if="ticketGroups" class="relative mx-auto w-full max-w-full sm:mx-0 sm:w-auto">
+        <div class="scroll-area flex overflow-x-auto rounded-md bg-slate-200 p-1 dark:bg-slate-700/40">
+          <button
+            v-for="(tab, index) in ticketGroups"
+            :key="index"
+            class="relative z-10 flex min-w-28 shrink-0 items-center justify-center rounded-md p-2 px-3 text-sm font-medium transition-colors duration-150 ease-in-out"
+            :class="tab.name === activeTab ? 'bg-white text-slate-900 shadow-sm dark:bg-primary dark:text-slate-100' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'"
+            :title="tab.name"
+            @click.prevent="handleTabChange(tab.name)"
           >
-            {{ tab.count }}
-          </Badge>
-        </button>
+            <span class="max-w-48 truncate">{{ tab.name }}</span>
+            <Badge
+              v-if="tab.count"
+              :variant="tab.name === activeTab ? 'default' : 'outline'"
+              class="ml-2 flex h-6 min-w-6 shrink-0 scale-90 items-center justify-center rounded-full px-1.5 text-xs"
+            >
+              {{ tab.count }}
+            </Badge>
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -641,7 +646,7 @@ watch(
             <template v-if="!table.getRowModel().rows.length">
               <template v-if="isDataLoading">
                 <tr v-for="index in 10" :key="index">
-                  <td v-for="(column, index2) in columns" :key="index2" class="p-2">
+                  <td v-for="(_, index2) in columns" :key="index2" class="p-2">
                     <Skeleton class="h-6 w-full rounded" />
                   </td>
                 </tr>
