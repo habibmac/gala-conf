@@ -41,26 +41,26 @@ const actionList = computed(() => {
     variant: 'outline' | 'default' | undefined
     class: string
   }> = [
-    { 
-      icon: 'tabler:link', 
-      label: 'Registration Link', 
+    {
+      icon: 'tabler:link',
+      label: 'Registration Link',
       url: registration.reg_url,
       variant: 'outline' as const,
-      class: ''
+      class: '',
     },
-    { 
-      icon: 'tabler:receipt', 
-      label: 'View Invoice', 
+    {
+      icon: 'tabler:receipt',
+      label: 'View Invoice',
       url: registration.invoice_url,
       variant: 'outline' as const,
-      class: ''
+      class: '',
     },
-    { 
-      icon: 'tabler:receipt-tax', 
-      label: 'View Receipt', 
+    {
+      icon: 'tabler:receipt-tax',
+      label: 'View Receipt',
       url: registration.receipt_url,
       variant: 'outline' as const,
-      class: ''
+      class: '',
     },
   ];
 
@@ -71,7 +71,7 @@ const actionList = computed(() => {
       label: 'Backend Details',
       url: backendUrl.value,
       variant: undefined,
-      class: 'bg-yellow-400 text-black hover:bg-yellow-500 dark:bg-yellow-500 dark:text-black dark:hover:bg-yellow-600'
+      class: 'bg-yellow-400 text-black hover:bg-yellow-500 dark:bg-yellow-500 dark:text-black dark:hover:bg-yellow-600',
     });
   }
 

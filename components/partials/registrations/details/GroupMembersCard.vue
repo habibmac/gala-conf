@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
 
-import type { RegistrationDetails, GroupMember } from '~/types';
+import type { GroupMember, RegistrationDetails } from '~/types';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -57,7 +57,7 @@ const openMemberDetails = (memberId: string) => {
         >
           <div class="flex-1 space-y-1">
             <div class="flex items-center gap-2">
-              <span class="font-medium text-sm">
+              <span class="text-sm font-medium">
                 {{ getDisplayName(member) }}
               </span>
               <Badge v-if="member.is_primary" variant="outline" class="text-xs">

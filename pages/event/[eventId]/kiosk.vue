@@ -319,7 +319,6 @@ useHead({
             {{ scanResult.ticket.name }}
           </p>
 
-
           <!-- Staff Notes -->
           <div v-if="scanResult.special_attendee?.notes" class="mt-4">
             <div class="rounded-lg bg-blue-500/20 p-4 text-blue-100">

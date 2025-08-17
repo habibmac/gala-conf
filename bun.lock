@@ -7,6 +7,11 @@
         "@e965/xlsx": "^0.20.3",
         "@floating-ui/vue": "^1.1.6",
         "@formkit/auto-animate": "^0.8.2",
+        "@iconify-json/heroicons": "^1.2.2",
+        "@iconify-json/lucide": "^1.2.62",
+        "@iconify-json/mdi": "^1.2.3",
+        "@iconify-json/solar": "^1.2.4",
+        "@iconify-json/tabler": "^1.2.22",
         "@nuxt/eslint": "^0.5.7",
         "@nuxt/fonts": "^0.7.2",
         "@nuxt/image": "^1.10.0",
@@ -430,7 +435,17 @@
 
     "@humanwhocodes/retry": ["@humanwhocodes/retry@0.4.3", "", {}, "sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ=="],
 
+    "@iconify-json/heroicons": ["@iconify-json/heroicons@1.2.2", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-qoW4pXr5kTTL6juEjgTs83OJIwpePu7q1tdtKVEdj+i0zyyVHgg/dd9grsXJQnpTpBt6/VwNjrXBvFjRsKPENg=="],
+
+    "@iconify-json/lucide": ["@iconify-json/lucide@1.2.62", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-K0KfhvP5YQZ2KraOgCm6jJbwwzQCVocvXcdMpDou5uLa48QnLBRW/dQ8VDGmxHTGpwF9EqLlvnUSinH2i6xs3Q=="],
+
+    "@iconify-json/mdi": ["@iconify-json/mdi@1.2.3", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-O3cLwbDOK7NNDf2ihaQOH5F9JglnulNDFV7WprU2dSoZu3h3cWH//h74uQAB87brHmvFVxIOkuBX2sZSzYhScg=="],
+
     "@iconify-json/radix-icons": ["@iconify-json/radix-icons@1.2.2", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-+PPmKWDP7pfJMcEc9Ty1zyo/zzq+9rfKW4EGb2HSZcPu1VUhothDLFzWvBqQNoFIOYCJ2nm0Vmf8kVyYhq9G0Q=="],
+
+    "@iconify-json/solar": ["@iconify-json/solar@1.2.4", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-ruAh+bbYimlzqXW6MtqmvWlfatvFjE7o1fZWieps1h42Dx7AaHu4Z/dgOYSO1RR4MIhNzD+2xgEbFjASgBcEyg=="],
+
+    "@iconify-json/tabler": ["@iconify-json/tabler@1.2.22", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-KmCtTzZyz7dtszdQGJ5wbWqko6exhI38e4aCQqWZE1Z2wGUqBsMXrRWawXkAp6/XNBebt54h0lcxFCaTYBwFJg=="],
 
     "@iconify/types": ["@iconify/types@2.0.0", "", {}, "sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg=="],
 

@@ -90,8 +90,8 @@ const toggleVipStatus = async () => {
         <div class="flex items-center gap-2">
           <Icon icon="solar:crown-bold-duotone" class="size-5 text-amber-500" />
           VIP Status
-          <Badge 
-            v-if="specialAttendee?.is_vip" 
+          <Badge
+            v-if="specialAttendee?.is_vip"
             class="bg-amber-500 text-white"
           >
             <Icon icon="solar:crown-bold" class="mr-1 size-3" />
