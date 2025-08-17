@@ -7,6 +7,7 @@ import type { RegistrationDetails } from '~/types';
 
 // Components
 import AttendeeInfoCard from '@/components/partials/registrations/details/AttendeeInfo.vue';
+import NotesCard from '@/components/partials/registrations/details/NotesCard.vue';
 import PaymentHistoryCard from '@/components/partials/registrations/details/PaymentHistory.vue';
 import QuickActionsCard from '@/components/partials/registrations/details/QuickActions.vue';
 import RegistrationAnswersCard from '@/components/partials/registrations/details/RegAnswers.vue';
@@ -36,13 +37,44 @@ const eventId = computed(() => route.params.eventId as string);
 const regId = computed(() => route.params.regId as string);
 
 // Fetch registration details
-const { data: registration, isLoading, isError, refetch } = useQuery({
+const { data: registration, isLoading, isError, error, refetch } = useQuery({
   queryKey: ['registration-details', eventId.value, regId.value],
   queryFn: async () => {
-    const response = await $galantisApi.get(`/event/${eventId.value}/registrations/${regId.value}`);
-    return response.data as RegistrationDetails;
+    try {
+      const response = await $galantisApi.get(`/event/${eventId.value}/registrations/${regId.value}`);
+      return response.data as RegistrationDetails;
+    }
+    catch (err: any) {
+      // Handle specific API error responses
+      if (err.response?.data?.error) {
+        throw err.response.data;
+      }
+      throw err;
+    }
   },
   enabled: computed(() => !!eventId.value && !!regId.value),
+  retry: false, // Don't retry for registration not found or invalid ID errors
+});
+
+// Error details
+const errorDetails = computed(() => {
+  if (!error.value)
+    return null;
+
+  // Handle structured API errors
+  const errorData = error.value as any;
+  if (errorData.error && errorData.message) {
+    return {
+      type: errorData.error,
+      message: errorData.message,
+    };
+  }
+
+  // Handle generic errors
+  return {
+    type: 'unknown_error',
+    message: 'An unexpected error occurred',
+  };
 });
 
 // Tab counts for badges
@@ -61,8 +93,8 @@ const goBack = () => {
   router.back();
 };
 
-// Handle notes update from SpecialAttendeeCard
-const handleNotesUpdate = async () => {
+// Handle updates from components
+const handleUpdate = async () => {
   // Refetch the registration data to get the latest from backend
   await refetch();
 };
@@ -100,11 +132,8 @@ useHead({
             <div v-else-if="registration" class="space-y-4 ">
               <!-- Details -->
               <RegistrationInfoCard :registration="registration" />
-              <SpecialAttendeeCard
-                :registration="registration"
-                @update-notes="handleNotesUpdate"
-                @vip-updated="handleNotesUpdate"
-              />
+              <SpecialAttendeeCard :registration="registration" @vip-updated="handleUpdate" />
+              <NotesCard :registration="registration" @update-notes="handleUpdate" />
               <QuickActionsCard :registration="registration" />
             </div>
           </div>
@@ -134,10 +163,27 @@ useHead({
           <Card v-else-if="isError">
             <CardContent class="pt-6">
               <EmptyState
+                v-if="errorDetails?.type === 'registration_not_found'"
+                icon="heroicons:user-minus"
+                title="Registration Not Found"
+                description="This registration has been deleted or does not exist. It may have been removed from the group."
+                :cta="{ label: 'Go Back', action: goBack, icon: 'heroicons:arrow-left' }"
+                :cta2="{ label: 'View All Registrations', action: () => router.push(`/event/${eventId}/registrations`), icon: 'heroicons:users' }"
+              />
+              <EmptyState
+                v-else-if="errorDetails?.type === 'invalid_registration_id'"
+                icon="heroicons:identification"
+                title="Invalid Registration"
+                description="The registration ID format is invalid or missing."
+                :cta="{ label: 'Go Back', action: goBack, icon: 'heroicons:arrow-left' }"
+              />
+              <EmptyState
+                v-else
                 icon="heroicons:exclamation-triangle"
-                title="Oh no! Something went wrong."
-                description="Please try again later or contact support."
+                title="Something went wrong"
+                :description="errorDetails?.message || 'Please try again later or contact support.'"
                 :cta="{ label: 'Try Again', action: refetch, icon: 'heroicons:arrow-path-solid' }"
+                :cta2="{ label: 'Go Back', action: goBack, icon: 'heroicons:arrow-left' }"
               />
             </CardContent>
           </Card>
@@ -152,9 +198,6 @@ useHead({
                 <TabsTrigger value="details" class="flex items-center gap-2">
                   <Icon icon="tabler:info-circle" class="size-4" />
                   <span class="hidden sm:block">Details</span>
-                  <Badge v-if="tabCounts.answers" variant="secondary" class="ml-1 hidden sm:inline">
-                    {{ tabCounts.answers }}
-                  </Badge>
                 </TabsTrigger>
                 <TabsTrigger value="transaction" class="flex items-center gap-2">
                   <Icon icon="tabler:credit-card" class="size-4" />

@@ -1,6 +1,7 @@
 // types/registration-details.d.ts
 export interface RegistrationDetails {
   id: string
+  backend_id: string
   code: string
   date: string
   fullname: string
@@ -27,13 +28,31 @@ export interface RegistrationDetails {
   pmt: PaymentDetail[]
   ans: RegistrationAnswer[]
   special_attendee?: SpecialAttendeeData
+  group_info?: GroupRegistrationInfo
 }
 
 export interface SpecialAttendeeData {
   is_vip: boolean
-  display_priority: boolean
-  special_treatment: boolean
   notes: string | null
+  display_priority: string
+}
+
+export interface GroupRegistrationInfo {
+  total_members: number
+  group_code: string
+  members: GroupMember[]
+}
+
+export interface GroupMember {
+  id: string
+  code: string
+  fullname: string
+  email: string
+  ticket_name: string
+  status: string
+  stt_id: string
+  is_primary: boolean
+  is_current: boolean
 }
 
 export interface TransactionDetails {

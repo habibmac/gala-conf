@@ -62,7 +62,10 @@ const groupedAnswers = computed(() => {
       <CardTitle class="flex items-center gap-2">
         <Icon icon="solar:documents-bold-duotone" class="size-5 text-violet-500" />
         Registration Information
-        <Badge variant="secondary">
+        <Badge
+          variant="secondary"
+          class="ml-2 flex h-6 min-w-6 shrink-0 scale-90 items-center justify-center rounded-full px-1.5 text-xs"
+        >
           {{ registration.ans.filter(a => a.ans).length }}
         </Badge>
       </CardTitle>
@@ -76,7 +79,11 @@ const groupedAnswers = computed(() => {
                 {{ groupName }}
               </h4>
               <div class="space-y-0.5">
-                <div v-for="answer in answers" :key="answer.qst_id" class="flex items-start justify-between rounded-md p-2 hover:bg-muted/50">
+                <div
+                  v-for="answer in answers"
+                  :key="answer.qst_id"
+                  class="flex items-start justify-between rounded-md p-2 hover:bg-muted/50"
+                >
                   <span class="flex-1 pr-4 text-sm text-muted-foreground">{{ answer.qst }}</span>
                   <span class="text-right text-sm font-medium">{{ answer.ans || 'Not provided' }}</span>
                 </div>

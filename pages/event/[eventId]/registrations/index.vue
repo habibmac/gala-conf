@@ -596,7 +596,7 @@ watch(
       isUpdatingFromQuery.value = false;
     });
   },
-  { deep: true },
+  { deep: true, immediate: true },
 );
 </script>
 

@@ -6,6 +6,7 @@ import { onMounted, onUnmounted, ref, watchEffect } from 'vue';
 import { toast } from 'vue-sonner';
 
 import EmptyState from '@/components/EmptyState.vue';
+import NotesCard from '@/components/partials/registrations/details/NotesCard.vue';
 import PayMethodLogo from '@/components/partials/registrations/PayMethodLogo.vue';
 import RegDetailsSummary from '@/components/partials/registrations/RegDetailsSummary.vue';
 import StatusBadge from '@/components/statuses/StatusBadge.vue';
@@ -41,24 +42,33 @@ const closeBtn = ref<HTMLElement | null>(null);
 
 const isLocked = ref(false);
 
-// VIP and notes functionality
+// VIP functionality
 const isTogglingVip = ref(false);
-const isEditingNotes = ref(false);
-const notesValue = ref('');
-const isSaving = ref(false);
 
 const { $galantisApi } = useNuxtApp();
 
-// Find registration notes as fallback
-const registrationNotes = computed(() => {
-  const notesAnswer = data.value?.ans?.find((answer: any) =>
-    answer.qst.toLowerCase().includes('notes')
-    || answer.qst.toLowerCase().includes('note'),
-  );
-  return notesAnswer?.ans || '';
+// Get event configuration
+const getEventData = async (signal: AbortSignal) => {
+  if (!eventId.value)
+    return null;
+
+  return $galantisApi
+    .get(`/event/${eventId.value}`, { signal })
+    .then(response => response.data)
+    .catch(() => null);
+};
+
+const { data: eventData } = useQuery({
+  enabled: !!eventId.value,
+  queryFn: ({ signal }) => getEventData(signal),
+  queryKey: ['eventDetails', { evtId: eventId.value }],
+  staleTime: 5 * 60 * 1000, // 5 minutes
 });
 
 const specialAttendee = computed(() => data.value?.special_attendee);
+
+// Check if VIP functionality is enabled for this event
+const isVipEnabled = computed(() => !!eventData.value?.has_vip);
 
 // VIP toggle functionality
 const toggleVipStatus = async () => {
@@ -94,44 +104,18 @@ const toggleVipStatus = async () => {
   }
 };
 
-// Notes editing functionality
-const startEditingNotes = () => {
-  notesValue.value = specialAttendee.value?.notes || registrationNotes.value || '';
-  isEditingNotes.value = true;
+// Handle updates from components
+const handleNotesUpdate = async () => {
+  // Refetch data to get latest state
+  await refetch();
 };
 
-const cancelEditingNotes = () => {
-  notesValue.value = '';
-  isEditingNotes.value = false;
-};
-
-const saveNotes = async () => {
-  if (isSaving.value || !data.value)
-    return;
-
-  try {
-    isSaving.value = true;
-
-    await $galantisApi.put(`/event/${eventId.value}/registrations/${data.value.id}/notes`, {
-      notes: notesValue.value.trim(),
-    });
-
-    // Refetch data to get latest state
-    await refetch();
-
-    isEditingNotes.value = false;
-    toast.success('Notes saved successfully');
-  }
-  catch (error) {
-    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to save notes');
-    toast.error(errorMessage, {
-      description: errorDescription,
-    });
-  }
-  finally {
-    isSaving.value = false;
-  }
-};
+// Group link for viewing group members
+const groupMembersLink = computed(() => {
+  if (!data.value?.is_group || !data.value?.code) return '';
+  const groupPrefix = data.value.code.split('-')[0];
+  return `/event/${eventId.value}/registrations?order=desc&page=1&perPage=10&search=${groupPrefix}-&sortBy=date`;
+});
 
 // close on click outside
 const clickHandler = (event: MouseEvent) => {
@@ -268,8 +252,29 @@ onUnmounted(async () => {
             <!-- Details -->
             <RegDetailsSummary :data="data" class="mt-4" />
 
+            <!-- Registration Type -->
+            <div class="mt-4 rounded-lg border border-slate-200 p-3 shadow-sm dark:border-slate-700">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Registration Type</span>
+                <!-- Single Registration -->
+                <Badge v-if="!data.is_group" variant="secondary">
+                  Single
+                </Badge>
+                <!-- Group Registration -->
+                <NuxtLink 
+                  v-else-if="data.is_group && groupMembersLink"
+                  :to="groupMembersLink"
+                  class="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                >
+                  Group
+                  <Icon icon="heroicons:arrow-top-right-on-square" class="size-3" />
+                </NuxtLink>
+              </div>
+            </div>
+
             <!-- VIP Status -->
             <div
+              v-if="isVipEnabled"
               class="mt-4 rounded-lg border p-4 shadow-sm duration-150 ease-in-out"
               :class="specialAttendee?.is_vip
                 ? 'border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20'
@@ -429,74 +434,13 @@ onUnmounted(async () => {
               </div>
             </div>
             <!-- Notes -->
-            <div class="mt-6 rounded-lg border border-slate-200 p-4 shadow-sm dark:border-slate-700">
-              <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <Icon icon="solar:note-bold-duotone" class="size-4 text-slate-500" />
-                    <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Notes</span>
-                  </div>
-                  <Button
-                    v-if="!isEditingNotes"
-                    variant="ghost"
-                    size="sm"
-                    @click.stop="startEditingNotes"
-                  >
-                    <Icon icon="solar:pen-bold" class="mr-1 size-3" />
-                    Edit
-                  </Button>
-                </div>
-
-                <!-- Notes Display -->
-                <div v-if="!isEditingNotes">
-                  <div
-                    v-if="specialAttendee?.notes || registrationNotes"
-                    class="rounded-md bg-slate-100 p-2 text-xs dark:bg-slate-700"
-                  >
-                    {{ specialAttendee?.notes || registrationNotes }}
-                  </div>
-                  <div v-else class="text-xs italic text-slate-500">
-                    No notes available
-                  </div>
-                </div>
-
-                <!-- Notes Editor -->
-                <div v-else class="space-y-2">
-                  <Textarea
-                    v-model="notesValue"
-                    placeholder="Add notes for this attendee"
-                    class="min-h-[60px] text-xs"
-                    :disabled="isSaving"
-                  />
-                  <div class="flex gap-2">
-                    <Button
-                      size="sm"
-                      :disabled="isSaving"
-                      @click.stop="saveNotes"
-                    >
-                      <Icon
-                        v-if="isSaving"
-                        icon="svg-spinners:ring-resize"
-                        class="mr-1 size-3"
-                      />
-                      <Icon
-                        v-else
-                        icon="tabler:check"
-                        class="mr-1 size-3"
-                      />
-                      {{ isSaving ? 'Saving...' : 'Save' }}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      :disabled="isSaving"
-                      @click.stop="cancelEditingNotes"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </div>
+            <div class="mt-6">
+              <NotesCard
+                v-if="data"
+                :registration="data"
+                compact
+                @update-notes="handleNotesUpdate"
+              />
             </div>
           </div>
         </div>

@@ -319,13 +319,6 @@ useHead({
             {{ scanResult.ticket.name }}
           </p>
 
-          <!-- VIP Special Treatment -->
-          <div v-if="scanResult.special_attendee?.special_treatment" class="mt-4">
-            <div class="inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-4 py-2 text-amber-200">
-              <Icon icon="solar:medal-star-bold" class="size-5" />
-              <span class="font-medium">Special Treatment Required</span>
-            </div>
-          </div>
 
           <!-- Staff Notes -->
           <div v-if="scanResult.special_attendee?.notes" class="mt-4">
