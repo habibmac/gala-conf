@@ -517,7 +517,7 @@ watch(
         :to="`/event/${eventId}/insights`"
         class="inline-flex items-center space-x-1 pb-5 text-xs text-slate-500 hover:underline"
       >
-        <Icon icon="heroicons-outline:arrow-left" class="size-3" />
+        <Icon icon="tabler:arrow-left" class="size-3" />
         <span>Back to All Insights</span>
       </NuxtLink>
       <!-- subtitle -->
@@ -608,11 +608,11 @@ watch(
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem :disabled="isExporting" @click="handleExport('csv')">
-              <Icon icon="ph:file-csv" class="mr-2 size-5 text-muted-foreground" />
+              <Icon icon="tabler:file-type-csv" class="mr-2 size-5 text-muted-foreground" />
               Export to CSV
             </DropdownMenuItem>
             <DropdownMenuItem :disabled="isExporting" @click="handleExport('xlsx')">
-              <Icon icon="ph:file-xls" class="mr-2 size-5 text-muted-foreground" />
+              <Icon icon="tabler:file-type-xls" class="mr-2 size-5 text-muted-foreground" />
               Export to XLSX
             </DropdownMenuItem>
           </DropdownMenuContent>

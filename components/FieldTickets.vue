@@ -217,7 +217,7 @@ watch(
                 variant="ghost"
                 @click.prevent="remove(index)"
               >
-                <Icon icon="material-symbols-light:close-rounded" class="size-6" />
+                <Icon icon="tabler:x" class="size-6" />
               </Button>
             </div>
           </div>

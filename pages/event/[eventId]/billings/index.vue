@@ -151,7 +151,7 @@ const statusConfig = (status: string) => {
         bgColor: 'bg-yellow-50 dark:bg-yellow-950',
         borderColor: 'border-yellow-200 dark:border-yellow-800',
         color: 'text-yellow-600 dark:text-yellow-400',
-        icon: 'material-symbols:pending',
+        icon: 'tabler:clock-hour-4',
       };
     case 'completed':
       return {
@@ -165,14 +165,14 @@ const statusConfig = (status: string) => {
         bgColor: 'bg-red-50 dark:bg-red-950',
         borderColor: 'border-red-200 dark:border-red-800',
         color: 'text-red-600 dark:text-red-400',
-        icon: 'material-symbols:error',
+        icon: 'tabler:alert-circle-filled',
       };
     default:
       return {
         bgColor: 'bg-gray-50 dark:bg-gray-950',
         borderColor: 'border-gray-200 dark:border-gray-800',
         color: 'text-gray-500 dark:text-gray-400',
-        icon: 'material-symbols:help',
+        icon: 'tabler:help-circle-filled',
       };
   }
 };

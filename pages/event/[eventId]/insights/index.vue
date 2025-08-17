@@ -140,7 +140,7 @@ const {
               }"
               :cta="{
                 label: 'Create Insight',
-                icon: 'heroicons-outline:plus',
+                icon: 'tabler:plus',
               }"
               :cta2="{ label: 'Refresh', action: refetch }"
             />
@@ -152,7 +152,7 @@ const {
             :description="
               error?.message || 'We are unable to fetch the insights at the moment. Please try again later.'
             "
-            :cta="{ label: 'Try Again', icon: 'heroicons-outline:refresh', action: refetch }"
+            :cta="{ label: 'Try Again', icon: 'tabler:refresh', action: refetch }"
           />
         </template>
       </div>

@@ -29,7 +29,7 @@ defineEmits<{
             @click="$emit('toggle-sidebar')"
           >
             <span class="sr-only">Open sidebar</span>
-            <Icon icon="material-symbols-light:menu" class="size-8 fill-current" />
+            <Icon icon="radix-icons:hamburger-menu" class="size-6 fill-current" />
           </Button>
           <NuxtLink
             v-else

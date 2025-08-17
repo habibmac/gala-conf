@@ -14,11 +14,11 @@ const handleResetFilters = () => {
     <Button
       type="button"
       variant="outline"
-      class="h-[42px] w-auto"
+      class="w-auto md:h-[42px]"
       @click="handleResetFilters"
     >
       Reset
-      <Icon icon="iconamoon:close-thin" class="size-6 dark:text-slate-600" />
+      <Icon icon="tabler:x" class="ml-2 size-4 dark:text-slate-600" />
     </Button>
   </div>
 </template>

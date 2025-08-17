@@ -248,7 +248,7 @@ watch(
         </div>
       </div>
 
-      <div v-else-if="isError">
+      <div v-else-if="!isError">
         <div class="absolute inset-0 flex items-center justify-center bg-red-100 dark:bg-red-800/40">
           <div class="max-w-40 space-y-2 text-center">
             <Icon

@@ -50,10 +50,10 @@ watch(
       @input="updateQuery"
     >
     <button class="absolute left-3 top-1/2 -translate-y-1/2" @click="searchImmediately">
-      <Icon icon="ion:search-outline" class="size-4" />
+      <Icon icon="tabler:search" class="size-4" />
     </button>
     <button v-if="inputQuery" class="absolute right-2 top-1/2 -translate-y-1/2" @click="clearSearch">
-      <Icon icon="ion:close-circle" class="size-4" />
+      <Icon icon="tabler:x" class="size-4" />
     </button>
   </div>
 </template>

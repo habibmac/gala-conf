@@ -145,12 +145,7 @@ watch(value, (newValue) => {
               />
               <ClientOnly>
                 <ComboboxButton class="absolute inset-y-0 right-0 flex items-center pr-2">
-                  <Icon
-                    v-if="isLoading"
-                    icon="eos-icons:loading"
-                    class="size-5 animate-spin"
-                    aria-hidden="true"
-                  />
+                  <SpinnerRing v-if="isLoading" class="size-5" />
                   <Icon
                     v-else-if="selectedCity"
                     icon="heroicons:x-mark"

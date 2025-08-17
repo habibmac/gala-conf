@@ -112,7 +112,8 @@ const handleNotesUpdate = async () => {
 
 // Group link for viewing group members
 const groupMembersLink = computed(() => {
-  if (!data.value?.is_group || !data.value?.code) return '';
+  if (!data.value?.is_group || !data.value?.code)
+    return '';
   const groupPrefix = data.value.code.split('-')[0];
   return `/event/${eventId.value}/registrations?order=desc&page=1&perPage=10&search=${groupPrefix}-&sortBy=date`;
 });
@@ -219,7 +220,7 @@ onUnmounted(async () => {
           class="group absolute right-0 top-0 mr-6 mt-6 p-2"
           @click.stop="$emit('close-reg-details')"
         >
-          <Icon icon="iconamoon:close-thin" class="size-6" />
+          <Icon icon="tabler:x" class="size-6" />
         </button>
 
         <div class="px-4 py-8 lg:px-8">
@@ -261,7 +262,7 @@ onUnmounted(async () => {
                   Single
                 </Badge>
                 <!-- Group Registration -->
-                <NuxtLink 
+                <NuxtLink
                   v-else-if="data.is_group && groupMembersLink"
                   :to="groupMembersLink"
                   class="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"

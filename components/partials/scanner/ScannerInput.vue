@@ -176,11 +176,7 @@ const getActionButtonLabel = () => {
           class="hidden h-12 md:flex"
           @click="$emit('unified-action')"
         >
-          <Icon
-            v-if="isProcessing || (scannerMode === 'search' && isSearching)"
-            icon="eos-icons:three-dots-loading"
-            class="mr-2 size-4"
-          />
+          <SpinnerDots v-if="isProcessing || (scannerMode === 'search' && isSearching)" />
           {{ getActionButtonLabel() }}
         </Button>
         <div class="flex justify-center">

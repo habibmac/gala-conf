@@ -139,7 +139,10 @@ const filteredScans = computed(() => {
     <CardContent class="p-0">
       <!-- Search Input -->
       <div v-if="showSearch" class="mb-4 px-5">
-        <div v-if="props.scannerFocusLocked" class="mb-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+        <div
+          v-if="props.scannerFocusLocked"
+          class="mb-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
+        >
           <Icon icon="heroicons:lock-closed" class="mr-1 inline size-3" />
           Scanner focus is locked. Disable "Lock Focus" to search.
         </div>
@@ -211,7 +214,8 @@ const filteredScans = computed(() => {
                     "
                     class="size-4 shrink-0"
                   />
-                  <span class="max-w-xs truncate break-words text-xs font-medium" :title="scan.code">{{ scan.code }}</span>
+                  <span class="max-w-xs truncate break-words text-xs font-medium" :title="scan.code">{{ scan.code
+                  }}</span>
                 </div>
                 <div v-if="scan.attendeeName" class="mt-1 flex items-center gap-2">
                   <!-- VIP Badge -->
@@ -275,10 +279,7 @@ const filteredScans = computed(() => {
                     'text-blue-600': scan.action === 'note_only',
                   }"
                 >
-                  <Icon
-                    :icon="scan.action === 'note_only' ? 'solar:note-bold' : 'tabler:checks'"
-                    class="size-3"
-                  />
+                  <Icon :icon="scan.action === 'note_only' ? 'solar:note-bold' : 'tabler:checks'" class="size-3" />
                   <span>{{ scan.action === 'note_only' ? 'Note Added' : scan.action }}</span>
                 </div>
 
@@ -302,7 +303,7 @@ const filteredScans = computed(() => {
                       size="sm"
                       @click="$emit('registration-action', scan.registrationData, 'checkin')"
                     >
-                      <Icon icon="ph:sign-in" class="size-4" />
+                      <Icon icon="tabler:checks" class="size-4" />
                     </Button>
                     <Button
                       v-if="scan.registrationData.can_checkout"
@@ -310,7 +311,7 @@ const filteredScans = computed(() => {
                       size="sm"
                       @click="$emit('registration-action', scan.registrationData, 'checkout')"
                     >
-                      <Icon icon="ph:sign-out" class="size-4" />
+                      <Icon icon="tabler:logout" class="size-4" />
                     </Button>
                   </template>
                 </div>

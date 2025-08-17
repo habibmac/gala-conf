@@ -152,7 +152,7 @@ watch(
                 variant="ghost"
                 @click.prevent="remove(index)"
               >
-                <Icon icon="material-symbols-light:close-rounded" class="size-6" />
+                <Icon icon="radix-icons:cross-1" class="size-6" />
               </Button>
             </div>
           </div>

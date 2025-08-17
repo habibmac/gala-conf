@@ -192,7 +192,7 @@ const handleClose = () => {
           class="border-rose-200 bg-rose-100 text-rose-700 hover:bg-rose-200"
           @click="handleAction('checkout')"
         >
-          <Icon icon="ph:sign-out" class="mr-2 size-4" />
+          <Icon icon="tabler:logout" class="mr-2 size-4" />
           Check Out
         </Button>
 
@@ -201,7 +201,7 @@ const handleClose = () => {
           class="border-emerald-200 bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
           @click="handleAction('checkin')"
         >
-          <Icon icon="ph:sign-in" class="mr-2 size-4" />
+          <Icon icon="tabler:checks" class="mr-2 size-4" />
           Check In
         </Button>
 
@@ -219,7 +219,7 @@ const handleClose = () => {
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
           <Icon
-            :icon="actionType === 'checkin' ? 'ph:sign-in' : 'ph:sign-out'"
+            :icon="actionType === 'checkin' ? 'tabler:checks' : 'tabler:logout'"
             class="size-5"
             :class="actionType === 'checkin' ? 'text-emerald-600' : 'text-rose-600'"
           />
@@ -249,7 +249,7 @@ const handleClose = () => {
         </Button>
         <Button @click="submitAction">
           <Icon
-            :icon="actionType === 'checkin' ? 'ph:sign-in' : 'ph:sign-out'"
+            :icon="actionType === 'checkin' ? 'tabler:checks' : 'tabler:logout'"
             class="mr-2 size-4"
           />
           {{ actionType === 'checkin' ? 'Check In' : 'Check Out' }}

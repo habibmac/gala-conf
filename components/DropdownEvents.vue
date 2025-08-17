@@ -158,7 +158,7 @@ onUnmounted(() => {
                         <Icon
                           v-else
                           class="size-5 text-slate-400 dark:text-slate-500"
-                          icon="heroicons-outline:search"
+                          icon="tabler:search"
                         />
                       </div>
                       <Input
@@ -221,7 +221,7 @@ onUnmounted(() => {
                         :class="cn('rounded-l-md', { 'text-slate-500': page === 1 })"
                         @click="prevPage"
                       >
-                        <Icon class="size-4" icon="heroicons-outline:chevron-left" />
+                        <Icon class="size-4" icon="tabler:chevrons-left" />
                       </Button>
                       <Button
                         v-if="page < maxPage"
@@ -230,7 +230,7 @@ onUnmounted(() => {
                         :class="cn('rounded-l-md', { 'text-slate-500': page === 1 })"
                         @click="nextPage"
                       >
-                        <Icon class="size-4" icon="heroicons-outline:chevron-right" />
+                        <Icon class="size-4" icon="tabler:chevrons-right" />
                       </Button>
                     </div>
                   </div>

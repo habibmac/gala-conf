@@ -34,7 +34,7 @@ const { insightData } = useInsight(eventId, insightId);
         :to="`/event/${eventId}/insights`"
         class="inline-flex items-center space-x-1 pb-5 text-xs text-slate-500 hover:underline"
       >
-        <Icon icon="heroicons-outline:arrow-left" class="size-3" />
+        <Icon icon="tabler:arrow-left" class="size-3" />
         <span>Back to All Insights</span>
       </NuxtLink>
       <!-- subtitle -->

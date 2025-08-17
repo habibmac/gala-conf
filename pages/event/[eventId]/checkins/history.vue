@@ -653,11 +653,11 @@ watch(
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center">
               <DropdownMenuItem :disabled="isExporting" @click="handleExport('csv')">
-                <Icon icon="ph:file-csv" class="mr-2 size-4 text-muted-foreground" />
+                <Icon icon="tabler:file-type-csv" class="mr-2 size-4 text-muted-foreground" />
                 Export to CSV
               </DropdownMenuItem>
               <DropdownMenuItem :disabled="isExporting" @click="handleExport('xlsx')">
-                <Icon icon="ph:file-xls" class="mr-2 size-4 text-muted-foreground" />
+                <Icon icon="tabler:file-type-xls" class="mr-2 size-4 text-muted-foreground" />
                 Export to XLSX
               </DropdownMenuItem>
             </DropdownMenuContent>

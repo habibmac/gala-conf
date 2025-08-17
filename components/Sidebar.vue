@@ -173,7 +173,7 @@ onUnmounted(() => {
             @click="handleCloseSidebar"
           >
             <span class="sr-only">Close sidebar</span>
-            <Icon icon="material-symbols-light:close-rounded" class="size-7" />
+            <Icon icon="radix-icons:cross-1" class="size-5" />
           </Button>
 
           <NuxtLink to="/my-events" class="mx-auto">
