@@ -36,7 +36,7 @@ const createLink = (page: number) => {
   return {
     name: route.name as string,
     params: { ...route.params },
-    query: { page },
+    query: { ...route.query, page },
   };
 };
 

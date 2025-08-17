@@ -9,7 +9,7 @@ import {
   useVueTable,
 } from '@tanstack/vue-table';
 import { format } from 'date-fns';
-import { computed, h, ref, toRefs, watch } from 'vue';
+import { computed, h, nextTick, ref, toRefs, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
@@ -74,6 +74,9 @@ const isExporting = ref(false);
 
 // Selected registration ID for details modal
 const selectedRegId = ref<string>((route.query.details as string) || '');
+
+// Flag to prevent infinite loops between watchers
+const isUpdatingFromQuery = ref(false);
 
 // Pagination configs
 const INITIAL_PAGE_SIZE = 10;
@@ -400,20 +403,10 @@ const dateRange = computed({
 });
 
 const handleNavigation = (pageNumber: number) => {
-  const currentPageIndex = table.getState().pagination.pageIndex;
-  const pageCount = table.getPageCount();
-
-  if (pageNumber === currentPageIndex + 1) {
-    return;
-  }
-
-  const newPageIndex = Math.max(0, Math.min(pageNumber - 1, pageCount - 1));
-  table.setPageIndex(newPageIndex);
-
   router.push({
     query: {
       ...route.query,
-      page: newPageIndex + 1,
+      page: pageNumber,
     },
   });
 };
@@ -518,17 +511,21 @@ const handleRemoveFilter = (filterToRemove: any) => {
 watch(
   [filters, pagination, sorting, selectedRegId],
   ([newFilters, newPagination, newSorting]) => {
+    if (isUpdatingFromQuery.value) {
+      return;
+    }
+
     const query = {
-      dateEnd: newFilters.date_end || undefined,
       dateStart: newFilters.date_start || undefined,
+      dateEnd: newFilters.date_end || undefined,
       details: selectedRegId.value || undefined,
       order: newSorting[0]?.desc ? 'desc' : 'asc',
-      page: newPagination.pageIndex + 1 || undefined,
+      page: (newPagination.pageIndex + 1) || undefined,
       perPage: newPagination.pageSize || undefined,
       search: newFilters.search || undefined,
       sortBy: newSorting[0]?.id || undefined,
       status: newFilters.status.length > 0 ? newFilters.status : undefined,
-      ticket: newFilters.ticket_name.length > 0 ? newFilters.ticket_name : undefined,
+      ticketName: newFilters.ticket_name.length > 0 ? newFilters.ticket_name : undefined,
     };
     router.push({ query });
   },
@@ -557,6 +554,8 @@ watch(
 watch(
   () => route.query,
   (newQuery) => {
+    isUpdatingFromQuery.value = true;
+
     filters.value = {
       date_end: (newQuery.dateEnd as string) || '',
       date_start: (newQuery.dateStart as string) || '',
@@ -566,25 +565,36 @@ watch(
         : newQuery.status
           ? [newQuery.status as string]
           : [],
-      ticket_name: Array.isArray(newQuery.ticket)
-        ? (newQuery.ticket as string[])
-        : newQuery.ticket
-          ? [newQuery.ticket as string]
+      ticket_name: Array.isArray(newQuery.ticketName)
+        ? (newQuery.ticketName as string[])
+        : newQuery.ticketName
+          ? [newQuery.ticketName as string]
           : [],
     };
-    table.getState().pagination.pageIndex = pagination.value.pageIndex;
-    table.getState().pagination.pageSize = pagination.value.pageSize;
+    const newPageIndex = newQuery.page ? Number(newQuery.page) - 1 : 0;
+    const newPageSize = newQuery.perPage ? Number(newQuery.perPage) : INITIAL_PAGE_SIZE;
+
     pagination.value = {
-      pageIndex: newQuery.page ? Number(newQuery.page) - 1 : 0,
-      pageSize: newQuery.perPage ? Number(newQuery.perPage) : INITIAL_PAGE_SIZE,
+      pageIndex: newPageIndex,
+      pageSize: newPageSize,
     };
+
+    // Ensure table state is synchronized
+    nextTick(() => {
+      table.setPageIndex(newPageIndex);
+      table.setPageSize(newPageSize);
+    });
     sorting.value = [
       {
         desc: parseDesc((newQuery.order as string) || 'desc'),
-        id: (newQuery.sortBy as string) || 'reg_date',
+        id: (newQuery.sortBy as string) || 'date',
       },
     ];
     selectedRegId.value = (newQuery.details as string) || '';
+
+    nextTick(() => {
+      isUpdatingFromQuery.value = false;
+    });
   },
   { deep: true },
 );
@@ -741,7 +751,7 @@ watch(
             <template v-if="!table.getRowModel().rows.length">
               <template v-if="isLoading">
                 <tr v-for="index in 10" :key="index">
-                  <td v-for="(column, index2) in columns" :key="index2" class="p-2">
+                  <td v-for="(_, index2) in columns" :key="index2" class="p-2">
                     <Skeleton class="h-6 w-full rounded" />
                   </td>
                 </tr>
@@ -788,10 +798,10 @@ watch(
   </section>
   <TablePagination
     v-if="table.getRowModel().rows.length > 0"
-    :current-page="table.getState().pagination.pageIndex + 1"
+    :current-page="Number(route.query.page) || 1"
     :page-count="table.getPageCount()"
     :page-sizes="pageSizes"
-    :page-size="table.getState().pagination.pageSize"
+    :page-size="Number(route.query.perPage) || INITIAL_PAGE_SIZE"
     :total-data="totalData"
     @update:page-size="handlePageSizeChange"
     @update:current-page="handleNavigation"

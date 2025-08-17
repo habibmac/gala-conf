@@ -128,7 +128,7 @@ const getBadgeVariant = (percentage: number) => {
       </Alert>
 
       <!-- Data Display -->
-      <div v-else-if="ticketStats && ticketStats.length > 0" class="space-y-6 py-4">
+      <div v-else-if="ticketStats && ticketStats.length > 0" class="space-y-4 py-4">
         <!-- Individual Tickets -->
         <div class="space-y-4">
           <div

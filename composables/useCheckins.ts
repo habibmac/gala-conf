@@ -19,7 +19,7 @@ export const useCheckins = (
     order: sorting.value.length > 0 && sorting.value[0].desc ? 'desc' : 'asc',
     page: (pagination.value.pageIndex + 1).toString(),
     per_page: pagination.value.pageSize.toString(),
-    sort_by: sorting.value.length > 0 ? sorting.value[0].id : '',
+    sort_by: sorting.value.length > 0 ? sorting.value[0].id : 'check_time',
     search: filters.value.search || '',
     datetime_start: filters.value.datetime_start || '',
     datetime_end: filters.value.datetime_end || '',

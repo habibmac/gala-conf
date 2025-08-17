@@ -23,7 +23,7 @@ export const useBillings = (
     // Always send 1-based page numbers to the API
     page: String(pagination.value.pageIndex + 1),
     per_page: pagination.value.pageSize.toString(),
-    sort_by: sorting.value.length > 0 ? sorting.value[0].id : '',
+    sort_by: sorting.value.length > 0 ? sorting.value[0].id : 'request_date',
     ...transformFiltersForAPI(filters.value),
   }));
 

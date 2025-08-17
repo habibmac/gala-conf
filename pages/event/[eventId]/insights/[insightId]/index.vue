@@ -10,7 +10,7 @@ import {
   useVueTable,
 } from '@tanstack/vue-table';
 import { format, fromUnixTime } from 'date-fns';
-import { computed, ref } from 'vue';
+import { computed, ref, watch, nextTick } from 'vue';
 import { toast } from 'vue-sonner';
 
 import type { Answer, ColumnConfig, CustomField, RegItem, TicketGroup } from '@/types';
@@ -52,6 +52,9 @@ const { group, order, page, perPage, search, sortBy } = toRefs(props);
 const route = useRoute();
 const router = useRouter();
 
+// Flag to prevent infinite loops between watchers
+const isUpdatingFromQuery = ref(false);
+
 const eventId = computed(() => route.params.eventId as string || '');
 const insightId = computed(() => route.params.insightId as string || '');
 
@@ -81,7 +84,7 @@ const parseDesc = (order: string): boolean => order.toLowerCase() === 'desc';
 const sorting = ref<SortingState>([
   {
     desc: parseDesc(order.value || 'asc'),
-    id: sortBy.value || 'code',
+    id: sortBy.value || 'date',
   },
 ]);
 
@@ -307,25 +310,10 @@ function handlePageSizeChange(newSize: number) {
 }
 
 const handleNavigation = (pageNumber: number) => {
-  const currentPageIndex = table.getState().pagination.pageIndex;
-  const pageCount = table.getPageCount();
-
-  if (pageNumber === currentPageIndex + 1) {
-    // No change in page, do nothing
-    return;
-  }
-
-  // Ensure the page number is within valid range
-  const newPageIndex = Math.max(0, Math.min(pageNumber - 1, pageCount - 1));
-
-  // Set the new page index
-  table.setPageIndex(newPageIndex);
-
-  // Update the router query
   router.push({
     query: {
       ...route.query,
-      page: newPageIndex + 1,
+      page: pageNumber,
     },
   });
 };
@@ -463,12 +451,62 @@ watch(
     };
     sorting.value = [
       {
-        desc: parseDesc((newQuery.order as string) || 'desc'),
-        id: (newQuery.sortBy as string) || 'reg_date',
+        desc: parseDesc((newQuery.order as string) || 'asc'),
+        id: (newQuery.sortBy as string) || 'date',
       },
     ];
   },
+  { deep: true, immediate: true },
+);
+
+// Add watchers to sync state with URL (similar to registrations/billings pages)
+watch(
+  [filters, pagination, sorting],
+  ([newFilters, newPagination, newSorting]) => {
+    if (isUpdatingFromQuery.value) {
+      return;
+    }
+    
+    const query = {
+      search: newFilters.search || undefined,
+      group: newFilters.group || undefined,
+      order: newSorting[0]?.desc ? 'desc' : 'asc',
+      page: String(newPagination.pageIndex + 1),
+      perPage: String(newPagination.pageSize),
+      sortBy: newSorting[0]?.id || undefined,
+    };
+    router.push({ query });
+  },
   { deep: true },
+);
+
+watch(
+  () => route.query,
+  (newQuery) => {
+    isUpdatingFromQuery.value = true;
+    
+    filters.value = {
+      search: (newQuery.search as string) || '',
+      group: (newQuery.group as string) || '',
+    };
+    
+    pagination.value = {
+      pageIndex: Math.max(0, Number(newQuery.page || 1) - 1),
+      pageSize: Number(newQuery.perPage || 10),
+    };
+    
+    sorting.value = [
+      {
+        desc: (newQuery.order as string || 'asc').toLowerCase() === 'desc',
+        id: (newQuery.sortBy as string) || 'date',
+      },
+    ];
+    
+    nextTick(() => {
+      isUpdatingFromQuery.value = false;
+    });
+  },
+  { deep: true, immediate: true },
 );
 </script>
 
@@ -685,10 +723,10 @@ watch(
   </section>
   <TablePagination
     v-if="table.getRowModel().rows.length > 0"
-    :current-page="table.getState().pagination.pageIndex + 1"
+    :current-page="Number(route.query.page) || 1"
     :page-count="table.getPageCount()"
     :page-sizes="pageSizes"
-    :page-size="table.getState().pagination.pageSize"
+    :page-size="Number(route.query.perPage) || 10"
     :total-data="totalData"
     @update:page-size="handlePageSizeChange"
     @update:current-page="handleNavigation"

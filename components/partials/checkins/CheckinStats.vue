@@ -118,7 +118,7 @@ const statsCards = computed((): StatsCard[] => [
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <!-- Loading State -->
     <div v-if="isLoading" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <Card v-for="i in 4" :key="i">

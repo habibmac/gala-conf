@@ -31,7 +31,7 @@ export const useInsight = (
 
   const defaultSorting = ref<SortingState>([
     {
-      desc: false,
+      desc: false, // API defaults to 'asc'
       id: 'date',
     },
   ]);
@@ -59,6 +59,21 @@ export const useInsight = (
   const activeSorting = sorting || defaultSorting;
   const activeFilters = filters || defaultFilters;
 
+  // Map frontend column keys to API sort fields
+  const mapSortField = (columnKey: string): string => {
+    const sortFieldMap: Record<string, string> = {
+      'code': 'date',  // Registration code sorting -> date
+      'fullname': 'name',
+      'ticket_name': 'ticket',
+      'date': 'date',
+      'name': 'name',
+      'email': 'email',
+      'status': 'status',
+      'ticket': 'ticket',
+    };
+    return sortFieldMap[columnKey] || 'date';
+  };
+
   // 2. Registration data query - handles all filters, pagination, sorting
   const requestParams = computed<RegRequestParams>(() => ({
     date_end: activeFilters.value.date_end || '',
@@ -67,8 +82,8 @@ export const useInsight = (
     page: (activePagination.value.pageIndex + 1).toString(),
     per_page: activePagination.value.pageSize.toString(),
     search: activeFilters.value.search || '',
-    sort_by: activeSorting.value.length > 0 ? activeSorting.value[0].id : 'date',
-    ...activeFilters.value, // Include any additional filters
+    sort_by: activeSorting.value.length > 0 ? mapSortField(activeSorting.value[0].id) : 'date',
+    group: activeFilters.value.group || '',
   }));
 
   const {

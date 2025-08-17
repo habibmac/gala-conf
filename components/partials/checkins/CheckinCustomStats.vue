@@ -73,7 +73,7 @@ const isNoAnswer = (answer: string) => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <!-- Loading State -->
     <div v-if="isLoading" class="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <Card v-for="i in 2" :key="i">

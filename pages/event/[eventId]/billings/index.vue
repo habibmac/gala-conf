@@ -10,7 +10,7 @@ import {
   useVueTable,
 } from '@tanstack/vue-table';
 import { format } from 'date-fns';
-import { computed, ref } from 'vue';
+import { computed, ref, watch, nextTick } from 'vue';
 
 import type { Billing, BillingFilters, ColumnConfig } from '@/types';
 
@@ -36,7 +36,7 @@ const props = withDefaults(
     page: '1',
     perPage: '10',
     search: '',
-    sortBy: 'date',
+    sortBy: 'request_date',
     status: '',
   },
 );
@@ -62,6 +62,9 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 
+// Flag to prevent infinite loops between watchers
+const isUpdatingFromQuery = ref(false);
+
 const eventId = computed(() => route.params.eventId as string || '');
 
 // Pagination configs
@@ -86,7 +89,7 @@ const filters = ref<BillingFilters>({
 const sorting = ref<SortingState>([
   {
     desc: props.order ? props.order.toLowerCase() === 'desc' : true,
-    id: props.sortBy || 'date',
+    id: props.sortBy || 'request_date',
   },
 ]);
 
@@ -268,14 +271,10 @@ const handlePageSizeChange = (newSize: number) => {
 };
 
 const handleNavigation = (pageNumber: number) => {
-  // pageNumber is 1-based, convert to 0-based for internal state
-  pagination.value.pageIndex = pageNumber - 1;
-
   router.push({
     query: {
       ...route.query,
       page: String(pageNumber),
-      perPage: String(pagination.value.pageSize),
     },
   });
 };
@@ -297,7 +296,7 @@ const handleResetFilters = () => {
   sorting.value = [
     {
       desc: true,
-      id: 'date',
+      id: 'request_date',
     },
   ];
 };
@@ -330,11 +329,14 @@ const isAnyFilterActive = computed(() => {
 watch(
   [filters, pagination, sorting],
   ([newFilters, newPagination, newSorting]) => {
+    if (isUpdatingFromQuery.value) {
+      return;
+    }
+    
     const query = {
-      dateEnd: newFilters.date_end || undefined,
       dateStart: newFilters.date_start || undefined,
+      dateEnd: newFilters.date_end || undefined,
       order: newSorting[0]?.desc ? 'desc' : 'asc',
-      // Always use 1-based page numbers in the URL
       page: String(newPagination.pageIndex + 1),
       perPage: String(newPagination.pageSize),
       search: newFilters.search || undefined,
@@ -350,6 +352,8 @@ watch(
 watch(
   () => route.query,
   (newQuery) => {
+    isUpdatingFromQuery.value = true;
+    
     filters.value = {
       date_end: (newQuery.dateEnd as string) || '',
       date_start: (newQuery.dateStart as string) || '',
@@ -358,7 +362,6 @@ watch(
     };
 
     pagination.value = {
-      // Convert 1-based URL page number to 0-based pageIndex
       pageIndex: Math.max(0, Number(newQuery.page || 1) - 1),
       pageSize: Number(newQuery.perPage || INITIAL_PAGE_SIZE),
     };
@@ -366,11 +369,15 @@ watch(
     sorting.value = [
       {
         desc: parseDesc((newQuery.order as string) || 'desc'),
-        id: (newQuery.sortBy as string) || 'date',
+        id: (newQuery.sortBy as string) || 'request_date',
       },
     ];
+    
+    nextTick(() => {
+      isUpdatingFromQuery.value = false;
+    });
   },
-  { deep: true },
+  { deep: true, immediate: true },
 );
 </script>
 
@@ -459,10 +466,10 @@ watch(
       <CardFooter class="border-t p-0">
         <TablePagination
           v-if="table.getRowModel().rows.length > 0"
-          :current-page="pagination.pageIndex + 1"
+          :current-page="Number(route.query.page) || 1"
           :page-count="totalPages"
           :page-sizes="pageSizes"
-          :page-size="pagination.pageSize"
+          :page-size="Number(route.query.perPage) || INITIAL_PAGE_SIZE"
           :total-data="totalData"
           active-page-style="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
           @update:page-size="handlePageSizeChange"
