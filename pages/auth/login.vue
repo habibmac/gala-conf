@@ -67,6 +67,7 @@ const onSubmit = handleSubmit(async (values) => {
 });
 
 const $version = packageJson.version;
+const $buildDate = new Date().toISOString().split('T')[0];
 
 // Redirect if already authenticated
 onMounted(() => {
@@ -194,7 +195,7 @@ onMounted(() => {
         </p>
 
         <p class="text-center">
-          <span class="text-xs text-muted-foreground">Version: {{ $version }}</span>
+          <span class="text-xs text-muted-foreground">Version: {{ $version }} | {{ $buildDate }}</span>
         </p>
       </div>
     </div>

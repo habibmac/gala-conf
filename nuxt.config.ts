@@ -54,20 +54,6 @@ export default defineNuxtConfig({
     'vue-sonner/nuxt',
     '@vite-pwa/nuxt',
   ],
-  vite: {
-    plugins: [
-      {
-        name: 'iconify-offline',
-        config() {
-          return {
-            define: {
-              'process.env.ICONIFY_API': 'false',
-            },
-          };
-        },
-      },
-    ],
-  },
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
