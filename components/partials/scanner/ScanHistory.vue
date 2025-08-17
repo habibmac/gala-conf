@@ -272,7 +272,7 @@ const filteredScans = computed(() => {
                   class="flex items-center gap-1 text-xs font-medium"
                   :class="{
                     'text-emerald-600': scan.action !== 'note_only',
-                    'text-blue-600': scan.action === 'note_only'
+                    'text-blue-600': scan.action === 'note_only',
                   }"
                 >
                   <Icon

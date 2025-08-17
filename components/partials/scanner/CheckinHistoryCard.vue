@@ -67,8 +67,8 @@ const historyCardColumns = [
 
     <template #cell-note="{ value }">
       <div v-if="value" class="flex items-start gap-2">
-        <Icon icon="solar:note-bold" class="mt-0.5 size-3 text-blue-500 shrink-0" />
-        <span class="text-sm text-muted-foreground break-words">
+        <Icon icon="solar:note-bold" class="mt-0.5 size-3 shrink-0 text-blue-500" />
+        <span class="break-words text-sm text-muted-foreground">
           {{ value }}
         </span>
       </div>

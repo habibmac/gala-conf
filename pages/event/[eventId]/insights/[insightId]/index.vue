@@ -10,7 +10,7 @@ import {
   useVueTable,
 } from '@tanstack/vue-table';
 import { format, fromUnixTime } from 'date-fns';
-import { computed, ref, watch, nextTick } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
 import type { Answer, ColumnConfig, CustomField, RegItem, TicketGroup } from '@/types';
@@ -379,7 +379,7 @@ const handleExport = async (format: 'csv' | 'xlsx') => {
         .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
         .substring(0, 50); // Limit length to avoid overly long filenames
     };
-    
+
     const sanitizedInsightTitle = sanitizeFilename(insightTitle);
     const sanitizedGroupName = sanitizeFilename(groupName);
 
@@ -466,7 +466,7 @@ watch(
     if (isUpdatingFromQuery.value) {
       return;
     }
-    
+
     const query = {
       search: newFilters.search || undefined,
       group: newFilters.group || undefined,
@@ -484,24 +484,24 @@ watch(
   () => route.query,
   (newQuery) => {
     isUpdatingFromQuery.value = true;
-    
+
     filters.value = {
       search: (newQuery.search as string) || '',
       group: (newQuery.group as string) || '',
     };
-    
+
     pagination.value = {
       pageIndex: Math.max(0, Number(newQuery.page || 1) - 1),
       pageSize: Number(newQuery.perPage || 10),
     };
-    
+
     sorting.value = [
       {
         desc: (newQuery.order as string || 'asc').toLowerCase() === 'desc',
         id: (newQuery.sortBy as string) || 'date',
       },
     ];
-    
+
     nextTick(() => {
       isUpdatingFromQuery.value = false;
     });

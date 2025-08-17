@@ -218,8 +218,8 @@ const handleClose = () => {
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
-          <Icon 
-            :icon="actionType === 'checkin' ? 'ph:sign-in' : 'ph:sign-out'" 
+          <Icon
+            :icon="actionType === 'checkin' ? 'ph:sign-in' : 'ph:sign-out'"
             class="size-5"
             :class="actionType === 'checkin' ? 'text-emerald-600' : 'text-rose-600'"
           />
@@ -248,9 +248,9 @@ const handleClose = () => {
           Cancel
         </Button>
         <Button @click="submitAction">
-          <Icon 
-            :icon="actionType === 'checkin' ? 'ph:sign-in' : 'ph:sign-out'" 
-            class="mr-2 size-4" 
+          <Icon
+            :icon="actionType === 'checkin' ? 'ph:sign-in' : 'ph:sign-out'"
+            class="mr-2 size-4"
           />
           {{ actionType === 'checkin' ? 'Check In' : 'Check Out' }}
         </Button>

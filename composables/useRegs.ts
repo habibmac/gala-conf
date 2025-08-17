@@ -27,11 +27,11 @@ export const useRegs = (
   // Map frontend column keys to API sort fields
   const mapSortField = (columnKey: string): string => {
     const sortFieldMap: Record<string, string> = {
-      'fullname': 'name',
-      'ticket_name': 'ticket',
-      'date': 'date',
-      'email': 'email',
-      'status': 'status',
+      fullname: 'name',
+      ticket_name: 'ticket',
+      date: 'date',
+      email: 'email',
+      status: 'status',
     };
     return sortFieldMap[columnKey] || 'date';
   };
@@ -42,11 +42,11 @@ export const useRegs = (
     per_page: pagination.value.pageSize.toString(),
     sort_by: sorting.value.length > 0 ? mapSortField(sorting.value[0].id) : 'date',
     search: filters.value.search || '',
-    status: Array.isArray(filters.value.status) && filters.value.status.length > 0 
-      ? filters.value.status.join(',') 
+    status: Array.isArray(filters.value.status) && filters.value.status.length > 0
+      ? filters.value.status.join(',')
       : '',
-    ticket_name: Array.isArray(filters.value.ticket_name) && filters.value.ticket_name.length > 0 
-      ? filters.value.ticket_name.join(',') 
+    ticket_name: Array.isArray(filters.value.ticket_name) && filters.value.ticket_name.length > 0
+      ? filters.value.ticket_name.join(',')
       : '',
     date_start: filters.value.date_start || '',
     date_end: filters.value.date_end || '',

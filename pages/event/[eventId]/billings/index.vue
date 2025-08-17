@@ -10,7 +10,7 @@ import {
   useVueTable,
 } from '@tanstack/vue-table';
 import { format } from 'date-fns';
-import { computed, ref, watch, nextTick } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 import type { Billing, BillingFilters, ColumnConfig } from '@/types';
 
@@ -332,7 +332,7 @@ watch(
     if (isUpdatingFromQuery.value) {
       return;
     }
-    
+
     const query = {
       dateStart: newFilters.date_start || undefined,
       dateEnd: newFilters.date_end || undefined,
@@ -353,7 +353,7 @@ watch(
   () => route.query,
   (newQuery) => {
     isUpdatingFromQuery.value = true;
-    
+
     filters.value = {
       date_end: (newQuery.dateEnd as string) || '',
       date_start: (newQuery.dateStart as string) || '',
@@ -372,7 +372,7 @@ watch(
         id: (newQuery.sortBy as string) || 'request_date',
       },
     ];
-    
+
     nextTick(() => {
       isUpdatingFromQuery.value = false;
     });

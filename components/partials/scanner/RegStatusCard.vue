@@ -88,7 +88,6 @@ const hasPaymentWarning = computed(() => {
           </span>
         </div>
       </template>
-
     </TableCard>
   </div>
 </template>

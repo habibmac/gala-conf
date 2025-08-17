@@ -62,14 +62,14 @@ export const useInsight = (
   // Map frontend column keys to API sort fields
   const mapSortField = (columnKey: string): string => {
     const sortFieldMap: Record<string, string> = {
-      'code': 'date',  // Registration code sorting -> date
-      'fullname': 'name',
-      'ticket_name': 'ticket',
-      'date': 'date',
-      'name': 'name',
-      'email': 'email',
-      'status': 'status',
-      'ticket': 'ticket',
+      code: 'date', // Registration code sorting -> date
+      fullname: 'name',
+      ticket_name: 'ticket',
+      date: 'date',
+      name: 'name',
+      email: 'email',
+      status: 'status',
+      ticket: 'ticket',
     };
     return sortFieldMap[columnKey] || 'date';
   };

@@ -549,7 +549,6 @@ const handleSaveNoteOnly = (data: { registration: any, note: string }) => {
   // Implementation for saving note without action would go here
 };
 
-
 const toggleScanner = () => {
   if (!canScan.value) {
     toast.error(

@@ -17,7 +17,7 @@ interface Props {
 defineProps<Props>();
 
 defineEmits<{
-  'close': []
+  close: []
 }>();
 
 const scannerInstructions = [

@@ -103,6 +103,7 @@ export default withNuxt(
   {
     ignores: [
       // Ignore specific files and directories
+      '.claude/**',
       './components/ui/**',
     ],
   },
