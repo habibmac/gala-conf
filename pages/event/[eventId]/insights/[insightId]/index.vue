@@ -9,17 +9,20 @@ import {
 
   useVueTable,
 } from '@tanstack/vue-table';
-import { format, fromUnixTime } from 'date-fns';
+import { format } from 'date-fns';
 import { computed, nextTick, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
 import type { Answer, ColumnConfig, CustomField, RegItem, TicketGroup } from '@/types';
 
+import DropdownTableFilter from '@/components/DropdownColumnFilter.vue';
 import RegCode from '@/components/statuses/RegCode.vue';
 import TablePagination from '@/components/TablePagination.vue';
+import TableSearchForm from '@/components/TableSearchForm.vue';
 import { Badge } from '@/components/ui/badge';
 import { useInsight } from '@/composables/useInsight';
 import { formatThousands } from '@/utils';
+import { calculateMinWidth } from '@/utils/table-helper';
 
 const props = defineProps<{
   search?: string
@@ -92,55 +95,64 @@ const { insightData, isDataLoading, isMetaLoading, regData, ticketGroups, totalD
   = useInsight(eventId, insightId.value, pagination, sorting, filters);
 
 // Table configuration
-const columnConfigs = computed<ColumnConfig[]>(() => {
-  const baseColumns = [
-    {
-      header: 'Date',
-      isHideable: true,
-      isVisible: false,
-      key: 'date',
-      width: 10,
-    },
-    {
-      header: 'Reg Code',
-      isHideable: false,
-      isVisible: true,
-      key: 'code',
-      width: 10,
-    },
-    {
-      header: 'Full Name',
-      isHideable: false,
-      isVisible: true,
-      key: 'fullname',
-      width: 20,
-    },
-    {
-      header: 'Ticket',
-      isHideable: true,
-      isVisible: true,
-      key: 'ticket_name',
-      width: 15,
-    },
-    {
-      header: 'Email',
-      isHideable: true,
-      isVisible: true,
-      key: 'email',
-      width: 15,
-    },
-    {
-      header: 'Phone',
-      isHideable: true,
-      isVisible: true,
-      key: 'phone',
-      width: 15,
-    },
-  ];
+const columnConfigs = ref<ColumnConfig[]>([]);
 
-  const customFields = getCustomFieldsColumns(insightData.value?.fields ?? []);
-  return [...baseColumns, ...customFields];
-});
+// Initialize column configs when insight data is loaded
+watch(
+  () => insightData.value?.fields,
+  (fields) => {
+    if (fields && columnConfigs.value.length === 0) {
+      const baseColumns = [
+        {
+          header: 'Date',
+          isHideable: true,
+          isVisible: false,
+          key: 'date',
+          width: 10,
+        },
+        {
+          header: 'Reg Code',
+          isHideable: false,
+          isVisible: true,
+          key: 'code',
+          width: 10,
+        },
+        {
+          header: 'Full Name',
+          isHideable: false,
+          isVisible: true,
+          key: 'fullname',
+          width: 20,
+        },
+        {
+          header: 'Ticket',
+          isHideable: true,
+          isVisible: true,
+          key: 'ticket_name',
+          width: 15,
+        },
+        {
+          header: 'Email',
+          isHideable: true,
+          isVisible: true,
+          key: 'email',
+          width: 15,
+        },
+        {
+          header: 'Phone',
+          isHideable: true,
+          isVisible: true,
+          key: 'phone',
+          width: 15,
+        },
+      ];
+
+      const customFields = getCustomFieldsColumns(fields);
+      columnConfigs.value = [...baseColumns, ...customFields];
+    }
+  },
+  { immediate: true },
+);
 
 // Define columns
 const columnHelper = createColumnHelper<RegItem>();
@@ -162,7 +174,8 @@ const columns = computed(() => {
             // Here you can add specific cell rendering logic based on the column key
             switch (config.key) {
               case 'date': {
-                const date = fromUnixTime(Number(cellProps.getValue()));
+                const dateValue = cellProps.getValue();
+                const date = new Date(dateValue as string);
                 return h(
                   'div',
                   {
@@ -365,25 +378,10 @@ const handleExport = async (format: 'csv' | 'xlsx') => {
   try {
     isExporting.value = true;
 
-    // Create a descriptive filename with insight title and group name
-    const insightTitle = insightData.value?.title || 'insight';
-    const groupName = activeTab.value || 'all-groups';
-    const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-
-    // Sanitize filename by removing special characters and limiting length
-    const sanitizeFilename = (str: string) => {
-      return str
-        .replace(/[^\w\s-]/g, '') // Remove special characters except word chars, spaces, hyphens
-        .replace(/\s+/g, '-') // Replace spaces with hyphens
-        .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-        .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
-        .substring(0, 50); // Limit length to avoid overly long filenames
-    };
-
-    const sanitizedInsightTitle = sanitizeFilename(insightTitle);
-    const sanitizedGroupName = sanitizeFilename(groupName);
-
-    const customFilename = `${sanitizedInsightTitle}-${sanitizedGroupName}-${timestamp}.${format}`;
+    // Get only visible column keys for export - API now matches column keys directly
+    const visibleFields = columnConfigs.value
+      .filter(config => config.isVisible)
+      .map(config => config.key);
 
     await exportData(
       eventId.value,
@@ -392,8 +390,8 @@ const handleExport = async (format: 'csv' | 'xlsx') => {
       {
         ...filters.value,
         insight_id: insightId.value, // Include the insight ID
+        fields: visibleFields, // Pass only visible columns
       },
-      customFilename,
     );
 
     toast('Export completed successfully');
@@ -595,10 +593,11 @@ watch(
         </div>
       </div>
 
-      <div class="shrink-0">
+      <div class="flex shrink-0 space-x-2 justify-self-end">
+        <DropdownTableFilter v-model="columnConfigs" />
         <DropdownMenu v-if="!isMetaLoading && !isDataLoading">
           <DropdownMenuTrigger as-child>
-            <Button variant="outline" class="bg-card" :disabled="isExporting">
+            <Button variant="outline" class="h-10 bg-card" :disabled="isExporting">
               <Icon
                 :icon="isExporting ? 'svg-spinners:ring-resize' : 'heroicons:arrow-right-start-on-rectangle'"
                 class="mr-2 size-5 text-muted-foreground"

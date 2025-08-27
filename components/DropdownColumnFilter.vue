@@ -67,7 +67,7 @@ const resetColumns = () => {
             :key="column.key"
             :checked="column.isVisible"
             :disabled="!column.isHideable"
-            @update:checked="toggleColumn(column.key, $event)"
+            @select="(event) => { event.preventDefault(); toggleColumn(column.key, !column.isVisible); }"
           >
             {{ column.header }}
           </DropdownMenuCheckboxItem>

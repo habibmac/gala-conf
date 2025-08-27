@@ -331,11 +331,19 @@ const handleExport = async (format: 'csv' | 'xlsx') => {
   try {
     isExporting.value = true;
 
+    // Get only visible column keys for export
+    const visibleFields = columnConfigs.value
+      .filter(config => config.isVisible)
+      .map(config => config.key);
+
     await exportData(
       eventId.value,
       endpoint,
       format,
-      filters.value,
+      {
+        ...filters.value,
+        fields: visibleFields, // Pass only visible columns
+      },
     );
 
     toast('Export completed successfully');
