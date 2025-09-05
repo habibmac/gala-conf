@@ -5,7 +5,6 @@ import { useForm } from 'vee-validate';
 import { toast } from 'vue-sonner';
 import * as z from 'zod';
 
-import type { AuthResponse } from '~/types'; // Use same type
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -74,35 +73,16 @@ const onSubmit = handleSubmit(async (values) => {
       },
     });
 
-    // ✅ 2. Then auto-login with new password
-    const loginResponse: AuthResponse = await $fetch<AuthResponse>('/api/login', {
-      method: 'POST',
-      body: {
-        password: values.password,
-        username: userLogin,
-      } as { password: string, username: string },
-    });
-
-    // ✅ 3. Set auth tokens
-    authStore.setAuth(loginResponse.access_token, loginResponse.refresh_token);
-
-    try {
-      await authStore.fetchUserProfile();
-    }
-    catch (profileError) {
-      console.warn('Could not fetch user profile:', profileError);
-    }
-
-    // ✅ 4. Show success toast with correct syntax
+    // ✅ 2. Show success message
     toast.success(
-      'Welcome back! 🎉',
+      'Password Updated Successfully! 🎉',
       {
-        description: 'Your account has been set up',
+        description: 'Please login with your new password to continue',
       },
     );
 
-    // ✅ 5. Redirect to dashboard
-    await router.push('/my-events');
+    // ✅ 3. Redirect to login page
+    await router.push('/auth/login');
   }
   catch (error: any) {
     console.error('Password reset error:', error);

@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const exchangeCodeForTokens = async (code: string) => {
     try {
-      const response: AuthResponse = await $fetch('/api/exchange-token', {
+      const response: AuthResponse = await $fetch<AuthResponse>('/api/exchange-token', {
         body: { code },
         method: 'POST',
       });
@@ -71,7 +71,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const refreshingTokens = async () => {
     try {
-      const response: AuthResponse = await $fetch('/api/refresh-token', {
+      const response: AuthResponse = await $fetch<AuthResponse>('/api/refresh-token', {
         body: { refresh_token: refreshToken.value },
         method: 'POST',
       });
@@ -91,7 +91,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoadingUser.value = true;
     try {
       // Use the proxied endpoint instead
-      const response: UserProfile = await $fetch('/api/me', {
+      const response: UserProfile = await $fetch<UserProfile>('/api/me', {
         headers: {
           Authorization: `Bearer ${accessToken.value}`,
         },
