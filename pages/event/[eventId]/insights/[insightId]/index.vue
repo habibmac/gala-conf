@@ -118,6 +118,13 @@ watch(
           width: 10,
         },
         {
+          header: 'Ticket Link',
+          isHideable: true,
+          isVisible: false,
+          key: 'ticket_url',
+          width: 10,
+        },
+        {
           header: 'Full Name',
           isHideable: false,
           isVisible: true,
@@ -216,6 +223,22 @@ const columns = computed(() => {
                     }),
                   ],
                 );
+              }
+              case 'ticket_url': {
+                const ticketUrl = cellProps.getValue() as string;
+                if (ticketUrl) {
+                  return h(
+                    'a',
+                    {
+                      class: 'text-blue-600 hover:underline dark:text-blue-400',
+                      href: ticketUrl,
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                    },
+                    'Link',
+                  );
+                }
+                return h('span', { class: 'text-slate-400 italic' }, 'N/A');
               }
               case 'fullname':
                 return h(
