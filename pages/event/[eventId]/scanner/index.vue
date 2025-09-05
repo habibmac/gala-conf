@@ -36,7 +36,7 @@ definePageMeta({
   layout: 'dashboard-with-sidebar',
   packages: ['optima'],
   requiresSelectedEvent: true,
-  roles: ['administrator', 'ee_event_organizer'],
+  roles: ['administrator', 'ee_event_organizer', 'ee_event_operator'],
   showInMenu: true,
   title: 'Ticket Scanner',
 });

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Icon } from '@iconify/vue';
+
 import type { RegistrationData } from '~/types';
 
 interface Props {
