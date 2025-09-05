@@ -5,6 +5,24 @@ import { useForm } from 'vee-validate';
 import { toast } from 'vue-sonner';
 import * as z from 'zod';
 
+interface ResetPasswordResponse {
+  message: string;
+  user_id: number;
+  tokens: {
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+    token_type: string;
+  };
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    role: string;
+  };
+}
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,8 +81,8 @@ const onSubmit = handleSubmit(async (values) => {
   isSubmitting.value = true;
 
   try {
-    // ✅ 1. Reset password first
-    await $fetch('/api/reset-password', {
+    // ✅ 1. Reset password and get tokens
+    const response = await $fetch<ResetPasswordResponse>('/api/reset-password', {
       method: 'POST',
       body: {
         key: resetKey,
@@ -73,16 +91,27 @@ const onSubmit = handleSubmit(async (values) => {
       },
     });
 
-    // ✅ 2. Show success message
+    // ✅ 2. Set auth tokens from response
+    authStore.setAuth(response.tokens.access_token, response.tokens.refresh_token);
+
+    // ✅ 3. Fetch user profile with new tokens
+    try {
+      await authStore.fetchUserProfile();
+    }
+    catch (profileError) {
+      console.warn('Could not fetch user profile:', profileError);
+    }
+
+    // ✅ 4. Show success toast
     toast.success(
-      'Password Updated Successfully! 🎉',
+      'Welcome back! 🎉',
       {
-        description: 'Please login with your new password to continue',
+        description: 'Your account has been set up successfully',
       },
     );
 
-    // ✅ 3. Redirect to login page
-    await router.push('/auth/login');
+    // ✅ 5. Redirect to dashboard
+    await router.push('/my-events');
   }
   catch (error: any) {
     console.error('Password reset error:', error);
