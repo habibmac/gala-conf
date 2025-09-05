@@ -5,23 +5,23 @@ import { useForm } from 'vee-validate';
 import { toast } from 'vue-sonner';
 import * as z from 'zod';
 
-interface ResetPasswordResponse {
-  message: string;
-  user_id: number;
-  user: {
-    id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    role: string;
-  };
-}
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+
+interface ResetPasswordResponse {
+  message: string
+  user_id: number
+  user: {
+    id: number
+    username: string
+    email: string
+    first_name: string
+    last_name: string
+    role: string
+  }
+}
 
 definePageMeta({
   layout: 'default',
@@ -76,7 +76,7 @@ const onSubmit = handleSubmit(async (values) => {
 
   try {
     // ✅ 1. Reset password
-    const response = await $fetch<ResetPasswordResponse>('/api/reset-password', {
+    await $fetch<ResetPasswordResponse>('/api/reset-password', {
       method: 'POST',
       body: {
         key: resetKey,
@@ -87,9 +87,12 @@ const onSubmit = handleSubmit(async (values) => {
 
     // ✅ 2. Now login with the new password using OAuth
     try {
-      await authStore.login({
-        username: userLogin,
-        password: values.password,
+      await $fetch('/api/login', {
+        method: 'POST',
+        body: {
+          username: userLogin,
+          password: values.password,
+        },
       });
 
       // ✅ 3. Show success toast
@@ -105,7 +108,7 @@ const onSubmit = handleSubmit(async (values) => {
     }
     catch (loginError: any) {
       console.error('Auto-login failed:', loginError);
-      
+
       // Password was reset but login failed - redirect to login page
       toast.success(
         'Password Updated',
@@ -113,7 +116,7 @@ const onSubmit = handleSubmit(async (values) => {
           description: 'Your password has been updated. Please log in with your new password.',
         },
       );
-      
+
       await router.push(`/auth/login?email=${encodeURIComponent(userLogin)}`);
     }
   }
