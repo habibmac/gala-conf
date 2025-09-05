@@ -8,12 +8,6 @@ import * as z from 'zod';
 interface ResetPasswordResponse {
   message: string;
   user_id: number;
-  tokens: {
-    access_token: string;
-    refresh_token: string;
-    expires_in: number;
-    token_type: string;
-  };
   user: {
     id: number;
     username: string;
@@ -81,7 +75,7 @@ const onSubmit = handleSubmit(async (values) => {
   isSubmitting.value = true;
 
   try {
-    // ✅ 1. Reset password and get tokens
+    // ✅ 1. Reset password
     const response = await $fetch<ResetPasswordResponse>('/api/reset-password', {
       method: 'POST',
       body: {
@@ -91,27 +85,37 @@ const onSubmit = handleSubmit(async (values) => {
       },
     });
 
-    // ✅ 2. Set auth tokens from response
-    authStore.setAuth(response.tokens.access_token, response.tokens.refresh_token);
-
-    // ✅ 3. Fetch user profile with new tokens
+    // ✅ 2. Now login with the new password using OAuth
     try {
-      await authStore.fetchUserProfile();
-    }
-    catch (profileError) {
-      console.warn('Could not fetch user profile:', profileError);
-    }
+      await authStore.login({
+        username: userLogin,
+        password: values.password,
+      });
 
-    // ✅ 4. Show success toast
-    toast.success(
-      'Welcome back! 🎉',
-      {
-        description: 'Your account has been set up successfully',
-      },
-    );
+      // ✅ 3. Show success toast
+      toast.success(
+        'Welcome back! 🎉',
+        {
+          description: 'Your password has been updated and you\'re now logged in',
+        },
+      );
 
-    // ✅ 5. Redirect to dashboard
-    await router.push('/my-events');
+      // ✅ 4. Redirect to dashboard
+      await router.push('/my-events');
+    }
+    catch (loginError: any) {
+      console.error('Auto-login failed:', loginError);
+      
+      // Password was reset but login failed - redirect to login page
+      toast.success(
+        'Password Updated',
+        {
+          description: 'Your password has been updated. Please log in with your new password.',
+        },
+      );
+      
+      await router.push(`/auth/login?email=${encodeURIComponent(userLogin)}`);
+    }
   }
   catch (error: any) {
     console.error('Password reset error:', error);
