@@ -3,6 +3,7 @@ import { Icon } from '@iconify/vue';
 
 import type { RegistrationData } from '~/types';
 
+import { Badge } from '@/components/ui/badge';
 import RegCode from '~/components/statuses/RegCode.vue';
 
 interface Props {
@@ -17,6 +18,20 @@ defineProps<Props>();
 defineEmits<{
   'select-result': [result: RegistrationData]
 }>();
+
+// Parse the matched_answers string into an array of question-answer pairs
+const parseMatchedAnswers = (matchedAnswers: string) => {
+  if (!matchedAnswers)
+    return [];
+
+  return matchedAnswers
+    .split('|')
+    .map((pair) => {
+      const [question, value] = pair.split(':');
+      return { question: question?.trim(), value: value?.trim() };
+    })
+    .filter(item => item.question && item.value);
+};
 </script>
 
 <template>
@@ -76,6 +91,18 @@ defineEmits<{
 
                   <div class="text-xs text-muted-foreground">
                     {{ result.attendee.email }}
+                  </div>
+
+                  <!-- Custom Questions Context -->
+                  <div v-if="result.matched_answers" class="mt-1 flex flex-wrap gap-1">
+                    <Badge
+                      v-for="answer in parseMatchedAnswers(result.matched_answers)"
+                      :key="answer.question + answer.value"
+                      variant="outline"
+                      class="border-blue-200 bg-blue-50 text-xs text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300"
+                    >
+                      {{ answer.question }}: {{ answer.value }}
+                    </Badge>
                   </div>
 
                   <!-- Payment Status Warning -->

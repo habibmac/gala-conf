@@ -16,6 +16,7 @@ import type { CheckinColumnConfig, CheckinData, CheckinItem } from '@/types';
 
 import RegPanel from '@/components/partials/registrations/RegPanel.vue';
 import RegCode from '@/components/statuses/RegCode.vue';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatDate } from '@/utils';
 import CheckinTabs from '~/components/partials/checkins/CheckinTabs.vue';
 import { useCheckins } from '~/composables/useCheckins';
@@ -103,13 +104,19 @@ const pagination = ref<PaginationState>({
 const searchFilter = ref(props.search || '');
 const dateStartFilter = ref(props.dateStart || '');
 const dateEndFilter = ref(props.dateEnd || '');
+const sortByFilter = ref(`${props.sortBy || 'check_time'}_${props.order === 'asc' ? 'asc' : 'desc'}`);
+const searchScopeFilter = ref<'all' | 'notes_only'>('all');
+const actionTypeFilter = ref<'all' | 'checkin' | 'checkout'>('all');
 
 // Use computed to combine all filters - this automatically updates when selectedDatetime changes
 const filters = computed(() => ({
-  date_end: dateEndFilter.value,
-  date_start: dateStartFilter.value,
-  search: searchFilter.value,
+  datetime_end: dateEndFilter.value,
+  datetime_start: dateStartFilter.value,
+  search: searchScopeFilter.value === 'notes_only' ? '' : searchFilter.value, // Only search regular fields if scope is 'all'
+  notes_search: searchScopeFilter.value === 'notes_only' && searchFilter.value ? searchFilter.value : '', // Only search notes if scope is 'notes_only' AND there's a search term
   datetime: selectedDatetime.value, // Automatically reactive
+  search_scope: searchScopeFilter.value,
+  action_type: actionTypeFilter.value,
 }));
 
 const sorting = ref<SortingState>([
@@ -428,6 +435,9 @@ const handleResetFilters = () => {
   searchFilter.value = '';
   dateStartFilter.value = '';
   dateEndFilter.value = '';
+  sortByFilter.value = 'check_time_desc';
+  searchScopeFilter.value = 'all';
+  actionTypeFilter.value = 'all';
   setSelectedDatetime(''); // This automatically updates filters.datetime
 
   pagination.value = {
@@ -440,6 +450,19 @@ const handleResetFilters = () => {
       id: 'check_time',
     },
   ];
+};
+
+const handleSortChange = (sortValue: string) => {
+  sortByFilter.value = sortValue;
+  const [field, order] = sortValue.split('_');
+
+  sorting.value = [
+    {
+      desc: order === 'desc',
+      id: field,
+    },
+  ];
+  pagination.value.pageIndex = 0; // Reset to first page
 };
 
 const handleSetDateRange = (dateRange: [Date | null, Date | null] | null) => {
@@ -528,8 +551,8 @@ watch(
 
     const query = {
       search: newFilters.search || undefined,
-      dateStart: newFilters.date_start || undefined,
-      dateEnd: newFilters.date_end || undefined,
+      dateStart: newFilters.datetime_start || undefined,
+      dateEnd: newFilters.datetime_end || undefined,
       datetime: newFilters.datetime || undefined,
       order: newSorting[0]?.desc ? 'desc' : 'asc',
       page: String(newPagination.pageIndex + 1),
@@ -623,12 +646,61 @@ watch(
     <section class="space-y-6">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex flex-col space-y-2 sm:grid sm:grid-flow-col sm:gap-2 sm:space-y-0">
-          <!-- Updated to use searchFilter ref -->
+          <!-- Unified search input -->
           <TableSearchForm
             v-model="searchFilter"
-            placeholder="Search by name, reg code, or ticket..."
+            :placeholder="searchScopeFilter === 'notes_only' ? 'Search in notes...' : 'Search by name, reg code, ticket...'"
             @update:model-value="pagination.pageIndex = 0"
           />
+
+          <!-- Search Scope Dropdown -->
+          <Select v-model="searchScopeFilter" @update:model-value="pagination.pageIndex = 0">
+            <SelectTrigger class="h-[42px] w-[140px]">
+              <SelectValue placeholder="Search in..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:magnifying-glass" class="mr-2 size-4" />
+                  All Fields
+                </div>
+              </SelectItem>
+              <SelectItem value="notes_only">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:document-text" class="mr-2 size-4" />
+                  Notes Only
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          <!-- Action Type Dropdown -->
+          <Select v-model="actionTypeFilter" @update:model-value="pagination.pageIndex = 0">
+            <SelectTrigger class="h-[42px] w-[140px]">
+              <SelectValue placeholder="Action type..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:arrows-right-left" class="mr-2 size-4" />
+                  All Actions
+                </div>
+              </SelectItem>
+              <SelectItem value="checkin">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:arrow-right-on-rectangle" class="mr-2 size-4 text-green-600" />
+                  Check-ins Only
+                </div>
+              </SelectItem>
+              <SelectItem value="checkout">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:arrow-left-on-rectangle" class="mr-2 size-4 text-red-600" />
+                  Check-outs Only
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
           <Datepicker
             :date-range="dateRange"
             :enable-time-picker="true"
@@ -637,6 +709,64 @@ watch(
             @update:date-range="handleSetDateRange"
             @update:model-value="pagination.pageIndex = 0"
           />
+
+          <!-- Sort Dropdown -->
+          <Select v-model="sortByFilter" @update:model-value="handleSortChange">
+            <SelectTrigger class="h-[42px] w-[160px]">
+              <SelectValue placeholder="Sort by..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="check_time_desc">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:arrow-long-down" class="mr-2 size-4" />
+                  Check Time
+                </div>
+              </SelectItem>
+              <SelectItem value="check_time_asc">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:chevron-up" class="mr-2 size-4" />
+                  Check Time
+                </div>
+              </SelectItem>
+              <SelectItem value="name_desc">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:arrow-long-down" class="mr-2 size-4" />
+                  Name
+                </div>
+              </SelectItem>
+              <SelectItem value="name_asc">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:chevron-up" class="mr-2 size-4" />
+                  Name
+                </div>
+              </SelectItem>
+              <SelectItem value="code_desc">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:arrow-long-down" class="mr-2 size-4" />
+                  Registration Code
+                </div>
+              </SelectItem>
+              <SelectItem value="code_asc">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:chevron-up" class="mr-2 size-4" />
+                  Registration Code
+                </div>
+              </SelectItem>
+              <SelectItem value="ticket_desc">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:arrow-long-down" class="mr-2 size-4" />
+                  Ticket
+                </div>
+              </SelectItem>
+              <SelectItem value="ticket_asc">
+                <div class="flex items-center">
+                  <Icon icon="heroicons:chevron-up" class="mr-2 size-4" />
+                  Ticket
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
           <TableResetBtn v-if="isAnyFilterActive" @reset-filters="handleResetFilters" />
         </div>
         <div>

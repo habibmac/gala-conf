@@ -35,6 +35,7 @@ export const useCheckins = (
       }
     });
 
+
     return nuxtApp.$galantisApi
       .get(`/event/${eventId.value}/checkins/history?${searchParams.toString()}`, {
         signal,

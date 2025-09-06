@@ -44,6 +44,9 @@ export interface CheckinFilters {
   datetime_start?: string
   datetime_end?: string
   datetime?: string
+  notes_search?: string
+  search_scope?: 'all' | 'notes_only'
+  action_type?: 'all' | 'checkin' | 'checkout'
 }
 
 export interface CheckinItem {

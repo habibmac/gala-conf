@@ -91,10 +91,7 @@ const getActionButtonLabel = () => {
       <!-- Input Row -->
       <div class="flex items-center gap-2">
         <!-- Mode Selection -->
-        <Select
-          :model-value="scannerMode"
-          @update:model-value="$emit('update:scannerMode', $event as ScannerMode)"
-        >
+        <Select :model-value="scannerMode" @update:model-value="$emit('update:scannerMode', $event as ScannerMode)">
           <SelectTrigger class="size-12 bg-card p-2 md:h-12 md:w-auto md:px-3">
             <SelectValue placeholder="Select scanner mode">
               <!-- Mobile & Tablet: Icon only -->
@@ -176,7 +173,7 @@ const getActionButtonLabel = () => {
           class="hidden h-12 md:flex"
           @click="$emit('unified-action')"
         >
-          <SpinnerDots v-if="isProcessing || (scannerMode === 'search' && isSearching)" />
+          <SpinnerBars v-if="isProcessing || (scannerMode === 'search' && isSearching)" class="mr-2" />
           {{ getActionButtonLabel() }}
         </Button>
         <div class="flex justify-center">

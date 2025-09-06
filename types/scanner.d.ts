@@ -102,6 +102,7 @@ export interface RegistrationData {
     qst: string
     ans: string
   }>
+  matched_answers?: string
 }
 
 export interface RegistrationValidation {
