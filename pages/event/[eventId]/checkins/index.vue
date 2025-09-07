@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import SpinnerRing from '~/components/SpinnerRing.vue';
+
 definePageMeta({
   capabilities: ['ee_read_checkins'],
   group: 'tools',
@@ -21,7 +23,7 @@ await navigateTo(`/event/${route.params.eventId}/checkins/stats`, { replace: tru
 <template>
   <div class="flex min-h-[200px] items-center justify-center">
     <div class="text-center">
-      <div class="mx-auto size-8 animate-spin rounded-full border-b-2 border-primary" />
+      <SpinnerRing class="mx-auto mt-4" />
       <p class="mt-2 text-muted-foreground">
         Redirecting to check-ins stats...
       </p>

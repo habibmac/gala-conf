@@ -44,9 +44,8 @@ export interface CheckinFilters {
   datetime_start?: string
   datetime_end?: string
   datetime?: string
-  notes_search?: string
-  search_scope?: 'all' | 'notes_only'
   action_type?: 'all' | 'checkin' | 'checkout'
+  ticket_name?: string[]
 }
 
 export interface CheckinItem {
@@ -57,8 +56,16 @@ export interface CheckinItem {
   name: string
   address: string
   ticket: string
-  first_check_time: string
-  checkin_data?: CheckinData[]
+  check_time: string
+  action: 'checkin' | 'checkout'
+  notes: string
+  audit?: {
+    scanned_by_name: string
+    scanned_by_login: string
+    scan_method: string
+    ip_address: string
+    user_agent: string
+  }
 }
 
 interface CheckinData {

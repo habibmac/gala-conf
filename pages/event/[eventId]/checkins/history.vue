@@ -12,7 +12,7 @@ import { format } from 'date-fns';
 import { computed, nextTick, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
-import type { CheckinColumnConfig, CheckinData, CheckinItem } from '@/types';
+import type { CheckinColumnConfig, CheckinItem } from '@/types';
 
 import RegPanel from '@/components/partials/registrations/RegPanel.vue';
 import RegCode from '@/components/statuses/RegCode.vue';
@@ -104,19 +104,17 @@ const pagination = ref<PaginationState>({
 const searchFilter = ref(props.search || '');
 const dateStartFilter = ref(props.dateStart || '');
 const dateEndFilter = ref(props.dateEnd || '');
-const sortByFilter = ref(`${props.sortBy || 'check_time'}_${props.order === 'asc' ? 'asc' : 'desc'}`);
-const searchScopeFilter = ref<'all' | 'notes_only'>('all');
 const actionTypeFilter = ref<'all' | 'checkin' | 'checkout'>('all');
+const ticketNameFilter = ref<string[]>([]);
 
 // Use computed to combine all filters - this automatically updates when selectedDatetime changes
 const filters = computed(() => ({
   datetime_end: dateEndFilter.value,
   datetime_start: dateStartFilter.value,
-  search: searchScopeFilter.value === 'notes_only' ? '' : searchFilter.value, // Only search regular fields if scope is 'all'
-  notes_search: searchScopeFilter.value === 'notes_only' && searchFilter.value ? searchFilter.value : '', // Only search notes if scope is 'notes_only' AND there's a search term
+  search: searchFilter.value, // Search in all fields (reg code, notes, etc.)
   datetime: selectedDatetime.value, // Automatically reactive
-  search_scope: searchScopeFilter.value,
   action_type: actionTypeFilter.value,
+  ticket_name: ticketNameFilter.value,
 }));
 
 const sorting = ref<SortingState>([
@@ -157,8 +155,15 @@ const columnConfigs = ref<CheckinColumnConfig[]>([
     header: 'Check Time',
     isHideable: true,
     isVisible: true,
-    key: 'first_check_time',
+    key: 'check_time',
     width: 15,
+  },
+  {
+    header: 'Action',
+    isHideable: true,
+    isVisible: true,
+    key: 'action',
+    width: 10,
   },
   {
     header: 'Session',
@@ -189,18 +194,11 @@ const columnConfigs = ref<CheckinColumnConfig[]>([
     width: 15,
   },
   {
-    header: 'History',
-    isHideable: true,
-    isVisible: true,
-    key: 'checkin_data',
-    width: 15,
-  },
-  {
     header: 'Notes',
     isHideable: true,
     isVisible: true,
     key: 'notes',
-    width: 15,
+    width: 10,
   },
 ]);
 
@@ -211,12 +209,13 @@ const columns = computed(() => {
     .filter(config => config.isVisible)
     .map((config) => {
       // Handle special cases for non-direct keys
-      const accessor = config.key === 'notes' ? 'checkin_data' : config.key;
+      const accessor = config.key === 'checkin_data' ? 'checkin_data' : config.key;
 
       return columnHelper.accessor(accessor as keyof CheckinItem, {
+        enableSorting: ['action', 'check_time', 'code', 'name', 'notes', 'session', 'ticket'].includes(config.key),
         cell: (cellProps) => {
           switch (config.key) {
-            case 'first_check_time': {
+            case 'check_time': {
               const value = cellProps.getValue() as string;
 
               if (!value || value === '' || value === '-') {
@@ -242,9 +241,25 @@ const columns = computed(() => {
                 );
               }
               catch (error) {
-                console.error('Error formatting first_check_time:', value, error);
+                console.error('Error formatting check_time:', value, error);
                 return h('div', { class: 'text-right text-slate-400' }, 'Format error');
               }
+            }
+            case 'action': {
+              const action = cellProps.getValue() as string;
+              const isCheckin = action === 'checkin';
+
+              return h(
+                'div',
+                {
+                  class: `text-center px-2 py-1 rounded text-xs font-medium ${
+                    isCheckin
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                  }`,
+                },
+                isCheckin ? 'Check In' : 'Check Out',
+              );
             }
             case 'code': {
               const stt_id = cellProps.row.original.stt_id;
@@ -285,101 +300,17 @@ const columns = computed(() => {
                 value || '-',
               );
             }
-            case 'checkin_data': {
-              const value = cellProps.getValue() as CheckinData[];
-
-              if (!value || !Array.isArray(value) || value.length === 0) {
-                return h('div', { class: 'text-xs text-slate-400' }, 'No history');
-              }
-
-              // Create a container div that holds all the history items
-              const historyItems = value
-                .filter((item: CheckinData) => item.time && item.time !== '' && item.time !== '-')
-                .map((item: CheckinData, index: number) => {
-                  try {
-                    const date = new Date(item.time);
-
-                    if (Number.isNaN(date.getTime())) {
-                      throw new TypeError('Invalid date');
-                    }
-
-                    return h(
-                      'div',
-                      {
-                        key: index,
-                        class: 'text-xs text-slate-900 dark:text-slate-300 mb-1',
-                      },
-                      `${format(date, 'd MMM yyyy HH:mm')} - ${item.type}`,
-                    );
-                  }
-                  catch (error) {
-                    console.error('Error formatting checkin_data time:', item.time, item.type, error);
-                    return null;
-                  }
-                })
-                .filter(Boolean);
-
-              // Return a single container div with all history items
-              return h(
-                'div',
-                { class: 'space-y-1' },
-                historyItems,
-              );
-            }
             case 'notes': {
-              // Use the same checkin_data array to extract notes
-              const checkinData = cellProps.row.original.checkin_data as CheckinData[];
+              const notes = cellProps.getValue() as string;
 
-              if (!checkinData || !Array.isArray(checkinData) || checkinData.length === 0) {
-                return h('div', { class: 'text-xs text-slate-400' }, '-');
-              }
-
-              // Extract notes from checkin history
-              const notesItems = checkinData
-                .filter((item: CheckinData) => item.note && item.note !== '')
-                .map((item: CheckinData, index: number) => {
-                  try {
-                    const date = new Date(item.time);
-
-                    if (Number.isNaN(date.getTime())) {
-                      throw new TypeError('Invalid date');
-                    }
-
-                    return h(
-                      'div',
-                      {
-                        key: index,
-                        class: 'text-xs text-slate-600 dark:text-slate-400 mb-2 p-2 rounded border-l-2 border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800',
-                      },
-                      [
-                        h('div', { class: 'font-medium text-slate-700 dark:text-slate-300 mb-1' }, item.note),
-                        h('div', { class: 'text-xs text-slate-500 dark:text-slate-500' }, `${format(date, 'd MMM yyyy HH:mm')} - ${item.type}`,
-                        ),
-                      ],
-                    );
-                  }
-                  catch (error) {
-                    console.error('Error formatting note time:', item.time, item.type, error);
-                    return h(
-                      'div',
-                      {
-                        key: index,
-                        class: 'text-xs text-slate-600 dark:text-slate-400 mb-1 p-2 rounded border-l-2 border-blue-200 bg-blue-50/50 dark:bg-blue-950/20',
-                      },
-                      item.note || '',
-                    );
-                  }
-                })
-                .filter(Boolean);
-
-              if (notesItems.length === 0) {
+              if (!notes || notes.trim() === '') {
                 return h('div', { class: 'text-xs text-slate-400' }, '-');
               }
 
               return h(
                 'div',
-                { class: 'space-y-1' },
-                notesItems,
+                { class: 'text-xs text-slate-600 dark:text-slate-400 p-2 rounded border-l-2 border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800' },
+                notes,
               );
             }
             default:
@@ -408,7 +339,30 @@ const table = useVueTable({
   get data() {
     return checkinData.value;
   },
+  enableMultiSort: false,
   getCoreRowModel: getCoreRowModel(),
+  manualFiltering: true,
+  manualPagination: true,
+  manualSorting: true,
+  onPaginationChange: (updater) => {
+    if (typeof updater === 'function') {
+      pagination.value = updater(pagination.value);
+    }
+    else {
+      pagination.value = updater;
+    }
+  },
+  onSortingChange: (updater) => {
+    if (typeof updater === 'function') {
+      sorting.value = updater(sorting.value);
+    }
+    else {
+      sorting.value = updater;
+    }
+  },
+  get pageCount() {
+    return totalPages.value ?? -1;
+  },
   state: {
     pagination: pagination.value,
     get sorting() {
@@ -435,9 +389,8 @@ const handleResetFilters = () => {
   searchFilter.value = '';
   dateStartFilter.value = '';
   dateEndFilter.value = '';
-  sortByFilter.value = 'check_time_desc';
-  searchScopeFilter.value = 'all';
   actionTypeFilter.value = 'all';
+  ticketNameFilter.value = [];
   setSelectedDatetime(''); // This automatically updates filters.datetime
 
   pagination.value = {
@@ -450,19 +403,6 @@ const handleResetFilters = () => {
       id: 'check_time',
     },
   ];
-};
-
-const handleSortChange = (sortValue: string) => {
-  sortByFilter.value = sortValue;
-  const [field, order] = sortValue.split('_');
-
-  sorting.value = [
-    {
-      desc: order === 'desc',
-      id: field,
-    },
-  ];
-  pagination.value.pageIndex = 0; // Reset to first page
 };
 
 const handleSetDateRange = (dateRange: [Date | null, Date | null] | null) => {
@@ -521,6 +461,17 @@ const handleCloseDetails = () => {
   delete currentQuery.details;
 };
 
+const handleHeaderClick = (header: any) => {
+  if (header.column.getCanSort()) {
+    try {
+      header.column.toggleSorting();
+    }
+    catch (error) {
+      console.error('Error toggling sort:', error);
+    }
+  }
+};
+
 // Watchers
 watch(selectedRegId, () => {
   const newQuery = { ...route.query };
@@ -554,6 +505,8 @@ watch(
       dateStart: newFilters.datetime_start || undefined,
       dateEnd: newFilters.datetime_end || undefined,
       datetime: newFilters.datetime || undefined,
+      actionType: newFilters.action_type !== 'all' ? newFilters.action_type : undefined,
+      ticketName: newFilters.ticket_name && newFilters.ticket_name.length > 0 ? newFilters.ticket_name.join(',') : undefined,
       order: newSorting[0]?.desc ? 'desc' : 'asc',
       page: String(newPagination.pageIndex + 1),
       perPage: String(newPagination.pageSize),
@@ -572,6 +525,8 @@ watch(
     searchFilter.value = (newQuery.search as string) || '';
     dateStartFilter.value = (newQuery.dateStart as string) || '';
     dateEndFilter.value = (newQuery.dateEnd as string) || '';
+    actionTypeFilter.value = (newQuery.actionType as 'all' | 'checkin' | 'checkout') || 'all';
+    ticketNameFilter.value = newQuery.ticketName ? (newQuery.ticketName as string).split(',') : [];
 
     if (newQuery.datetime) {
       setSelectedDatetime(newQuery.datetime as string);
@@ -649,30 +604,12 @@ watch(
           <!-- Unified search input -->
           <TableSearchForm
             v-model="searchFilter"
-            :placeholder="searchScopeFilter === 'notes_only' ? 'Search in notes...' : 'Search by name, reg code, ticket...'"
+            placeholder="Search by reg code, notes..."
             @update:model-value="pagination.pageIndex = 0"
           />
 
-          <!-- Search Scope Dropdown -->
-          <Select v-model="searchScopeFilter" @update:model-value="pagination.pageIndex = 0">
-            <SelectTrigger class="h-[42px] w-[140px]">
-              <SelectValue placeholder="Search in..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                <div class="flex items-center">
-                  <Icon icon="heroicons:magnifying-glass" class="mr-2 size-4" />
-                  All Fields
-                </div>
-              </SelectItem>
-              <SelectItem value="notes_only">
-                <div class="flex items-center">
-                  <Icon icon="heroicons:document-text" class="mr-2 size-4" />
-                  Notes Only
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <!-- Ticket Filter -->
+          <DropdownTicketFilter v-model="ticketNameFilter" @update:model-value="pagination.pageIndex = 0" />
 
           <!-- Action Type Dropdown -->
           <Select v-model="actionTypeFilter" @update:model-value="pagination.pageIndex = 0">
@@ -709,63 +646,6 @@ watch(
             @update:date-range="handleSetDateRange"
             @update:model-value="pagination.pageIndex = 0"
           />
-
-          <!-- Sort Dropdown -->
-          <Select v-model="sortByFilter" @update:model-value="handleSortChange">
-            <SelectTrigger class="h-[42px] w-[160px]">
-              <SelectValue placeholder="Sort by..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="check_time_desc">
-                <div class="flex items-center">
-                  <Icon icon="heroicons:arrow-long-down" class="mr-2 size-4" />
-                  Check Time
-                </div>
-              </SelectItem>
-              <SelectItem value="check_time_asc">
-                <div class="flex items-center">
-                  <Icon icon="heroicons:chevron-up" class="mr-2 size-4" />
-                  Check Time
-                </div>
-              </SelectItem>
-              <SelectItem value="name_desc">
-                <div class="flex items-center">
-                  <Icon icon="heroicons:arrow-long-down" class="mr-2 size-4" />
-                  Name
-                </div>
-              </SelectItem>
-              <SelectItem value="name_asc">
-                <div class="flex items-center">
-                  <Icon icon="heroicons:chevron-up" class="mr-2 size-4" />
-                  Name
-                </div>
-              </SelectItem>
-              <SelectItem value="code_desc">
-                <div class="flex items-center">
-                  <Icon icon="heroicons:arrow-long-down" class="mr-2 size-4" />
-                  Registration Code
-                </div>
-              </SelectItem>
-              <SelectItem value="code_asc">
-                <div class="flex items-center">
-                  <Icon icon="heroicons:chevron-up" class="mr-2 size-4" />
-                  Registration Code
-                </div>
-              </SelectItem>
-              <SelectItem value="ticket_desc">
-                <div class="flex items-center">
-                  <Icon icon="heroicons:arrow-long-down" class="mr-2 size-4" />
-                  Ticket
-                </div>
-              </SelectItem>
-              <SelectItem value="ticket_asc">
-                <div class="flex items-center">
-                  <Icon icon="heroicons:chevron-up" class="mr-2 size-4" />
-                  Ticket
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
 
           <TableResetBtn v-if="isAnyFilterActive" @reset-filters="handleResetFilters" />
         </div>
@@ -833,8 +713,30 @@ watch(
                     :colSpan="header.colSpan"
                     :style="{ width: `${header.column.columnDef.size}px` }"
                     class="whitespace-nowrap px-2 py-3 text-xs text-slate-500 first:pl-5 last:pr-5 dark:text-slate-400"
+                    :class="[
+                      header.column.getCanSort() ? 'cursor-pointer select-none hover:bg-slate-200 dark:hover:bg-slate-700' : '',
+                    ]"
+                    @click="handleHeaderClick(header)"
                   >
-                    <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+                    <div class="flex items-center gap-2">
+                      <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+                      <Icon
+                        v-if="header.column.getCanSort()"
+                        :icon="
+                          header.column.getIsSorted() === 'desc'
+                            ? 'heroicons:chevron-down'
+                            : header.column.getIsSorted() === 'asc'
+                              ? 'heroicons:chevron-up'
+                              : 'heroicons:chevron-up-down'
+                        "
+                        class="size-3 transition-colors"
+                        :class="[
+                          header.column.getIsSorted()
+                            ? 'text-slate-900 dark:text-slate-100'
+                            : 'text-slate-400 dark:text-slate-600',
+                        ]"
+                      />
+                    </div>
                   </th>
                 </tr>
               </thead>

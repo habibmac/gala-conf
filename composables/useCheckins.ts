@@ -35,16 +35,23 @@ export const useCheckins = (
       }
     });
 
-
     return nuxtApp.$galantisApi
       .get(`/event/${eventId.value}/checkins/history?${searchParams.toString()}`, {
         signal,
       })
       .then((response) => {
+        if (!response.data) {
+          throw new Error('No data in API response');
+        }
+
         return {
-          data: response.data.data,
-          pagination: response.data.pagination,
+          data: response.data.data || [],
+          pagination: response.data.pagination || { total_data: 0, total_pages: 1, per_page: 10, current: 1 },
         };
+      })
+      .catch((error) => {
+        console.error('API Error:', error);
+        throw error;
       });
   };
 
@@ -57,7 +64,7 @@ export const useCheckins = (
     checkinData: computed(() => data.value?.data || []),
     error,
     isLoading,
-    totalData: computed(() => data.value?.pagination.total_data || 0),
-    totalPages: computed(() => data.value?.pagination.total_pages || 1),
+    totalData: computed(() => data.value?.pagination?.total_data || 0),
+    totalPages: computed(() => data.value?.pagination?.total_pages || 1),
   };
 };
