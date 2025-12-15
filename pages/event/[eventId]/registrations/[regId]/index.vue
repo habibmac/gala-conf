@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
 import { useQuery } from '@tanstack/vue-query';
+import { toast } from 'vue-sonner';
 
 import type { RegistrationDetails } from '~/types';
 
@@ -99,6 +100,52 @@ const handleUpdate = async () => {
   await refetch();
 };
 
+// Handle attendee information save
+const handleSaveAttendeeInfo = async (payload: any) => {
+  if (!registration.value)
+    return;
+
+  try {
+    await $galantisApi.put(
+      `/event/${eventId.value}/registrations/${registration.value.id}`,
+      payload,
+    );
+
+    toast.success('Attendee information updated successfully');
+    // Refetch data to get latest state
+    await refetch();
+  }
+  catch (error) {
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to update attendee information');
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
+  }
+};
+
+// Handle answers save
+const handleSaveAnswers = async (payload: any) => {
+  if (!registration.value)
+    return;
+
+  try {
+    await $galantisApi.put(
+      `/event/${eventId.value}/registrations/${registration.value.id}`,
+      payload,
+    );
+
+    toast.success('Answers updated successfully');
+    // Refetch data to get latest state
+    await refetch();
+  }
+  catch (error) {
+    const { errorMessage, errorDescription } = handleApiError(error, 'Failed to update answers');
+    toast.error(errorMessage, {
+      description: errorDescription,
+    });
+  }
+};
+
 // Head
 useHead({
   title: computed(() =>
@@ -190,34 +237,40 @@ useHead({
 
           <template v-else-if="registration">
             <Tabs default-value="overview" class="space-y-6">
-              <TabsList class="grid w-full grid-cols-4 bg-muted-foreground/10">
-                <TabsTrigger value="overview" class="flex items-center gap-2">
+              <TabsList class="grid h-11 w-full grid-cols-4 bg-muted-foreground/10 px-1.5">
+                <TabsTrigger value="overview" class="flex h-8 items-center gap-2">
                   <Icon icon="tabler:user" class="size-4" />
                   <span class="hidden sm:block">Overview</span>
                 </TabsTrigger>
-                <TabsTrigger value="details" class="flex items-center gap-2">
+                <TabsTrigger value="details" class="flex h-8 items-center gap-2">
                   <Icon icon="tabler:info-circle" class="size-4" />
                   <span class="hidden sm:block">Details</span>
                 </TabsTrigger>
-                <TabsTrigger value="transaction" class="flex items-center gap-2">
+                <TabsTrigger value="transaction" class="flex h-8 items-center gap-2">
                   <Icon icon="tabler:credit-card" class="size-4" />
                   <span class="hidden sm:block">Transaction</span>
                 </TabsTrigger>
-                <TabsTrigger value="payments" class="flex items-center gap-2">
+                <TabsTrigger value="payments" class="flex h-8 items-center gap-2">
                   <Icon icon="tabler:wallet" class="size-4" />
                   <span class="hidden sm:block">Payments</span>
-                  <Badge v-if="tabCounts.payments" variant="secondary" class="ml-1">
+                  <Badge v-if="tabCounts.payments" variant="secondary" class="flex h-6 min-w-6 shrink-0 scale-90 items-center justify-center rounded-full px-1.5 text-xs">
                     {{ tabCounts.payments }}
                   </Badge>
                 </TabsTrigger>
               </TabsList>
               <!-- Overview Tab -->
               <TabsContent value="overview" class="space-y-6">
-                <AttendeeInfoCard :registration="registration" />
+                <AttendeeInfoCard
+                  :registration="registration"
+                  @save-attendee="handleSaveAttendeeInfo"
+                />
               </TabsContent>
               <!-- Details Tab -->
               <TabsContent value="details" class="space-y-6">
-                <RegistrationAnswersCard :registration="registration" />
+                <RegistrationAnswersCard
+                  :registration="registration"
+                  @save-answers="handleSaveAnswers"
+                />
               </TabsContent>
 
               <!-- Transaction Tab -->

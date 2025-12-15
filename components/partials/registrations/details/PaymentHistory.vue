@@ -23,7 +23,7 @@ const isExpanded = ref(true);
       <CardTitle class="flex items-center gap-2">
         <Icon icon="solar:wallet-money-bold-duotone" class="size-5 text-green-500" />
         Payment History
-        <Badge variant="secondary">
+        <Badge variant="secondary" class="flex h-6 min-w-6 shrink-0 scale-90 items-center justify-center rounded-full px-1.5 text-xs">
           {{ registration.pmt.length }}
         </Badge>
       </CardTitle>

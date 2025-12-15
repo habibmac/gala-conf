@@ -29,6 +29,22 @@ export interface RegistrationDetails {
   ans: RegistrationAnswer[]
   special_attendee?: SpecialAttendeeData
   group_info?: GroupRegistrationInfo
+  edit_history?: EditHistoryEntry[]
+}
+
+export interface EditHistoryEntry {
+  id: number
+  field_name: string
+  old_value: string
+  new_value: string
+  changed_by: {
+    id: number
+    name: string
+    login: string
+  }
+  user_agent: string
+  ip_address: string
+  created_at: string
 }
 
 export interface SpecialAttendeeData {
@@ -92,8 +108,17 @@ export interface PaymentGatewayDetails {
   PaymentDate: string
 }
 
+export interface QuestionOption {
+  value: string
+  label: string
+}
+
 export interface RegistrationAnswer {
   qst_id: number
   qst: string
+  qst_type: string
+  qst_group?: string
+  qst_group_order?: number
   ans: string
+  options?: QuestionOption[]
 }

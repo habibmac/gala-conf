@@ -57,8 +57,17 @@ export interface CustomField {
   slug: string
 }
 
+export interface QuestionOption {
+  value: string
+  label: string
+}
+
 export interface Answer {
   qst_id: number
   qst: string
+  qst_type: string
+  qst_group?: string
+  qst_group_order?: number
   ans: string
+  options?: QuestionOption[]
 }
