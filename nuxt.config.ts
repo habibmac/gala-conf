@@ -10,7 +10,14 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   components: [
     {
+      path: '~/components/ui',
+      extensions: ['.vue'],
+      prefix: '',
+      pathPrefix: false,
+    },
+    {
       path: '~/components',
+      extensions: ['.vue'],
       pathPrefix: false,
     },
   ],
@@ -141,6 +148,10 @@ export default defineNuxtConfig({
     '~/plugins/api.ts',
     '~/plugins/auth.ts',
   ],
+  shadcn: {
+    prefix: '',
+    componentDir: './components/ui',
+  },
   runtimeConfig: {
     oauthClientSecret: import.meta.env.NUXT_OAUTH_CLIENT_SECRET || '',
     public: {
