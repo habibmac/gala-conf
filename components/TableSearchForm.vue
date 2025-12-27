@@ -44,7 +44,7 @@ watch(
     <input
       id="action-search"
       v-model="inputQuery"
-      class="form-input with-icon w-full min-w-40 text-slate-200 lg:w-auto"
+      class="form-input with-icon h-10 w-full min-w-40 text-slate-200 lg:w-auto"
       type="search"
       :placeholder="props.placeholder"
       @input="updateQuery"

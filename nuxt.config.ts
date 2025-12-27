@@ -8,6 +8,12 @@ export default defineNuxtConfig({
     classSuffix: '',
   },
   compatibilityDate: '2024-04-03',
+  components: [
+    {
+      path: '~/components',
+      pathPrefix: false,
+    },
+  ],
   css: [
     '~/assets/scss/main.scss',
   ],
@@ -57,9 +63,9 @@ export default defineNuxtConfig({
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
-      name: 'Gala Dashboard',
-      short_name: 'GalaDash',
-      description: 'Real-time event registration and management dashboard',
+      name: 'Conference Management Dashboard',
+      short_name: 'ConfMgmt',
+      description: 'Conference paper management and organizer dashboard',
       theme_color: '#3B82F6',
       background_color: '#F1F5F9',
       display: 'standalone',

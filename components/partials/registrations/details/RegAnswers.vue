@@ -139,7 +139,7 @@ const saveChanges = async () => {
     isSaving.value = true;
     // Only send changed answers
     const changedAnswers = getChangedAnswers();
-    await emit('save-answers', { ans: changedAnswers });
+    emit('save-answers', { ans: changedAnswers });
     isEditMode.value = false;
   }
   catch (error) {
